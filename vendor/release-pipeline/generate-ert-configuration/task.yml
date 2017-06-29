@@ -1,0 +1,29 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: pivotalcfreleng/golang}
+
+inputs:
+  - name: pcf-releng-ci
+    path: go/src/github.com/pivotal-cf/pcf-releng-ci
+  - name: ert_metadata
+
+outputs:
+  - name: product_configuration
+
+params:
+  PROVIDER:
+  SSL_CERT:
+  SSL_PRIVATE_KEY:
+  STORAGE_INTEROP_ACCESS_KEY:
+  STORAGE_INTEROP_SECRET:
+  SMTP_USERNAME:
+  SMTP_PASSWORD:
+  ERT_VERSION:
+  ENABLE_C2C:
+  ENABLE_SAML_CERT: true
+
+run:
+  path: go/src/github.com/pivotal-cf/pcf-releng-ci/tasks/om/generate-ert-configuration/task.sh

@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: pivotalcfreleng/golang}
+
+inputs:
+  - name: pcf-releng-ci
+  - name: environment
+
+params:
+  OPSMAN_URL_SUFFIX:
+  OPSMAN_USERNAME:
+  OPSMAN_PASSWORD:
+  USE_OPTIONAL_OPSMAN:
+
+run:
+  path: pcf-releng-ci/tasks/om/delete-installation/task.sh

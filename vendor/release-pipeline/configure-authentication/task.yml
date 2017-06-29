@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: pivotalcfreleng/golang}
+
+inputs:
+  - name: pcf-releng-ci
+    path: go/src/github.com/pivotal-cf/pcf-releng-ci
+  - name: environment
+
+params:
+  OPSMAN_USERNAME:
+  OPSMAN_PASSWORD:
+  OPSMAN_DECRYPTION_PASSPHRASE:
+  OPSMAN_URL_SUFFIX:
+
+run:
+  path: go/src/github.com/pivotal-cf/pcf-releng-ci/tasks/om/configure-authentication/task.sh

@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: pivotalcfreleng/golang}
+
+inputs:
+  - name: pcf-releng-ci
+    path: go/src/github.com/pivotal-cf/pcf-releng-ci
+  - name: terraform_output
+
+outputs:
+  - name: bosh_configuration
+
+params:
+  PROVIDER:
+  COMPILATION_VM_TYPE:
+
+run:
+  path: go/src/github.com/pivotal-cf/pcf-releng-ci/tasks/om/generate-bosh-configuration/task.sh

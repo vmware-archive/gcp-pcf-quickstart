@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: pivotalcfreleng/golang}
+
+inputs:
+  - name: pcf-releng-ci
+    path: go/src/github.com/pivotal-cf/pcf-releng-ci
+  - name: terraform_output
+  - name: product_configuration
+
+params:
+  OPSMAN_USERNAME:
+  OPSMAN_PASSWORD:
+  PRODUCT:
+  USE_OPTIONAL_OPSMAN:
+
+run:
+  path: go/src/github.com/pivotal-cf/pcf-releng-ci/tasks/om/configure-product/task.sh
