@@ -1,0 +1,36 @@
+{% set networkName = 'pcf-' + env['deployment'] %}
+
+resources:
+- name: {{ networkName }}
+  type: compute.v1.network
+  properties:
+    autoCreateSubnetworks: false
+    description: 'Network for Ops Manager and PCF'
+
+- name: mgmt
+  type: compute.v1.subnetwork
+  properties:
+    region: {{ properties['region'] }}
+    network: $(ref.{{ networkName }}.selfLink)
+    ipCidrRange: {{ properties['mgmtCidrRange'] }}
+    privateIpGoogleAccess: true
+
+- name: ert
+  type: compute.v1.subnetwork
+  properties:
+    region: {{ properties['region'] }}
+    network: $(ref.{{ networkName }}.selfLink)
+    ipCidrRange: {{ properties['ertCidrRange'] }}
+    privateIpGoogleAccess: true
+
+- name: services
+  type: compute.v1.subnetwork
+  properties:
+    region: {{ properties['region'] }}
+    network: $(ref.{{ networkName }}.selfLink)
+    ipCidrRange: {{ properties['servicesCidrRange'] }}
+    privateIpGoogleAccess: true
+
+outputs:
+- name: networkSelfLink
+  value: $(ref.{{ networkName }}.selfLink)
