@@ -7,7 +7,7 @@ resources:
     autoCreateSubnetworks: false
     description: 'Network for Ops Manager and PCF'
 
-- name: mgmt
+- name: {{ networkName }}-mgmt
   type: compute.v1.subnetwork
   properties:
     region: {{ properties['region'] }}
@@ -15,7 +15,7 @@ resources:
     ipCidrRange: {{ properties['mgmtCidrRange'] }}
     privateIpGoogleAccess: true
 
-- name: ert
+- name: {{ networkName }}-ert
   type: compute.v1.subnetwork
   properties:
     region: {{ properties['region'] }}
@@ -23,7 +23,7 @@ resources:
     ipCidrRange: {{ properties['ertCidrRange'] }}
     privateIpGoogleAccess: true
 
-- name: services
+- name: {{ networkName }}-services
   type: compute.v1.subnetwork
   properties:
     region: {{ properties['region'] }}
@@ -31,6 +31,25 @@ resources:
     ipCidrRange: {{ properties['servicesCidrRange'] }}
     privateIpGoogleAccess: true
 
+- name: {{ networkName }}-intra-network-open
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.{{ networkName }}.selfLink)
+    sourceRanges:
+    - {{ properties['mgmtCidrRange'] }}
+    - {{ properties['ertCidrRange'] }}
+    - {{ properties['servicesCidrRange'] }}
+    allowed:
+      - IPProtocol: icmp
+      - IPProtocol: tcp
+        ports:
+          - 1-65535
+      - IPProtocol: udp
+        ports:
+          - 1-65535
+
 outputs:
 - name: networkSelfLink
   value: $(ref.{{ networkName }}.selfLink)
+- name: mgmtSubnetworkSelfLink
+  value: $(ref.{{ networkName }}-mgmt.selfLink)

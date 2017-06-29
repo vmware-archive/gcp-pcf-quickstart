@@ -5,7 +5,6 @@ info:
 properties:
   region:
     type: string
-    default: us-central1
 
   mgmtCidrRange:
     type: string
@@ -23,3 +22,9 @@ outputs:
 - name: networkSelfLink
   description: Self Link to OpsMan/ERT Network
   type: string
+- name: mgmtSubnetworkSelfLink
+  description: Self Link to Management Subnetwork
+  type: string
+
+required:
+- region
