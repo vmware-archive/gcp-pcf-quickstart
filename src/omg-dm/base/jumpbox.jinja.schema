@@ -1,0 +1,18 @@
+info:
+  title: Jumpbox
+  description: Deploy an externally accessible jumpbox to access the internal network
+
+properties:
+  zone:
+    type: string
+
+  networkSelfLink:
+    type: string
+
+  subnetworkSelfLink:
+    type: string
+
+required:
+- networkSelfLink
+- subnetworkSelfLink
+- zone

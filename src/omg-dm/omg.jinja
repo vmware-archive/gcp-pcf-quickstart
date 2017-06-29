@@ -10,3 +10,9 @@ resources:
     zone: us-central1-b
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+- name: jumpbox
+  type: base/jumpbox.jinja
+  properties:
+    zone: us-central1-b
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
