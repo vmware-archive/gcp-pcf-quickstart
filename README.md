@@ -13,11 +13,9 @@ git submodules update
 
 ```
 omg/
-    target/
-           stages/
-           infra/
     vendor/
            ...
     src/
+        omg-dm/
         omg-cli/
 ```
