@@ -1,0 +1,125 @@
+#
+# Deploys a NAT instance group behind an internal load balancer
+# and a route for all instances with 'targetTag' for ports
+# 80, 8080, 22, 443, 4443
+#
+
+{% set baseName = 'nat-' + properties['zone'] + 'pcf-' + env['deployment'] %}
+{% set templateName =  baseName + '-template' %}
+{% set groupName = baseName + '-group' %}
+{% set backendName = baseName + '-backend' %}
+{% set checkName = baseName + '-healthcheck' %}
+
+resources:
+- name: {{ templateName }}
+  type: compute.v1.instanceTemplate
+  properties:
+    description: NAT Service for {{ properties['zone'] }}
+    properties:
+      machineType: n1-standard-1
+      tags:
+        items:
+        - nat
+        - internal
+      canIpForward: true
+      networkInterfaces:
+      - subnetwork: {{ properties['subnetworkSelfLink'] }}
+        accessConfigs:
+        - name: External NAT
+          type: ONE_TO_ONE_NAT
+      disks:
+        - type: PERSISTENT
+          boot: true
+          mode: READ_WRITE
+          autoDelete: true
+          deviceName: nat-machine
+          initializeParams:
+            sourceImage: projects/debian-cloud/global/images/debian-8-jessie-v20170619
+            diskType: pd-standard
+            diskSizeGb: 10
+      metadata:
+        items:
+          - key: "startup_script"
+            value: |
+              #!/bin/bash
+              sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+              iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+- name: {{ groupName }}
+  type: compute.v1.instanceGroupManager
+  properties:
+    instanceTemplate: $(ref.{{ templateName }}.selfLink)
+    baseInstanceName: {{ baseName }}
+    targetSize: 1
+    autoHealingPolicies:
+    - initialDelaySec: 300
+    zone: {{ properties['zone'] }}
+
+- name: {{ baseName }}-scaler
+  type: compute.v1.autoscaler
+  properties:
+    target: $(ref.{{ groupName }}.selfLink)
+    zone: {{ properties['zone'] }}
+    autoscalingPolicy:
+      minNumReplicas: 2
+      maxNumReplicas: 10
+      coolDownPeriodSec: 60
+      cpuUtilization:
+        utilizationTarget: 0.6
+
+- name: {{ checkName }}
+  type: compute.v1.healthCheck
+  properties:
+    type: TCP
+    tcpHealthCheck:
+      port: 22
+
+- name: {{ backendName }}
+  type: compute.v1.regionBackendService
+  properties:
+    region: {{ properties['region'] }}
+    network: {{ properties['networkSelfLink'] }}
+    protocol: TCP
+    loadBalancingScheme: INTERNAL
+    backends:
+    - name: {{ backendName }}-primary
+      group: $(ref.{{ groupName }}.instanceGroup)
+    healthChecks:
+      - $(ref.{{ checkName }}.selfLink)
+
+- name: {{ baseName }}-fr
+  type: compute.v1.forwardingRule
+  properties:
+    region: {{ properties['region'] }}
+    loadBalancingScheme: INTERNAL
+    backendService: $(ref.{{ backendName }}.selfLink)
+    IPProtocol: TCP
+    subnetwork: {{ properties['subnetworkSelfLink'] }}
+    ports:
+    - 22
+    - 80
+    - 8080
+    - 443
+    - 4443
+
+- name: {{ baseName }}-allow-healthcheck
+  type: compute.v1.firewall
+  properties:
+    network: {{ properties['networkSelfLink'] }}
+    sourceRanges:
+    - 130.211.0.0/22
+    - 35.191.0.0/16
+    allowed:
+      - IPProtocol: tcp
+        ports:
+          - 22
+
+- name: {{ baseName }}-route
+  type: compute.v1.route
+  properties:
+    network: {{ properties['networkSelfLink'] }}
+    destRange: 0.0.0.0/0
+    nextHopIp: $(ref.{{ baseName }}-fr.IPAddress)
+    priority: 800
+    tags:
+    - {{ properties['targetTag'] }}

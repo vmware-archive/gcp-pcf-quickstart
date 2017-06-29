@@ -1,3 +1,12 @@
 resources:
 - name: pcfNetwork
   type: base/networks.jinja
+  properties:
+    region: us-central1
+- name: natA
+  type: base/nat.jinja
+  properties:
+    region: us-central1
+    zone: us-central1-b
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)

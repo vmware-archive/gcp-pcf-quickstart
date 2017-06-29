@@ -1,0 +1,26 @@
+info:
+  title: NAT
+  description: Deploy and configure NAT service for local instances
+
+properties:
+  zone:
+    type: string
+
+  region:
+    type: string
+
+  networkSelfLink:
+    type: string
+
+  subnetworkSelfLink:
+    type: string
+
+  targetTag:
+    type: string
+    default: no-ip
+
+required:
+- networkSelfLink
+- subnetworkSelfLink
+- region
+- zone
