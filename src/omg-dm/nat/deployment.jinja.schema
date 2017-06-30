@@ -1,3 +1,6 @@
+imports:
+- path: instance.jinja
+
 info:
   title: NAT
   description: Deploy and configure NAT service for local instances

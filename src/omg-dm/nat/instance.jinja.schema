@@ -1,0 +1,23 @@
+info:
+  title: NAT Instance
+  description: Deploy a single NAT instance and default route
+
+properties:
+  zone:
+    type: string
+
+  targetTag:
+    description: Tag of instances that should route through this NAT instance
+    type: string
+
+  networkSelfLink:
+    type: string
+
+  subnetworkSelfLink:
+    type: string
+
+required:
+- zone
+- targetTag
+- networkSelfLink
+- subnetworkSelfLink

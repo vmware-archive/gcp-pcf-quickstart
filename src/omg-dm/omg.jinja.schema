@@ -1,4 +1,4 @@
 imports:
 - path: base/networks.jinja
-- path: base/nat.jinja
+- path: nat/deployment.jinja
 - path: base/jumpbox.jinja

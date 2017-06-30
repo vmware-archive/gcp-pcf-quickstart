@@ -3,16 +3,16 @@ resources:
   type: base/networks.jinja
   properties:
     region: us-central1
-- name: natA
-  type: base/nat.jinja
-  properties:
-    region: us-central1
-    zone: us-central1-b
-    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
-    subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
 - name: jumpbox
   type: base/jumpbox.jinja
   properties:
+    zone: us-central1-b
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+- name: natA
+  type: nat/deployment.jinja
+  properties:
+    region: us-central1
     zone: us-central1-b
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
