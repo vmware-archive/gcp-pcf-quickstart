@@ -25,6 +25,26 @@ outputs:
 - name: mgmtSubnetworkSelfLink
   description: Self Link to Management Subnetwork
   type: string
+- name: networkName
+  type: string
+- name: mgmtSubnetName
+  type: string
+- name: mgmtSubnetGateway
+  type: string
+- name: mgmtSubnetCIDR
+  type: string
+- name: servicesSubnetName
+  type: string
+- name: servicesSubnetGateway
+  type: string
+- name: servicesSubnetCIDR
+  type: string
+- name: ertSubnetName
+  type: string
+- name: ertSubnetGateway
+  type: string
+- name: ertSubnetCIDR
+  type: string
 
 required:
 - region

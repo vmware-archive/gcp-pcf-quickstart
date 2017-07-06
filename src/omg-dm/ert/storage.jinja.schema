@@ -1,0 +1,13 @@
+info:
+  title: ERT Storage
+  description: Provisions GCS Buckets for ERT
+
+outputs:
+- name: buildpacksBucket
+  type: string
+- name: dropletsBucket
+  type: string
+- name: packagesBucket
+  type: string
+- name: resourcesBucket
+  type: string

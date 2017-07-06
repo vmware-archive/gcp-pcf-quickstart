@@ -22,6 +22,6 @@ required:
 - zone3
 
 outputs:
-- name: cfHttpIp
+- name: httpLoadBalancerIP
   description: IP Address of the HTTP(S) Front End
   type: string

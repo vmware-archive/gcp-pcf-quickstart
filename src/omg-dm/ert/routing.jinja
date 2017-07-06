@@ -92,8 +92,8 @@ resources:
     target: $(ref.cf-http-proxy.selfLink)
     portRange: 80
 
-output:
-- name: cfHttpIp
+outputs:
+- name: httpLoadBalancerIP
   value: $(ref.cf-global-address.address)
 
 # TODO:

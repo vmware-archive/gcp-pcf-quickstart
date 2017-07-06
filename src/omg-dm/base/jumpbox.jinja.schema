@@ -16,3 +16,7 @@ required:
 - networkSelfLink
 - subnetworkSelfLink
 - zone
+
+outputs:
+- name: vmName
+  type: string

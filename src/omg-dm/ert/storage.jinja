@@ -11,11 +11,11 @@ resources:
   type: storage.v1.bucket
 
 outputs:
-- name: buildpacks-bucket
+- name: buildpacksBucket
   value: $(ref.{{ baseName }}-buildpacks.name)
-- name: droplets-bucket
+- name: dropletsBucket
   value: $(ref.{{ baseName }}-droplets.name)
-- name: packages-bucket
+- name: packagesBucket
   value: $(ref.{{ baseName }}-packages.name)
-- name: resources-bucket
+- name: resourcesBucket
   value: $(ref.{{ baseName }}-resources.name)

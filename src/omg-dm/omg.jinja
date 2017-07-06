@@ -24,12 +24,127 @@ resources:
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
     projectOwner: {{ properties['projectOwner'] }}
-- name: ert
-  type: ert/deployment.jinja
+- name: ertRouting
+  type: ert/routing.jinja
   properties:
     region: us-central1
     zone1: us-central1-b
     zone2: us-central1-c
     zone3: us-central1-f
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
-    opsManagerIp: $(ref.ops_manager.opsManagerIp)
+- name: ertStorage
+  type: ert/storage.jinja
+
+- name: omgConfig
+  type: runtimeconfig.v1beta1.config
+  properties:
+    config: omgConfig
+    description: Config for resources in OMG Deployment
+- name: opsManagerIp
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: opsManagerIp
+    text: $(ref.ops_manager.opsManagerIp)
+- name: jumpboxName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: jumpboxName
+    text: $(ref.jumpbox.vmName)
+- name: networkName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: networkName
+    text: $(ref.pcfNetwork.networkName)
+- name: mgmtSubnetName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: mgmtSubnetName
+    text: $(ref.pcfNetwork.mgmtSubnetName)
+- name: mgmtSubnetGateway
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: mgmtSubnetGateway
+    text: $(ref.pcfNetwork.mgmtSubnetGateway)
+- name: mgmtSubnetCIDR
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: mgmtSubnetCIDR
+    text: $(ref.pcfNetwork.mgmtSubnetCIDR)
+- name: servicesSubnetName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: servicesSubnetName
+    text: $(ref.pcfNetwork.servicesSubnetName)
+- name: servicesSubnetGateway
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: servicesSubnetGateway
+    text: $(ref.pcfNetwork.servicesSubnetGateway)
+- name: servicesSubnetCIDR
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: servicesSubnetCIDR
+    text: $(ref.pcfNetwork.servicesSubnetCIDR)
+- name: ertSubnetName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: ertSubnetName
+    text: $(ref.pcfNetwork.ertSubnetName)
+- name: ertSubnetGateway
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: ertSubnetGateway
+    text: $(ref.pcfNetwork.ertSubnetGateway)
+- name: ertSubnetCIDR
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: ertSubnetCIDR
+    text: $(ref.pcfNetwork.ertSubnetCIDR)
+- name: httpLoadBalancerIP
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: httpLoadBalancerIP
+    text: $(ref.ertRouting.httpLoadBalancerIP)
+- name: buildpacksBucket
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: buildpacksBucket
+    text: $(ref.ertStorage.buildpacksBucket)
+- name: dropletsBucket
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: dropletsBucket
+    text: $(ref.ertStorage.dropletsBucket)
+- name: packagesBucket
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: packagesBucket
+    text: $(ref.ertStorage.packagesBucket)
+- name: resourcesBucket
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: resourcesBucket
+    text: $(ref.ertStorage.resourcesBucket)
+- name: directorBucket
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: directorBucket
+    text: $(ref.ops_manager.directorBucket)

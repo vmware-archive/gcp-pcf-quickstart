@@ -40,3 +40,7 @@ resources:
         ports:
           - 22
       - IPProtocol: icmp
+
+outputs:
+- name: vmName
+  value: $(ref.{{ baseName }}.name)

@@ -90,6 +90,8 @@ resources:
     scopes:
       - cloud-platform
 
-output:
+outputs:
 - name: opsManagerIp
   value: $(ref.{{ opsManName }}.networkInterfaces[0].networkIP)
+- name: directorBucket
+  value: $(ref.{{ baseName }}-director.name)

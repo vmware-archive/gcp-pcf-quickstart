@@ -53,3 +53,23 @@ outputs:
   value: $(ref.{{ networkName }}.selfLink)
 - name: mgmtSubnetworkSelfLink
   value: $(ref.{{ networkName }}-mgmt.selfLink)
+- name: networkName
+  value: $(ref.{{ networkName }}.name)
+- name: mgmtSubnetName
+  value: $(ref.{{ networkName }}-mgmt.name)
+- name: mgmtSubnetGateway
+  value: $(ref.{{ networkName }}-mgmt.gatewayAddress)
+- name: mgmtSubnetCIDR
+  value: $(ref.{{ networkName }}-mgmt.ipCidrRange)
+- name: servicesSubnetName
+  value: $(ref.{{ networkName }}-services.name)
+- name: servicesSubnetGateway
+  value: $(ref.{{ networkName }}-services.gatewayAddress)
+- name: servicesSubnetCIDR
+  value: $(ref.{{ networkName }}-services.ipCidrRange)
+- name: ertSubnetName
+  value: $(ref.{{ networkName }}-ert.name)
+- name: ertSubnetGateway
+  value: $(ref.{{ networkName }}-ert.gatewayAddress)
+- name: ertSubnetCIDR
+  value: $(ref.{{ networkName }}-ert.ipCidrRange)

@@ -30,3 +30,6 @@ outputs:
 - name: opsManagerIp
   description: IP Address of the Ops Manager VM
   type: string
+- name: directorBucket
+  description: GCS Bucket Name for BOSH director storage
+  type: string
