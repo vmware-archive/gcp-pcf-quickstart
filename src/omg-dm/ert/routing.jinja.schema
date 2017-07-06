@@ -1,0 +1,27 @@
+info:
+  title: ERT Routing
+  description: Deploy routing infrastructure for ERT
+
+properties:
+  zone1:
+    type: string
+
+  zone2:
+    type: string
+
+  zone3:
+    type: string
+
+  networkSelfLink:
+    type: string
+
+required:
+- networkSelfLink
+- zone1
+- zone2
+- zone3
+
+outputs:
+- name: cfHttpIp
+  description: IP Address of the HTTP(S) Front End
+  type: string

@@ -11,3 +11,8 @@ The tricky thing here is: how does PCF/tag instances?
 ## GCE Enforcer
 
 Currently giving the enforcer an IAM binding on the project. This is Googler specific.
+
+## Global Resources
+
+Move IAM roles (ops_manager/ops_manager.jinja) to a global roles or base.
+

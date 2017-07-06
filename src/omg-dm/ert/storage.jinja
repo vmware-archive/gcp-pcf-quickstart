@@ -1,0 +1,21 @@
+{% set baseName = 'ert-' + env['deployment'] %}
+
+resources:
+- name: {{ baseName }}-buildpacks
+  type: storage.v1.bucket
+- name: {{ baseName }}-droplets
+  type: storage.v1.bucket
+- name: {{ baseName }}-packages
+  type: storage.v1.bucket
+- name: {{ baseName }}-resources
+  type: storage.v1.bucket
+
+outputs:
+- name: buildpacks-bucket
+  value: $(ref.{{ baseName }}-buildpacks.name)
+- name: droplets-bucket
+  value: $(ref.{{ baseName }}-droplets.name)
+- name: packages-bucket
+  value: $(ref.{{ baseName }}-packages.name)
+- name: resources-bucket
+  value: $(ref.{{ baseName }}-resources.name)

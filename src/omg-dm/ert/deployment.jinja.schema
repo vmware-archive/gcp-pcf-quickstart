@@ -1,0 +1,26 @@
+imports:
+- path: routing.jinja
+- path: storage.jinja
+
+info:
+  title: ERT
+  description: Deploy infrastructure for ERT
+
+properties:
+  zone1:
+    type: string
+
+  zone2:
+    type: string
+
+  zone3:
+    type: string
+
+  networkSelfLink:
+    type: string
+
+required:
+- networkSelfLink
+- zone1
+- zone2
+- zone3

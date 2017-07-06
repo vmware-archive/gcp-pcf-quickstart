@@ -24,3 +24,12 @@ resources:
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
     projectOwner: {{ properties['projectOwner'] }}
+- name: ert
+  type: ert/deployment.jinja
+  properties:
+    region: us-central1
+    zone1: us-central1-b
+    zone2: us-central1-c
+    zone3: us-central1-f
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    opsManagerIp: $(ref.ops_manager.opsManagerIp)

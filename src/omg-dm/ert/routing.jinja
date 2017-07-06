@@ -1,0 +1,111 @@
+{% set baseName = 'ert-' + env['deployment'] %}
+{% set instanceGroupPrefix = baseName + '-inst' %}
+
+resources:
+- name: {{ baseName }}-cf-public
+  type: compute.v1.firewall
+  properties:
+    network: {{ properties['networkSelfLink'] }}
+    allowed:
+      - IPProtocol: tcp
+        ports:
+          - 80
+          - 443
+    targetTags:
+      - cf-public
+
+- name: {{ baseName }}-health-check
+  type: compute.v1.firewall
+  properties:
+    network: {{ properties['networkSelfLink'] }}
+    allowed:
+      - IPProtocol: tcp
+        ports:
+          - 8080
+    targetTags:
+      - cf-public
+    sourceRanges:
+      - 130.211.0.0/22
+
+- name: cf-global-address
+  type: compute.v1.globalAddress
+  properties:
+    name: {{ baseName }}-globalAddress
+
+
+- name: cf-http-routers-1
+  type: compute.v1.instanceGroup
+  properties:
+    name: {{ instanceGroupPrefix }}-1
+    zone: {{ properties['zone1'] }}
+
+- name: cf-http-routers-2
+  type: compute.v1.instanceGroup
+  properties:
+    name: {{ instanceGroupPrefix }}-2
+    zone: {{ properties['zone2'] }}
+
+- name: cf-http-routers-3
+  type: compute.v1.instanceGroup
+  properties:
+    name: {{ instanceGroupPrefix }}-3
+    zone: {{ properties['zone3'] }}
+
+- name: cf-http-health-check
+  type: compute.v1.httpHealthCheck
+  properties:
+    name: {{ baseName }}-healthCheck
+    port: 8080
+    requestPath: /health
+    checkIntervalSec: 5
+    timeoutSec: 3
+    healthyThreshold: 6
+    unhealthyThreshold: 3
+
+- name: cf-http-backend
+  type: compute.v1.backendService
+  properties:
+    name: {{ backendName }}
+    backends:
+      - group: $(ref.cf-http-routers-1.selfLink)
+      - group: $(ref.cf-http-routers-2.selfLink)
+      - group: $(ref.cf-http-routers-3.selfLink)
+    healthChecks:
+      - $(ref.cf-http-health-check.selfLink)
+
+- name: cf-http-url-map
+  type: compute.v1.urlMap
+  properties:
+    name: {{ baseName }}-urlMap
+    defaultService: $(ref.cf-http-backend.selfLink)
+
+- name: cf-http-proxy
+  type: compute.v1.targetHttpProxy
+  properties:
+    name: {{ baseName }}-httpProxy
+    urlMap: $(ref.cf-http-url-map.selfLink)
+
+- name: {{ baseName }}-forwarding-rule
+  type: compute.v1.globalForwardingRule
+  properties:
+    IPAddress: $(ref.cf-global-address.address) 
+    target: $(ref.cf-http-proxy.selfLink)
+    portRange: 80
+
+output:
+- name: cfHttpIp
+  value: $(ref.cf-global-address.address)
+
+# TODO:
+# resource "google_compute_target_https_proxy" "https_lb_proxy" {
+#   name             = "${var.env_name}-httpsproxy"
+#   description      = "really a load balancer but listed as an https proxy"
+#   url_map          = "${google_compute_url_map.https_lb_url_map.self_link}"
+#   ssl_certificates = ["${google_compute_ssl_certificate.cert.self_link}"]
+# }
+# resource "google_compute_global_forwarding_rule" "cf-https" {
+#   name       = "${var.env_name}-cf-lb-https"
+#   ip_address = "${google_compute_global_address.cf.address}"
+#   target     = "${google_compute_target_https_proxy.https_lb_proxy.self_link}"
+#   port_range = "443"
+# }
