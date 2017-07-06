@@ -16,3 +16,11 @@ resources:
     zone: us-central1-b
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+- name: ops_manager
+  type: ops_manager/ops_manager.jinja
+  properties:
+    region: us-central1
+    zone: us-central1-b
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+    projectOwner: {{ properties['projectOwner'] }}

@@ -1,0 +1,89 @@
+{% set baseName = 'opsman-' + properties['zone'] + 'pcf-' + env['deployment'] %}
+{% set imageName = 'opsman-' + properties['zone'] + 'pcf-' + env['deployment'] + '-img' %}
+{% set serviceAccountName = 'opsman-pcf-' + env['deployment'] + '-sa' %}
+{% set projectDomain = env['project'].split(':') | reverse | join('.') %}
+
+resources:
+- name: {{ imageName }}
+  type: compute.v1.image
+  properties:
+    rawDisk:
+      source: {{ properties['opsManagerImage'] }}
+
+- name: opsManServiceAccount
+  type: iam.v1.serviceAccount
+  properties:
+    accountId: {{ serviceAccountName }}
+    displayName: {{ serviceAccountName }}
+
+- name: {{ env['project'] }}
+  type: cloudresourcemanager.v1.project
+  properties:
+    projectId: {{ env['project'] }}
+  accessControl:
+    gcpIamPolicy:
+      bindings:
+      - role: roles/iam.serviceAccountActor
+        members:
+        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
+        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
+      - role: roles/compute.instanceAdmin
+        members:
+        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
+      - role: roles/compute.networkAdmin
+        members:
+        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
+      - role: roles/compute.storageAdmin
+        members:
+        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
+      - role: roles/storage.admin
+        members:
+        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
+      - role: roles/owner
+        members:
+        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
+        # TODO(jrjohnson): remove, needed for engineering projects
+        - serviceAccount:enforcer-opt-out@graphite-production.iam.gserviceaccount.com
+        - user:{{ properties['projectOwner'] }}
+      - role: roles/container.serviceAgent
+        members:
+        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
+      - role: roles/logging.logWriter
+        members:
+        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
+      - role: roles/logging.configWriter
+        members:
+        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
+  metadata:
+    dependsOn:
+      - opsManServiceAccount
+
+- name: {{ baseName }}-director
+  type: storage.v1.bucket
+
+- name: {{ baseName }}-instance
+  type: compute.v1.instance
+  properties:
+    description: Ops Manager
+    machineType: projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/machineTypes/n1-standard-2
+    zone: {{ properties['zone'] }}
+    tags:
+      items:
+      - internal
+      - no-ip
+    networkInterfaces:
+    - subnetwork: {{ properties['subnetworkSelfLink'] }}
+    disks:
+      - type: PERSISTENT
+        boot: true
+        mode: READ_WRITE
+        autoDelete: true
+        deviceName: ops-man
+        initializeParams:
+          sourceImage: $(ref.{{ imageName }}.selfLink)
+          diskType: projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/diskTypes/pd-standard
+          diskSizeGb: 50
+    serviceAccountName: $(ref.opsManServiceAccount.email)
+    scopes:
+      - cloud-platform
+

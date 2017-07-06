@@ -7,3 +7,7 @@ Debt that needs to be resolved but not at this moment.
 NAT is deployed to a single zone. This will cause cross-zone access for NAT. 
 
 The tricky thing here is: how does PCF/tag instances?
+
+## GCE Enforcer
+
+Currently giving the enforcer an IAM binding on the project. This is Googler specific.

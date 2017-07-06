@@ -1,0 +1,30 @@
+info:
+  title: Ops Manager VM
+  description: Deploy an Ops Manager instance
+
+properties:
+  zone:
+    type: string
+
+  networkSelfLink:
+    type: string
+
+  subnetworkSelfLink:
+    type: string
+
+  opsManagerImage:
+    type: string
+    default: https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz
+  
+  projectOwner:
+    type: string
+    description: Email address of the user that owns the project
+
+required:
+- zone
+- networkSelfLink
+- subnetworkSelfLink
+- projectOwner
+
+
+

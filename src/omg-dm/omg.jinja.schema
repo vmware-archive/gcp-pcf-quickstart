@@ -2,3 +2,15 @@ imports:
 - path: base/networks.jinja
 - path: nat/deployment.jinja
 - path: base/jumpbox.jinja
+- path: ops_manager/ops_manager.jinja
+
+info:
+  title: Ops Manager and PCF
+  description: Deploy an Ops Manager and setup PCF
+
+  projectOwner:
+    type: string
+    description: Email address of the user that owns the project
+
+required:
+- projectOwner
