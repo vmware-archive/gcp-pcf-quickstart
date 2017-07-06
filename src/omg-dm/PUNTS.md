@@ -16,3 +16,6 @@ Currently giving the enforcer an IAM binding on the project. This is Googler spe
 
 Move IAM roles (ops_manager/ops_manager.jinja) to a global roles or base.
 
+## DNS
+
+Deployment Manager can't create individual DNS records, only managed zones
