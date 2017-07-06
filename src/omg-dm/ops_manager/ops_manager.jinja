@@ -2,6 +2,7 @@
 {% set imageName = 'opsman-' + properties['zone'] + 'pcf-' + env['deployment'] + '-img' %}
 {% set serviceAccountName = 'opsman-pcf-' + env['deployment'] + '-sa' %}
 {% set projectDomain = env['project'].split(':') | reverse | join('.') %}
+{% set opsManName = baseName + '-instance' %}
 
 resources:
 - name: {{ imageName }}
@@ -35,9 +36,11 @@ resources:
         - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
       - role: roles/compute.storageAdmin
         members:
+        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
         - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
       - role: roles/storage.admin
         members:
+        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
         - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
       - role: roles/owner
         members:
@@ -61,7 +64,7 @@ resources:
 - name: {{ baseName }}-director
   type: storage.v1.bucket
 
-- name: {{ baseName }}-instance
+- name: {{ opsManName }}
   type: compute.v1.instance
   properties:
     description: Ops Manager
@@ -87,3 +90,6 @@ resources:
     scopes:
       - cloud-platform
 
+output:
+- name: opsManagerIp
+  value: $(ref.{{ opsManName }}.networkInterfaces[0].networkIP)

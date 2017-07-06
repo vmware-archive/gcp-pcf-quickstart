@@ -26,5 +26,7 @@ required:
 - subnetworkSelfLink
 - projectOwner
 
-
-
+outputs:
+- name: opsManagerIp
+  description: IP Address of the Ops Manager VM
+  type: string
