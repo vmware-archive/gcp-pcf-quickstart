@@ -5,6 +5,8 @@ imports:
 - path: ops_manager/ops_manager.jinja
 - path: ert/http_routing.jinja
 - path: ert/storage.jinja
+- path: ssl/server.crt
+- path: ssl/server.key
 
 info:
   title: Ops Manager and PCF
@@ -13,6 +15,7 @@ info:
   projectOwner:
     type: string
     description: Email address of the user that owns the project
-
+  
 required:
 - projectOwner
+

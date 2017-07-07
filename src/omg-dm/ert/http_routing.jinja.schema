@@ -1,3 +1,6 @@
+imports:
+- path: ssl.py
+
 info:
   title: ERT Routing
   description: Deploy HTTP(S) routing infrastructure for ERT
@@ -14,12 +17,20 @@ properties:
 
   networkSelfLink:
     type: string
+  
+  sslPrivateKeyPath:
+    type: string
+
+  sslCertificatePath:
+    type: string
 
 required:
 - networkSelfLink
 - zone1
 - zone2
 - zone3
+- sslPrivateKeyPath
+- sslCertificatePath
 
 outputs:
 - name: httpLoadBalancerIP

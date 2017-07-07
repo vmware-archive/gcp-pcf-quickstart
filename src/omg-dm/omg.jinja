@@ -32,6 +32,9 @@ resources:
     zone2: us-central1-c
     zone3: us-central1-f
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    sslPrivateKeyPath: ssl/server.key
+    sslCertificatePath: ssl/server.crt
+
 - name: ertStorage
   type: ert/storage.jinja
 

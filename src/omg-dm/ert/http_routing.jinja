@@ -2,6 +2,9 @@
 {% set instanceGroupPrefix = baseName + '-inst' %}
 
 resources:
+#
+# Ingress Rules
+#
 - name: {{ baseName }}-cf-public
   type: compute.v1.firewall
   properties:
@@ -10,7 +13,6 @@ resources:
       - IPProtocol: tcp
         ports:
           - 80
-          - 443
     targetTags:
       - cf-public
 
@@ -26,12 +28,18 @@ resources:
       - cf-public
     sourceRanges:
       - 130.211.0.0/22
+#
+# HTTP(s) Address
+#
 
 - name: cf-global-address
   type: compute.v1.globalAddress
   properties:
     name: {{ baseName }}-globalAddress
 
+#
+# Backend Services/Groups for HTTP(s)
+#
 
 - name: cf-http-routers-1
   type: compute.v1.instanceGroup
@@ -79,33 +87,48 @@ resources:
     name: {{ baseName }}-urlMap
     defaultService: $(ref.cf-http-backend.selfLink)
 
+#
+# HTTP Frontend
+#
+
 - name: cf-http-proxy
   type: compute.v1.targetHttpProxy
   properties:
     name: {{ baseName }}-httpProxy
     urlMap: $(ref.cf-http-url-map.selfLink)
 
-- name: {{ baseName }}-forwarding-rule
+- name: {{ baseName }}-http-forwarding-rule
   type: compute.v1.globalForwardingRule
   properties:
     IPAddress: $(ref.cf-global-address.address) 
     target: $(ref.cf-http-proxy.selfLink)
     portRange: 80
 
+#
+# HTTPS
+#
+
+- name: cf-ssl-cert
+  type: ssl.py
+  properties:
+    sslPrivateKeyPath: {{ properties['sslPrivateKeyPath'] }}
+    sslCertificatePath: {{ properties['sslCertificatePath'] }}
+
+- name: cf-https-proxy
+  type: compute.v1.targetHttpsProxy
+  properties:
+    name: {{ baseName }}-httpsProxy
+    urlMap: $(ref.cf-http-url-map.selfLink)
+    sslCertificates:
+    - $(ref.cf-ssl-cert.link)
+
+- name: {{ baseName }}-https-forwarding-rule
+  type: compute.v1.globalForwardingRule
+  properties:
+    IPAddress: $(ref.cf-global-address.address) 
+    target: $(ref.cf-https-proxy.selfLink)
+    portRange: 443
+
 outputs:
 - name: httpLoadBalancerIP
   value: $(ref.cf-global-address.address)
-
-# TODO:
-# resource "google_compute_target_https_proxy" "https_lb_proxy" {
-#   name             = "${var.env_name}-httpsproxy"
-#   description      = "really a load balancer but listed as an https proxy"
-#   url_map          = "${google_compute_url_map.https_lb_url_map.self_link}"
-#   ssl_certificates = ["${google_compute_ssl_certificate.cert.self_link}"]
-# }
-# resource "google_compute_global_forwarding_rule" "cf-https" {
-#   name       = "${var.env_name}-cf-lb-https"
-#   ip_address = "${google_compute_global_address.cf.address}"
-#   target     = "${google_compute_target_https_proxy.https_lb_proxy.self_link}"
-#   port_range = "443"
-# }

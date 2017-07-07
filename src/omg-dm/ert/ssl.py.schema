@@ -1,0 +1,18 @@
+info:
+  title: SSL
+  description: Deploys an SSL Cert
+
+properties:
+  sslCertificatePath:
+    type: string
+
+  sslPrivateKeyPath:
+    type: string
+
+required:
+- sslCertificatePath
+- sslPrivateKeyPath
+
+outputs:
+- name: link
+  type: string
