@@ -181,7 +181,7 @@ resources:
   type: runtimeconfig.v1beta1.variable
   properties:
     parent: $(ref.omgConfig.name)
-    variable: tcpTargetTag
+    variable: tcpPortRange
     text: $(ref.ertTcpRouting.portRange)
 - name: buildpacksBucket
   type: runtimeconfig.v1beta1.variable
