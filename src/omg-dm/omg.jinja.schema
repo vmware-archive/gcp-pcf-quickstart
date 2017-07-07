@@ -3,7 +3,7 @@ imports:
 - path: nat/deployment.jinja
 - path: base/jumpbox.jinja
 - path: ops_manager/ops_manager.jinja
-- path: ert/routing.jinja
+- path: ert/http_routing.jinja
 - path: ert/storage.jinja
 
 info:

@@ -25,7 +25,7 @@ resources:
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
     projectOwner: {{ properties['projectOwner'] }}
 - name: ertRouting
-  type: ert/routing.jinja
+  type: ert/http_routing.jinja
   properties:
     region: us-central1
     zone1: us-central1-b

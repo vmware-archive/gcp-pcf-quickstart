@@ -1,6 +1,6 @@
 info:
   title: ERT Routing
-  description: Deploy routing infrastructure for ERT
+  description: Deploy HTTP(S) routing infrastructure for ERT
 
 properties:
   zone1:
