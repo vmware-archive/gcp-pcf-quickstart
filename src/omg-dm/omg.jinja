@@ -45,6 +45,13 @@ resources:
     region: us-central1
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
 
+- name: ertTcpRouting
+  type: ert/tcp_routing.jinja
+  properties:
+    region: us-central1
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+    portRange: 1024-65535
+
 - name: ertStorage
   type: ert/storage.jinja
 
@@ -152,6 +159,30 @@ resources:
     parent: $(ref.omgConfig.name)
     variable: sshTargetTag
     text: $(ref.ertSshRouting.targetTag)
+- name: tcpTargetPoolName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: tcpTargetPoolName
+    text: $(ref.ertTcpRouting.targetPoolName)
+- name: tcpLoadBalancerIP
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: tcpLoadBalancerIP
+    text: $(ref.ertTcpRouting.loadBalancerIP)
+- name: tcpTargetTag
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: tcpTargetTag
+    text: $(ref.ertTcpRouting.targetTag)
+- name: tcpPortRange
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: tcpTargetTag
+    text: $(ref.ertTcpRouting.portRange)
 - name: buildpacksBucket
   type: runtimeconfig.v1beta1.variable
   properties:

@@ -5,6 +5,7 @@ imports:
 - path: ops_manager/ops_manager.jinja
 - path: ert/http_routing.jinja
 - path: ert/ssh_routing.jinja
+- path: ert/tcp_routing.jinja
 - path: ert/storage.jinja
 - path: ssl/server.crt
 - path: ssl/server.key

@@ -1,0 +1,28 @@
+info:
+  title: TCP Routing
+  description: Deploy routing service for TCP Routing
+
+properties:
+  networkSelfLink:
+    type: string
+
+  region:
+    type: string
+
+  portRange:
+    type: string
+
+required:
+- networkSelfLink
+- region
+- portRange
+
+outputs:
+- name: targetPoolName
+  type: string
+- name: loadBalancerIP
+  type: string
+- name: targetTag
+  type: string
+- name: portRange
+  type: string
