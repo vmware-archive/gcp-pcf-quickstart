@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"omg-cli/config"
+	"omg-cli/ops_manager"
 
 	"golang.org/x/oauth2/google"
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
@@ -18,10 +19,12 @@ func main() {
 		panic(err)
 	}
 
-	envCfg, err := config.FromEnvironment(ctx, client, configName)
+	cfg, err := config.FromEnvironment(ctx, client, configName)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%#v", envCfg)
+	fmt.Printf("%#v", cfg)
+	om := ops_manager.New(cfg)
+	om.Setup()
 }

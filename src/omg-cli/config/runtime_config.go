@@ -34,7 +34,16 @@ type Config struct {
 	PackagesBucket        string `json:"packagesBucket"`
 	ResourcesBucket       string `json:"resourcesBucket"`
 	DirectorBucket        string `json:"directorBucket"`
+
+	// Not from the environment today
+	OpsManUsername         string
+	OpsManPassword         string
+	OpsManDecryptionPhrase string
 }
+
+const (
+	SkipSSLValidation = true
+)
 
 func FromEnvironment(ctx context.Context, client *http.Client, configName string) (*Config, error) {
 	cfgMap, err := dumpConfigVariables(ctx, client, configName)
@@ -43,6 +52,8 @@ func FromEnvironment(ctx context.Context, client *http.Client, configName string
 	}
 
 	cfg, err := mapToConfig(cfgMap)
+
+	fillInDefaults(cfg)
 
 	return cfg, err
 }
@@ -84,4 +95,10 @@ func mapToConfig(cfgMap map[string]string) (*Config, error) {
 	err = json.Unmarshal(str, hydratedCfg)
 
 	return hydratedCfg, err
+}
+
+func fillInDefaults(cfg *Config) {
+	cfg.OpsManUsername = "foo"
+	cfg.OpsManPassword = "bar111111"
+	cfg.OpsManDecryptionPhrase = "bar111111"
 }
