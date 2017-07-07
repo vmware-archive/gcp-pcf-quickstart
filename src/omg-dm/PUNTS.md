@@ -19,3 +19,7 @@ Move IAM roles (ops_manager/ops_manager.jinja) to a global roles or base.
 ## DNS
 
 Deployment Manager can't create individual DNS records, only managed zones
+
+## CF-WS: Web Sockets Router
+
+Web sockets _should_ work through L7 (HTTP) router. May need to revisit if this isn't true.
