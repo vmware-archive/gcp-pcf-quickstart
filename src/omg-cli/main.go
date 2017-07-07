@@ -12,12 +12,13 @@ import (
 const configName = "projects/google.com:graphite-test-bosh-cpi-cert/configs/omgConfig"
 
 func main() {
-	client, err := google.DefaultClient(context.Background(), runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
+	ctx := context.Background()
+	client, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
 	if err != nil {
 		panic(err)
 	}
 
-	envCfg, err := config.FromEnvironment(client, configName)
+	envCfg, err := config.FromEnvironment(ctx, client, configName)
 	if err != nil {
 		panic(err)
 	}

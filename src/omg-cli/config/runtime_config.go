@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -35,8 +36,8 @@ type Config struct {
 	DirectorBucket        string `json:"directorBucket"`
 }
 
-func FromEnvironment(client *http.Client, configName string) (*Config, error) {
-	cfgMap, err := dumpConfigVariables(client, configName)
+func FromEnvironment(ctx context.Context, client *http.Client, configName string) (*Config, error) {
+	cfgMap, err := dumpConfigVariables(ctx, client, configName)
 	if err != nil {
 		return nil, err
 	}
@@ -46,29 +47,30 @@ func FromEnvironment(client *http.Client, configName string) (*Config, error) {
 	return cfg, err
 }
 
-func dumpConfigVariables(client *http.Client, configName string) (map[string]string, error) {
+func dumpConfigVariables(ctx context.Context, client *http.Client, configName string) (map[string]string, error) {
 	svc, err := runtimeconfig.New(client)
+
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := svc.Projects.Configs.Variables.List(configName).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	cfg := map[string]string{}
 	trimString := len(configName) + len("/variables/")
 
-	for _, v := range list.Variables {
-		v, err := svc.Projects.Configs.Variables.Get(v.Name).Do()
-		if err != nil {
-			return nil, err
+	cfg := map[string]string{}
+	call := svc.Projects.Configs.Variables.List(configName).ReturnValues(true)
+	err = call.Pages(ctx, func(res *runtimeconfig.ListVariablesResponse) error {
+		for _, v := range res.Variables {
+			cfg[v.Name[trimString:len(v.Name)]] = v.Text
 		}
-		cfg[v.Name[trimString:len(v.Name)]] = v.Text
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	return cfg, nil
+	return cfg, err
 }
 
 func mapToConfig(cfgMap map[string]string) (*Config, error) {
