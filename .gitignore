@@ -1,3 +1,4 @@
 pkg/*
 bin/*
 .cache
+service_account.json
