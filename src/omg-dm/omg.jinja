@@ -3,12 +3,14 @@ resources:
   type: base/networks.jinja
   properties:
     region: us-central1
+
 - name: jumpbox
   type: base/jumpbox.jinja
   properties:
     zone: us-central1-b
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+
 - name: natA
   type: nat/deployment.jinja
   properties:
@@ -16,6 +18,7 @@ resources:
     zone: us-central1-b
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+
 - name: ops_manager
   type: ops_manager/ops_manager.jinja
   properties:
@@ -24,7 +27,8 @@ resources:
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
     projectOwner: {{ properties['projectOwner'] }}
-- name: ertRouting
+
+- name: ertHttpRouting
   type: ert/http_routing.jinja
   properties:
     region: us-central1
@@ -35,9 +39,18 @@ resources:
     sslPrivateKeyPath: ssl/server.key
     sslCertificatePath: ssl/server.crt
 
+- name: ertSshRouting
+  type: ert/ssh_routing.jinja
+  properties:
+    region: us-central1
+    networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
+
 - name: ertStorage
   type: ert/storage.jinja
 
+#
+# Exported variables
+#
 - name: omgConfig
   type: runtimeconfig.v1beta1.config
   properties:
@@ -120,7 +133,25 @@ resources:
   properties:
     parent: $(ref.omgConfig.name)
     variable: httpLoadBalancerIP
-    text: $(ref.ertRouting.httpLoadBalancerIP)
+    text: $(ref.ertHttpRouting.httpLoadBalancerIP)
+- name: sshTargetPoolName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: sshTargetPoolName
+    text: $(ref.ertSshRouting.targetPoolName)
+- name: sshLoadBalancerIP
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: sshLoadBalancerIP
+    text: $(ref.ertSshRouting.loadBalancerIP)
+- name: sshTargetTag
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: sshTargetTag
+    text: $(ref.ertSshRouting.targetTag)
 - name: buildpacksBucket
   type: runtimeconfig.v1beta1.variable
   properties:
