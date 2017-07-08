@@ -86,7 +86,8 @@ resources:
           sourceImage: $(ref.{{ imageName }}.selfLink)
           diskType: projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/diskTypes/pd-standard
           diskSizeGb: 50
-    serviceAccountName: $(ref.opsManServiceAccount.email)
+    serviceAccounts:
+      - email: $(ref.opsManServiceAccount.email)
     scopes:
       - cloud-platform
 
