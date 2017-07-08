@@ -88,8 +88,6 @@ resources:
           diskSizeGb: 50
     serviceAccounts:
       - email: $(ref.opsManServiceAccount.email)
-    scopes:
-      - cloud-platform
 
 outputs:
 - name: opsManagerIp
