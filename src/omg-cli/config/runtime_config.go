@@ -99,6 +99,6 @@ func mapToConfig(cfgMap map[string]string) (*Config, error) {
 
 func fillInDefaults(cfg *Config) {
 	cfg.OpsManUsername = "foo"
-	cfg.OpsManPassword = "bar111111"
-	cfg.OpsManDecryptionPhrase = "bar111111"
+	cfg.OpsManPassword = "foobar"
+	cfg.OpsManDecryptionPhrase = "foobar"
 }

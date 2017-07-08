@@ -26,5 +26,13 @@ func main() {
 
 	fmt.Printf("%#v", cfg)
 	om := ops_manager.New(cfg)
-	om.Setup()
+	err = om.SetupAuth()
+	if err != nil {
+		fmt.Printf("err: %v", err)
+	}
+
+	err = om.SetupBosh()
+	if err != nil {
+		fmt.Printf("err: %v", err)
+	}
 }
