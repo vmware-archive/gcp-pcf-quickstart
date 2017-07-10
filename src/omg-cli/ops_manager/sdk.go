@@ -47,14 +47,40 @@ func (om *Sdk) SetupAuth(decryptionPhrase string) error {
 	return cmd.Execute([]string{"--username", om.username, "--password", om.password, "--decryption-passphrase", decryptionPhrase})
 }
 
-func (om *Sdk) SetupBosh(cfg commands.GCPIaaSConfiguration) error {
+func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) error {
 	boshService := api.NewBoshFormService(om.client)
 	diagnosticService := api.NewDiagnosticService(om.client)
 	cmd := commands.NewConfigureBosh(boshService, diagnosticService, om.logger)
 
-	v, err := json.Marshal(cfg)
+	iaasBytes, err := json.Marshal(iaas)
 	if err != nil {
 		return err
 	}
-	return cmd.Execute([]string{"--iaas-configuration", string(v)})
+
+	directorBytes, err := json.Marshal(director)
+	if err != nil {
+		return err
+	}
+
+	azBytes, err := json.Marshal(azs)
+	if err != nil {
+		return err
+	}
+
+	networksBytes, err := json.Marshal(networks)
+	if err != nil {
+		return err
+	}
+
+	networkAssignmentBytes, err := json.Marshal(networkAssignment)
+	if err != nil {
+		return err
+	}
+
+	return cmd.Execute([]string{
+		"--iaas-configuration", string(iaasBytes),
+		"--director-configuration", string(directorBytes),
+		"--az-configuration", string(azBytes),
+		"--networks-configuration", string(networksBytes),
+		"--network-assignment", string(networkAssignmentBytes)})
 }

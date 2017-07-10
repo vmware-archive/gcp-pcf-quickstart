@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"google.golang.org/api/runtimeconfig/v1beta1"
+	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 )
 
 type Config struct {
