@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
+	"google.golang.org/api/runtimeconfig/v1beta1"
 )
 
 type Config struct {
@@ -42,10 +42,6 @@ type Config struct {
 	OpsManDecryptionPhrase string
 	ProjectName            string
 }
-
-const (
-	SkipSSLValidation = true
-)
 
 func FromEnvironment(ctx context.Context, client *http.Client, projectName string) (*Config, error) {
 	cfgMap, err := dumpConfigVariables(ctx, client, fmt.Sprintf("projects/%s/configs/omgConfig", projectName))

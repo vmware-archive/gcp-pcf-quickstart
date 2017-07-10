@@ -3,19 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"omg-cli/config"
 	"omg-cli/omg"
 	"omg-cli/ops_manager"
 
 	"golang.org/x/oauth2/google"
-	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
+	"google.golang.org/api/runtimeconfig/v1beta1"
 )
 
 const (
-	projectName      = "google.com:graphite-test-bosh-cpi-cert"
-	username         = "foo"
-	password         = "foobar"
-	decryptionPhrase = "foobar"
+	projectName       = "google.com:graphite-test-bosh-cpi-cert"
+	username          = "foo"
+	password          = "foobar"
+	decryptionPhrase  = "foobar"
+	skipSSLValidation = true
 )
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	sdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), username, password, config.SkipSSLValidation)
+	sdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), username, password, skipSSLValidation)
 	if err != nil {
 		panic(err)
 	}
