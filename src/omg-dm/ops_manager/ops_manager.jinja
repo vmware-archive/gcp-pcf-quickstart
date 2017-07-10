@@ -88,6 +88,8 @@ resources:
           diskSizeGb: 50
     serviceAccounts:
       - email: $(ref.opsManServiceAccount.email)
+        scopes:
+        - "https://www.googleapis.com/auth/cloud-platform"
 
 outputs:
 - name: opsManagerIp
