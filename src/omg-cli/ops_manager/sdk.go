@@ -12,7 +12,10 @@ import (
 	"github.com/pivotal-cf/om/network"
 )
 
-const requestTimeout = 1800
+const (
+	requestTimeout     = 1800
+	poolingIntervalSec = 10
+)
 
 type Sdk struct {
 	target                string
@@ -83,4 +86,12 @@ func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.D
 		"--az-configuration", string(azBytes),
 		"--networks-configuration", string(networksBytes),
 		"--network-assignment", string(networkAssignmentBytes)})
+}
+
+func (om *Sdk) ApplyChanges() error {
+	installationsService := api.NewInstallationsService(om.client)
+	logWriter := commands.NewLogWriter(os.Stdout)
+	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
+
+	return cmd.Execute(nil)
 }

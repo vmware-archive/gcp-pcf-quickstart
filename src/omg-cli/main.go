@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/api/runtimeconfig/v1beta1"
+
 	"omg-cli/config"
 	"omg-cli/omg"
 	"omg-cli/ops_manager"
 
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/runtimeconfig/v1beta1"
 )
 
 const (
@@ -44,6 +45,11 @@ func main() {
 	}
 
 	err = setup.SetupBosh()
+	if err != nil {
+		fmt.Printf("err: %v", err)
+	}
+
+	err = setup.ApplyChanges()
 	if err != nil {
 		fmt.Printf("err: %v", err)
 	}

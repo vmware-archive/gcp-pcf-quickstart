@@ -6,8 +6,12 @@ import (
 
 	"fmt"
 
+	"net"
+
 	"github.com/pivotal-cf/om/commands"
 )
+
+const metadataService = "169.254.169.254"
 
 type SetupService struct {
 	cfg *config.Config
@@ -22,8 +26,30 @@ func (s *SetupService) SetupAuth(decryptionPhrase string) error {
 	return s.sdk.SetupAuth(decryptionPhrase)
 }
 
-func (s *SetupService) fullSubnetName(name string) string {
-	return fmt.Sprintf("%s/%s/%s", s.cfg.NetworkName, name, "us-central1")
+func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.NetworkConfiguration {
+	// Reserve .1-.20
+	lowerIp, _, err := net.ParseCIDR(cidrRange)
+	lowerIp = lowerIp.To4()
+	if err != nil {
+		panic(err)
+	}
+	upperIp := make(net.IP, len(lowerIp))
+	copy(upperIp, lowerIp)
+	upperIp[3] = 20
+
+	return commands.NetworkConfiguration{
+		Name: name,
+		Subnets: []commands.Subnet{
+			{
+				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", s.cfg.NetworkName, name, "us-central1"),
+				CIDR:              cidrRange,
+				Gateway:           gateway,
+				ReservedIPRanges:  fmt.Sprintf("%s-%s", lowerIp.String(), upperIp.String()),
+				AvailabilityZones: []string{"us-central1-b", "us-central1-c", "us-central1-f"},
+				DNS:               metadataService,
+			},
+		},
+	}
 }
 
 func (s *SetupService) SetupBosh() error {
@@ -34,7 +60,7 @@ func (s *SetupService) SetupBosh() error {
 	}
 
 	director := commands.DirectorConfiguration{
-		NTPServers: "169.254.169.254", // GCP metadata service
+		NTPServers: metadataService, // GCP metadata service
 	}
 
 	azs := commands.AvailabilityZonesConfiguration{
@@ -48,21 +74,12 @@ func (s *SetupService) SetupBosh() error {
 	networks := commands.NetworksConfiguration{
 		ICMP: false,
 		Networks: []commands.NetworkConfiguration{
-			{
-				Name: s.cfg.MgmtSubnetName,
-				Subnets: []commands.Subnet{
-					{
-						IAASIdentifier:    s.fullSubnetName(s.cfg.MgmtSubnetName),
-						CIDR:              s.cfg.MgmtSubnetCIDR,
-						Gateway:           s.cfg.MgmtSubnetGateway,
-						ReservedIPRanges:  "10.0.0.0-10.0.0.20", // TODO(jrjohnson): Not true
-						AvailabilityZones: []string{"us-central1-b", "us-cetnral1-c", "us-central1-f"},
-						DNS:               "169.254.169.254",
-					},
-				},
-			},
+			s.buildNetwork(s.cfg.MgmtSubnetName, s.cfg.MgmtSubnetCIDR, s.cfg.MgmtSubnetGateway),
+			s.buildNetwork(s.cfg.ServicesSubnetName, s.cfg.ServicesSubnetCIDR, s.cfg.ServicesSubnetGateway),
+			s.buildNetwork(s.cfg.ErtSubnetName, s.cfg.ErtSubnetCIDR, s.cfg.ErtSubnetGateway),
 		},
 	}
+
 	networkAssignment := commands.NetworkAssignment{
 		UserProvidedNetworkName: s.cfg.MgmtSubnetName,
 		UserProvidedAZName:      "us-central1-b",
@@ -73,4 +90,8 @@ func (s *SetupService) SetupBosh() error {
 	}
 
 	return nil
+}
+
+func (s *SetupService) ApplyChanges() error {
+	return s.sdk.ApplyChanges()
 }
