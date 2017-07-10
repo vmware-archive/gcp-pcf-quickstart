@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
@@ -35,25 +36,26 @@ type Config struct {
 	ResourcesBucket       string `json:"resourcesBucket"`
 	DirectorBucket        string `json:"directorBucket"`
 
-	// Not from the environment today
+	// Not from the environment:
 	OpsManUsername         string
 	OpsManPassword         string
 	OpsManDecryptionPhrase string
+	ProjectName            string
 }
 
 const (
 	SkipSSLValidation = true
 )
 
-func FromEnvironment(ctx context.Context, client *http.Client, configName string) (*Config, error) {
-	cfgMap, err := dumpConfigVariables(ctx, client, configName)
+func FromEnvironment(ctx context.Context, client *http.Client, projectName string) (*Config, error) {
+	cfgMap, err := dumpConfigVariables(ctx, client, fmt.Sprintf("projects/%s/configs/omgConfig", projectName))
 	if err != nil {
 		return nil, err
 	}
 
 	cfg, err := mapToConfig(cfgMap)
 
-	fillInDefaults(cfg)
+	fillInDefaults(cfg, projectName)
 
 	return cfg, err
 }
@@ -97,8 +99,9 @@ func mapToConfig(cfgMap map[string]string) (*Config, error) {
 	return hydratedCfg, err
 }
 
-func fillInDefaults(cfg *Config) {
+func fillInDefaults(cfg *Config, projectName string) {
 	cfg.OpsManUsername = "foo"
 	cfg.OpsManPassword = "foobar"
 	cfg.OpsManDecryptionPhrase = "foobar"
+	cfg.ProjectName = projectName
 }

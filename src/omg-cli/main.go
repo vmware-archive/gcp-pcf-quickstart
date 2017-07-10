@@ -10,7 +10,7 @@ import (
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 )
 
-const configName = "projects/google.com:graphite-test-bosh-cpi-cert/configs/omgConfig"
+const projectName = "google.com:graphite-test-bosh-cpi-cert"
 
 func main() {
 	ctx := context.Background()
@@ -19,7 +19,7 @@ func main() {
 		panic(err)
 	}
 
-	cfg, err := config.FromEnvironment(ctx, client, configName)
+	cfg, err := config.FromEnvironment(ctx, client, projectName)
 	if err != nil {
 		panic(err)
 	}

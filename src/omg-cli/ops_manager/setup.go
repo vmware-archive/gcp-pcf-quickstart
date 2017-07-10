@@ -41,7 +41,7 @@ func (om *OpsManager) SetupBosh() error {
 	cmd := commands.NewConfigureBosh(boshService, diagnosticService, log.New(os.Stdout, "", 0))
 
 	// TODO(jrjohnson): just hard coding this for testing
-	return cmd.Execute([]string{"--iaas-configuration", "{\"project\": \"google.com:graphite-test-bosh-cpi-cert\",\"default_deployment_tag\": \"foo-vms\",\"auth_json\": \"\"}"})
+	return cmd.Execute([]string{"--iaas-configuration", fmt.Sprintf("{\"project\": \"%s\",\"default_deployment_tag\": \"opsman-vms\",\"auth_json\": \"\"}", om.cfg.ProjectName)})
 }
 
 // {"iaas_configuration":{"project":null,"associated_service_account":null},"director_configuration":{"ntp_servers_string":"","metrics_ip":null,"resurrector_enabled":false,"max_threads":null,"database_type":"internal","blobstore_type":"local"},"security_configuration":{"trusted_certificates":null,"generate_vm_passwords":true},"syslog_configuration":{"enabled":false}}
