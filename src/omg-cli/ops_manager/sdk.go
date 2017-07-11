@@ -7,9 +7,13 @@ import (
 
 	"encoding/json"
 
+	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
+	"github.com/pivotal-cf/om/extractor"
+	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
+	"github.com/pivotal-cf/om/progress"
 )
 
 const (
@@ -47,7 +51,10 @@ func (om *Sdk) SetupAuth(decryptionPhrase string) error {
 	setupService := api.NewSetupService(om.unauthenticatedClient)
 
 	cmd := commands.NewConfigureAuthentication(setupService, om.logger)
-	return cmd.Execute([]string{"--username", om.username, "--password", om.password, "--decryption-passphrase", decryptionPhrase})
+	return cmd.Execute([]string{
+		"--username", om.username,
+		"--password", om.password,
+		"--decryption-passphrase", decryptionPhrase})
 }
 
 func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) error {
@@ -94,4 +101,30 @@ func (om *Sdk) ApplyChanges() error {
 	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
 
 	return cmd.Execute(nil)
+}
+
+func (om *Sdk) UploadProduct(path string) error {
+	liveWriter := uilive.New()
+	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), liveWriter)
+
+	form, err := formcontent.NewForm()
+	if err != nil {
+		return err
+	}
+
+	cmd := commands.NewUploadProduct(form, extractor.ProductUnzipper{}, availableProductsService, om.logger)
+
+	return cmd.Execute([]string{
+		"--product", path})
+}
+
+func (om *Sdk) StageProduct(name, version string) error {
+	diagnosticService := api.NewDiagnosticService(om.client)
+	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
+	stagedProductsService := api.NewStagedProductsService(om.client)
+	cmd := commands.NewStageProduct(stagedProductsService, availableProductsService, diagnosticService, om.logger)
+	return cmd.Execute([]string{
+		"--product-name", name,
+		"--product-version", version,
+	})
 }

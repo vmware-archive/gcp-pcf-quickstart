@@ -3,6 +3,8 @@ package omg
 import (
 	"omg-cli/config"
 	"omg-cli/ops_manager"
+	"omg-cli/pivnet"
+	"os"
 
 	"fmt"
 
@@ -11,19 +13,28 @@ import (
 	"github.com/pivotal-cf/om/commands"
 )
 
-const metadataService = "169.254.169.254"
+const (
+	metadataService    = "169.254.169.254"
+	ertPivnetName      = "elastic-runtime"
+	ertPivnetVersionId = "5993"
+	ertPivnetFileId    = "24044"
+	ertSha256          = "a1d248287fff3328459dedb10921394949f818e7b89f017803ac7d23a6c27bf2"
+	ertProductName     = "cf"
+	ertProductVersion  = "1.11.2"
+)
 
 type SetupService struct {
-	cfg *config.Config
-	sdk *ops_manager.Sdk
+	cfg    *config.Config
+	om     *ops_manager.Sdk
+	pivnet *pivnet.Sdk
 }
 
-func NewSetupService(cfg *config.Config, sdk *ops_manager.Sdk) *SetupService {
-	return &SetupService{cfg: cfg, sdk: sdk}
+func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk) *SetupService {
+	return &SetupService{cfg: cfg, om: omSdk, pivnet: pivnetSdk}
 }
 
 func (s *SetupService) SetupAuth(decryptionPhrase string) error {
-	return s.sdk.SetupAuth(decryptionPhrase)
+	return s.om.SetupAuth(decryptionPhrase)
 }
 
 func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.NetworkConfiguration {
@@ -85,7 +96,7 @@ func (s *SetupService) SetupBosh() error {
 		UserProvidedAZName:      "us-central1-b",
 	}
 
-	if err := s.sdk.SetupBosh(gcp, director, azs, networks, networkAssignment); err != nil {
+	if err := s.om.SetupBosh(gcp, director, azs, networks, networkAssignment); err != nil {
 		return err
 	}
 
@@ -93,5 +104,19 @@ func (s *SetupService) SetupBosh() error {
 }
 
 func (s *SetupService) ApplyChanges() error {
-	return s.sdk.ApplyChanges()
+	return s.om.ApplyChanges()
+}
+
+func (s *SetupService) UploadERT() error {
+	tile, err := s.pivnet.DownloadTile(ertPivnetName, ertPivnetVersionId, ertPivnetFileId, ertSha256)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tile.Name())
+
+	s.om.UploadProduct(tile.Name())
+
+	s.om.StageProduct(ertProductName, ertProductVersion)
+
+	return nil
 }
