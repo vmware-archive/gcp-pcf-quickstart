@@ -128,3 +128,13 @@ func (om *Sdk) StageProduct(name, version string) error {
 		"--product-version", version,
 	})
 }
+
+func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
+	service := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
+	out, err := service.List()
+	if err != nil {
+		return nil, err
+	}
+
+	return out.ProductsList, nil
+}

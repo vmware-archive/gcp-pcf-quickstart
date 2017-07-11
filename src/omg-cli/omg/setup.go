@@ -14,14 +14,38 @@ import (
 )
 
 const (
-	metadataService    = "169.254.169.254"
-	ertPivnetName      = "elastic-runtime"
-	ertPivnetVersionId = "5993"
-	ertPivnetFileId    = "24044"
-	ertSha256          = "a1d248287fff3328459dedb10921394949f818e7b89f017803ac7d23a6c27bf2"
-	ertProductName     = "cf"
-	ertProductVersion  = "1.11.2"
+	metadataService = "169.254.169.254"
 )
+
+type pivnetDefinition struct {
+	name      string
+	versionId string
+	fileId    string
+	sha256    string
+}
+
+type productDefinition struct {
+	name    string
+	version string
+}
+
+type tileDefinition struct {
+	pivnet  pivnetDefinition
+	product productDefinition
+}
+
+var ertTile = tileDefinition{
+	pivnetDefinition{
+		"elastic-runtime",
+		"5993",
+		"24044",
+		"a1d248287fff3328459dedb10921394949f818e7b89f017803ac7d23a6c27bf2",
+	},
+	productDefinition{
+		"cf",
+		"1.11.2",
+	},
+}
 
 type SetupService struct {
 	cfg    *config.Config
@@ -107,16 +131,38 @@ func (s *SetupService) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
-func (s *SetupService) UploadERT() error {
-	tile, err := s.pivnet.DownloadTile(ertPivnetName, ertPivnetVersionId, ertPivnetFileId, ertSha256)
+func (s *SetupService) productInstalled(name, version string) (bool, error) {
+	products, err := s.om.AvaliableProducts()
+	if err != nil {
+		return false, err
+	}
+
+	for _, p := range products {
+		if p.Name == name && p.Version == version {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (s *SetupService) ensureProductReady(tile tileDefinition) error {
+	if i, err := s.productInstalled(tile.product.name, tile.product.version); i == true || err != nil {
+		return err
+	}
+
+	file, err := s.pivnet.DownloadTile(tile.pivnet.name, tile.pivnet.versionId, tile.pivnet.fileId, tile.pivnet.sha256)
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tile.Name())
+	defer os.Remove(file.Name())
 
-	s.om.UploadProduct(tile.Name())
+	s.om.UploadProduct(file.Name())
 
-	s.om.StageProduct(ertProductName, ertProductVersion)
+	s.om.StageProduct(tile.product.name, tile.product.version)
 
 	return nil
+}
+
+func (s *SetupService) UploadERT() error {
+	return s.ensureProductReady(ertTile)
 }
