@@ -156,11 +156,11 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 	}
 	defer os.Remove(file.Name())
 
-	s.om.UploadProduct(file.Name())
+	if err = s.om.UploadProduct(file.Name()); err != nil {
+		return err
+	}
 
-	s.om.StageProduct(tile.product.name, tile.product.version)
-
-	return nil
+	return s.om.StageProduct(tile.product.name, tile.product.version)
 }
 
 func (s *SetupService) UploadERT() error {

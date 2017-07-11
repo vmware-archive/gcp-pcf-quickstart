@@ -7,6 +7,8 @@ import (
 
 	"encoding/json"
 
+	"fmt"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -31,17 +33,19 @@ type Sdk struct {
 	client                network.OAuthClient
 }
 
-func NewSdk(target, username, password string, skipSSLValidation bool) (*Sdk, error) {
+func NewSdk(target, username, password string, skipSSLValidation bool, logger log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, username, password, "", "", skipSSLValidation, true, time.Duration(requestTimeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Sdk{target: target,
+	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
+
+	return &Sdk{target:        target,
 		username:              username,
 		password:              password,
 		skipSSLValidation:     skipSSLValidation,
-		logger:                log.New(os.Stdout, "[OM SDK] ", 0),
+		logger:                &logger,
 		unauthenticatedClient: network.NewUnauthenticatedClient(target, skipSSLValidation, time.Duration(requestTimeout)*time.Second),
 		client:                client,
 	}, nil

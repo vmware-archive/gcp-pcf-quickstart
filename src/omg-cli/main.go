@@ -16,9 +16,12 @@ import (
 
 	"log"
 
+	"errors"
+
 	"golang.org/x/oauth2/google"
 )
 
+//TODO(jrjohnson): These constants should be detected, generated, or flags
 const (
 	projectName       = "google.com:graphite-test-bosh-cpi-cert"
 	username          = "foo"
@@ -27,56 +30,61 @@ const (
 	skipSSLValidation = true
 )
 
-var (
-	pivnetAPIToken string
-)
-
 func main() {
-	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
+	logger := log.New(os.Stderr, "[ONG] ", 0)
+
+	setup, err := NewApp(logger)
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
-	cfg, err := config.FromEnvironment(ctx, client, projectName)
-	if err != nil {
-		panic(err)
-	}
-
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), username, password, skipSSLValidation)
-	if err != nil {
-		panic(err)
-	}
-
-	pivnetAPIToken = os.Getenv("PIVNET_API_TOKEN")
-	if pivnetAPIToken == "" {
-		panic("expected environment variable PIVNET_API_TOKEN. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile")
-	}
-
-	stdout := log.New(os.Stdout, "", 0)
-	pivnetSdk, err := pivnet.NewSdk(pivnetAPIToken, stdout)
-	if err != nil {
-		panic(err)
-	}
-
-	setup := omg.NewSetupService(cfg, omSdk, pivnetSdk)
 	err = setup.SetupAuth(decryptionPhrase)
 	if err != nil {
-		fmt.Printf("err: %v", err)
+		logger.Fatal(err)
 	}
 
 	err = setup.SetupBosh()
 	if err != nil {
-		fmt.Printf("err: %v", err)
+		logger.Fatal(err)
 	}
 
 	err = setup.ApplyChanges()
 	if err != nil {
-		fmt.Printf("err: %v", err)
+		logger.Fatal(err)
 	}
 
 	err = setup.UploadERT()
 	if err != nil {
-		fmt.Printf("err: %v", err)
+		logger.Fatal(err)
 	}
+}
+
+func NewApp(logger *log.Logger) (*omg.SetupService, error) {
+	ctx := context.Background()
+	client, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := config.FromEnvironment(ctx, client, projectName)
+	if err != nil {
+		return nil, err
+	}
+
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), username, password, skipSSLValidation, *logger)
+	if err != nil {
+		return nil, err
+	}
+
+	pivnetAPIToken := os.Getenv("PIVNET_API_TOKEN")
+	if pivnetAPIToken == "" {
+		return nil, errors.New("expected environment variable PIVNET_API_TOKEN. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile")
+	}
+
+	pivnetSdk, err := pivnet.NewSdk(pivnetAPIToken, logger)
+	if err != nil {
+		return nil, err
+	}
+
+	return omg.NewSetupService(cfg, omSdk, pivnetSdk), nil
 }
