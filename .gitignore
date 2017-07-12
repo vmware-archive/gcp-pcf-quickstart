@@ -1,4 +1,6 @@
 pkg/*
 bin/*
 .cache
+.idea/*
 service_account.json
+
