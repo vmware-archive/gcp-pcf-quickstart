@@ -11,55 +11,11 @@ resources:
     rawDisk:
       source: {{ properties['opsManagerImage'] }}
 
-- name: opsManServiceAccount
+- name: serviceAccount
   type: iam.v1.serviceAccount
   properties:
     accountId: {{ serviceAccountName }}
     displayName: {{ serviceAccountName }}
-
-- name: {{ env['project'] }}
-  type: cloudresourcemanager.v1.project
-  properties:
-    projectId: {{ env['project'] }}
-  accessControl:
-    gcpIamPolicy:
-      bindings:
-      - role: roles/iam.serviceAccountActor
-        members:
-        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
-        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
-      - role: roles/compute.instanceAdmin
-        members:
-        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
-      - role: roles/compute.networkAdmin
-        members:
-        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
-      - role: roles/compute.storageAdmin
-        members:
-        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
-        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
-      - role: roles/storage.admin
-        members:
-        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
-        - serviceAccount:{{ serviceAccountName }}@{{ projectDomain }}.iam.gserviceaccount.com
-      - role: roles/owner
-        members:
-        - serviceAccount:{{ env['project_number'] }}@cloudservices.gserviceaccount.com
-        # TODO(jrjohnson): remove, needed for engineering projects
-        - serviceAccount:enforcer-opt-out@graphite-production.iam.gserviceaccount.com
-        - user:{{ properties['projectOwner'] }}
-      - role: roles/container.serviceAgent
-        members:
-        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
-      - role: roles/logging.logWriter
-        members:
-        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
-      - role: roles/logging.configWriter
-        members:
-        - serviceAccount:{{ env['project_number'] }}-compute@developer.gserviceaccount.com
-  metadata:
-    dependsOn:
-      - opsManServiceAccount
 
 - name: {{ baseName }}-director
   type: storage.v1.bucket
@@ -87,12 +43,15 @@ resources:
           diskType: projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/diskTypes/pd-standard
           diskSizeGb: 50
     serviceAccounts:
-      - email: $(ref.opsManServiceAccount.email)
+      - email: $(ref.serviceAccount.email)
         scopes:
         - "https://www.googleapis.com/auth/cloud-platform"
+
 
 outputs:
 - name: opsManagerIp
   value: $(ref.{{ opsManName }}.networkInterfaces[0].networkIP)
 - name: directorBucket
   value: $(ref.{{ baseName }}-director.name)
+- name: serviceAccountEmail
+  value: $(ref.serviceAccount.email)

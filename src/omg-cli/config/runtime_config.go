@@ -41,6 +41,14 @@ type Config struct {
 	RootDomain             string `json:"rootDomain"`
 	SslCertificate         string `json:"sslCertificate"`
 	SslPrivateKey          string `json:"sslPrivateKey"`
+	GoogleApisAccount      string `json:"googleApisAccount"`
+	OpsManServiceAccount   string `json:"opsManServiceAccount"`
+	ProjectOwnerEmail      string `json:"projectOwnerEmail"`
+
+	Region string `json:"region"`
+	Zone1  string `json:"zone1"`
+	Zone2  string `json:"zone2"`
+	Zone3  string `json:"zone3"`
 
 	// Not from the environment:
 	OpsManUsername         string

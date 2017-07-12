@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/runtimeconfig/v1beta1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 
 	"omg-cli/config"
 	"omg-cli/omg"
@@ -23,7 +24,7 @@ import (
 
 //TODO(jrjohnson): These constants should be detected, generated, or flags
 const (
-	projectName       = "google.com:graphite-test-bosh-cpi-cert"
+	projectName       = "graphite-demo-jjcf"
 	username          = "foo"
 	password          = "foobar"
 	decryptionPhrase  = "foobar"
@@ -41,11 +42,13 @@ func main() {
 	steps := []struct {
 		fn func() error
 	}{
+		{setup.SetupIAMRoles},
 		{func() error { return setup.SetupAuth(decryptionPhrase) }},
 		{setup.SetupBosh},
 		{setup.ApplyChanges},
 		{setup.UploadERT},
 		{setup.ConfigureERT},
+		{setup.ApplyChanges},
 	}
 
 	for _, v := range steps {
@@ -57,12 +60,12 @@ func main() {
 
 func NewApp(logger *log.Logger) (*omg.SetupService, error) {
 	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
+	configClient, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err := config.FromEnvironment(ctx, client, projectName)
+	cfg, err := config.FromEnvironment(ctx, configClient, projectName)
 	if err != nil {
 		return nil, err
 	}
@@ -82,5 +85,9 @@ func NewApp(logger *log.Logger) (*omg.SetupService, error) {
 		return nil, err
 	}
 
-	return omg.NewSetupService(cfg, omSdk, pivnetSdk), nil
+	gcpClient, err := google.DefaultClient(ctx, cloudresourcemanager.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	return omg.NewSetupService(cfg, omSdk, pivnetSdk, gcpClient), nil
 }

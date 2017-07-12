@@ -22,6 +22,22 @@ info:
     type: string
     description: DNS Root for PCF Installation (eg cf.example.org)
 
+  region:
+    type: string
+
+  zone1:
+    type: string
+
+  zone2:
+    type: string
+
+  zone3:
+    type: string
+
 required:
 - projectOwner
 - rootDomain
+- region
+- zone1
+- zone2
+- zone3

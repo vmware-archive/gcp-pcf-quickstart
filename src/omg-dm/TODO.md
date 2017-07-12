@@ -10,8 +10,7 @@
 - tcp_router.tf
 
 # TODO
-- Generate/store UAA Certificates
-- Store zone & regions
+- output/parameterize `omg-opsman`, use it for next-hop on NAT rules.
 
 # Next Steps
 - IAM is messed up. do it out of the script.

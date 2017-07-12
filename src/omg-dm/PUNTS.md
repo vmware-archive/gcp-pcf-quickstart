@@ -12,10 +12,6 @@ The tricky thing here is: how does PCF/tag instances?
 
 Currently giving the enforcer an IAM binding on the project. This is Googler specific.
 
-## Global Resources
-
-Move IAM roles (ops_manager/ops_manager.jinja) to a global roles or base.
-
 ## DNS
 
 Deployment Manager can't create individual DNS records, only managed zones
@@ -23,7 +19,3 @@ Deployment Manager can't create individual DNS records, only managed zones
 ## CF-WS: Web Sockets Router
 
 Web sockets _should_ work through L7 (HTTP) router. May need to revisit if this isn't true.
-
-## Zones
-
-Zones are hardcoded as us-central1-b, us-central1-c, us-central1-f

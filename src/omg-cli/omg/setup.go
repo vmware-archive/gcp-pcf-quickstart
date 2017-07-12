@@ -6,13 +6,15 @@ import (
 	"omg-cli/pivnet"
 	"os"
 
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+
 	"fmt"
 
 	"net"
 
 	"encoding/json"
 
-	"errors"
+	"net/http"
 
 	"github.com/pivotal-cf/om/commands"
 )
@@ -52,13 +54,14 @@ var ertTile = tileDefinition{
 }
 
 type SetupService struct {
-	cfg    *config.Config
-	om     *ops_manager.Sdk
-	pivnet *pivnet.Sdk
+	cfg       *config.Config
+	om        *ops_manager.Sdk
+	pivnet    *pivnet.Sdk
+	gcpClient *http.Client
 }
 
-func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk) *SetupService {
-	return &SetupService{cfg: cfg, om: omSdk, pivnet: pivnetSdk}
+func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, gcpClient *http.Client) *SetupService {
+	return &SetupService{cfg, omSdk, pivnetSdk, gcpClient}
 }
 
 func (s *SetupService) SetupAuth(decryptionPhrase string) error {
@@ -80,15 +83,45 @@ func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.Ne
 		Name: name,
 		Subnets: []commands.Subnet{
 			{
-				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", s.cfg.NetworkName, name, "us-central1"),
+				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", s.cfg.NetworkName, name, s.cfg.Region),
 				CIDR:              cidrRange,
 				Gateway:           gateway,
 				ReservedIPRanges:  fmt.Sprintf("%s-%s", lowerIp.String(), upperIp.String()),
-				AvailabilityZones: []string{"us-central1-b", "us-central1-c", "us-central1-f"},
+				AvailabilityZones: []string{s.cfg.Zone1, s.cfg.Zone2, s.cfg.Zone3},
 				DNS:               metadataService,
 			},
 		},
 	}
+}
+
+func (s *SetupService) SetupIAMRoles() error {
+	svc, err := cloudresourcemanager.New(s.gcpClient)
+	if err != nil {
+		return err
+	}
+
+	policy, err := svc.Projects.GetIamPolicy(s.cfg.ProjectName, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+	if err != nil {
+		return err
+	}
+
+	opsManServiceAccount := fmt.Sprintf("serviceAccount:%s", s.cfg.OpsManServiceAccount)
+	roles := []string{"roles/iam.serviceAccountActor",
+		"roles/compute.instanceAdmin",
+		"roles/compute.networkAdmin",
+		"roles/compute.storageAdmin",
+		"roles/storage.admin",
+		"roles/owner"}
+
+	for _, r := range roles {
+		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{Role: r, Members: []string{
+			opsManServiceAccount,
+		}})
+	}
+
+	_, err = svc.Projects.SetIamPolicy(s.cfg.ProjectName, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Do()
+
+	return err
 }
 
 func (s *SetupService) SetupBosh() error {
@@ -104,9 +137,9 @@ func (s *SetupService) SetupBosh() error {
 
 	azs := commands.AvailabilityZonesConfiguration{
 		AvailabilityZones: []commands.AvailabilityZone{
-			{Name: "us-central1-b"},
-			{Name: "us-central1-c"},
-			{Name: "us-central1-f"},
+			{Name: s.cfg.Zone1},
+			{Name: s.cfg.Zone2},
+			{Name: s.cfg.Zone3},
 		},
 	}
 
@@ -121,15 +154,16 @@ func (s *SetupService) SetupBosh() error {
 
 	networkAssignment := commands.NetworkAssignment{
 		UserProvidedNetworkName: s.cfg.MgmtSubnetName,
-		UserProvidedAZName:      "us-central1-b",
+		UserProvidedAZName:      s.cfg.Zone1,
 	}
 
+	f := false
 	resources := commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
-			InternetConnected: &false,
+			InternetConnected: &f,
 		},
 		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
-			InternetConnected: &false,
+			InternetConnected: &f,
 		},
 	}
 
@@ -238,8 +272,8 @@ type ErtResource struct {
 
 func (s *SetupService) ConfigureERT() error {
 	ertNetwork := ErtNetwork{
-		ErtAvalibilityZone{"us-central1-b"},
-		[]ErtAvalibilityZone{{"us-central1-b"}, {"us-central1-c"}, {"us-central1-f"}},
+		ErtAvalibilityZone{s.cfg.Zone1},
+		[]ErtAvalibilityZone{{s.cfg.Zone1}, {s.cfg.Zone2}, {s.cfg.Zone3}},
 		ErtNetworkName{s.cfg.ErtSubnetName},
 	}
 

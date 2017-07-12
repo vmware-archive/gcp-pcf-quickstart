@@ -33,3 +33,7 @@ outputs:
 - name: directorBucket
   description: GCS Bucket Name for BOSH director storage
   type: string
+- name: serviceAccountEmail
+  description: Email address of service account created for Ops Man
+  type: string
+
