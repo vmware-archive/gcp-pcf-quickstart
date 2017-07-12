@@ -10,6 +10,8 @@
 - tcp_router.tf
 
 # TODO
+- Generate/store UAA Certificates
+- Store zone & regions
 
 # Next Steps
 - IAM is messed up. do it out of the script.

@@ -57,6 +57,11 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
+	err = setup.ConfigureERT()
+	if err != nil {
+		logger.Fatal(err)
+	}
 }
 
 func NewApp(logger *log.Logger) (*omg.SetupService, error) {

@@ -10,6 +10,8 @@ import (
 
 	"net"
 
+	"encoding/json"
+
 	"github.com/pivotal-cf/om/commands"
 )
 
@@ -165,4 +167,68 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 
 func (s *SetupService) UploadERT() error {
 	return s.ensureProductReady(ertTile)
+}
+
+// TODO(jrjohnson): Move to it's own ert (sub?)package
+type ErtAvalibilityZone struct {
+	Name string `json:"name"`
+}
+
+type ErtNetworkName struct {
+	Name string `json:"name"`
+}
+
+type ErtNetwork struct {
+	SingletonAvalibilityZone ErtAvalibilityZone   `json:"singleton_availability_zone""`
+	OtherAvailabilityZones   []ErtAvalibilityZone `json:"other_availability_zones"`
+	Network                  ErtNetworkName       `json:"network"`
+}
+
+type ErtProperties struct {
+	// Domains
+	AppsDomain ErtValue `json:".cloud_controller.apps_domain"`
+	SysDomain  ErtValue `json:".cloud_controller.system_domain"`
+	// Networking
+	NetworkingPointOfEntry ErtValue `json:".properties.networking_point_of_entry"`
+	// Application Security Groups
+	SecurityAcknowledgement ErtValue `json:".properties.security_acknowledgement"`
+	// TODO(jrjohnson): Generate this value in omg-dm and pull it in here
+	// UAA
+	ServiceProviderCredentials ErtCert `json:".uaa.service_provider_key_credentials"`
+}
+
+type ErtValue struct {
+	Value string `json:"value"`
+}
+
+type ErtCert struct {
+	Cert       string `json:"cert_pem"`
+	PrivateKey string `json:"private_key_pem"`
+}
+
+func (s *SetupService) ConfigureERT() error {
+	ertNetwork := ErtNetwork{
+		ErtAvalibilityZone{"us-central1-b"},
+		[]ErtAvalibilityZone{{"us-central1-b"}, {"us-central1-c"}, {"us-central1-f"}},
+		ErtNetworkName{s.cfg.ErtSubnetName},
+	}
+
+	ertNetworkBytes, err := json.Marshal(&ertNetwork)
+	if err != nil {
+		return err
+	}
+
+	ertProperties := ErtProperties{
+		AppsDomain:              ErtValue{fmt.Sprintf("apps.%s.xip.io", s.cfg.HttpLoadBalancerIP)},
+		SysDomain:               ErtValue{fmt.Sprintf("sys.%s.xip.io", s.cfg.HttpLoadBalancerIP)},
+		NetworkingPointOfEntry:  ErtValue{"external_non_ssl"},
+		SecurityAcknowledgement: ErtValue{"X"},
+	}
+
+	ertPropertiesBytes, err := json.Marshal(&ertProperties)
+	if err != nil {
+		return err
+	}
+
+	return s.om.ConfigureProduct(ertTile.product.name, string(ertNetworkBytes), string(ertPropertiesBytes))
 }
