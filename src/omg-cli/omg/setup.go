@@ -194,6 +194,8 @@ type ErtProperties struct {
 	SecurityAcknowledgement ErtValue `json:".properties.security_acknowledgement"`
 	// UAA
 	ServiceProviderCredentials ErtRsaCertCredentaial `json:".uaa.service_provider_key_credentials"`
+	// MySQL
+	MySqlMonitorRecipientEmail ErtValue `json:".mysql_monitor.recipient_email"`
 }
 
 type ErtValue struct {
@@ -227,6 +229,7 @@ func (s *SetupService) ConfigureERT() error {
 		NetworkingPointOfEntry:     ErtValue{"external_non_ssl"},
 		SecurityAcknowledgement:    ErtValue{"X"},
 		ServiceProviderCredentials: ErtRsaCertCredentaial{ErtCert{s.cfg.SslCertificate, s.cfg.SslPrivateKey}},
+		MySqlMonitorRecipientEmail: ErtValue{"admin@example.org"},
 	}
 
 	ertPropertiesBytes, err := json.Marshal(&ertProperties)
