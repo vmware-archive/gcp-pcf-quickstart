@@ -12,6 +12,8 @@ import (
 
 	"encoding/json"
 
+	"errors"
+
 	"github.com/pivotal-cf/om/commands"
 )
 
@@ -122,7 +124,16 @@ func (s *SetupService) SetupBosh() error {
 		UserProvidedAZName:      "us-central1-b",
 	}
 
-	if err := s.om.SetupBosh(gcp, director, azs, networks, networkAssignment); err != nil {
+	resources := commands.ResourceConfiguration{
+		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
+			InternetConnected: &false,
+		},
+		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
+			InternetConnected: &false,
+		},
+	}
+
+	if err := s.om.SetupBosh(gcp, director, azs, networks, networkAssignment, resources); err != nil {
 		return err
 	}
 

@@ -61,7 +61,7 @@ func (om *Sdk) SetupAuth(decryptionPhrase string) error {
 		"--decryption-passphrase", decryptionPhrase})
 }
 
-func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) error {
+func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment, resources commands.ResourceConfiguration) error {
 	boshService := api.NewBoshFormService(om.client)
 	diagnosticService := api.NewDiagnosticService(om.client)
 	cmd := commands.NewConfigureBosh(boshService, diagnosticService, om.logger)
@@ -91,12 +91,18 @@ func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.D
 		return err
 	}
 
+	resourceBytes, err := json.Marshal(resources)
+	if err != nil {
+		return err
+	}
+
 	return cmd.Execute([]string{
 		"--iaas-configuration", string(iaasBytes),
 		"--director-configuration", string(directorBytes),
 		"--az-configuration", string(azBytes),
 		"--networks-configuration", string(networksBytes),
-		"--network-assignment", string(networkAssignmentBytes)})
+		"--network-assignment", string(networkAssignmentBytes),
+		"--resource-configuration", string(resourceBytes)})
 }
 
 func (om *Sdk) ApplyChanges() error {
