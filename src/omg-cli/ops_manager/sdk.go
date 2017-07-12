@@ -143,7 +143,7 @@ func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
 	return out.ProductsList, nil
 }
 
-func (om *Sdk) ConfigureProduct(name, networks, properties string) error {
+func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
 	stagedProductsService := api.NewStagedProductsService(om.client)
 	jobsService := api.NewJobsService(om.client)
 	cmd := commands.NewConfigureProduct(stagedProductsService, jobsService, om.logger)
@@ -152,5 +152,6 @@ func (om *Sdk) ConfigureProduct(name, networks, properties string) error {
 		"--product-name", name,
 		"--product-network", networks,
 		"--product-properties", properties,
+		"--product-resources", resources,
 	})
 }

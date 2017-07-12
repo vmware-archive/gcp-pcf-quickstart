@@ -141,6 +141,12 @@ resources:
     parent: $(ref.omgConfig.name)
     variable: httpLoadBalancerIP
     text: $(ref.ertHttpRouting.httpLoadBalancerIP)
+- name: httpBackendServiceName
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: httpBackendServiceName
+    text: $(ref.ertHttpRouting.httpBackendServiceName)
 - name: sshTargetPoolName
   type: runtimeconfig.v1beta1.variable
   properties:

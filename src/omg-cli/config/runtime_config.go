@@ -6,40 +6,41 @@ import (
 	"fmt"
 	"net/http"
 
-	"encoding/base64"
+	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 
-	"google.golang.org/api/runtimeconfig/v1beta1"
+	"encoding/base64"
 )
 
 type Config struct {
-	OpsManagerIp          string `json:"opsManagerIp"`
-	JumpboxName           string `json:"jumpboxName"`
-	NetworkName           string `json:"networkName"`
-	MgmtSubnetName        string `json:"mgmtSubnetName"`
-	MgmtSubnetGateway     string `json:"mgmtSubnetGateway"`
-	MgmtSubnetCIDR        string `json:"mgmtSubnetCIDR"`
-	ServicesSubnetName    string `json:"servicesSubnetName"`
-	ServicesSubnetGateway string `json:"servicesSubnetGateway"`
-	ServicesSubnetCIDR    string `json:"servicesSubnetCIDR"`
-	ErtSubnetName         string `json:"ertSubnetName"`
-	ErtSubnetGateway      string `json:"ertSubnetGateway"`
-	ErtSubnetCIDR         string `json:"ertSubnetCIDR"`
-	HttpLoadBalancerIP    string `json:"httpLoadBalancerIP"`
-	SshTargetPoolName     string `json:"sshTargetPoolName"`
-	SshLoadBalancerIP     string `json:"sshLoadBalancerIP"`
-	SshTargetTag          string `json:"sshTargetTag"`
-	TcpTargetPoolName     string `json:"tcpTargetPoolName"`
-	TcpLoadBalancerIP     string `json:"tcpLoadBalancerIP"`
-	TcpTargetTag          string `json:"tcpTargetTag"`
-	TcpPortRange          string `json:"tcpPortRange"`
-	BuildpacksBucket      string `json:"buildpacksBucket"`
-	DropletsBucket        string `json:"dropletsBucket"`
-	PackagesBucket        string `json:"packagesBucket"`
-	ResourcesBucket       string `json:"resourcesBucket"`
-	DirectorBucket        string `json:"directorBucket"`
-	RootDomain            string `json:"rootDomain"`
-	SslCertificate        string `json:"sslCertificate"`
-	SslPrivateKey         string `json:"sslPrivateKey"`
+	OpsManagerIp           string `json:"opsManagerIp"`
+	JumpboxName            string `json:"jumpboxName"`
+	NetworkName            string `json:"networkName"`
+	MgmtSubnetName         string `json:"mgmtSubnetName"`
+	MgmtSubnetGateway      string `json:"mgmtSubnetGateway"`
+	MgmtSubnetCIDR         string `json:"mgmtSubnetCIDR"`
+	ServicesSubnetName     string `json:"servicesSubnetName"`
+	ServicesSubnetGateway  string `json:"servicesSubnetGateway"`
+	ServicesSubnetCIDR     string `json:"servicesSubnetCIDR"`
+	ErtSubnetName          string `json:"ertSubnetName"`
+	ErtSubnetGateway       string `json:"ertSubnetGateway"`
+	ErtSubnetCIDR          string `json:"ertSubnetCIDR"`
+	HttpLoadBalancerIP     string `json:"httpLoadBalancerIP"`
+	HttpBackendServiceName string `json:"httpBackendServiceName"`
+	SshTargetPoolName      string `json:"sshTargetPoolName"`
+	SshLoadBalancerIP      string `json:"sshLoadBalancerIP"`
+	SshTargetTag           string `json:"sshTargetTag"`
+	TcpTargetPoolName      string `json:"tcpTargetPoolName"`
+	TcpLoadBalancerIP      string `json:"tcpLoadBalancerIP"`
+	TcpTargetTag           string `json:"tcpTargetTag"`
+	TcpPortRange           string `json:"tcpPortRange"`
+	BuildpacksBucket       string `json:"buildpacksBucket"`
+	DropletsBucket         string `json:"dropletsBucket"`
+	PackagesBucket         string `json:"packagesBucket"`
+	ResourcesBucket        string `json:"resourcesBucket"`
+	DirectorBucket         string `json:"directorBucket"`
+	RootDomain             string `json:"rootDomain"`
+	SslCertificate         string `json:"sslCertificate"`
+	SslPrivateKey          string `json:"sslPrivateKey"`
 
 	// Not from the environment:
 	OpsManUsername         string

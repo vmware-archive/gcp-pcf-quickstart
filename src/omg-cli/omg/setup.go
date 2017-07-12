@@ -189,7 +189,9 @@ type ErtProperties struct {
 	AppsDomain ErtValue `json:".cloud_controller.apps_domain"`
 	SysDomain  ErtValue `json:".cloud_controller.system_domain"`
 	// Networking
-	NetworkingPointOfEntry ErtValue `json:".properties.networking_point_of_entry"`
+	NetworkingPointOfEntry    ErtValue `json:".properties.networking_point_of_entry"`
+	TcpRouting                ErtValue `json:".properties.tcp_routing"`
+	TcpRoutingReservablePorts ErtValue `json:".properties.tcp_routing.enable.reservable_ports"`
 	// Application Security Groups
 	SecurityAcknowledgement ErtValue `json:".properties.security_acknowledgement"`
 	// UAA
@@ -211,6 +213,18 @@ type ErtRsaCertCredentaial struct {
 	Value ErtCert `json:"value"`
 }
 
+type ErtResources struct {
+	TcpRouter  ErtResource `json:"tcp_router"`
+	Router     ErtResource `json:"router"`
+	DiegoBrain ErtResource `json:"diego_brain"`
+}
+
+type ErtResource struct {
+	RouterNames       []string `json:"elb_names,omitempty"`
+	Instances         int      `json:"instances,omitempty"`
+	InternetConnected bool     `json:"internet_connected"`
+}
+
 func (s *SetupService) ConfigureERT() error {
 	ertNetwork := ErtNetwork{
 		ErtAvalibilityZone{"us-central1-b"},
@@ -227,6 +241,8 @@ func (s *SetupService) ConfigureERT() error {
 		AppsDomain:                 ErtValue{fmt.Sprintf("apps.%s", s.cfg.RootDomain)},
 		SysDomain:                  ErtValue{fmt.Sprintf("sys.%s", s.cfg.RootDomain)},
 		NetworkingPointOfEntry:     ErtValue{"external_non_ssl"},
+		TcpRouting:                 ErtValue{"enable"},
+		TcpRoutingReservablePorts:  ErtValue{s.cfg.TcpPortRange},
 		SecurityAcknowledgement:    ErtValue{"X"},
 		ServiceProviderCredentials: ErtRsaCertCredentaial{ErtCert{s.cfg.SslCertificate, s.cfg.SslPrivateKey}},
 		MySqlMonitorRecipientEmail: ErtValue{"admin@example.org"},
@@ -237,5 +253,24 @@ func (s *SetupService) ConfigureERT() error {
 		return err
 	}
 
-	return s.om.ConfigureProduct(ertTile.product.name, string(ertNetworkBytes), string(ertPropertiesBytes))
+	ertResoruces := ErtResources{
+		TcpRouter: ErtResource{
+			RouterNames:       []string{fmt.Sprintf("tcp:%s", s.cfg.TcpTargetPoolName)},
+			InternetConnected: false,
+		},
+		Router: ErtResource{
+			RouterNames:       []string{fmt.Sprintf("http:%s", s.cfg.HttpBackendServiceName)},
+			InternetConnected: false,
+		},
+		DiegoBrain: ErtResource{
+			RouterNames:       []string{fmt.Sprintf("tcp:%s", s.cfg.SshTargetPoolName)},
+			InternetConnected: false,
+		},
+	}
+	ertResorucesBytes, err := json.Marshal(&ertResoruces)
+	if err != nil {
+		return err
+	}
+
+	return s.om.ConfigureProduct(ertTile.product.name, string(ertNetworkBytes), string(ertPropertiesBytes), string(ertResorucesBytes))
 }
