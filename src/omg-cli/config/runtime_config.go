@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
+	"encoding/base64"
+
+	"google.golang.org/api/runtimeconfig/v1beta1"
 )
 
 type Config struct {
@@ -35,6 +37,9 @@ type Config struct {
 	PackagesBucket        string `json:"packagesBucket"`
 	ResourcesBucket       string `json:"resourcesBucket"`
 	DirectorBucket        string `json:"directorBucket"`
+	RootDomain            string `json:"rootDomain"`
+	SslCertificate        string `json:"sslCertificate"`
+	SslPrivateKey         string `json:"sslPrivateKey"`
 
 	// Not from the environment:
 	OpsManUsername         string
@@ -69,7 +74,18 @@ func dumpConfigVariables(ctx context.Context, client *http.Client, configName st
 	call := svc.Projects.Configs.Variables.List(configName).ReturnValues(true)
 	err = call.Pages(ctx, func(res *runtimeconfig.ListVariablesResponse) error {
 		for _, v := range res.Variables {
-			cfg[v.Name[trimString:len(v.Name)]] = v.Text
+			val := v.Text
+
+			// The variable is stored as a base64 encoded string
+			if v.Value != "" {
+				decoded, err := base64.StdEncoding.DecodeString(v.Value)
+				if err != nil {
+					return err
+				}
+				val = string(decoded)
+			}
+
+			cfg[v.Name[trimString:len(v.Name)]] = val
 		}
 
 		return nil

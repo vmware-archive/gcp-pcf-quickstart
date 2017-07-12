@@ -179,7 +179,7 @@ type ErtNetworkName struct {
 }
 
 type ErtNetwork struct {
-	SingletonAvalibilityZone ErtAvalibilityZone   `json:"singleton_availability_zone""`
+	SingletonAvalibilityZone ErtAvalibilityZone   `json:"singleton_availability_zone"`
 	OtherAvailabilityZones   []ErtAvalibilityZone `json:"other_availability_zones"`
 	Network                  ErtNetworkName       `json:"network"`
 }
@@ -192,9 +192,8 @@ type ErtProperties struct {
 	NetworkingPointOfEntry ErtValue `json:".properties.networking_point_of_entry"`
 	// Application Security Groups
 	SecurityAcknowledgement ErtValue `json:".properties.security_acknowledgement"`
-	// TODO(jrjohnson): Generate this value in omg-dm and pull it in here
 	// UAA
-	ServiceProviderCredentials ErtCert `json:".uaa.service_provider_key_credentials"`
+	ServiceProviderCredentials ErtRsaCertCredentaial `json:".uaa.service_provider_key_credentials"`
 }
 
 type ErtValue struct {
@@ -204,6 +203,10 @@ type ErtValue struct {
 type ErtCert struct {
 	Cert       string `json:"cert_pem"`
 	PrivateKey string `json:"private_key_pem"`
+}
+
+type ErtRsaCertCredentaial struct {
+	Value ErtCert `json:"value"`
 }
 
 func (s *SetupService) ConfigureERT() error {
@@ -219,10 +222,11 @@ func (s *SetupService) ConfigureERT() error {
 	}
 
 	ertProperties := ErtProperties{
-		AppsDomain:              ErtValue{fmt.Sprintf("apps.%s.xip.io", s.cfg.HttpLoadBalancerIP)},
-		SysDomain:               ErtValue{fmt.Sprintf("sys.%s.xip.io", s.cfg.HttpLoadBalancerIP)},
-		NetworkingPointOfEntry:  ErtValue{"external_non_ssl"},
-		SecurityAcknowledgement: ErtValue{"X"},
+		AppsDomain:                 ErtValue{fmt.Sprintf("apps.%s", s.cfg.RootDomain)},
+		SysDomain:                  ErtValue{fmt.Sprintf("sys.%s", s.cfg.RootDomain)},
+		NetworkingPointOfEntry:     ErtValue{"external_non_ssl"},
+		SecurityAcknowledgement:    ErtValue{"X"},
+		ServiceProviderCredentials: ErtRsaCertCredentaial{ErtCert{s.cfg.SslCertificate, s.cfg.SslPrivateKey}},
 	}
 
 	ertPropertiesBytes, err := json.Marshal(&ertProperties)

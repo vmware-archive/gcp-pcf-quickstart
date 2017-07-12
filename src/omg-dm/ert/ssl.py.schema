@@ -16,3 +16,7 @@ required:
 outputs:
 - name: link
   type: string
+- name: certificate
+  type: string
+- name: privateKey
+  type: string

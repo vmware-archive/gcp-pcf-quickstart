@@ -36,3 +36,7 @@ outputs:
 - name: httpLoadBalancerIP
   description: IP Address of the HTTP(S) Front End
   type: string
+- name: sslCertificate
+  type: string
+- name: sslPrivateKey
+  type: string

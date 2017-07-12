@@ -132,3 +132,7 @@ resources:
 outputs:
 - name: httpLoadBalancerIP
   value: $(ref.cf-global-address.address)
+- name: sslCertificate
+  value: $(ref.cf-ssl-cert.certificate)
+- name: sslPrivateKey
+  value: $(ref.cf-ssl-cert.privateKey)

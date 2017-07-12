@@ -213,3 +213,22 @@ resources:
     parent: $(ref.omgConfig.name)
     variable: directorBucket
     text: $(ref.ops_manager.directorBucket)
+- name: rootDomain
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: rootDomain
+    text: {{ properties['rootDomain'] }}
+- name: sslPrivateKey
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: sslPrivateKey
+    value: $(ref.ertHttpRouting.sslPrivateKey)
+- name: sslCertificate
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: sslCertificate
+    value: $(ref.ertHttpRouting.sslCertificate)
+

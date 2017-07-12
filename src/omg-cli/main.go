@@ -38,29 +38,20 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	err = setup.SetupAuth(decryptionPhrase)
-	if err != nil {
-		logger.Fatal(err)
+	steps := []struct {
+		fn func() error
+	}{
+		{func() error { return setup.SetupAuth(decryptionPhrase) }},
+		{setup.SetupBosh},
+		{setup.ApplyChanges},
+		{setup.UploadERT},
+		{setup.ConfigureERT},
 	}
 
-	err = setup.SetupBosh()
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	err = setup.ApplyChanges()
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	err = setup.UploadERT()
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	err = setup.ConfigureERT()
-	if err != nil {
-		logger.Fatal(err)
+	for _, v := range steps {
+		if err := v.fn(); err != nil {
+			logger.Fatal(err)
+		}
 	}
 }
 

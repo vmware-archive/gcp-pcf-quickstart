@@ -17,7 +17,11 @@ info:
   projectOwner:
     type: string
     description: Email address of the user that owns the project
-  
+
+  rootDomain:
+    type: string
+    description: DNS Root for PCF Installation (eg cf.example.org)
+
 required:
 - projectOwner
-
+- rootDomain

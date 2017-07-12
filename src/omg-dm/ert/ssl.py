@@ -1,3 +1,5 @@
+import base64
+
 def GenerateConfig(ctx):
   """Reads SSL certificate and key from a file."""
   ssl = {'name': 'ssl-cert',
@@ -9,4 +11,13 @@ def GenerateConfig(ctx):
           'outputs': [{
              'name': 'link',
              'value': '$(ref.ssl-cert.selfLink)'
-          }]}
+          },
+          {
+            'name': 'certificate',
+            'value': base64.b64encode(ctx.imports[ctx.properties['sslCertificatePath']])
+          },
+          {
+            'name': 'privateKey',
+            'value': base64.b64encode(ctx.imports[ctx.properties['sslPrivateKeyPath']])
+          }
+          ]}
