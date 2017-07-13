@@ -1,6 +1,6 @@
-/**********
- * ERT LB *
- **********/
+/***********
+ * ERT LB  *
+ ***********/
 
 resource "google_compute_firewall" "cf-public" {
   name    = "${var.env_name}-cf-public"
@@ -22,7 +22,7 @@ resource "google_compute_instance_group" "httplb" {
   // Count based on number of AZs
   count       = 3
   name        = "${var.env_name}-httpslb-${element(var.zones, count.index)}"
-  description = "terraform generated instance group that is multi-zone for https loadbalancing"
+  description = "Instance Group for ERT HTTP Routers"
   zone        = "${element(var.zones, count.index)}"
 }
 
@@ -66,13 +66,13 @@ resource "google_compute_url_map" "https_lb_url_map" {
 
 resource "google_compute_target_http_proxy" "http_lb_proxy" {
   name        = "${var.env_name}-httpproxy"
-  description = "really a load balancer but listed as an https proxy"
+  description = "Proxy public HTTP traffic"
   url_map     = "${google_compute_url_map.https_lb_url_map.self_link}"
 }
 
 resource "google_compute_target_https_proxy" "https_lb_proxy" {
   name             = "${var.env_name}-httpsproxy"
-  description      = "really a load balancer but listed as an https proxy"
+  description      = "Proxy public HTTPS traffic"
   url_map          = "${google_compute_url_map.https_lb_url_map.self_link}"
   ssl_certificates = ["${google_compute_ssl_certificate.cert.self_link}"]
 }
@@ -115,9 +115,9 @@ resource "google_compute_global_forwarding_rule" "cf-https" {
   port_range = "443"
 }
 
-/**********
- * TCP LB *
- **********/
+/***********
+ * TCP LB  *
+ ***********/
 
 resource "google_compute_address" "cf-ws" {
   name = "${var.env_name}-cf-ws"
@@ -147,9 +147,9 @@ resource "google_compute_forwarding_rule" "cf-ws-http" {
   ip_address  = "${google_compute_address.cf-ws.address}"
 }
 
-/****************
- * Diego SSH LB *
- ****************/
+/*****************
+ * Diego SSH LB  *
+ *****************/
 
 resource "google_compute_firewall" "cf-ssh" {
   name    = "${var.env_name}-cf-ssh"

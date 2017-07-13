@@ -3,26 +3,24 @@ variable "project" {
 }
 
 variable "env_name" {
-  type = "string"
+  type    = "string"
+  default = "omg"
 }
 
 variable "region" {
-  type = "string"
+  type    = "string"
+  default = "us-east1"
 }
 
 variable "zones" {
-  type = "list"
+  type    = "list"
+  default = ["us-east1-b", "us-east1-c", "us-east1-d"]
 }
 
 variable "opsman_image_url" {
   type        = "string"
   description = "location of ops manager image on google cloud storage"
-}
-
-variable "optional_opsman_image_url" {
-  type        = "string"
-  description = "location of ops manager image (to be used for optional extra instance) on google cloud storage"
-  default     = ""
+  default     = "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz"
 }
 
 variable "opsman_machine_type" {
@@ -53,9 +51,14 @@ variable "external_database" {
   default     = false
 }
 
-/******************
- * OpsMan Options *
- ******************/
+variable "instance_tag" {
+  description = "Instance tag for unnetworked instances and NAT routes"
+  default     = "omg-no-ip"
+}
+
+/*******************
+ * OpsMan Options  *
+ *******************/
 
 variable "opsman_storage_bucket_count" {
   type        = "string"

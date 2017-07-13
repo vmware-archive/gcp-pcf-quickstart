@@ -6,10 +6,6 @@ output "ops_manager_dns" {
   value = "${google_dns_record_set.ops-manager-dns.name}"
 }
 
-output "optional_ops_manager_dns" {
-  value = "${google_dns_record_set.optional-ops-manager-dns.name}"
-}
-
 output "sys_domain" {
   value = "sys.${var.env_name}.${var.dns_suffix}"
 }
@@ -22,12 +18,8 @@ output "tcp_domain" {
   value = "tcp.${var.env_name}.${var.dns_suffix}"
 }
 
-output "ops_manager_public_ip" {
-  value = "${google_compute_instance.ops-manager.network_interface.0.access_config.0.assigned_nat_ip}"
-}
-
-output "optional_ops_manager_public_ip" {
-  value = "${google_compute_instance.optional-ops-manager.network_interface.0.access_config.0.assigned_nat_ip}"
+output "ops_manager_private_ip" {
+  value = "${google_compute_instance.ops-manager.network_interface.0.network_ip}"
 }
 
 output "env_dns_zone_name_servers" {
@@ -47,7 +39,7 @@ output "azs" {
 }
 
 output "vm_tag" {
-  value = "${var.env_name}-vms"
+  value = "${var.instance_tag}"
 }
 
 output "network_name" {
@@ -152,14 +144,6 @@ output "opsman_sql_username" {
 
 output "opsman_sql_password" {
   value = "${module.external_database.opsman_sql_password}"
-}
-
-output "ops_manager_ssh_private_key" {
-  value = "${tls_private_key.ops-manager.private_key_pem}"
-}
-
-output "ops_manager_ssh_public_key" {
-  value = "${format("ubuntu:%s", tls_private_key.ops-manager.public_key_openssh)}"
 }
 
 output "cf_ws_address" {

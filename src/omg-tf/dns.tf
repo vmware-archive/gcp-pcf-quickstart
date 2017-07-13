@@ -11,18 +11,7 @@ resource "google_dns_record_set" "ops-manager-dns" {
 
   managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
 
-  rrdatas = ["${google_compute_instance.ops-manager.network_interface.0.access_config.0.assigned_nat_ip}"]
-}
-
-resource "google_dns_record_set" "optional-ops-manager-dns" {
-  name  = "pcf-optional.${google_dns_managed_zone.env_dns_zone.dns_name}"
-  type  = "A"
-  ttl   = 300
-  count = "${min(length(split("", var.optional_opsman_image_url)),1)}"
-
-  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
-
-  rrdatas = ["${google_compute_instance.optional-ops-manager.network_interface.0.access_config.0.assigned_nat_ip}"]
+  rrdatas = ["${google_compute_instance.ops-manager.network_interface.0.network_ip}"]
 }
 
 resource "google_dns_record_set" "wildcard-sys-dns" {
