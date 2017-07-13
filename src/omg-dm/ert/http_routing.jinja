@@ -14,7 +14,7 @@ resources:
         ports:
           - 80
     targetTags:
-      - cf-public
+      - router
 
 - name: {{ baseName }}-health-check
   type: compute.v1.firewall
@@ -25,9 +25,10 @@ resources:
         ports:
           - 8080
     targetTags:
-      - cf-public
+      - router
     sourceRanges:
       - 130.211.0.0/22
+      - 35.191.0.0/16
 #
 # HTTP(s) Address
 #

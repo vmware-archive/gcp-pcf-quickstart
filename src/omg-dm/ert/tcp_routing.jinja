@@ -3,7 +3,7 @@
 {% set addressName = baseName + '-addr' %}
 {% set targetPoolName = baseName + '-target-pool' %}
 {% set forwardingRuleName = baseName + '-fwd' %}
-{% set targetTag = 'cf-tcp' %}
+{% set targetTag = 'tcp-router' %}
 
 resources:
 - name: {{ baseName }}-public
@@ -17,6 +17,20 @@ resources:
     targetTags:
       - {{ targetTag }}
 
+- name: {{ baseName }}-allow-hc
+  type: compute.v1.firewall
+  properties:
+    network: {{ properties['networkSelfLink'] }}
+    allowed:
+      - IPProtocol: tcp
+        ports:
+          - 80
+    targetTags:
+      - {{ targetTag }}
+    sourceRanges:
+      - 130.211.0.0/22
+      - 35.191.0.0/16
+
 - name: {{ addressName }}
   type: compute.v1.address
   properties:
@@ -27,7 +41,7 @@ resources:
   type: compute.v1.httpHealthCheck
   properties:
     name: {{ healthCheckName }}
-    port: 8080
+    port: 80
     requestPath: /health
     checkIntervalSec: 5
     timeoutSec: 3

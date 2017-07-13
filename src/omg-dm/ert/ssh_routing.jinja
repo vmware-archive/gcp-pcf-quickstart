@@ -1,15 +1,16 @@
 {% set baseName = 'ert-ssh-' + env['deployment'] %}
-{% set targetTag = 'cf-ssh' %}
+{% set targetTag = 'diego-brain' %}
+{% set healthCheckName = baseName + '-hc' %}
 
 resources:
-- name: {{ baseName }}-cf-ssh
+- name: {{ baseName }}
   type: compute.v1.firewall
   properties:
     network: {{ properties['networkSelfLink'] }}
     allowed:
       - IPProtocol: tcp
         ports:
-          - 222
+          - 2222
     targetTags:
       - {{ targetTag }}
 
