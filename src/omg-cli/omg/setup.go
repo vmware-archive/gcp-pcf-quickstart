@@ -127,7 +127,7 @@ func (s *SetupService) SetupIAMRoles() error {
 func (s *SetupService) SetupBosh() error {
 	gcp := commands.GCPIaaSConfiguration{
 		Project:              s.cfg.ProjectName,
-		DefaultDeploymentTag: "omg-opsman",
+		DefaultDeploymentTag: s.cfg.DeploymentTargetTag,
 		AuthJSON:             "",
 	}
 

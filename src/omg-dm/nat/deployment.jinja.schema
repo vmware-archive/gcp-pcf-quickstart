@@ -20,10 +20,10 @@ properties:
 
   targetTag:
     type: string
-    default: no-ip
 
 required:
 - networkSelfLink
 - subnetworkSelfLink
 - region
 - zone
+- target-tag

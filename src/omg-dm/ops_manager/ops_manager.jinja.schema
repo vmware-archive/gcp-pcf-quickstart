@@ -20,11 +20,16 @@ properties:
     type: string
     description: Email address of the user that owns the project
 
+  targetTag:
+    type: string
+    description: Networking tag for Ops Manager VM
+
 required:
 - zone
 - networkSelfLink
 - subnetworkSelfLink
 - projectOwner
+- targetTag
 
 outputs:
 - name: opsManagerIp

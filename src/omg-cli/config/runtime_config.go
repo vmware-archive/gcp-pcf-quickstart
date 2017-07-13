@@ -15,6 +15,7 @@ type Config struct {
 	OpsManagerIp           string `json:"opsManagerIp"`
 	JumpboxName            string `json:"jumpboxName"`
 	NetworkName            string `json:"networkName"`
+	DeploymentTargetTag    string `json:"deploymentTargetTag"`
 	MgmtSubnetName         string `json:"mgmtSubnetName"`
 	MgmtSubnetGateway      string `json:"mgmtSubnetGateway"`
 	MgmtSubnetCIDR         string `json:"mgmtSubnetCIDR"`

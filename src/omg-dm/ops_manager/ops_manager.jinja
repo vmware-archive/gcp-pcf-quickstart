@@ -29,7 +29,7 @@ resources:
     tags:
       items:
       - internal
-      - no-ip
+      - {{ properties['targetTag'] }}
     networkInterfaces:
     - subnetwork: {{ properties['subnetworkSelfLink'] }}
     disks:

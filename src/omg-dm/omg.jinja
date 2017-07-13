@@ -18,6 +18,7 @@ resources:
     zone: {{ properties['zone1'] }}
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
+    targetTag: omg-opsman
 
 - name: ops_manager
   type: ops_manager/ops_manager.jinja
@@ -27,6 +28,7 @@ resources:
     networkSelfLink: $(ref.pcfNetwork.networkSelfLink)
     subnetworkSelfLink: $(ref.pcfNetwork.mgmtSubnetworkSelfLink)
     projectOwner: {{ properties['projectOwner'] }}
+    targetTag: omg-opsman
 
 - name: ertHttpRouting
   type: ert/http_routing.jinja
@@ -412,6 +414,16 @@ resources:
     parent: $(ref.omgConfig.name)
     variable: zone3
     text: {{ properties['zone3'] }}
+  metadata:
+    dependsOn:
+    - omgConfig
+
+- name: deploymentTargetTag
+  type: runtimeconfig.v1beta1.variable
+  properties:
+    parent: $(ref.omgConfig.name)
+    variable: deploymentTargetTag
+    text: omg-opsman
   metadata:
     dependsOn:
     - omgConfig
