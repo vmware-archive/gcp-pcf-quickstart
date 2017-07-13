@@ -29,7 +29,10 @@ const (
 	password          = "foobar"
 	decryptionPhrase  = "foobar"
 	skipSSLValidation = true
+	imagePrep         = true
 )
+
+type step func() error
 
 func main() {
 	logger := log.New(os.Stderr, "[ONG] ", 0)
@@ -39,20 +42,31 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	steps := []struct {
-		fn func() error
-	}{
-		{setup.SetupIAMRoles},
-		{func() error { return setup.SetupAuth(decryptionPhrase) }},
-		{setup.SetupBosh},
-		{setup.ApplyChanges},
-		{setup.UploadERT},
-		{setup.ConfigureERT},
-		{setup.ApplyChanges},
+	if imagePrep {
+		run([]step{
+			setup.SetupIAMRoles,
+			func() error { return setup.SetupAuth(decryptionPhrase) },
+			setup.SetupBosh,
+			setup.UploadERT,
+			setup.UploadNozzle,
+			setup.UploadServiceBroker,
+		}, logger)
+	} else {
+		run([]step{
+			setup.SetupIAMRoles,
+			func() error { return setup.SetupAuth(decryptionPhrase) },
+			setup.SetupBosh,
+			setup.ConfigureERT,
+			//TODO(jrjohnson): ConfigureNozzle
+			//TODO(jrjohnson): ConfigureServiceBroker
+			setup.ApplyChanges,
+		}, logger)
 	}
+}
 
+func run(steps []step, logger *log.Logger) {
 	for _, v := range steps {
-		if err := v.fn(); err != nil {
+		if err := v(); err != nil {
 			logger.Fatal(err)
 		}
 	}

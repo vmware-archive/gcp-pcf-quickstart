@@ -53,6 +53,32 @@ var ertTile = tileDefinition{
 	},
 }
 
+var nozzleTile = tileDefinition{
+	pivnetDefinition{
+		"gcp-stackdriver-nozzle",
+		"5378",
+		"20350",
+		"b3156360159dbf20b5ac04b5ebd28c437741bc6d62bcb513587e72ac4e94fc18",
+	},
+	productDefinition{
+		"stackdriver-nozzle",
+		"1.0.3",
+	},
+}
+
+var serviceBrokerTile = tileDefinition{
+	pivnetDefinition{
+		"gcp-service-broker",
+		"5563",
+		"21222",
+		"81dd57e6a98b62cf27336b84ffac3051feafe23fc28f3e14d2b61dc8982043c1",
+	},
+	productDefinition{
+		"gcp-service-broker",
+		"3.4.1",
+	},
+}
+
 type SetupService struct {
 	cfg       *config.Config
 	om        *ops_manager.Sdk
@@ -212,6 +238,15 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 
 func (s *SetupService) UploadERT() error {
 	return s.ensureProductReady(ertTile)
+}
+
+func (s *SetupService) UploadNozzle() error {
+	return s.ensureProductReady(nozzleTile)
+}
+
+func (s *SetupService) UploadServiceBroker() error {
+	s.pivnet.AcceptEula(serviceBrokerTile.pivnet.name, serviceBrokerTile.pivnet.versionId)
+	return s.ensureProductReady(serviceBrokerTile)
 }
 
 // TODO(jrjohnson): Move to it's own ert (sub?)package
