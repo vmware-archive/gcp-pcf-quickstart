@@ -14,6 +14,7 @@ import (
 	"log"
 
 	"errors"
+	"flag"
 )
 
 //TODO(jrjohnson): These constants should be detected, generated, or flags
@@ -25,9 +26,13 @@ const (
 	terraformState    = "env.json"
 )
 
+var bakeImage = flag.Bool("bakeImage", false, "Bake image mode")
+
 type step func() error
 
 func main() {
+	flag.Parse()
+
 	logger := log.New(os.Stderr, "[ONG] ", 0)
 
 	setup, err := NewApp(logger)
@@ -35,17 +40,22 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	run([]step{
-		func() error { return setup.SetupAuth(decryptionPhrase) },
-		setup.SetupBosh,
-		setup.ApplyChanges,
-		//setup.UploadERT,
-		//setup.UploadNozzle,
-		//setup.UploadServiceBroker,
-		//setup.ConfigureERT,
-		//TODO(jrjohnson): ConfigureNozzle
-		//TODO(jrjohnson): ConfigureServiceBroker
-	}, logger)
+	if *bakeImage {
+		run([]step{
+			func() error { return setup.SetupAuth(decryptionPhrase) },
+			setup.UploadERT,
+			//setup.UploadNozzle,
+			//setup.UploadServiceBroker,
+		}, logger)
+	} else {
+		run([]step{
+			func() error { return setup.SetupAuth(decryptionPhrase) },
+			setup.SetupBosh,
+			setup.ConfigureERT,
+			//TODO(jrjohnson): ConfigureNozzle
+			//TODO(jrjohnson): ConfigureServiceBroker
+		}, logger)
+	}
 }
 
 func run(steps []step, logger *log.Logger) {
