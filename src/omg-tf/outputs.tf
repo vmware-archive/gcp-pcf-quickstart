@@ -18,6 +18,10 @@ output "tcp_domain" {
   value = "tcp.${var.env_name}.${var.dns_suffix}"
 }
 
+output "root_domain" {
+  value = "${var.env_name}.${var.dns_suffix}"
+}
+
 output "ops_manager_private_ip" {
   value = "${google_compute_instance.ops-manager.network_interface.0.address}"
 }
@@ -158,3 +162,14 @@ output "jumpbox_ip" {
   value = "${google_compute_instance.jumpbox.network_interface.0.access_config.0.assigned_nat_ip}"
 }
 
+output "ssl_cert" {
+  value = "${var.ssl_cert}"
+}
+
+output "ssl_cert_private_key" {
+  value = "${var.ssl_cert_private_key}"
+}
+
+output "tcp_port_range" {
+  value = "${var.tcp_port_range}"
+}

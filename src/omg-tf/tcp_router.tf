@@ -5,7 +5,7 @@ resource "google_compute_firewall" "cf-tcp" {
 
   allow {
     protocol = "tcp"
-    ports    = ["1024-65535"]
+    ports    = ["${var.tcp_port_range}"]
   }
 
   target_tags = ["${var.env_name}-cf-tcp"]

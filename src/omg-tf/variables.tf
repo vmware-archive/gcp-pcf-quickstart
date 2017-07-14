@@ -28,6 +28,11 @@ variable "opsman_machine_type" {
   default = "n1-standard-2"
 }
 
+variable "jumpbox_machine_type" {
+  type    = "string"
+  default = "n1-standard-2"
+}
+
 variable "service_account_key" {
   type = "string"
 }
@@ -56,15 +61,14 @@ variable "instance_tag" {
   default     = "omg-no-ip"
 }
 
+variable "tcp_port_range" {
+  description = "Port range for TCP router"
+  default     = "1024-65535"
+}
+
 /*******************
  * OpsMan Options  *
  *******************/
-
-variable "opsman_storage_bucket_count" {
-  type        = "string"
-  default     = "0"
-  description = "Optional configuration of a Google Storage Bucket for BOSH's blobstore"
-}
 
 variable "ert_sql_db_host" {
   type    = "string"

@@ -26,6 +26,18 @@ terraform destroy
 rm terraform.tfvars
 ```
 
+## Connecting to the environment
+
+```bash
+gcloud compute config-ssh
+sshuttle -e "ssh -i ~/.ssh/google_compute_engine" -r $(terraform output jumpbox_ip) 10.0.0.0/16
+```
+
+## Configuration for omg-cli
+```bash
+terraform output -json > ../omg-cli/env.json
+```
+
 ## Appendix
 
 ### Var Details
