@@ -27,7 +27,7 @@ resources:
           diskType: projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/diskTypes/pd-standard
           diskSizeGb: 100
 
-- name: {{ baseName }}-allow-healthcheck
+- name: {{ baseName }}-allow-access
   type: compute.v1.firewall
   properties:
     network: {{ properties['networkSelfLink'] }}
