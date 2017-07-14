@@ -33,6 +33,16 @@ variable "jumpbox_machine_type" {
   default = "n1-standard-2"
 }
 
+variable "nat_machine_type" {
+  type    = "string"
+  default = "n1-standard-1"
+}
+
+variable "nat_instance_count" {
+  type    = "string"
+  default = 3
+}
+
 variable "service_account_key" {
   type = "string"
 }
