@@ -263,9 +263,40 @@ type ErtRsaCertCredentaial struct {
 }
 
 type ErtResources struct {
-	TcpRouter  ErtResource `json:"tcp_router"`
-	Router     ErtResource `json:"router"`
-	DiegoBrain ErtResource `json:"diego_brain"`
+	TcpRouter                    ErtResource `json:"tcp_router"`
+	Router                       ErtResource `json:"router"`
+	DiegoBrain                   ErtResource `json:"diego_brain"`
+	ConsulServer                 ErtResource `json:"consul_server"`
+	Nats                         ErtResource `json:"nats"`
+	EtcdTlsServer                ErtResource `json:"etcd_tls_server"`
+	NfsServer                    ErtResource `json:"nfs_server"`
+	MysqlProxy                   ErtResource `json:"mysql_proxy"`
+	Mysql                        ErtResource `json:"mysql"`
+	BackupPrepare                ErtResource `json:"backup-prepare"`
+	Ccdb                         ErtResource `json:"ccdb"`
+	DiegoDatabase                ErtResource `json:"diego_database"`
+	Uaadb                        ErtResource `json:"uaadb"`
+	Uaa                          ErtResource `json:"uaa"`
+	CloudController              ErtResource `json:"cloud_controller"`
+	HaProxy                      ErtResource `json:"ha_proxy"`
+	MysqlMonitor                 ErtResource `json:"mysql_monitor"`
+	ClockGlobal                  ErtResource `json:"clock_global"`
+	CloudControllerWorker        ErtResource `json:"cloud_controller_worker"`
+	DiegoCell                    ErtResource `json:"diego_cell"`
+	LoggregatorTrafficcontroller ErtResource `json:"loggregator_trafficcontroller"`
+	SyslogAdapter                ErtResource `json:"syslog_adapter"`
+	SyslogScheduler              ErtResource `json:"syslog_scheduler"`
+	Doppler                      ErtResource `json:"doppler"`
+	SmokeTests                   ErtResource `json:"smoke-tests"`
+	PushAppsManager              ErtResource `json:"push-apps-manager"`
+	Notifications                ErtResource `json:"notifications"`
+	NotificationsUi              ErtResource `json:"notifications-ui"`
+	PushPivotalAccount           ErtResource `json:"push-pivotal-account"`
+	Autoscaling                  ErtResource `json:"autoscaling"`
+	AutoscalingRegisterBroker    ErtResource `json:"autoscaling-register-broker"`
+	Nfsbrokerpush                ErtResource `json:"nfsbrokerpush"`
+	Bootstrap                    ErtResource `json:"bootstrap"`
+	MysqlRejoinUnsafe            ErtResource `json:"mysql-rejoin-unsafe"`
 }
 
 type ErtResource struct {
