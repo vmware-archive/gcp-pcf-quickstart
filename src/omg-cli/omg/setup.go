@@ -89,6 +89,10 @@ func (s *SetupService) SetupAuth(decryptionPhrase string) error {
 	return s.om.SetupAuth(decryptionPhrase)
 }
 
+func (s *SetupService) Unlock(decryptionPhrase string) error {
+	return s.om.Unlock(decryptionPhrase)
+}
+
 func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.NetworkConfiguration {
 	// Reserve .1-.20
 	lowerIp, _, err := net.ParseCIDR(cidrRange)

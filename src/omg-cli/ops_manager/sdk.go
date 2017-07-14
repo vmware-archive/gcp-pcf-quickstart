@@ -1,6 +1,7 @@
 package ops_manager
 
 import (
+	"crypto/tls"
 	"log"
 	"os"
 	"time"
@@ -8,6 +9,10 @@ import (
 	"encoding/json"
 
 	"fmt"
+
+	"net/http"
+
+	"bytes"
 
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
@@ -41,7 +46,7 @@ func NewSdk(target, username, password string, skipSSLValidation bool, logger lo
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
-	return &Sdk{target:        target,
+	return &Sdk{target: target,
 		username:              username,
 		password:              password,
 		skipSSLValidation:     skipSSLValidation,
@@ -59,6 +64,30 @@ func (om *Sdk) SetupAuth(decryptionPhrase string) error {
 		"--username", om.username,
 		"--password", om.password,
 		"--decryption-passphrase", decryptionPhrase})
+}
+
+type UnlockRequest struct {
+	Passphrase string `json:"passphrase"`
+}
+
+func (om *Sdk) Unlock(decryptionPhrase string) error {
+	om.logger.Println("decrypting Ops Manager")
+	unlockReq := UnlockRequest{decryptionPhrase}
+	body, err := json.Marshal(&unlockReq)
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v0/unlock", om.target), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: om.skipSSLValidation},
+	}
+	client := &http.Client{Transport: tr}
+	_, err = client.Do(req)
+
+	return err
 }
 
 func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment, resources commands.ResourceConfiguration) error {

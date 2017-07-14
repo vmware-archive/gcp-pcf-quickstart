@@ -49,9 +49,10 @@ func main() {
 		}, logger)
 	} else {
 		run([]step{
-			func() error { return setup.SetupAuth(decryptionPhrase) },
+			func() error { return setup.Unlock(decryptionPhrase) },
 			setup.SetupBosh,
 			setup.ConfigureERT,
+			setup.ApplyChanges,
 			//TODO(jrjohnson): ConfigureNozzle
 			//TODO(jrjohnson): ConfigureServiceBroker
 		}, logger)
