@@ -6,6 +6,14 @@ output "ops_manager_dns" {
   value = "${google_dns_record_set.ops-manager-dns.name}"
 }
 
+output "ops_manager_instance_name" {
+  value = "${google_compute_instance.ops-manager.name}"
+}
+
+output "ops_manager_instance_zone" {
+  value = "${google_compute_instance.ops-manager.zone}"
+}
+
 output "sys_domain" {
   value = "sys.${var.env_name}.${var.dns_suffix}"
 }

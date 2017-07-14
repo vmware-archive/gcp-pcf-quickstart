@@ -21,6 +21,7 @@ resource "google_compute_instance" "ops-manager" {
 
   network_interface {
     subnetwork = "${google_compute_subnetwork.management-subnet.name}"
+    address    = "10.0.0.6"
   }
 
   service_account {
