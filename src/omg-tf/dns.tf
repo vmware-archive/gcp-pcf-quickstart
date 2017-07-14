@@ -11,7 +11,7 @@ resource "google_dns_record_set" "ops-manager-dns" {
 
   managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
 
-  rrdatas = ["${google_compute_instance.ops-manager.network_interface.0.network_ip}"]
+  rrdatas = ["${google_compute_instance.ops-manager.network_interface.0.address}"]
 }
 
 resource "google_dns_record_set" "wildcard-sys-dns" {

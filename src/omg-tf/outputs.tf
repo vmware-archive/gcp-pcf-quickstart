@@ -19,7 +19,7 @@ output "tcp_domain" {
 }
 
 output "ops_manager_private_ip" {
-  value = "${google_compute_instance.ops-manager.network_interface.0.network_ip}"
+  value = "${google_compute_instance.ops-manager.network_interface.0.address}"
 }
 
 output "env_dns_zone_name_servers" {
