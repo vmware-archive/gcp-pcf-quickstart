@@ -6,7 +6,7 @@ resource "google_compute_instance" "jumpbox" {
   tags           = ["${var.env_name}-jumpbox-external", "${var.instance_tag}"]
 
   disk {
-    image = "projects/ubuntu-os-cloud/global/images/ubuntu-1404-trusty-v20170505"
+    image = "ubuntu-1404-trusty-v20170703"
     size  = 50
   }
 
