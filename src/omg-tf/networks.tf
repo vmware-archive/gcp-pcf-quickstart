@@ -9,6 +9,13 @@ resource "google_compute_subnetwork" "management-subnet" {
   region        = "${var.region}"
 }
 
+resource "google_compute_subnetwork" "unmanaged-subnet" {
+  name          = "${var.env_name}-unmanaged-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  network       = "${google_compute_network.pcf-network.self_link}"
+  region        = "${var.region}"
+}
+
 resource "google_compute_subnetwork" "ert-subnet" {
   name          = "${var.env_name}-ert-subnet"
   ip_cidr_range = "10.0.4.0/22"

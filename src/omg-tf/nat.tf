@@ -12,7 +12,7 @@ resource "google_compute_instance" "nat" {
   }
 
   network_interface {
-    subnetwork = "${google_compute_subnetwork.management-subnet.name}"
+    subnetwork = "${google_compute_subnetwork.unmanaged-subnet.name}"
     access_config {
       # ephemeral IP
     }
