@@ -3,7 +3,7 @@ resource "google_compute_instance" "jumpbox" {
   machine_type   = "${var.jumpbox_machine_type}"
   zone           = "${element(var.zones, 1)}"
   create_timeout = 10
-  tags           = ["${var.env_name}-jumpbox-external", "${var.instance_tag}"]
+  tags           = ["${var.env_name}-jumpbox-external"]
 
   disk {
     image = "ubuntu-1404-trusty-v20170703"
