@@ -66,7 +66,7 @@ variable "external_database" {
   default     = false
 }
 
-variable "instance_tag" {
+variable "no_ip_instance_tag" {
   description = "Instance tag for unnetworked instances and NAT routes"
   default     = "omg-no-ip"
 }

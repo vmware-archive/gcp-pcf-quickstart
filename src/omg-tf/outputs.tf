@@ -43,7 +43,7 @@ output "azs" {
 }
 
 output "vm_tag" {
-  value = "${var.instance_tag}"
+  value = "${var.no_ip_instance_tag}"
 }
 
 output "network_name" {

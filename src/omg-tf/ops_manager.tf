@@ -12,7 +12,7 @@ resource "google_compute_instance" "ops-manager" {
   machine_type   = "${var.opsman_machine_type}"
   zone           = "${element(var.zones, 1)}"
   create_timeout = 10
-  tags           = ["${var.env_name}-ops-manager", "${var.instance_tag}"]
+  tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
   disk {
     image = "${google_compute_image.ops-manager-image.self_link}"

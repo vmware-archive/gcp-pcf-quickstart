@@ -39,6 +39,6 @@ resource "google_compute_route" "nat-primary" {
   next_hop_instance      = "${var.env_name}-nat-${count.index}"
   next_hop_instance_zone = "${google_compute_instance.nat.0.zone}"
   priority               = 800
-  tags                   = ["${var.instance_tag}"]
+  tags                   = ["${var.no_ip_instance_tag}"]
   count                  = "${var.nat_instance_count}"
 }
