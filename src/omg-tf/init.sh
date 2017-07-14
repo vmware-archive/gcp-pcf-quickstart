@@ -10,6 +10,12 @@ if [ -z ${PROJECT_ID+x} ]; then
     echo "PROJECT_ID unset, using: ${PROJECT_ID}"
 fi
 
+# TODO(jrjohnson): Once a baked OpsMan image is ready, default to using it here
+if [ -z ${BASE_IMAGE+x} ]; then
+    echo "BASE_IMAGE required"
+    exit 1
+fi
+
 
 service_account_email=omg-terraform@${PROJECT_ID}.iam.gserviceaccount.com
 service_account_file=$(mktemp)
@@ -32,6 +38,7 @@ popd
 cat << VARS_FILE > terraform.tfvars
 project = "${PROJECT_ID}"
 dns_suffix = "${DNS_SUFFIX}"
+opsman_image_url = "${BASE_IMAGE}"
 
 ssl_cert = <<SSL_CERT
 $(cat ssl/server.crt)

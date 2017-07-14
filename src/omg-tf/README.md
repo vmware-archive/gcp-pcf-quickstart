@@ -16,7 +16,10 @@ You will need to enable the following Google Cloud APIs:
 ### Deploying
 
 ```bash
-PROJECT_ID="your-gcp-project" DNS_SUFFIX="cf.your-domain.example.org" ./init.sh
+export PROJECT_ID="your-gcp-project"
+export DNS_SUFFIX="cf.your-domain.example.org"
+export BASE_IMAGE="https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz"
+./init.sh
 terraform apply
 ```
 
