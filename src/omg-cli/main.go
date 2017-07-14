@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 
 	"omg-cli/config"
 	"omg-cli/omg"
@@ -30,6 +29,8 @@ const (
 	decryptionPhrase  = "foobar"
 	skipSSLValidation = true
 	imagePrep         = true
+	useTerraform      = true
+	terraformState    = "env.json"
 )
 
 type step func() error
@@ -42,26 +43,17 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	if imagePrep {
-		run([]step{
-			setup.SetupIAMRoles,
-			func() error { return setup.SetupAuth(decryptionPhrase) },
-			setup.SetupBosh,
-			setup.UploadERT,
-			setup.UploadNozzle,
-			setup.UploadServiceBroker,
-		}, logger)
-	} else {
-		run([]step{
-			setup.SetupIAMRoles,
-			func() error { return setup.SetupAuth(decryptionPhrase) },
-			setup.SetupBosh,
-			setup.ConfigureERT,
-			//TODO(jrjohnson): ConfigureNozzle
-			//TODO(jrjohnson): ConfigureServiceBroker
-			setup.ApplyChanges,
-		}, logger)
-	}
+	run([]step{
+		func() error { return setup.SetupAuth(decryptionPhrase) },
+		setup.SetupBosh,
+		setup.ApplyChanges,
+		//setup.UploadERT,
+		//setup.UploadNozzle,
+		//setup.UploadServiceBroker,
+		//setup.ConfigureERT,
+		//TODO(jrjohnson): ConfigureNozzle
+		//TODO(jrjohnson): ConfigureServiceBroker
+	}, logger)
 }
 
 func run(steps []step, logger *log.Logger) {
@@ -72,14 +64,12 @@ func run(steps []step, logger *log.Logger) {
 	}
 }
 
-func NewApp(logger *log.Logger) (*omg.SetupService, error) {
-	ctx := context.Background()
-	configClient, err := google.DefaultClient(ctx, runtimeconfig.CloudruntimeconfigScope, runtimeconfig.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
+func LoadTerraformConfig() (*config.Config, error) {
+	return config.FromTerraform(terraformState)
+}
 
-	cfg, err := config.FromEnvironment(ctx, configClient, projectName)
+func NewApp(logger *log.Logger) (*omg.SetupService, error) {
+	cfg, err := LoadTerraformConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +89,7 @@ func NewApp(logger *log.Logger) (*omg.SetupService, error) {
 		return nil, err
 	}
 
-	gcpClient, err := google.DefaultClient(ctx, cloudresourcemanager.CloudPlatformScope)
+	gcpClient, err := google.DefaultClient(context.Background(), cloudresourcemanager.CloudPlatformScope)
 	if err != nil {
 		return nil, err
 	}
