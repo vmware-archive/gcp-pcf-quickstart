@@ -11,6 +11,7 @@ resource "google_compute_firewall" "cf-public" {
     ports    = ["80", "443"]
   }
 
+  source_ranges = ["0.0.0.0/0"]
   target_tags = ["${var.env_name}-httpslb", "${var.env_name}-cf-ws", "${var.env_name}-isoseglb"]
 }
 
@@ -129,12 +130,14 @@ resource "google_compute_target_pool" "cf-ws" {
   health_checks = [
     "${google_compute_http_health_check.cf-public.name}",
   ]
+
+  session_affinity = "NONE"
 }
 
 resource "google_compute_forwarding_rule" "cf-ws-https" {
   name        = "${var.env_name}-cf-ws-https"
   target      = "${google_compute_target_pool.cf-ws.self_link}"
-  port_range  = "443"
+  port_range  = "443-443"
   ip_protocol = "TCP"
   ip_address  = "${google_compute_address.cf-ws.address}"
 }
@@ -142,7 +145,7 @@ resource "google_compute_forwarding_rule" "cf-ws-https" {
 resource "google_compute_forwarding_rule" "cf-ws-http" {
   name        = "${var.env_name}-cf-ws-http"
   target      = "${google_compute_target_pool.cf-ws.self_link}"
-  port_range  = "80"
+  port_range  = "80-80"
   ip_protocol = "TCP"
   ip_address  = "${google_compute_address.cf-ws.address}"
 }
@@ -160,7 +163,8 @@ resource "google_compute_firewall" "cf-ssh" {
     ports    = ["2222"]
   }
 
-  target_tags = ["${var.env_name}-cf-ssh"]
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["${var.env_name}-cf-ssh"]
 }
 
 resource "google_compute_address" "cf-ssh" {
@@ -168,13 +172,14 @@ resource "google_compute_address" "cf-ssh" {
 }
 
 resource "google_compute_target_pool" "cf-ssh" {
-  name = "${var.env_name}-cf-ssh"
+  name             = "${var.env_name}-cf-ssh"
+  session_affinity = "NONE"
 }
 
 resource "google_compute_forwarding_rule" "cf-ssh" {
   name        = "${var.env_name}-cf-ssh"
   target      = "${google_compute_target_pool.cf-ssh.self_link}"
-  port_range  = "2222"
+  port_range  = "2222-2222"
   ip_protocol = "TCP"
   ip_address  = "${google_compute_address.cf-ssh.address}"
 }

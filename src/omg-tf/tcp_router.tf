@@ -8,6 +8,7 @@ resource "google_compute_firewall" "cf-tcp" {
     ports    = ["${var.tcp_port_range}"]
   }
 
+  source_ranges = ["0.0.0.0/0"]
   target_tags = ["${var.env_name}-cf-tcp"]
 }
 
@@ -34,6 +35,8 @@ resource "google_compute_target_pool" "cf-tcp" {
   health_checks = [
     "${google_compute_http_health_check.cf-tcp.name}",
   ]
+
+  session_affinity = "NONE"
 }
 
 // TCP forwarding rule
