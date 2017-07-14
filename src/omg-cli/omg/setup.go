@@ -6,15 +6,11 @@ import (
 	"omg-cli/pivnet"
 	"os"
 
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-
 	"fmt"
 
 	"net"
 
 	"encoding/json"
-
-	"net/http"
 
 	"github.com/pivotal-cf/om/commands"
 )
@@ -80,14 +76,13 @@ var serviceBrokerTile = tileDefinition{
 }
 
 type SetupService struct {
-	cfg       *config.Config
-	om        *ops_manager.Sdk
-	pivnet    *pivnet.Sdk
-	gcpClient *http.Client
+	cfg    *config.Config
+	om     *ops_manager.Sdk
+	pivnet *pivnet.Sdk
 }
 
-func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, gcpClient *http.Client) *SetupService {
-	return &SetupService{cfg, omSdk, pivnetSdk, gcpClient}
+func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk) *SetupService {
+	return &SetupService{cfg, omSdk, pivnetSdk}
 }
 
 func (s *SetupService) SetupAuth(decryptionPhrase string) error {
@@ -118,36 +113,6 @@ func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.Ne
 			},
 		},
 	}
-}
-
-func (s *SetupService) SetupIAMRoles() error {
-	svc, err := cloudresourcemanager.New(s.gcpClient)
-	if err != nil {
-		return err
-	}
-
-	policy, err := svc.Projects.GetIamPolicy(s.cfg.ProjectName, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
-	if err != nil {
-		return err
-	}
-
-	opsManServiceAccount := fmt.Sprintf("serviceAccount:%s", s.cfg.OpsManServiceAccount)
-	roles := []string{"roles/iam.serviceAccountActor",
-		"roles/compute.instanceAdmin",
-		"roles/compute.networkAdmin",
-		"roles/compute.storageAdmin",
-		"roles/storage.admin",
-		"roles/owner"}
-
-	for _, r := range roles {
-		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{Role: r, Members: []string{
-			opsManServiceAccount,
-		}})
-	}
-
-	_, err = svc.Projects.SetIamPolicy(s.cfg.ProjectName, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Do()
-
-	return err
 }
 
 func (s *SetupService) SetupBosh() error {

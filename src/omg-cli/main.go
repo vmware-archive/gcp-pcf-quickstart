@@ -1,10 +1,7 @@
 package main
 
 import (
-	"context"
 	"fmt"
-
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 
 	"omg-cli/config"
 	"omg-cli/omg"
@@ -17,19 +14,14 @@ import (
 	"log"
 
 	"errors"
-
-	"golang.org/x/oauth2/google"
 )
 
 //TODO(jrjohnson): These constants should be detected, generated, or flags
 const (
-	projectName       = "graphite-demo-jjcf"
 	username          = "foo"
 	password          = "foobar"
 	decryptionPhrase  = "foobar"
 	skipSSLValidation = true
-	imagePrep         = true
-	useTerraform      = true
 	terraformState    = "env.json"
 )
 
@@ -89,9 +81,5 @@ func NewApp(logger *log.Logger) (*omg.SetupService, error) {
 		return nil, err
 	}
 
-	gcpClient, err := google.DefaultClient(context.Background(), cloudresourcemanager.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
-	return omg.NewSetupService(cfg, omSdk, pivnetSdk, gcpClient), nil
+	return omg.NewSetupService(cfg, omSdk, pivnetSdk), nil
 }
