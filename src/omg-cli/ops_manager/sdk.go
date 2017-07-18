@@ -1,20 +1,15 @@
 package ops_manager
 
 import (
-	"crypto/tls"
-	"log"
-	"os"
-	"time"
-
-	"encoding/json"
-
-	"fmt"
-
-	"net/http"
-
 	"bytes"
-
+	"crypto/tls"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"omg-cli/tiles"
 

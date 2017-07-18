@@ -2,6 +2,7 @@ package omg
 
 import (
 	"omg-cli/config"
+	"omg-cli/omg/bosh_director"
 	"omg-cli/omg/ert"
 	"omg-cli/omg/service_broker"
 	"omg-cli/omg/stackdriver_nozzle"
@@ -13,8 +14,6 @@ import (
 	"log"
 	"os"
 	"time"
-
-	"omg-cli/omg/bosh_director"
 )
 
 type SetupService struct {

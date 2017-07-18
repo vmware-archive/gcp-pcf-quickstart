@@ -1,20 +1,16 @@
 package main
 
 import (
-	"fmt"
-
 	"omg-cli/config"
 	"omg-cli/omg"
 	"omg-cli/ops_manager"
-
-	"os"
-
 	"omg-cli/pivnet"
-
-	"log"
 
 	"errors"
 	"flag"
+	"fmt"
+	"log"
+	"os"
 )
 
 //TODO(jrjohnson): These constants should be detected, generated, or flags
