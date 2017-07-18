@@ -48,6 +48,7 @@ func main() {
 		run([]step{
 			setup.PoolTillOnline,
 			func() error { return setup.Unlock(decryptionPhrase) },
+			//TODO(jrjohnson): RollCredentials
 			setup.SetupBosh,
 			setup.ConfigureERT,
 			//setup.ApplyChanges,
