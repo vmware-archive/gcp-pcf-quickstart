@@ -6,6 +6,8 @@ import (
 	"log"
 	"omg-cli/config"
 	"omg-cli/omg/setup"
+	"omg-cli/omg/tiles"
+	"omg-cli/omg/tiles/ert"
 	"omg-cli/ops_manager"
 	"omg-cli/pivnet"
 )
@@ -37,7 +39,11 @@ func New(logger *log.Logger, mode Mode, terraformConfigPath string, pivnetAPITok
 		}
 	}
 
-	return &App{setup.NewService(cfg, omSdk, pivnetSdk, logger)}, nil
+	selectedTiles := []tiles.TileInstaller{
+		ert.Tile{},
+	}
+
+	return &App{setup.NewService(cfg, omSdk, pivnetSdk, logger, selectedTiles)}, nil
 }
 
 type step func() error
@@ -57,9 +63,7 @@ func (a *App) Run(mode Mode) error {
 		return runSteps([]step{
 			a.setupService.PoolTillOnline,
 			a.setupService.SetupAuth,
-			a.setupService.UploadERT,
-			//a.setupService.UploadNozzle,
-			//a.setupService.UploadServiceBroker,
+			a.setupService.UploadTiles,
 		})
 	case ConfigureOpsManager:
 		return runSteps([]step{
@@ -67,10 +71,8 @@ func (a *App) Run(mode Mode) error {
 			a.setupService.Unlock,
 			//TODO(jrjohnson): RollCredentials
 			a.setupService.SetupBosh,
-			a.setupService.ConfigureERT,
+			a.setupService.ConfigureTiles,
 			//a.setupService.ApplyChanges,
-			//TODO(jrjohnson): ConfigureNozzle
-			//TODO(jrjohnson): ConfigureServiceBroker
 		})
 	default:
 		return errors.New("unknown mode")

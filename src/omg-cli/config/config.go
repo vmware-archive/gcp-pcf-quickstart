@@ -41,3 +41,5 @@ type OpsManagerCredentials struct {
 	DecryptionPhrase    string
 	SkipSSLVerification bool
 }
+
+

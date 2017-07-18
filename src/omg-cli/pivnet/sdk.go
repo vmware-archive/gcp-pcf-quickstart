@@ -10,7 +10,7 @@ import (
 
 	"log"
 
-	"omg-cli/tiles"
+	"omg-cli/config"
 
 	"github.com/pivotal-cf/om/progress"
 )
@@ -60,7 +60,7 @@ func (s *Sdk) checkCredentials() error {
 // If an error is returned no os.File will be returned
 //
 // Caller is responsible for deleting the os.File
-func (s *Sdk) DownloadTile(tile tiles.PivnetDefinition) (*os.File, error) {
+func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (*os.File, error) {
 	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.VersionId, tile.FileId), nil)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (s *Sdk) DownloadTile(tile tiles.PivnetDefinition) (*os.File, error) {
 	return out, nil
 }
 
-func (s *Sdk) AcceptEula(tile tiles.PivnetDefinition) error {
+func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", tile.Name, tile.VersionId), nil)
 	if err != nil {
 		return err

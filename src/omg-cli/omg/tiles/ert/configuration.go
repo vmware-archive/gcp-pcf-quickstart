@@ -93,7 +93,7 @@ type Resource struct {
 	InternetConnected bool     `json:"internet_connected"`
 }
 
-func Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	ertNetwork := Network{
 		AvalibilityZone{cfg.Zone1},
 		[]AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
@@ -140,5 +140,5 @@ func Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		return err
 	}
 
-	return om.ConfigureProduct(Tile.Product.Name, string(ertNetworkBytes), string(ertPropertiesBytes), string(ertResorucesBytes))
+	return om.ConfigureProduct(tile.Product.Name, string(ertNetworkBytes), string(ertPropertiesBytes), string(ertResorucesBytes))
 }

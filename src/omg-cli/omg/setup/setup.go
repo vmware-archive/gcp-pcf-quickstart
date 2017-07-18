@@ -3,15 +3,12 @@ package setup
 import (
 	"omg-cli/config"
 	"omg-cli/omg/bosh_director"
-	"omg-cli/omg/ert"
-	"omg-cli/omg/service_broker"
-	"omg-cli/omg/stackdriver_nozzle"
 	"omg-cli/ops_manager"
 	"omg-cli/pivnet"
-	"omg-cli/tiles"
 
 	"errors"
 	"log"
+	"omg-cli/omg/tiles"
 	"os"
 	"time"
 )
@@ -21,10 +18,11 @@ type Service struct {
 	om     *ops_manager.Sdk
 	pivnet *pivnet.Sdk
 	logger *log.Logger
+	tiles  []tiles.TileInstaller
 }
 
-func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger) *Service {
-	return &Service{cfg, omSdk, pivnetSdk, logger}
+func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *Service {
+	return &Service{cfg, omSdk, pivnetSdk, logger, tiles}
 }
 
 func (s *Service) SetupAuth() error {
@@ -71,7 +69,7 @@ func (s *Service) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
-func (s *Service) productInstalled(product tiles.ProductDefinition) (bool, error) {
+func (s *Service) productInstalled(product config.OpsManagerMetadata) (bool, error) {
 	products, err := s.om.AvaliableProducts()
 	if err != nil {
 		return false, err
@@ -85,7 +83,7 @@ func (s *Service) productInstalled(product tiles.ProductDefinition) (bool, error
 	return false, nil
 }
 
-func (s *Service) ensureProductReady(tile tiles.Definition) error {
+func (s *Service) ensureProductReady(tile config.Tile) error {
 	if i, err := s.productInstalled(tile.Product); i == true || err != nil {
 		return err
 	}
@@ -120,22 +118,22 @@ func (s *Service) PoolTillOnline() error {
 	}
 }
 
-// ERT
-func (s *Service) ConfigureERT() error {
-	return ert.Configure(s.cfg, s.om)
+func (s *Service) ConfigureTiles() error {
+	for _, t := range s.tiles {
+		if err := t.Configure(s.cfg, s.om); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (s *Service) UploadERT() error {
-	return s.ensureProductReady(ert.Tile)
-}
+func (s *Service) UploadTiles() error {
+	for _, t := range s.tiles {
+		if err := s.ensureProductReady(t.Definition()); err != nil {
+			return err
+		}
+	}
 
-// Service Broker
-func (s *Service) UploadServiceBroker() error {
-	s.pivnet.AcceptEula(service_broker.Tile.Pivnet)
-	return s.ensureProductReady(service_broker.Tile)
-}
-
-// Stackdriver Nozzle
-func (s *Service) UploadNozzle() error {
-	return s.ensureProductReady(stackdriver_nozzle.Tile)
+	return nil
 }

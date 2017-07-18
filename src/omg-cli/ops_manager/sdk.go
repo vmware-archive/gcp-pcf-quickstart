@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"omg-cli/tiles"
-
 	"omg-cli/config"
 
 	"github.com/gosuri/uilive"
@@ -183,7 +181,7 @@ func (om *Sdk) UploadProduct(path string) error {
 }
 
 // StageProduct moves a given name, version to the list of tiles that will be deployed
-func (om *Sdk) StageProduct(tile tiles.ProductDefinition) error {
+func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
 	diagnosticService := api.NewDiagnosticService(om.client)
 	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
 	stagedProductsService := api.NewStagedProductsService(om.client)
