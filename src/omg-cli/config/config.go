@@ -33,14 +33,11 @@ type Config struct {
 	Zone2       string
 	Zone3       string
 	ProjectName string
-
-	OpsManUsername         string
-	OpsManPassword         string
-	OpsManDecryptionPhrase string
 }
 
-func fillInDefaults(cfg *Config) {
-	cfg.OpsManUsername = "foo"
-	cfg.OpsManPassword = "foobar"
-	cfg.OpsManDecryptionPhrase = "foobar"
+type OpsManagerCredentials struct {
+	Username            string
+	Password            string
+	DecryptionPhrase    string
+	SkipSSLVerification bool
 }

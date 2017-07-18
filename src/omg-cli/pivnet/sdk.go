@@ -49,7 +49,7 @@ func (s *Sdk) checkCredentials() error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("authorizing pivnet credentials, recieved: %i", resp.StatusCode)
+		return fmt.Errorf("authorizing pivnet-api-token, recieved: %s", resp.Status)
 	}
 
 	return nil
@@ -124,7 +124,7 @@ func (s *Sdk) AcceptEula(tile tiles.PivnetDefinition) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %s, recieved: %i", tile.Name, tile.VersionId, resp.StatusCode)
+		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.VersionId, resp.Status)
 	}
 
 	return nil

@@ -39,11 +39,6 @@ type TerraformConfigSchema struct {
 	Zone2       string `json:"azs_1"`
 	Zone3       string `json:"azs_2"`
 	ProjectName string `json:"project"`
-
-	// Not from the environment:
-	OpsManUsername         string
-	OpsManPassword         string
-	OpsManDecryptionPhrase string
 }
 
 func FromTerraform(filename string) (*Config, error) {
@@ -69,8 +64,6 @@ func FromTerraform(filename string) (*Config, error) {
 	}
 
 	cfg := Config(hydratedCfg)
-
-	fillInDefaults(&cfg)
 
 	return &cfg, nil
 }

@@ -1,15 +1,10 @@
 package main
 
 import (
-	"omg-cli/config"
-	"omg-cli/omg"
-	"omg-cli/ops_manager"
-	"omg-cli/pivnet"
-
-	"errors"
 	"flag"
-	"fmt"
 	"log"
+	"omg-cli/config"
+	"omg-cli/omg/app"
 	"os"
 )
 
@@ -19,79 +14,25 @@ const (
 	password          = "foobar"
 	decryptionPhrase  = "foobar"
 	skipSSLValidation = true
-	terraformState    = "env.json"
 )
 
-var bakeImage = flag.Bool("bakeImage", false, "Bake image mode")
-
-type step func() error
+var mode = flag.String("mode", "", "BakeImage or ConfigureOpsManager")
+var pivnetApiToken = flag.String("pivnet-api-token", "", "Needed for BakeImage. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.")
+var terraformState = flag.String("terraform-state-path", "env.json", "Path to terraform output")
 
 func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "[ONG] ", 0)
 
-	setup, err := NewApp(logger, *bakeImage)
+	creds := config.OpsManagerCredentials{username, password, decryptionPhrase, skipSSLValidation}
+	mode := app.Mode(*mode)
+	app, err := app.New(logger, mode, *terraformState, *pivnetApiToken, creds)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	if *bakeImage {
-		run([]step{
-			setup.PoolTillOnline,
-			func() error { return setup.SetupAuth(decryptionPhrase) },
-			setup.UploadERT,
-			//setup.UploadNozzle,
-			//setup.UploadServiceBroker,
-		}, logger)
-	} else {
-		run([]step{
-			setup.PoolTillOnline,
-			func() error { return setup.Unlock(decryptionPhrase) },
-			//TODO(jrjohnson): RollCredentials
-			setup.SetupBosh,
-			setup.ConfigureERT,
-			//setup.ApplyChanges,
-			//TODO(jrjohnson): ConfigureNozzle
-			//TODO(jrjohnson): ConfigureServiceBroker
-		}, logger)
+	if err := app.Run(mode); err != nil {
+		logger.Fatal(err)
 	}
-}
-
-func run(steps []step, logger *log.Logger) {
-	for _, v := range steps {
-		if err := v(); err != nil {
-			logger.Fatal(err)
-		}
-	}
-}
-
-func LoadTerraformConfig() (*config.Config, error) {
-	return config.FromTerraform(terraformState)
-}
-
-func NewApp(logger *log.Logger, usePivnet bool) (*omg.SetupService, error) {
-	cfg, err := LoadTerraformConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), username, password, skipSSLValidation, *logger)
-	if err != nil {
-		return nil, err
-	}
-
-	var pivnetSdk *pivnet.Sdk
-	if usePivnet {
-		pivnetAPIToken := os.Getenv("PIVNET_API_TOKEN")
-		if pivnetAPIToken == "" {
-			return nil, errors.New("expected environment variable PIVNET_API_TOKEN. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile")
-		}
-		pivnetSdk, err = pivnet.NewSdk(pivnetAPIToken, logger)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return omg.NewSetupService(cfg, omSdk, pivnetSdk, logger), nil
 }

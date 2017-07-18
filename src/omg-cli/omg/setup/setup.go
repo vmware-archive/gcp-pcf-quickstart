@@ -1,4 +1,4 @@
-package omg
+package setup
 
 import (
 	"omg-cli/config"
@@ -16,23 +16,23 @@ import (
 	"time"
 )
 
-type SetupService struct {
+type Service struct {
 	cfg    *config.Config
 	om     *ops_manager.Sdk
 	pivnet *pivnet.Sdk
 	logger *log.Logger
 }
 
-func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger) *SetupService {
-	return &SetupService{cfg, omSdk, pivnetSdk, logger}
+func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger) *Service {
+	return &Service{cfg, omSdk, pivnetSdk, logger}
 }
 
-func (s *SetupService) SetupAuth(decryptionPhrase string) error {
-	return s.om.SetupAuth(decryptionPhrase)
+func (s *Service) SetupAuth() error {
+	return s.om.SetupAuth()
 }
 
-func (s *SetupService) Unlock(decryptionPhrase string) error {
-	err := s.om.Unlock(decryptionPhrase)
+func (s *Service) Unlock() error {
+	err := s.om.Unlock()
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (s *SetupService) Unlock(decryptionPhrase string) error {
 	}
 }
 
-func (s *SetupService) SetupBosh() error {
+func (s *Service) SetupBosh() error {
 	gcp := bosh_director.GCP(s.cfg)
 	director := bosh_director.Director()
 	azs := bosh_director.AvalibilityZones(s.cfg)
@@ -67,11 +67,11 @@ func (s *SetupService) SetupBosh() error {
 	return nil
 }
 
-func (s *SetupService) ApplyChanges() error {
+func (s *Service) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
-func (s *SetupService) productInstalled(product tiles.ProductDefinition) (bool, error) {
+func (s *Service) productInstalled(product tiles.ProductDefinition) (bool, error) {
 	products, err := s.om.AvaliableProducts()
 	if err != nil {
 		return false, err
@@ -85,7 +85,7 @@ func (s *SetupService) productInstalled(product tiles.ProductDefinition) (bool, 
 	return false, nil
 }
 
-func (s *SetupService) ensureProductReady(tile tiles.Definition) error {
+func (s *Service) ensureProductReady(tile tiles.Definition) error {
 	if i, err := s.productInstalled(tile.Product); i == true || err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (s *SetupService) ensureProductReady(tile tiles.Definition) error {
 	return s.om.StageProduct(tile.Product)
 }
 
-func (s *SetupService) PoolTillOnline() error {
+func (s *Service) PoolTillOnline() error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(time.Duration(120 * time.Second))
 	for {
@@ -121,21 +121,21 @@ func (s *SetupService) PoolTillOnline() error {
 }
 
 // ERT
-func (s *SetupService) ConfigureERT() error {
+func (s *Service) ConfigureERT() error {
 	return ert.Configure(s.cfg, s.om)
 }
 
-func (s *SetupService) UploadERT() error {
+func (s *Service) UploadERT() error {
 	return s.ensureProductReady(ert.Tile)
 }
 
 // Service Broker
-func (s *SetupService) UploadServiceBroker() error {
+func (s *Service) UploadServiceBroker() error {
 	s.pivnet.AcceptEula(service_broker.Tile.Pivnet)
 	return s.ensureProductReady(service_broker.Tile)
 }
 
 // Stackdriver Nozzle
-func (s *SetupService) UploadNozzle() error {
+func (s *Service) UploadNozzle() error {
 	return s.ensureProductReady(stackdriver_nozzle.Tile)
 }

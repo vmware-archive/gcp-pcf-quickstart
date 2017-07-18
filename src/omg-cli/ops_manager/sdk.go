@@ -13,6 +13,8 @@ import (
 
 	"omg-cli/tiles"
 
+	"omg-cli/config"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -29,16 +31,15 @@ const (
 
 type Sdk struct {
 	target                string
-	username              string
-	password              string
+	creds                 config.OpsManagerCredentials
 	logger                *log.Logger
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
 	httpClient            *http.Client
 }
 
-func NewSdk(target, username, password string, skipSSLValidation bool, logger log.Logger) (*Sdk, error) {
-	client, err := network.NewOAuthClient(target, username, password, "", "", skipSSLValidation, true, time.Duration(requestTimeout)*time.Second)
+func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
+	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -46,28 +47,27 @@ func NewSdk(target, username, password string, skipSSLValidation bool, logger lo
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSLValidation},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: creds.SkipSSLVerification},
 	}
 
 	return &Sdk{target: target,
-		username:              username,
-		password:              password,
+		creds:                 creds,
 		logger:                &logger,
-		unauthenticatedClient: network.NewUnauthenticatedClient(target, skipSSLValidation, time.Duration(requestTimeout)*time.Second),
+		unauthenticatedClient: network.NewUnauthenticatedClient(target, creds.SkipSSLVerification, time.Duration(requestTimeout)*time.Second),
 		client:                client,
 		httpClient:            &http.Client{Transport: tr},
 	}, nil
 }
 
 // SetupAuth configures the initial username, password, and decryptionPhrase
-func (om *Sdk) SetupAuth(decryptionPhrase string) error {
+func (om *Sdk) SetupAuth() error {
 	setupService := api.NewSetupService(om.unauthenticatedClient)
 
 	cmd := commands.NewConfigureAuthentication(setupService, om.logger)
 	return cmd.Execute([]string{
-		"--username", om.username,
-		"--password", om.password,
-		"--decryption-passphrase", decryptionPhrase})
+		"--username", om.creds.Username,
+		"--password", om.creds.Password,
+		"--decryption-passphrase", om.creds.DecryptionPhrase})
 }
 
 type UnlockRequest struct {
@@ -76,9 +76,9 @@ type UnlockRequest struct {
 
 // Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
 // This task runs asynchronusly. Query the status by invoking ReadyForAuth.
-func (om *Sdk) Unlock(decryptionPhrase string) error {
+func (om *Sdk) Unlock() error {
 	om.logger.Println("decrypting Ops Manager")
-	unlockReq := UnlockRequest{decryptionPhrase}
+	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
 	body, err := json.Marshal(&unlockReq)
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v0/unlock", om.target), bytes.NewReader(body))
