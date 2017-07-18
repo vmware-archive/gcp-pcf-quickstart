@@ -16,17 +16,17 @@ const (
 	skipSSLValidation = true
 )
 
-var mode = flag.String("mode", "", "BakeImage or ConfigureOpsManager")
-var pivnetApiToken = flag.String("pivnet-api-token", "", "Needed for BakeImage. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.")
-var terraformState = flag.String("terraform-state-path", "env.json", "Path to terraform output")
-
 func main() {
+	mode := app.Mode(app.ConfigureOpsManager)
+	flag.Var(&mode, "mode", "BakeImage, ConfigureOpsManager")
+	var pivnetApiToken = flag.String("pivnet-api-token", "", "Required for BakeImage. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.")
+	var terraformState = flag.String("terraform-state-path", "env.json", "Path to terraform output")
+
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "[ONG] ", 0)
 
 	creds := config.OpsManagerCredentials{username, password, decryptionPhrase, skipSSLValidation}
-	mode := app.Mode(*mode)
 	app, err := app.New(logger, mode, *terraformState, *pivnetApiToken, creds)
 	if err != nil {
 		logger.Fatal(err)
