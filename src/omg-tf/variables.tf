@@ -23,6 +23,12 @@ variable "opsman_image_url" {
   default     = "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz"
 }
 
+variable "opsman_image_selflink" {
+  type        = "string"
+  description = "location of ops manager image hosted by a google project"
+  default     = ""
+}
+
 variable "opsman_machine_type" {
   type    = "string"
   default = "n1-standard-2"

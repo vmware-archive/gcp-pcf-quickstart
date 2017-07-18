@@ -1,5 +1,10 @@
+variable "ops_manager_image_name" {
+  default = "ops-manager-image"
+}
+
 resource "google_compute_image" "ops-manager-image" {
-  name           = "${var.env_name}-ops-manager-image"
+  count = "${var.opsman_image_selflink != "" ? 0 : 1}"
+  name           = "${var.ops_manager_image_name}"
   create_timeout = 20
 
   raw_disk {
@@ -15,7 +20,7 @@ resource "google_compute_instance" "ops-manager" {
   tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
   disk {
-    image = "${google_compute_image.ops-manager-image.self_link}"
+    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : var.ops_manager_image_name}"
     size  = 50
   }
 

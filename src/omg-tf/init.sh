@@ -11,8 +11,8 @@ if [ -z ${PROJECT_ID+x} ]; then
 fi
 
 # TODO(jrjohnson): Once a baked OpsMan image is ready, default to using it here
-if [ -z ${BASE_IMAGE+x} ]; then
-    echo "BASE_IMAGE required"
+if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
+    echo "BASE_IMAGE_URL or BASE_IMAGE_SELFLINK is required"
     exit 1
 fi
 
@@ -38,7 +38,8 @@ popd
 cat << VARS_FILE > terraform.tfvars
 project = "${PROJECT_ID}"
 dns_suffix = "${DNS_SUFFIX}"
-opsman_image_url = "${BASE_IMAGE}"
+opsman_image_url = "${BASE_IMAGE_URL}"
+opsman_image_selflink = "${BASE_IMAGE_SELFLINK}"
 
 ssl_cert = <<SSL_CERT
 $(cat ssl/server.crt)

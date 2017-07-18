@@ -32,10 +32,10 @@ type Sdk struct {
 	target                string
 	username              string
 	password              string
-	skipSSLValidation     bool
 	logger                *log.Logger
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
+	httpClient            *http.Client
 }
 
 func NewSdk(target, username, password string, skipSSLValidation bool, logger log.Logger) (*Sdk, error) {
@@ -46,13 +46,17 @@ func NewSdk(target, username, password string, skipSSLValidation bool, logger lo
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSLValidation},
+	}
+
 	return &Sdk{target: target,
 		username:              username,
 		password:              password,
-		skipSSLValidation:     skipSSLValidation,
 		logger:                &logger,
 		unauthenticatedClient: network.NewUnauthenticatedClient(target, skipSSLValidation, time.Duration(requestTimeout)*time.Second),
 		client:                client,
+		httpClient:            &http.Client{Transport: tr},
 	}, nil
 }
 
@@ -81,11 +85,7 @@ func (om *Sdk) Unlock(decryptionPhrase string) error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: om.skipSSLValidation},
-	}
-	client := &http.Client{Transport: tr}
-	_, err = client.Do(req)
+	_, err = om.httpClient.Do(req)
 
 	return err
 }
@@ -166,6 +166,20 @@ func (om *Sdk) StageProduct(name, version string) error {
 		"--product-name", name,
 		"--product-version", version,
 	})
+}
+
+func (om *Sdk) Ready() bool {
+	om.logger.Print("checking if Ops Manager is ready... ")
+
+	req, err := http.NewRequest("GET", om.target, nil)
+	if err != nil {
+		return false
+	}
+	resp, err := om.httpClient.Do(req)
+
+	om.logger.Printf("got: %d\n", resp.StatusCode)
+
+	return resp.StatusCode < 500
 }
 
 func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {

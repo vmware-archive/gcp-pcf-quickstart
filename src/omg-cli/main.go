@@ -35,13 +35,14 @@ func main() {
 
 	logger := log.New(os.Stderr, "[ONG] ", 0)
 
-	setup, err := NewApp(logger)
+	setup, err := NewApp(logger, *bakeImage)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	if *bakeImage {
 		run([]step{
+			setup.PoolTillReady,
 			func() error { return setup.SetupAuth(decryptionPhrase) },
 			setup.UploadERT,
 			//setup.UploadNozzle,
@@ -49,10 +50,12 @@ func main() {
 		}, logger)
 	} else {
 		run([]step{
+			setup.PoolTillReady,
 			func() error { return setup.Unlock(decryptionPhrase) },
+			setup.PoolTillReady,
 			setup.SetupBosh,
 			setup.ConfigureERT,
-			setup.ApplyChanges,
+			//setup.ApplyChanges,
 			//TODO(jrjohnson): ConfigureNozzle
 			//TODO(jrjohnson): ConfigureServiceBroker
 		}, logger)
@@ -71,7 +74,7 @@ func LoadTerraformConfig() (*config.Config, error) {
 	return config.FromTerraform(terraformState)
 }
 
-func NewApp(logger *log.Logger) (*omg.SetupService, error) {
+func NewApp(logger *log.Logger, usePivnet bool) (*omg.SetupService, error) {
 	cfg, err := LoadTerraformConfig()
 	if err != nil {
 		return nil, err
@@ -82,14 +85,16 @@ func NewApp(logger *log.Logger) (*omg.SetupService, error) {
 		return nil, err
 	}
 
-	pivnetAPIToken := os.Getenv("PIVNET_API_TOKEN")
-	if pivnetAPIToken == "" {
-		return nil, errors.New("expected environment variable PIVNET_API_TOKEN. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile")
-	}
-
-	pivnetSdk, err := pivnet.NewSdk(pivnetAPIToken, logger)
-	if err != nil {
-		return nil, err
+	var pivnetSdk *pivnet.Sdk
+	if usePivnet {
+		pivnetAPIToken := os.Getenv("PIVNET_API_TOKEN")
+		if pivnetAPIToken == "" {
+			return nil, errors.New("expected environment variable PIVNET_API_TOKEN. Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile")
+		}
+		pivnetSdk, err = pivnet.NewSdk(pivnetAPIToken, logger)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return omg.NewSetupService(cfg, omSdk, pivnetSdk), nil

@@ -12,6 +12,10 @@ import (
 
 	"encoding/json"
 
+	"errors"
+
+	"time"
+
 	"github.com/pivotal-cf/om/commands"
 )
 
@@ -203,6 +207,23 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 	}
 
 	return s.om.StageProduct(tile.product.name, tile.product.version)
+}
+
+func (s *SetupService) PoolTillReady() error {
+	timer := time.After(time.Duration(0 * time.Second))
+	timeout := time.After(time.Duration(120 * time.Second))
+	for {
+		select {
+		case <-timeout:
+			return errors.New("Timeout waiting for Ops Manager to start")
+		case <-timer:
+			if s.om.Ready() {
+				return nil
+			}
+			timer = time.After(time.Duration(2 * time.Second))
+		}
+	}
+	return errors.New("NYI")
 }
 
 func (s *SetupService) UploadERT() error {
