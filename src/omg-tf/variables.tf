@@ -59,12 +59,12 @@ variable "dns_suffix" {
 
 variable "ssl_cert" {
   type        = "string"
-  description = "ssl certificate content"
+  description = "ssl certificate content for *.{env_name}.{dns_suffix}"
 }
 
 variable "ssl_cert_private_key" {
   type        = "string"
-  description = "ssl certificate private key content"
+  description = "ssl certificate private key content *.{env_name}.{dns_suffix}"
 }
 
 variable "external_database" {

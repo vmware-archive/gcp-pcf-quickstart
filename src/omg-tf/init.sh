@@ -31,7 +31,7 @@ pushd ssl
   openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=Washington/L=Seattle/CN=*.${DNS_SUFFIX}"
+  -subj "/C=US/ST=Washington/L=Seattle/CN=${DNS_SUFFIX}/subjectAltName=*.${DNS_SUFFIX}"
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 popd
 
