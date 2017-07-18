@@ -42,7 +42,7 @@ func main() {
 
 	if *bakeImage {
 		run([]step{
-			setup.PoolTillReady,
+			setup.PoolTillOnline,
 			func() error { return setup.SetupAuth(decryptionPhrase) },
 			setup.UploadERT,
 			//setup.UploadNozzle,
@@ -50,9 +50,8 @@ func main() {
 		}, logger)
 	} else {
 		run([]step{
-			setup.PoolTillReady,
+			setup.PoolTillOnline,
 			func() error { return setup.Unlock(decryptionPhrase) },
-			setup.PoolTillReady,
 			setup.SetupBosh,
 			setup.ConfigureERT,
 			//setup.ApplyChanges,
@@ -97,5 +96,5 @@ func NewApp(logger *log.Logger, usePivnet bool) (*omg.SetupService, error) {
 		}
 	}
 
-	return omg.NewSetupService(cfg, omSdk, pivnetSdk), nil
+	return omg.NewSetupService(cfg, omSdk, pivnetSdk, logger), nil
 }

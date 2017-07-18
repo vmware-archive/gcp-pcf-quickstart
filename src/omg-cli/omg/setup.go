@@ -16,6 +16,8 @@ import (
 
 	"time"
 
+	"log"
+
 	"github.com/pivotal-cf/om/commands"
 )
 
@@ -83,10 +85,11 @@ type SetupService struct {
 	cfg    *config.Config
 	om     *ops_manager.Sdk
 	pivnet *pivnet.Sdk
+	logger *log.Logger
 }
 
-func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk) *SetupService {
-	return &SetupService{cfg, omSdk, pivnetSdk}
+func NewSetupService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger) *SetupService {
+	return &SetupService{cfg, omSdk, pivnetSdk, logger}
 }
 
 func (s *SetupService) SetupAuth(decryptionPhrase string) error {
@@ -94,7 +97,25 @@ func (s *SetupService) SetupAuth(decryptionPhrase string) error {
 }
 
 func (s *SetupService) Unlock(decryptionPhrase string) error {
-	return s.om.Unlock(decryptionPhrase)
+	err := s.om.Unlock(decryptionPhrase)
+	if err != nil {
+		return err
+	}
+
+	timer := time.After(time.Duration(0 * time.Second))
+	timeout := time.After(time.Duration(120 * time.Second))
+	for {
+		select {
+		case <-timeout:
+			return errors.New("Timeout waiting for Ops Manager to unlock")
+		case <-timer:
+			if s.om.ReadyForAuth() {
+				return nil
+			}
+			s.logger.Print("waiting for Ops Manager to unlock")
+			timer = time.After(time.Duration(5 * time.Second))
+		}
+	}
 }
 
 func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.NetworkConfiguration {
@@ -209,7 +230,7 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 	return s.om.StageProduct(tile.product.name, tile.product.version)
 }
 
-func (s *SetupService) PoolTillReady() error {
+func (s *SetupService) PoolTillOnline() error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(time.Duration(120 * time.Second))
 	for {
@@ -217,13 +238,13 @@ func (s *SetupService) PoolTillReady() error {
 		case <-timeout:
 			return errors.New("Timeout waiting for Ops Manager to start")
 		case <-timer:
-			if s.om.Ready() {
+			if s.om.Online() {
 				return nil
 			}
-			timer = time.After(time.Duration(2 * time.Second))
+			s.logger.Print("waiting for Ops Manager to start")
+			timer = time.After(time.Duration(5 * time.Second))
 		}
 	}
-	return errors.New("NYI")
 }
 
 func (s *SetupService) UploadERT() error {

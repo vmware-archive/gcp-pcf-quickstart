@@ -14,6 +14,8 @@ import (
 
 	"bytes"
 
+	"strings"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -60,6 +62,7 @@ func NewSdk(target, username, password string, skipSSLValidation bool, logger lo
 	}, nil
 }
 
+// SetupAuth configures the initial username, password, and decryptionPhrase
 func (om *Sdk) SetupAuth(decryptionPhrase string) error {
 	setupService := api.NewSetupService(om.unauthenticatedClient)
 
@@ -74,6 +77,8 @@ type UnlockRequest struct {
 	Passphrase string `json:"passphrase"`
 }
 
+// Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
+// This task runs asynchronusly. Query the status by invoking ReadyForAuth.
 func (om *Sdk) Unlock(decryptionPhrase string) error {
 	om.logger.Println("decrypting Ops Manager")
 	unlockReq := UnlockRequest{decryptionPhrase}
@@ -85,11 +90,32 @@ func (om *Sdk) Unlock(decryptionPhrase string) error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	_, err = om.httpClient.Do(req)
+	resp, err := om.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
+// ReadyForAuth checks if the Ops Manager authentication system is ready
+func (om *Sdk) ReadyForAuth() bool {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/login/ensure_availability", om.target), nil)
+	if err != nil {
+		return false
+	}
+	resp, err := om.httpClient.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	// When OpsMan is online/decrypted it redirects its auth system. UAA is expected for OMG.
+	return resp.StatusCode == 200 && strings.Contains(resp.Request.URL.Path, "/uaa/login")
+}
+
+// SetupBosh applies the provided configuration to the BOSH director tile
 func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment, resources commands.ResourceConfiguration) error {
 	boshService := api.NewBoshFormService(om.client)
 	diagnosticService := api.NewDiagnosticService(om.client)
@@ -134,6 +160,7 @@ func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.D
 		"--resource-configuration", string(resourceBytes)})
 }
 
+// ApplyChanges deploys pending changes to Ops Manager
 func (om *Sdk) ApplyChanges() error {
 	installationsService := api.NewInstallationsService(om.client)
 	logWriter := commands.NewLogWriter(os.Stdout)
@@ -142,6 +169,7 @@ func (om *Sdk) ApplyChanges() error {
 	return cmd.Execute(nil)
 }
 
+// UploadProduct pushes a given file located locally at path to the target
 func (om *Sdk) UploadProduct(path string) error {
 	liveWriter := uilive.New()
 	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), liveWriter)
@@ -157,6 +185,7 @@ func (om *Sdk) UploadProduct(path string) error {
 		"--product", path})
 }
 
+// StageProduct moves a given name, version to the list of tiles that will be deployed
 func (om *Sdk) StageProduct(name, version string) error {
 	diagnosticService := api.NewDiagnosticService(om.client)
 	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
@@ -168,16 +197,17 @@ func (om *Sdk) StageProduct(name, version string) error {
 	})
 }
 
-func (om *Sdk) Ready() bool {
-	om.logger.Print("checking if Ops Manager is ready... ")
-
+// Online checks if Ops Manager is running on the target.
+func (om *Sdk) Online() bool {
 	req, err := http.NewRequest("GET", om.target, nil)
 	if err != nil {
 		return false
 	}
 	resp, err := om.httpClient.Do(req)
-
-	om.logger.Printf("got: %d\n", resp.StatusCode)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
 
 	return resp.StatusCode < 500
 }
