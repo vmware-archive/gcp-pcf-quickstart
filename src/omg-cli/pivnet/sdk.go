@@ -10,6 +10,8 @@ import (
 
 	"log"
 
+	"omg-cli/tiles"
+
 	"github.com/pivotal-cf/om/progress"
 )
 
@@ -58,8 +60,8 @@ func (s *Sdk) checkCredentials() error {
 // If an error is returned no os.File will be returned
 //
 // Caller is responsible for deleting the os.File
-func (s *Sdk) DownloadTile(productSlug, releaseId, fileId, fileSha256 string) (*os.File, error) {
-	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", productSlug, releaseId, fileId), nil)
+func (s *Sdk) DownloadTile(tile tiles.PivnetDefinition) (*os.File, error) {
+	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.VersionId, tile.FileId), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +91,7 @@ func (s *Sdk) DownloadTile(productSlug, releaseId, fileId, fileSha256 string) (*
 	//
 	// resp.body ==> BarReader (bar) ==> TeeReader ==> hasher (sha256)
 	//                                             ==> out (temp file)
-	s.logger.Printf("downloading tile: %s", productSlug)
+	s.logger.Printf("downloading tile: %s", tile.Name)
 	hasher := sha256.New()
 	bar := progress.NewBar()
 	bar.SetTotal(resp.ContentLength)
@@ -102,15 +104,15 @@ func (s *Sdk) DownloadTile(productSlug, releaseId, fileId, fileSha256 string) (*
 	}
 
 	downloadedSha := fmt.Sprintf("%x", hasher.Sum(nil))
-	if downloadedSha != fileSha256 {
-		return nil, fmt.Errorf("sha256 of downloaded product does not match expected, got: %s, expected: %s", downloadedSha, fileSha256)
+	if downloadedSha != tile.Sha256 {
+		return nil, fmt.Errorf("sha256 of downloaded product does not match expected, got: %s, expected: %s", downloadedSha, tile.Sha256)
 	}
 
 	return out, nil
 }
 
-func (s *Sdk) AcceptEula(productSlug, releaseId string) error {
-	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", productSlug, releaseId), nil)
+func (s *Sdk) AcceptEula(tile tiles.PivnetDefinition) error {
+	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", tile.Name, tile.VersionId), nil)
 	if err != nil {
 		return err
 	}
@@ -122,7 +124,7 @@ func (s *Sdk) AcceptEula(productSlug, releaseId string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %s, recieved: %i", productSlug, releaseId, resp.StatusCode)
+		return fmt.Errorf("accepting eula for %s, %s, recieved: %i", tile.Name, tile.VersionId, resp.StatusCode)
 	}
 
 	return nil

@@ -2,84 +2,20 @@ package omg
 
 import (
 	"omg-cli/config"
+	"omg-cli/omg/ert"
+	"omg-cli/omg/service_broker"
+	"omg-cli/omg/stackdriver_nozzle"
 	"omg-cli/ops_manager"
 	"omg-cli/pivnet"
-	"os"
-
-	"fmt"
-
-	"net"
-
-	"encoding/json"
+	"omg-cli/tiles"
 
 	"errors"
-
+	"log"
+	"os"
 	"time"
 
-	"log"
-
-	"github.com/pivotal-cf/om/commands"
+	"omg-cli/omg/bosh_director"
 )
-
-const (
-	metadataService = "169.254.169.254"
-)
-
-type pivnetDefinition struct {
-	name      string
-	versionId string
-	fileId    string
-	sha256    string
-}
-
-type productDefinition struct {
-	name    string
-	version string
-}
-
-type tileDefinition struct {
-	pivnet  pivnetDefinition
-	product productDefinition
-}
-
-var ertTile = tileDefinition{
-	pivnetDefinition{
-		"elastic-runtime",
-		"5993",
-		"24044",
-		"a1d248287fff3328459dedb10921394949f818e7b89f017803ac7d23a6c27bf2",
-	},
-	productDefinition{
-		"cf",
-		"1.11.2",
-	},
-}
-
-var nozzleTile = tileDefinition{
-	pivnetDefinition{
-		"gcp-stackdriver-nozzle",
-		"5378",
-		"20350",
-		"b3156360159dbf20b5ac04b5ebd28c437741bc6d62bcb513587e72ac4e94fc18",
-	},
-	productDefinition{
-		"stackdriver-nozzle",
-		"1.0.3",
-	},
-}
-
-var serviceBrokerTile = tileDefinition{
-	pivnetDefinition{
-		"gcp-service-broker",
-		"5563",
-		"21222",
-		"81dd57e6a98b62cf27336b84ffac3051feafe23fc28f3e14d2b61dc8982043c1",
-	},
-	productDefinition{
-		"gcp-service-broker",
-		"3.4.1",
-	},
-}
 
 type SetupService struct {
 	cfg    *config.Config
@@ -118,74 +54,12 @@ func (s *SetupService) Unlock(decryptionPhrase string) error {
 	}
 }
 
-func (s *SetupService) buildNetwork(name, cidrRange, gateway string) commands.NetworkConfiguration {
-	// Reserve .1-.20
-	lowerIp, _, err := net.ParseCIDR(cidrRange)
-	lowerIp = lowerIp.To4()
-	if err != nil {
-		panic(err)
-	}
-	upperIp := make(net.IP, len(lowerIp))
-	copy(upperIp, lowerIp)
-	upperIp[3] = 20
-
-	return commands.NetworkConfiguration{
-		Name: name,
-		Subnets: []commands.Subnet{
-			{
-				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", s.cfg.NetworkName, name, s.cfg.Region),
-				CIDR:              cidrRange,
-				Gateway:           gateway,
-				ReservedIPRanges:  fmt.Sprintf("%s-%s", lowerIp.String(), upperIp.String()),
-				AvailabilityZones: []string{s.cfg.Zone1, s.cfg.Zone2, s.cfg.Zone3},
-				DNS:               metadataService,
-			},
-		},
-	}
-}
-
 func (s *SetupService) SetupBosh() error {
-	gcp := commands.GCPIaaSConfiguration{
-		Project:              s.cfg.ProjectName,
-		DefaultDeploymentTag: s.cfg.DeploymentTargetTag,
-		AuthJSON:             "",
-	}
-
-	director := commands.DirectorConfiguration{
-		NTPServers: metadataService, // GCP metadata service
-	}
-
-	azs := commands.AvailabilityZonesConfiguration{
-		AvailabilityZones: []commands.AvailabilityZone{
-			{Name: s.cfg.Zone1},
-			{Name: s.cfg.Zone2},
-			{Name: s.cfg.Zone3},
-		},
-	}
-
-	networks := commands.NetworksConfiguration{
-		ICMP: false,
-		Networks: []commands.NetworkConfiguration{
-			s.buildNetwork(s.cfg.MgmtSubnetName, s.cfg.MgmtSubnetCIDR, s.cfg.MgmtSubnetGateway),
-			s.buildNetwork(s.cfg.ServicesSubnetName, s.cfg.ServicesSubnetCIDR, s.cfg.ServicesSubnetGateway),
-			s.buildNetwork(s.cfg.ErtSubnetName, s.cfg.ErtSubnetCIDR, s.cfg.ErtSubnetGateway),
-		},
-	}
-
-	networkAssignment := commands.NetworkAssignment{
-		UserProvidedNetworkName: s.cfg.MgmtSubnetName,
-		UserProvidedAZName:      s.cfg.Zone1,
-	}
-
-	f := false
-	resources := commands.ResourceConfiguration{
-		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
-			InternetConnected: &f,
-		},
-		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
-			InternetConnected: &f,
-		},
-	}
+	gcp := bosh_director.GCP(s.cfg)
+	director := bosh_director.Director()
+	azs := bosh_director.AvalibilityZones(s.cfg)
+	networks, networkAssignment := bosh_director.Network(s.cfg)
+	resources := bosh_director.Resources()
 
 	if err := s.om.SetupBosh(gcp, director, azs, networks, networkAssignment, resources); err != nil {
 		return err
@@ -198,26 +72,26 @@ func (s *SetupService) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
-func (s *SetupService) productInstalled(name, version string) (bool, error) {
+func (s *SetupService) productInstalled(product tiles.ProductDefinition) (bool, error) {
 	products, err := s.om.AvaliableProducts()
 	if err != nil {
 		return false, err
 	}
 
 	for _, p := range products {
-		if p.Name == name && p.Version == version {
+		if p.Name == product.Name && p.Version == product.Version {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func (s *SetupService) ensureProductReady(tile tileDefinition) error {
-	if i, err := s.productInstalled(tile.product.name, tile.product.version); i == true || err != nil {
+func (s *SetupService) ensureProductReady(tile tiles.Definition) error {
+	if i, err := s.productInstalled(tile.Product); i == true || err != nil {
 		return err
 	}
 
-	file, err := s.pivnet.DownloadTile(tile.pivnet.name, tile.pivnet.versionId, tile.pivnet.fileId, tile.pivnet.sha256)
+	file, err := s.pivnet.DownloadTile(tile.Pivnet)
 	if err != nil {
 		return err
 	}
@@ -227,7 +101,7 @@ func (s *SetupService) ensureProductReady(tile tileDefinition) error {
 		return err
 	}
 
-	return s.om.StageProduct(tile.product.name, tile.product.version)
+	return s.om.StageProduct(tile.Product)
 }
 
 func (s *SetupService) PoolTillOnline() error {
@@ -247,152 +121,22 @@ func (s *SetupService) PoolTillOnline() error {
 	}
 }
 
-func (s *SetupService) UploadERT() error {
-	return s.ensureProductReady(ertTile)
-}
-
-func (s *SetupService) UploadNozzle() error {
-	return s.ensureProductReady(nozzleTile)
-}
-
-func (s *SetupService) UploadServiceBroker() error {
-	s.pivnet.AcceptEula(serviceBrokerTile.pivnet.name, serviceBrokerTile.pivnet.versionId)
-	return s.ensureProductReady(serviceBrokerTile)
-}
-
-// TODO(jrjohnson): Move to it's own ert (sub?)package
-type ErtAvalibilityZone struct {
-	Name string `json:"name"`
-}
-
-type ErtNetworkName struct {
-	Name string `json:"name"`
-}
-
-type ErtNetwork struct {
-	SingletonAvalibilityZone ErtAvalibilityZone   `json:"singleton_availability_zone"`
-	OtherAvailabilityZones   []ErtAvalibilityZone `json:"other_availability_zones"`
-	Network                  ErtNetworkName       `json:"network"`
-}
-
-type ErtProperties struct {
-	// Domains
-	AppsDomain ErtValue `json:".cloud_controller.apps_domain"`
-	SysDomain  ErtValue `json:".cloud_controller.system_domain"`
-	// Networking
-	NetworkingPointOfEntry    ErtValue `json:".properties.networking_point_of_entry"`
-	TcpRouting                ErtValue `json:".properties.tcp_routing"`
-	TcpRoutingReservablePorts ErtValue `json:".properties.tcp_routing.enable.reservable_ports"`
-	// Application Security Groups
-	SecurityAcknowledgement ErtValue `json:".properties.security_acknowledgement"`
-	// UAA
-	ServiceProviderCredentials ErtRsaCertCredentaial `json:".uaa.service_provider_key_credentials"`
-	// MySQL
-	MySqlMonitorRecipientEmail ErtValue `json:".mysql_monitor.recipient_email"`
-}
-
-type ErtValue struct {
-	Value string `json:"value"`
-}
-
-type ErtCert struct {
-	Cert       string `json:"cert_pem"`
-	PrivateKey string `json:"private_key_pem"`
-}
-
-type ErtRsaCertCredentaial struct {
-	Value ErtCert `json:"value"`
-}
-
-type ErtResources struct {
-	TcpRouter                    ErtResource `json:"tcp_router"`
-	Router                       ErtResource `json:"router"`
-	DiegoBrain                   ErtResource `json:"diego_brain"`
-	ConsulServer                 ErtResource `json:"consul_server"`
-	Nats                         ErtResource `json:"nats"`
-	EtcdTlsServer                ErtResource `json:"etcd_tls_server"`
-	NfsServer                    ErtResource `json:"nfs_server"`
-	MysqlProxy                   ErtResource `json:"mysql_proxy"`
-	Mysql                        ErtResource `json:"mysql"`
-	BackupPrepare                ErtResource `json:"backup-prepare"`
-	Ccdb                         ErtResource `json:"ccdb"`
-	DiegoDatabase                ErtResource `json:"diego_database"`
-	Uaadb                        ErtResource `json:"uaadb"`
-	Uaa                          ErtResource `json:"uaa"`
-	CloudController              ErtResource `json:"cloud_controller"`
-	HaProxy                      ErtResource `json:"ha_proxy"`
-	MysqlMonitor                 ErtResource `json:"mysql_monitor"`
-	ClockGlobal                  ErtResource `json:"clock_global"`
-	CloudControllerWorker        ErtResource `json:"cloud_controller_worker"`
-	DiegoCell                    ErtResource `json:"diego_cell"`
-	LoggregatorTrafficcontroller ErtResource `json:"loggregator_trafficcontroller"`
-	SyslogAdapter                ErtResource `json:"syslog_adapter"`
-	SyslogScheduler              ErtResource `json:"syslog_scheduler"`
-	Doppler                      ErtResource `json:"doppler"`
-	SmokeTests                   ErtResource `json:"smoke-tests"`
-	PushAppsManager              ErtResource `json:"push-apps-manager"`
-	Notifications                ErtResource `json:"notifications"`
-	NotificationsUi              ErtResource `json:"notifications-ui"`
-	PushPivotalAccount           ErtResource `json:"push-pivotal-account"`
-	Autoscaling                  ErtResource `json:"autoscaling"`
-	AutoscalingRegisterBroker    ErtResource `json:"autoscaling-register-broker"`
-	Nfsbrokerpush                ErtResource `json:"nfsbrokerpush"`
-	Bootstrap                    ErtResource `json:"bootstrap"`
-	MysqlRejoinUnsafe            ErtResource `json:"mysql-rejoin-unsafe"`
-}
-
-type ErtResource struct {
-	RouterNames       []string `json:"elb_names,omitempty"`
-	Instances         int      `json:"instances,omitempty"`
-	InternetConnected bool     `json:"internet_connected"`
-}
-
+// ERT
 func (s *SetupService) ConfigureERT() error {
-	ertNetwork := ErtNetwork{
-		ErtAvalibilityZone{s.cfg.Zone1},
-		[]ErtAvalibilityZone{{s.cfg.Zone1}, {s.cfg.Zone2}, {s.cfg.Zone3}},
-		ErtNetworkName{s.cfg.ErtSubnetName},
-	}
+	return ert.Configure(s.cfg, s.om)
+}
 
-	ertNetworkBytes, err := json.Marshal(&ertNetwork)
-	if err != nil {
-		return err
-	}
+func (s *SetupService) UploadERT() error {
+	return s.ensureProductReady(ert.Tile)
+}
 
-	ertProperties := ErtProperties{
-		AppsDomain:                 ErtValue{fmt.Sprintf("apps.%s", s.cfg.RootDomain)},
-		SysDomain:                  ErtValue{fmt.Sprintf("sys.%s", s.cfg.RootDomain)},
-		NetworkingPointOfEntry:     ErtValue{"external_non_ssl"},
-		TcpRouting:                 ErtValue{"enable"},
-		TcpRoutingReservablePorts:  ErtValue{s.cfg.TcpPortRange},
-		SecurityAcknowledgement:    ErtValue{"X"},
-		ServiceProviderCredentials: ErtRsaCertCredentaial{ErtCert{s.cfg.SslCertificate, s.cfg.SslPrivateKey}},
-		MySqlMonitorRecipientEmail: ErtValue{"admin@example.org"},
-	}
+// Service Broker
+func (s *SetupService) UploadServiceBroker() error {
+	s.pivnet.AcceptEula(service_broker.Tile.Pivnet)
+	return s.ensureProductReady(service_broker.Tile)
+}
 
-	ertPropertiesBytes, err := json.Marshal(&ertProperties)
-	if err != nil {
-		return err
-	}
-
-	ertResoruces := ErtResources{
-		TcpRouter: ErtResource{
-			RouterNames:       []string{fmt.Sprintf("tcp:%s", s.cfg.TcpTargetPoolName)},
-			InternetConnected: false,
-		},
-		Router: ErtResource{
-			RouterNames:       []string{fmt.Sprintf("http:%s", s.cfg.HttpBackendServiceName)},
-			InternetConnected: false,
-		},
-		DiegoBrain: ErtResource{
-			RouterNames:       []string{fmt.Sprintf("tcp:%s", s.cfg.SshTargetPoolName)},
-			InternetConnected: false,
-		},
-	}
-	ertResorucesBytes, err := json.Marshal(&ertResoruces)
-	if err != nil {
-		return err
-	}
-
-	return s.om.ConfigureProduct(ertTile.product.name, string(ertNetworkBytes), string(ertPropertiesBytes), string(ertResorucesBytes))
+// Stackdriver Nozzle
+func (s *SetupService) UploadNozzle() error {
+	return s.ensureProductReady(stackdriver_nozzle.Tile)
 }

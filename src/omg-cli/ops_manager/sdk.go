@@ -16,6 +16,8 @@ import (
 
 	"strings"
 
+	"omg-cli/tiles"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -186,14 +188,14 @@ func (om *Sdk) UploadProduct(path string) error {
 }
 
 // StageProduct moves a given name, version to the list of tiles that will be deployed
-func (om *Sdk) StageProduct(name, version string) error {
+func (om *Sdk) StageProduct(tile tiles.ProductDefinition) error {
 	diagnosticService := api.NewDiagnosticService(om.client)
 	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
 	stagedProductsService := api.NewStagedProductsService(om.client)
 	cmd := commands.NewStageProduct(stagedProductsService, availableProductsService, diagnosticService, om.logger)
 	return cmd.Execute([]string{
-		"--product-name", name,
-		"--product-version", version,
+		"--product-name", tile.Name,
+		"--product-version", tile.Version,
 	})
 }
 
@@ -212,6 +214,7 @@ func (om *Sdk) Online() bool {
 	return resp.StatusCode < 500
 }
 
+// AvaliableProducts lists products that are uploaded to Ops Manager.
 func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
 	service := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
 	out, err := service.List()
@@ -222,6 +225,7 @@ func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
 	return out.ProductsList, nil
 }
 
+// ConfigureProduct sets up the settings for a given tile by name
 func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
 	stagedProductsService := api.NewStagedProductsService(om.client)
 	jobsService := api.NewJobsService(om.client)
