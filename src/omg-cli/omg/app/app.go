@@ -13,7 +13,7 @@ import (
 )
 
 type App struct {
-	setupService *setup.Service
+	setupOpsMan *setup.OpsManager
 }
 
 func New(logger *log.Logger, mode Mode, terraformConfigPath string, pivnetAPIToken string, creds config.OpsManagerCredentials) (*App, error) {
@@ -61,18 +61,18 @@ func (a *App) Run(mode Mode) error {
 	switch mode {
 	case BakeImage:
 		return runSteps([]step{
-			a.setupService.PoolTillOnline,
-			a.setupService.SetupAuth,
-			a.setupService.UploadTiles,
+			a.setupOpsMan.PoolTillOnline,
+			a.setupOpsMan.SetupAuth,
+			a.setupOpsMan.UploadTiles,
 		})
 	case ConfigureOpsManager:
 		return runSteps([]step{
-			a.setupService.PoolTillOnline,
-			a.setupService.Unlock,
+			a.setupOpsMan.PoolTillOnline,
+			a.setupOpsMan.Unlock,
 			//TODO(jrjohnson): RollCredentials
-			a.setupService.SetupBosh,
-			a.setupService.ConfigureTiles,
-			//a.setupService.ApplyChanges,
+			a.setupOpsMan.SetupBosh,
+			a.setupOpsMan.ConfigureTiles,
+			//a.setupOpsMan.ApplyChanges,
 		})
 	default:
 		return errors.New("unknown mode")

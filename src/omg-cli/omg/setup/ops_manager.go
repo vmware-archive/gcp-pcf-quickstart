@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type Service struct {
+type OpsManager struct {
 	cfg    *config.Config
 	om     *ops_manager.Sdk
 	pivnet *pivnet.Sdk
@@ -21,15 +21,15 @@ type Service struct {
 	tiles  []tiles.TileInstaller
 }
 
-func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *Service {
-	return &Service{cfg, omSdk, pivnetSdk, logger, tiles}
+func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *OpsManager {
+	return &OpsManager{cfg, omSdk, pivnetSdk, logger, tiles}
 }
 
-func (s *Service) SetupAuth() error {
+func (s *OpsManager) SetupAuth() error {
 	return s.om.SetupAuth()
 }
 
-func (s *Service) Unlock() error {
+func (s *OpsManager) Unlock() error {
 	err := s.om.Unlock()
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (s *Service) Unlock() error {
 	}
 }
 
-func (s *Service) SetupBosh() error {
+func (s *OpsManager) SetupBosh() error {
 	gcp := bosh_director.GCP(s.cfg)
 	director := bosh_director.Director()
 	azs := bosh_director.AvalibilityZones(s.cfg)
@@ -65,11 +65,11 @@ func (s *Service) SetupBosh() error {
 	return nil
 }
 
-func (s *Service) ApplyChanges() error {
+func (s *OpsManager) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
-func (s *Service) productInstalled(product config.OpsManagerMetadata) (bool, error) {
+func (s *OpsManager) productInstalled(product config.OpsManagerMetadata) (bool, error) {
 	products, err := s.om.AvaliableProducts()
 	if err != nil {
 		return false, err
@@ -83,7 +83,7 @@ func (s *Service) productInstalled(product config.OpsManagerMetadata) (bool, err
 	return false, nil
 }
 
-func (s *Service) ensureProductReady(tile config.Tile) error {
+func (s *OpsManager) ensureProductReady(tile config.Tile) error {
 	if i, err := s.productInstalled(tile.Product); i == true || err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (s *Service) ensureProductReady(tile config.Tile) error {
 	return s.om.StageProduct(tile.Product)
 }
 
-func (s *Service) PoolTillOnline() error {
+func (s *OpsManager) PoolTillOnline() error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(time.Duration(120 * time.Second))
 	for {
@@ -118,7 +118,7 @@ func (s *Service) PoolTillOnline() error {
 	}
 }
 
-func (s *Service) ConfigureTiles() error {
+func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
 		if err := t.Configure(s.cfg, s.om); err != nil {
 			return err
@@ -128,7 +128,7 @@ func (s *Service) ConfigureTiles() error {
 	return nil
 }
 
-func (s *Service) UploadTiles() error {
+func (s *OpsManager) UploadTiles() error {
 	for _, t := range s.tiles {
 		if err := s.ensureProductReady(t.Definition()); err != nil {
 			return err
