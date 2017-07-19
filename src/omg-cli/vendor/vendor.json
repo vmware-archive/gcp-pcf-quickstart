@@ -81,6 +81,12 @@
 			"revisionTime": "2017-03-23T04:15:06Z"
 		},
 		{
+			"checksumSHA1": "4DZutGMPOZRCxvp7jJ9K67GvH3c=",
+			"path": "github.com/kvz/logstreamer",
+			"revision": "a635b98146f0f465f3413a0b8ec481f3698d3fc2",
+			"revisionTime": "2015-05-07T11:54:22Z"
+		},
+		{
 			"checksumSHA1": "U6lX43KDDlNOn+Z0Yyww+ZzHfFo=",
 			"path": "github.com/mattn/go-isatty",
 			"revision": "fc9e8d8ef48496124e79ae0df75490096eccf6fe",
