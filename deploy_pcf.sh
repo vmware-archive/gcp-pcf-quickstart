@@ -52,5 +52,5 @@ pushd src/omg-cli
     wait_for_host $jumpbox_ip
     scp -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no omg-cli ${jumpbox_ip}:.
     scp -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no env.json ${jumpbox_ip}:.
-    ssh -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no ${jumpbox_ip} "./omg-cli --mode ConfigureOpsManager"
+    ssh -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no ${jumpbox_ip} "./omg-cli ConfigureOpsManager"
 popd
