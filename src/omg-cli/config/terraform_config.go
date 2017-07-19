@@ -8,6 +8,7 @@ import (
 
 type TerraformConfigSchema struct {
 	OpsManagerIp           string `json:"ops_manager_private_ip"`
+	JumpboxIp              string `json:"jumpbox_public_ip"`
 	NetworkName            string `json:"network_name"`
 	DeploymentTargetTag    string `json:"vm_tag"`
 	MgmtSubnetName         string `json:"management_subnet_name"`

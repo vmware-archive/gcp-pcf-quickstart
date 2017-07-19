@@ -158,7 +158,7 @@ output "dns_managed_zone" {
   value = "${google_dns_managed_zone.env_dns_zone.name}"
 }
 
-output "jumpbox_ip" {
+output "jumpbox_public_ip" {
   value = "${google_compute_instance.jumpbox.network_interface.0.access_config.0.assigned_nat_ip}"
 }
 

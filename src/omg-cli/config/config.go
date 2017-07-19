@@ -2,6 +2,7 @@ package config
 
 type Config struct {
 	OpsManagerIp           string
+	JumpboxIp              string
 	NetworkName            string
 	DeploymentTargetTag    string
 	MgmtSubnetName         string
