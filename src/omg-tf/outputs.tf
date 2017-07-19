@@ -110,10 +110,6 @@ output "isoseg_lb_backend_name" {
   value = "${module.isolation_segment.load_balancer_name}"
 }
 
-output "ws_router_pool" {
-  value = "${google_compute_target_pool.cf-ws.name}"
-}
-
 output "ssh_router_pool" {
   value = "${google_compute_target_pool.cf-ssh.name}"
 }
@@ -156,10 +152,6 @@ output "opsman_sql_username" {
 
 output "opsman_sql_password" {
   value = "${module.external_database.opsman_sql_password}"
-}
-
-output "cf_ws_address" {
-  value = "${google_compute_address.cf-ws.address}"
 }
 
 output "dns_managed_zone" {

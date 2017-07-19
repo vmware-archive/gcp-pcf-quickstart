@@ -12,7 +12,7 @@ resource "google_compute_firewall" "cf-public" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags = ["${var.env_name}-httpslb", "${var.env_name}-cf-ws", "${var.env_name}-isoseglb"]
+  target_tags = ["${var.env_name}-httpslb", "${var.env_name}-isoseglb"]
 }
 
 resource "google_compute_global_address" "cf" {
@@ -99,7 +99,7 @@ resource "google_compute_firewall" "cf-health_check" {
   }
 
   source_ranges = ["130.211.0.0/22"]
-  target_tags   = ["${var.env_name}-httpslb", "${var.env_name}-cf-ws", "${var.env_name}-isoseglb"]
+  target_tags   = ["${var.env_name}-httpslb", "${var.env_name}-isoseglb"]
 }
 
 resource "google_compute_global_forwarding_rule" "cf-http" {
@@ -114,40 +114,6 @@ resource "google_compute_global_forwarding_rule" "cf-https" {
   ip_address = "${google_compute_global_address.cf.address}"
   target     = "${google_compute_target_https_proxy.https_lb_proxy.self_link}"
   port_range = "443"
-}
-
-/***********
- * TCP LB  *
- ***********/
-
-resource "google_compute_address" "cf-ws" {
-  name = "${var.env_name}-cf-ws"
-}
-
-resource "google_compute_target_pool" "cf-ws" {
-  name = "${var.env_name}-cf-ws"
-
-  health_checks = [
-    "${google_compute_http_health_check.cf-public.name}",
-  ]
-
-  session_affinity = "NONE"
-}
-
-resource "google_compute_forwarding_rule" "cf-ws-https" {
-  name        = "${var.env_name}-cf-ws-https"
-  target      = "${google_compute_target_pool.cf-ws.self_link}"
-  port_range  = "443-443"
-  ip_protocol = "TCP"
-  ip_address  = "${google_compute_address.cf-ws.address}"
-}
-
-resource "google_compute_forwarding_rule" "cf-ws-http" {
-  name        = "${var.env_name}-cf-ws-http"
-  target      = "${google_compute_target_pool.cf-ws.self_link}"
-  port_range  = "80-80"
-  ip_protocol = "TCP"
-  ip_address  = "${google_compute_address.cf-ws.address}"
 }
 
 /*****************

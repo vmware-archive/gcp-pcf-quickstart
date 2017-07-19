@@ -7,32 +7,31 @@ import (
 )
 
 type TerraformConfigSchema struct {
-	OpsManagerIp            string `json:"ops_manager_private_ip"`
-	NetworkName             string `json:"network_name"`
-	DeploymentTargetTag     string `json:"vm_tag"`
-	MgmtSubnetName          string `json:"management_subnet_name"`
-	MgmtSubnetGateway       string `json:"management_subnet_gateway"`
-	MgmtSubnetCIDR          string `json:"management_subnet_cidrs_0"`
-	ServicesSubnetName      string `json:"services_subnet_name"`
-	ServicesSubnetGateway   string `json:"services_subnet_gateway"`
-	ServicesSubnetCIDR      string `json:"services_subnet_cidrs_0"`
-	ErtSubnetName           string `json:"ert_subnet_name"`
-	ErtSubnetGateway        string `json:"ert_subnet_gateway"`
-	ErtSubnetCIDR           string `json:"ert_subnet_cidrs_0"`
-	HttpBackendServiceName  string `json:"http_lb_backend_name"`
-	SshTargetPoolName       string `json:"ssh_router_pool"`
-	WebSocketTargetPoolName string `json:"ws_router_pool"`
-	TcpTargetPoolName       string `json:"tcp_router_pool"`
-	TcpPortRange            string `json:"tcp_port_range"`
-	BuildpacksBucket        string `json:"buildpacks_bucket"`
-	DropletsBucket          string `json:"droplets_bucket"`
-	PackagesBucket          string `json:"packages_bucket"`
-	ResourcesBucket         string `json:"resources_bucket"`
-	DirectorBucket          string `json:"director_blobstore_bucket"`
-	RootDomain              string `json:"root_domain"`
-	SslCertificate          string `json:"ssl_cert"`
-	SslPrivateKey           string `json:"ssl_cert_private_key"`
-	OpsManServiceAccount    string `json:"service_account_email"`
+	OpsManagerIp           string `json:"ops_manager_private_ip"`
+	NetworkName            string `json:"network_name"`
+	DeploymentTargetTag    string `json:"vm_tag"`
+	MgmtSubnetName         string `json:"management_subnet_name"`
+	MgmtSubnetGateway      string `json:"management_subnet_gateway"`
+	MgmtSubnetCIDR         string `json:"management_subnet_cidrs_0"`
+	ServicesSubnetName     string `json:"services_subnet_name"`
+	ServicesSubnetGateway  string `json:"services_subnet_gateway"`
+	ServicesSubnetCIDR     string `json:"services_subnet_cidrs_0"`
+	ErtSubnetName          string `json:"ert_subnet_name"`
+	ErtSubnetGateway       string `json:"ert_subnet_gateway"`
+	ErtSubnetCIDR          string `json:"ert_subnet_cidrs_0"`
+	HttpBackendServiceName string `json:"http_lb_backend_name"`
+	SshTargetPoolName      string `json:"ssh_router_pool"`
+	TcpTargetPoolName      string `json:"tcp_router_pool"`
+	TcpPortRange           string `json:"tcp_port_range"`
+	BuildpacksBucket       string `json:"buildpacks_bucket"`
+	DropletsBucket         string `json:"droplets_bucket"`
+	PackagesBucket         string `json:"packages_bucket"`
+	ResourcesBucket        string `json:"resources_bucket"`
+	DirectorBucket         string `json:"director_blobstore_bucket"`
+	RootDomain             string `json:"root_domain"`
+	SslCertificate         string `json:"ssl_cert"`
+	SslPrivateKey          string `json:"ssl_cert_private_key"`
+	OpsManServiceAccount   string `json:"service_account_email"`
 
 	Region      string `json:"region"`
 	Zone1       string `json:"azs_0"`

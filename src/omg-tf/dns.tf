@@ -24,26 +24,6 @@ resource "google_dns_record_set" "wildcard-sys-dns" {
   rrdatas = ["${google_compute_global_address.cf.address}"]
 }
 
-resource "google_dns_record_set" "doppler-sys-dns" {
-  name = "doppler.sys.${google_dns_managed_zone.env_dns_zone.dns_name}"
-  type = "A"
-  ttl  = 300
-
-  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
-
-  rrdatas = ["${google_compute_address.cf-ws.address}"]
-}
-
-resource "google_dns_record_set" "loggregator-sys-dns" {
-  name = "loggregator.sys.${google_dns_managed_zone.env_dns_zone.dns_name}"
-  type = "A"
-  ttl  = 300
-
-  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
-
-  rrdatas = ["${google_compute_address.cf-ws.address}"]
-}
-
 resource "google_dns_record_set" "wildcard-apps-dns" {
   name = "*.apps.${google_dns_managed_zone.env_dns_zone.dns_name}"
   type = "A"
@@ -52,16 +32,6 @@ resource "google_dns_record_set" "wildcard-apps-dns" {
   managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
 
   rrdatas = ["${google_compute_global_address.cf.address}"]
-}
-
-resource "google_dns_record_set" "wildcard-ws-dns" {
-  name = "*.ws.${google_dns_managed_zone.env_dns_zone.dns_name}"
-  type = "A"
-  ttl  = 300
-
-  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
-
-  rrdatas = ["${google_compute_address.cf-ws.address}"]
 }
 
 resource "google_dns_record_set" "app-ssh-dns" {
