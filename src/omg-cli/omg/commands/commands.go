@@ -6,6 +6,8 @@ import (
 	"omg-cli/omg/tiles"
 	"omg-cli/omg/tiles/ert"
 
+	"omg-cli/config"
+
 	"github.com/alecthomas/kingpin"
 )
 
@@ -44,4 +46,15 @@ func runSteps(steps []step) error {
 		}
 	}
 	return nil
+}
+
+func registerOpsManagerFlags(c *kingpin.CmdClause, cfg *config.OpsManagerCredentials) {
+	c.Flag("opsman-username", "Username for Ops Manager").Default(defaultUsername).StringVar(&cfg.Username)
+	c.Flag("opsman-password", "Password for Ops Manager").Default(defaultPassword).StringVar(&cfg.Password)
+	c.Flag("opsman-decryption-phrase", "Decryption Phrase for Ops Manager").Default(defaultDecryptionPhrase).StringVar(&cfg.DecryptionPhrase)
+	c.Flag("opsman-skip-ssl-verification", "Skip SSL Validation for Ops Manager").Default(defaultSkipSSLVerify).BoolVar(&cfg.SkipSSLVerification)
+}
+
+func registerTerraformConfigFlag(c *kingpin.CmdClause, path *string) {
+	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").Default("env.json").StringVar(path)
 }

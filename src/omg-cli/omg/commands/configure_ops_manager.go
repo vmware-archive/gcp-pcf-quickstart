@@ -18,11 +18,8 @@ type ConfigureOpsManagerCommand struct {
 
 func (comc *ConfigureOpsManagerCommand) register(app *kingpin.Application) {
 	c := app.Command("ConfigureOpsManager", "Push desired tiles to a fresh Ops Manager for image capture").Action(comc.run)
-	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").Default("env.json").StringVar(&comc.terraformConfigPath)
-	c.Flag("opsman-username", "Username for Ops Manager").Default(defaultUsername).StringVar(&comc.opsManCreds.Username)
-	c.Flag("opsman-password", "Password for Ops Manager").Default(defaultPassword).StringVar(&comc.opsManCreds.Password)
-	c.Flag("opsman-decryption-phrase", "Decryption Phrase for Ops Manager").Default(defaultDecryptionPhrase).StringVar(&comc.opsManCreds.DecryptionPhrase)
-	c.Flag("opsman-skip-ssl-verification", "Skip SSL Validation for Ops Manager").Default(defaultSkipSSLVerify).BoolVar(&comc.opsManCreds.SkipSSLVerification)
+	registerTerraformConfigFlag(c, &comc.terraformConfigPath)
+	registerOpsManagerFlags(c, &comc.opsManCreds)
 }
 
 func (comc *ConfigureOpsManagerCommand) run(c *kingpin.ParseContext) error {

@@ -21,10 +21,8 @@ type BakeImageCommand struct {
 func (bic *BakeImageCommand) register(app *kingpin.Application) {
 	c := app.Command("BakeImage", "Push desired tiles to a fresh Ops Manager for image capture").Action(bic.run)
 	c.Flag("pivnet-api-token", "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.").Required().StringVar(&bic.apiToken)
-	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").Default("env.json").StringVar(&bic.terraformConfigPath)
-	c.Flag("opsman-username", "Username for Ops Manager").Default(defaultUsername).StringVar(&bic.opsManCreds.Username)
-	c.Flag("opsman-password", "Password for Ops Manager").Default(defaultPassword).StringVar(&bic.opsManCreds.Password)
-	c.Flag("opsman-decryption-phrase", "Decryption Phrase for Ops Manager").Default(defaultDecryptionPhrase).StringVar(&bic.opsManCreds.DecryptionPhrase)
+	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
+	registerOpsManagerFlags(c, &bic.opsManCreds)
 }
 
 func (bic *BakeImageCommand) run(c *kingpin.ParseContext) error {
