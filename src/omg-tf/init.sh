@@ -16,6 +16,11 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     exit 1
 fi
 
+if [ -z ${ENV_NAME+X} ]; then
+    export ENV_NAME="omg"
+    echo "ENV_NAME unset, using: ${ENV_NAME}"
+fi
+
 
 service_account_email=omg-terraform@${PROJECT_ID}.iam.gserviceaccount.com
 service_account_file=$(mktemp)
@@ -31,11 +36,12 @@ pushd ssl
   openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=Washington/L=Seattle/CN=${DNS_SUFFIX}/subjectAltName=*.${DNS_SUFFIX}"
+  -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${ENV_NAME}.${DNS_SUFFIX}"
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 popd
 
 cat << VARS_FILE > terraform.tfvars
+env_name = "${ENV_NAME}"
 project = "${PROJECT_ID}"
 dns_suffix = "${DNS_SUFFIX}"
 opsman_image_url = "${BASE_IMAGE_URL}"
