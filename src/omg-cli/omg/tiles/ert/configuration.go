@@ -29,6 +29,8 @@ type Properties struct {
 	NetworkingPointOfEntry    Value `json:".properties.networking_point_of_entry"`
 	TcpRouting                Value `json:".properties.tcp_routing"`
 	TcpRoutingReservablePorts Value `json:".properties.tcp_routing.enable.reservable_ports"`
+	//SkipSSLVerification       BooleanValue `json:".properties.route_services.enable.ignore_ssl_cert_verification"`
+	SkipSSLVerification BooleanValue `json:".ha_proxy.skip_cert_verify"`
 	// Application Security Groups
 	SecurityAcknowledgement Value `json:".properties.security_acknowledgement"`
 	// UAA
@@ -39,6 +41,10 @@ type Properties struct {
 
 type Value struct {
 	Value string `json:"value"`
+}
+
+type BooleanValue struct {
+	Value bool `json:"value"`
 }
 
 type Certificate struct {
@@ -94,21 +100,22 @@ type Resource struct {
 }
 
 func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	ertNetwork := Network{
+	network := Network{
 		AvalibilityZone{cfg.Zone1},
 		[]AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
 		NetworkName{cfg.ErtSubnetName},
 	}
 
-	ertNetworkBytes, err := json.Marshal(&ertNetwork)
+	networkBytes, err := json.Marshal(&network)
 	if err != nil {
 		return err
 	}
 
-	ertProperties := Properties{
+	properties := Properties{
 		AppsDomain:                 Value{fmt.Sprintf("apps.%s", cfg.RootDomain)},
 		SysDomain:                  Value{fmt.Sprintf("sys.%s", cfg.RootDomain)},
 		NetworkingPointOfEntry:     Value{"external_non_ssl"},
+		SkipSSLVerification:        BooleanValue{true},
 		TcpRouting:                 Value{"enable"},
 		TcpRoutingReservablePorts:  Value{cfg.TcpPortRange},
 		SecurityAcknowledgement:    Value{"X"},
@@ -116,12 +123,12 @@ func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		MySqlMonitorRecipientEmail: Value{"admin@example.org"},
 	}
 
-	ertPropertiesBytes, err := json.Marshal(&ertProperties)
+	propertiesBytes, err := json.Marshal(&properties)
 	if err != nil {
 		return err
 	}
 
-	ertResoruces := Resources{
+	resoruces := Resources{
 		TcpRouter: Resource{
 			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 			InternetConnected: false,
@@ -135,10 +142,10 @@ func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 			InternetConnected: false,
 		},
 	}
-	ertResorucesBytes, err := json.Marshal(&ertResoruces)
+	resorucesBytes, err := json.Marshal(&resoruces)
 	if err != nil {
 		return err
 	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(ertNetworkBytes), string(ertPropertiesBytes), string(ertResorucesBytes))
+	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
 }
