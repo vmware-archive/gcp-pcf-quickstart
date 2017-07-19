@@ -134,7 +134,9 @@ func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 			InternetConnected: false,
 		},
 		Router: Resource{
-			RouterNames:       []string{fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+			RouterNames: []string{
+				fmt.Sprintf("tcp:%s", cfg.WebSocketTargetPoolName),
+				fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
 			InternetConnected: false,
 		},
 		DiegoBrain: Resource{

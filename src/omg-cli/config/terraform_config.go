@@ -21,9 +21,9 @@ type TerraformConfigSchema struct {
 	ErtSubnetCIDR           string `json:"ert_subnet_cidrs_0"`
 	HttpBackendServiceName  string `json:"http_lb_backend_name"`
 	SshTargetPoolName       string `json:"ssh_router_pool"`
+	WebSocketTargetPoolName string `json:"ws_router_pool"`
 	TcpTargetPoolName       string `json:"tcp_router_pool"`
 	TcpPortRange            string `json:"tcp_port_range"`
-	WebSocketTargetPoolName string `json:"ws_router_pool"`
 	BuildpacksBucket        string `json:"buildpacks_bucket"`
 	DropletsBucket          string `json:"droplets_bucket"`
 	PackagesBucket          string `json:"packages_bucket"`

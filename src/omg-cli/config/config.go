@@ -15,9 +15,9 @@ type Config struct {
 	ErtSubnetCIDR           string
 	HttpBackendServiceName  string
 	SshTargetPoolName       string
+	WebSocketTargetPoolName string
 	TcpTargetPoolName       string
 	TcpPortRange            string
-	WebSocketTargetPoolName string
 	BuildpacksBucket        string
 	DropletsBucket          string
 	PackagesBucket          string
@@ -41,5 +41,3 @@ type OpsManagerCredentials struct {
 	DecryptionPhrase    string
 	SkipSSLVerification bool
 }
-
-
