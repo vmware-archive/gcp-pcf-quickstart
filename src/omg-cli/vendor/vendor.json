@@ -151,6 +151,12 @@
 			"revisionTime": "2017-06-23T19:08:13Z"
 		},
 		{
+			"checksumSHA1": "gIeNIlamabiqMwbOGClpM9NqL3s=",
+			"path": "github.com/tmc/scp",
+			"revision": "8734282bd23b160cc07954a157106fe59e0f3993",
+			"revisionTime": "2016-02-17T17:11:43Z"
+		},
+		{
 			"checksumSHA1": "MlEHIE/60sB86Lmf0MPTIXHzKzE=",
 			"path": "golang.org/x/crypto/curve25519",
 			"revision": "4d70248d17d12d1edb7153434a74001c1540938b",
