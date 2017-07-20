@@ -41,7 +41,7 @@ pushd src/omg-cli
     go build
     scp -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no omg-cli ${jumpbox_ip}:.
     scp -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no env.json ${jumpbox_ip}:.
-    ssh -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no ${jumpbox_ip} "./omg-cli BakeImage --pivnet-api-token=${PIVNET_API_TOKEN}"
+    ssh -i ~/.ssh/google_compute_engine -oStrictHostKeyChecking=no ${jumpbox_ip} "./omg-cli bake-image --pivnet-api-token=${PIVNET_API_TOKEN}"
 popd
 
 # Capture image

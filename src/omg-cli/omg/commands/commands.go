@@ -30,6 +30,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 	cmds := []register{
 		&BakeImageCommand{logger: logger},
 		&ConfigureOpsManagerCommand{logger: logger},
+		&BootstrapCommand{logger: logger},
 	}
 
 	for _, c := range cmds {

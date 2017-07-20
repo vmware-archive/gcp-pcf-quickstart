@@ -19,7 +19,7 @@ type BakeImageCommand struct {
 }
 
 func (bic *BakeImageCommand) register(app *kingpin.Application) {
-	c := app.Command("BakeImage", "Push desired tiles to a fresh Ops Manager for image capture").Action(bic.run)
+	c := app.Command("bake-image", "Push desired tiles to a fresh Ops Manager for image capture").Action(bic.run)
 	c.Flag("pivnet-api-token", "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.").Required().StringVar(&bic.apiToken)
 	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
 	registerOpsManagerFlags(c, &bic.opsManCreds)

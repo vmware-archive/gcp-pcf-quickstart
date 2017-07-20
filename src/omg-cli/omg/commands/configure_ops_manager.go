@@ -16,8 +16,10 @@ type ConfigureOpsManagerCommand struct {
 	opsManCreds         config.OpsManagerCredentials
 }
 
+const ConfigureOpsManagerCommandName = "configure"
+
 func (comc *ConfigureOpsManagerCommand) register(app *kingpin.Application) {
-	c := app.Command("ConfigureOpsManager", "Push desired tiles to a fresh Ops Manager for image capture").Action(comc.run)
+	c := app.Command(ConfigureOpsManagerCommandName, "Push desired tiles to a fresh Ops Manager for image capture").Action(comc.run)
 	registerTerraformConfigFlag(c, &comc.terraformConfigPath)
 	registerOpsManagerFlags(c, &comc.opsManCreds)
 }
