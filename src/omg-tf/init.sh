@@ -32,15 +32,38 @@ if [ -z ${ENV_NAME+X} ]; then
     echo "ENV_NAME unset, using: ${ENV_NAME}"
 fi
 
+# Terraform Service Account
+terraform_service_account_name=omg-terraform
+terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
+terraform_service_account_file=$(mktemp)
 
-service_account_email=omg-terraform@${PROJECT_ID}.iam.gserviceaccount.com
-service_account_file=$(mktemp)
-
-gcloud iam service-accounts create omg-terraform --display-name terraform  2> /dev/null
-gcloud iam service-accounts keys create ${service_account_file} --iam-account ${service_account_email}
+gcloud iam service-accounts create ${terraform_service_account_name}  2> /dev/null
+gcloud iam service-accounts keys create ${terraform_service_account_file} --iam-account ${terraform_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:${service_account_email} \
+  --member serviceAccount:${terraform_service_account_email} \
   --role roles/owner
+
+# Stackdriver Nozzle Service Account
+stackdriver_service_account_name=stackdriver-nozzle
+stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
+stackdriver_service_account_file=$(mktemp)
+
+gcloud iam service-accounts create ${stackdriver_service_account_name}  2> /dev/null
+gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${stackdriver_service_account_email}
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member serviceAccount:${stackdriver_service_account_email} \
+  --role roles/editor
+
+# Service Broker Service Account
+servicebroker_service_account_name=gcp-servicebroker
+servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
+servicebroker_service_account_file=$(mktemp)
+
+gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null
+gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${servicebroker_service_account_email}
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member serviceAccount:${servicebroker_service_account_email} \
+  --role roles/editor
 
 mkdir -p keys
 pushd keys
@@ -71,7 +94,15 @@ $(cat keys/server.key)
 SSL_KEY
 
 service_account_key = <<SERVICE_ACCOUNT_KEY
-$(cat ${service_account_file})
+$(cat ${terraform_service_account_file})
+SERVICE_ACCOUNT_KEY
+
+stackdriver_service_account_key = <<SERVICE_ACCOUNT_KEY
+$(cat ${stackdriver_service_account_file})
+SERVICE_ACCOUNT_KEY
+
+servicebroker_service_account_key = <<SERVICE_ACCOUNT_KEY
+$(cat ${servicebroker_service_account_file})
 SERVICE_ACCOUNT_KEY
 
 ssh_public_key = <<SSH_PUBLIC_KEY

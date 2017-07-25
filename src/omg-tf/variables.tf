@@ -53,6 +53,14 @@ variable "service_account_key" {
   type = "string"
 }
 
+variable "stackdriver_service_account_key" {
+  type = "string"
+}
+
+variable "servicebroker_service_account_key" {
+  type = "string"
+}
+
 variable "dns_suffix" {
   type = "string"
 }

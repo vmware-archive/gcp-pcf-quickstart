@@ -165,3 +165,11 @@ output "ssl_cert_private_key" {
 output "tcp_port_range" {
   value = "${var.tcp_port_range}"
 }
+
+output "stackdriver_service_account_key" {
+  value = "${var.stackdriver_service_account_key}"
+}
+
+output "servicebroker_service_account_key" {
+  value = "${var.servicebroker_service_account_key}"
+}
