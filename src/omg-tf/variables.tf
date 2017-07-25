@@ -82,6 +82,10 @@ variable "tcp_port_range" {
   default     = "1024-65535"
 }
 
+variable "ssh_public_key" {
+  description = "Public SSH key to access Jumpbox/Ops Manager VMs"
+}
+
 /*******************
  * OpsMan Options  *
  *******************/

@@ -31,13 +31,16 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${service_account_email} \
   --role roles/owner
 
-mkdir -p ssl
-pushd ssl
+mkdir -p keys
+pushd keys
   openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
   -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${ENV_NAME}.${DNS_SUFFIX}"
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+  rm -f jumpbox_ssh jumpbox_ssh.pub
+  ssh-keygen -b 2048 -t rsa -f jumpbox_ssh -q -N ""
 popd
 
 cat << VARS_FILE > terraform.tfvars
@@ -48,15 +51,19 @@ opsman_image_url = "${BASE_IMAGE_URL}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK}"
 
 ssl_cert = <<SSL_CERT
-$(cat ssl/server.crt)
+$(cat keys/server.crt)
 SSL_CERT
 
 ssl_cert_private_key = <<SSL_KEY
-$(cat ssl/server.key)
+$(cat keys/server.key)
 SSL_KEY
 
 service_account_key = <<SERVICE_ACCOUNT_KEY
 $(cat ${service_account_file})
 SERVICE_ACCOUNT_KEY
+
+ssh_public_key = <<SSH_PUBLIC_KEY
+$(cat keys/jumpbox_ssh.pub)
+SSH_PUBLIC_KEY
 
 VARS_FILE

@@ -30,12 +30,8 @@ pushd src/omg-tf
     terraform output -json > ${terraform_output}
 popd
 
-# Ensure ssh keys are setup
-# TODO(jrjohnson) this is crashing on my machine
-# gcloud compute config-ssh
-
 # Deploy PCF
 pushd src/omg-cli
     go build
-    ./omg-cli bootstrap --ssh-key-path ~/.ssh/google_compute_engine --username `whoami` --terraform-output-path ${terraform_output}
+    ./omg-cli bootstrap --ssh-key-path ../omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}
 popd

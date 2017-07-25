@@ -1,4 +1,4 @@
-ssl/
+keys/
 terraform.tfstate*
 terraform.tfvars
 .terraform/*

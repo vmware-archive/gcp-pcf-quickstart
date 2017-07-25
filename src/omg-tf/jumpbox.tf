@@ -16,6 +16,10 @@ resource "google_compute_instance" "jumpbox" {
       # ephemeral IP
     }
   }
+
+  metadata = {
+    ssh-keys               = "${format("omg:%s", var.ssh_public_key)}"
+  }
 }
 
 resource "google_compute_firewall" "jumpbox-external" {
@@ -34,4 +38,3 @@ resource "google_compute_firewall" "jumpbox-external" {
 
   source_ranges = ["0.0.0.0/0"]
 }
-

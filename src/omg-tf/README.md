@@ -32,8 +32,7 @@ rm terraform.tfvars
 ## Connecting to the environment
 
 ```bash
-gcloud compute config-ssh
-sshuttle -e "ssh -i ~/.ssh/google_compute_engine" -r $(terraform output jumpbox_ip) 10.0.0.0/16
+sshuttle -e "ssh -i keys/jumpbox_ssh" -r $(terraform output jumpbox_public_ip) 10.0.0.0/16
 ```
 
 ## Configuration for omg-cli
