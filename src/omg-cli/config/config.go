@@ -23,7 +23,7 @@ type Config struct {
 	PackagesBucket         string
 	ResourcesBucket        string
 	DirectorBucket         string
-	RootDomain             string
+	DnsSuffix              string
 	SslCertificate         string
 	SslPrivateKey          string
 	OpsManServiceAccount   string

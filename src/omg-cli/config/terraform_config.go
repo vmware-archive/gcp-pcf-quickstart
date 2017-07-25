@@ -29,7 +29,7 @@ type TerraformConfigSchema struct {
 	PackagesBucket         string `json:"packages_bucket"`
 	ResourcesBucket        string `json:"resources_bucket"`
 	DirectorBucket         string `json:"director_blobstore_bucket"`
-	RootDomain             string `json:"root_domain"`
+	DnsSuffix              string `json:"dns_suffix"`
 	SslCertificate         string `json:"ssl_cert"`
 	SslPrivateKey          string `json:"ssl_cert_private_key"`
 	OpsManServiceAccount   string `json:"service_account_email"`

@@ -22,7 +22,7 @@ module "isolation_segment" {
   ssl_cert             = "${var.iso_seg_ssl_cert}"
   ssl_cert_private_key = "${var.iso_seg_ssl_cert_private_key}"
 
-  dns_zone_name           = "${google_dns_managed_zone.env_dns_zone.name}"
-  dns_zone_dns_name       = "${google_dns_managed_zone.env_dns_zone.dns_name}"
+  dns_zone_name           = "${var.dns_zone_name}"
+  dns_zone_dns_name       = "${var.dns_suffix}."
   public_healthcheck_link = "${google_compute_http_health_check.cf-public.self_link}"
 }

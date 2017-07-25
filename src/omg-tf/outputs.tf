@@ -26,16 +26,12 @@ output "tcp_domain" {
   value = "tcp.${var.env_name}.${var.dns_suffix}"
 }
 
-output "root_domain" {
-  value = "${var.env_name}.${var.dns_suffix}"
+output "dns_suffix" {
+  value = "${var.dns_suffix}"
 }
 
 output "ops_manager_private_ip" {
   value = "${google_compute_instance.ops-manager.network_interface.0.address}"
-}
-
-output "env_dns_zone_name_servers" {
-  value = "${google_dns_managed_zone.env_dns_zone.name_servers}"
 }
 
 output "project" {
@@ -152,10 +148,6 @@ output "opsman_sql_username" {
 
 output "opsman_sql_password" {
   value = "${module.external_database.opsman_sql_password}"
-}
-
-output "dns_managed_zone" {
-  value = "${google_dns_managed_zone.env_dns_zone.name}"
 }
 
 output "jumpbox_public_ip" {

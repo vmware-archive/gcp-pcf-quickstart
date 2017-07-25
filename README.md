@@ -11,14 +11,18 @@ git submodules update
 
 ## TODO: Prerequisites
 
-- Setup DNS
 - Quota increases
 - Enable APIs
+
+## Setup DNS
+
+- Create a new DNS Zone (eg pcf.example.org) in [Cloud DNS](https://console.cloud.google.com/networking/dns/zones)
+- Create NS records in parent domain to point to new DNS Zone (eg NS pcf.example.org -> ns-cloud-{a,b,c,d}1.googledomains.com)
 
 ## Deploying and Accessing PCF
 ```bash
 # Deploy
-DNS_SUFFIX="..." ./deploy_pcf
+DNS_ZONE_NAME="..." ./deploy_pcf
 
 # Access jumpbox
 ssh -i src/omg-tf/keys/jumpbox_ssh omg@$(terraform output -state src/omg-tf/terraform.tfstate jumpbox_public_ip)

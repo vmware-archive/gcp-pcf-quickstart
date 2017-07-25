@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
 
-if [ -z ${DNS_SUFFIX+x} ]; then
-    echo "DNS_SUFFIX required"
+if [ -z ${DNS_ZONE_NAME+x} ]; then
+    echo "DNS_ZONE_NAME required"
     exit 1
 fi
 
 if [ -z ${PROJECT_ID+x} ]; then
     export PROJECT_ID=${PROJECT_ID-`gcloud config get-value project  2> /dev/null`}
     echo "PROJECT_ID unset, using: ${PROJECT_ID}"
+fi
+
+if [ -z ${DNS_SUFFIX+x} ]; then
+    dns_suffix=`gcloud dns managed-zones describe ${DNS_ZONE_NAME} --project ${PROJECT_ID} --format="value(dnsName)"  2> /dev/null`
+    # trim trailing '.' from response
+    export DNS_SUFFIX=${dns_suffix%.}
+    echo "DNS_SUFFIX unset, using: ${DNS_SUFFIX}"
+
+    if [ `dig ${DNS_SUFFIX} NS +short | wc -l` == "0" ]; then
+        echo "Failed to resolve NS records for ${DNS_SUFFIX}"
+    fi
 fi
 
 # TODO(jrjohnson): Once a baked OpsMan image is ready, default to using it here
@@ -47,6 +58,7 @@ cat << VARS_FILE > terraform.tfvars
 env_name = "${ENV_NAME}"
 project = "${PROJECT_ID}"
 dns_suffix = "${DNS_SUFFIX}"
+dns_zone_name = "${DNS_ZONE_NAME}"
 opsman_image_url = "${BASE_IMAGE_URL}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK}"
 

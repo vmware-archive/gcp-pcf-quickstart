@@ -57,6 +57,10 @@ variable "dns_suffix" {
   type = "string"
 }
 
+variable "dns_zone_name" {
+  type = "string"
+}
+
 variable "ssl_cert" {
   type        = "string"
   description = "ssl certificate content for *.{env_name}.{dns_suffix}"

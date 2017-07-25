@@ -2,8 +2,8 @@
 
 set -ue
 
-if [ -z ${DNS_SUFFIX+x} ]; then
-    echo "DNS_SUFFIX required"
+if [ -z ${DNS_ZONE_NAME+x} ]; then
+    echo "DNS_ZONE_NAME required"
     exit 1
 fi
 
