@@ -101,12 +101,6 @@ func (s *OpsManager) PoolTillOnline() error {
 
 func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
-		if !t.BuiltIn() {
-			if err := s.om.StageProduct(t.Definition().Product); err != nil {
-				return err
-			}
-		}
-
 		if err := t.Configure(s.cfg, s.om); err != nil {
 			return err
 		}

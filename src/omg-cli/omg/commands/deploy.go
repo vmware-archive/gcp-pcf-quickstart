@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"log"
+
 	"omg-cli/config"
 	"omg-cli/omg/setup"
 	"omg-cli/ops_manager"
@@ -10,21 +11,21 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
-type ConfigureOpsManagerCommand struct {
+type Deploy struct {
 	logger              *log.Logger
 	terraformConfigPath string
 	opsManCreds         config.OpsManagerCredentials
 }
 
-const ConfigureOpsManagerCommandName = "configure"
+const DeployName = "deploy"
 
-func (comc *ConfigureOpsManagerCommand) register(app *kingpin.Application) {
-	c := app.Command(ConfigureOpsManagerCommandName, "Push desired tiles to a fresh Ops Manager for image capture").Action(comc.run)
+func (comc *Deploy) register(app *kingpin.Application) {
+	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(comc.run)
 	registerTerraformConfigFlag(c, &comc.terraformConfigPath)
 	registerOpsManagerFlags(c, &comc.opsManCreds)
 }
 
-func (comc *ConfigureOpsManagerCommand) run(c *kingpin.ParseContext) error {
+func (comc *Deploy) run(c *kingpin.ParseContext) error {
 	cfg, err := config.FromTerraform(comc.terraformConfigPath)
 	if err != nil {
 		return err

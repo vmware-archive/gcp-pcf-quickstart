@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"log"
+
 	"omg-cli/config"
 	"omg-cli/omg/setup"
 	"omg-cli/ops_manager"
@@ -11,21 +12,23 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
-type BakeImageCommand struct {
+type PushTilesCommand struct {
 	logger              *log.Logger
 	apiToken            string
 	terraformConfigPath string
 	opsManCreds         config.OpsManagerCredentials
 }
 
-func (bic *BakeImageCommand) register(app *kingpin.Application) {
-	c := app.Command("bake-image", "Push desired tiles to a fresh Ops Manager for image capture").Action(bic.run)
-	c.Flag("pivnet-api-token", "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.").Required().StringVar(&bic.apiToken)
+const PushTilesName = "push-tiles"
+
+func (bic *PushTilesCommand) register(app *kingpin.Application) {
+	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(bic.run)
 	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
 	registerOpsManagerFlags(c, &bic.opsManCreds)
+	registerPivnetFlag(c, &bic.apiToken)
 }
 
-func (bic *BakeImageCommand) run(c *kingpin.ParseContext) error {
+func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
 	cfg, err := config.FromTerraform(bic.terraformConfigPath)
 	if err != nil {
 		return err

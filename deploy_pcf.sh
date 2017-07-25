@@ -15,7 +15,7 @@ fi
 gcloud config set project ${PROJECT_ID}
 
 if [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
-    export BASE_IMAGE_SELFLINK="projects/graphite-demo-jjcf/global/images/baked-opsman-1500053863"
+    export BASE_IMAGE_SELFLINK="projects/graphite-demo-jjcf/global/images/baked-opsman-1501021113"
     echo "BASE_IMAGE_SELFLINK unset, using: ${BASE_IMAGE_SELFLINK}"
 fi
 
@@ -33,5 +33,5 @@ popd
 # Deploy PCF
 pushd src/omg-cli
     go build
-    ./omg-cli bootstrap --ssh-key-path ../omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}
+    ./omg-cli bootstrap-deploy --ssh-key-path ../omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}
 popd

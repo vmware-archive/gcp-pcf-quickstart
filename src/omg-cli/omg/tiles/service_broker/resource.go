@@ -1,7 +1,6 @@
 package service_broker
 
 import (
-	"errors"
 	"omg-cli/config"
 	"omg-cli/ops_manager"
 )
@@ -22,7 +21,8 @@ var tile = config.Tile{
 type Tile struct{}
 
 func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	return errors.New("service_broker: Tile: Conifgure NYI")
+	println("TODO: Configure Service Broker. Skipping.")
+	return nil
 }
 
 func (Tile) Definition() config.Tile {

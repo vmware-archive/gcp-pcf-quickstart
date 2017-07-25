@@ -76,11 +76,10 @@ func (jb *Jumpbox) UploadDependencies() error {
 	return nil
 }
 
-// Execute the Ops Manager bootstrap
-func (jb *Jumpbox) ConfigureOpsManager() error {
+func (jb *Jumpbox) RunOmg(args string) error {
 	if err := jb.session.EnsureConnected(); err != nil {
 		return err
 	}
 
-	return jb.session.RunCommand("~/omg-cli configure --terraform-output-path=env.json")
+	return jb.session.RunCommand(fmt.Sprintf("~/omg-cli %s", args))
 }

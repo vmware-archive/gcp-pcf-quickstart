@@ -100,6 +100,10 @@ type Resource struct {
 }
 
 func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+	if err := om.StageProduct(tile.Product); err != nil {
+		return err
+	}
+
 	network := Network{
 		AvalibilityZone{cfg.Zone1},
 		[]AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},

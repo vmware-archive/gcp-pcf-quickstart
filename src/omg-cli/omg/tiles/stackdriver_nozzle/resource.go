@@ -1,7 +1,6 @@
 package stackdriver_nozzle
 
 import (
-	"errors"
 	"omg-cli/config"
 	"omg-cli/ops_manager"
 )
@@ -22,7 +21,8 @@ var tile = config.Tile{
 type Tile struct{}
 
 func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	return errors.New("stackdriver_nozzle: Tile: Conifgure NYI")
+	println("TODO: Configure Stackdriver Nozzle. Skipping.")
+	return nil
 }
 
 func (Tile) Definition() config.Tile {
