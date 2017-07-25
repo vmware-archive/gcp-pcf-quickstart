@@ -2,7 +2,6 @@ package setup
 
 import (
 	"omg-cli/config"
-	"omg-cli/omg/bosh_director"
 	"omg-cli/ops_manager"
 	"omg-cli/pivnet"
 
@@ -51,20 +50,6 @@ func (s *OpsManager) Unlock() error {
 	}
 }
 
-func (s *OpsManager) SetupBosh() error {
-	gcp := bosh_director.GCP(s.cfg)
-	director := bosh_director.Director()
-	azs := bosh_director.AvalibilityZones(s.cfg)
-	networks, networkAssignment := bosh_director.Network(s.cfg)
-	resources := bosh_director.Resources()
-
-	if err := s.om.SetupBosh(gcp, director, azs, networks, networkAssignment, resources); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *OpsManager) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
@@ -94,11 +79,7 @@ func (s *OpsManager) ensureProductReady(tile config.Tile) error {
 	}
 	defer os.Remove(file.Name())
 
-	if err = s.om.UploadProduct(file.Name()); err != nil {
-		return err
-	}
-
-	return s.om.StageProduct(tile.Product)
+	return s.om.UploadProduct(file.Name())
 }
 
 func (s *OpsManager) PoolTillOnline() error {
@@ -120,6 +101,12 @@ func (s *OpsManager) PoolTillOnline() error {
 
 func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
+		if !t.BuiltIn() {
+			if err := s.om.StageProduct(t.Definition().Product); err != nil {
+				return err
+			}
+		}
+
 		if err := t.Configure(s.cfg, s.om); err != nil {
 			return err
 		}
@@ -130,8 +117,10 @@ func (s *OpsManager) ConfigureTiles() error {
 
 func (s *OpsManager) UploadTiles() error {
 	for _, t := range s.tiles {
-		if err := s.ensureProductReady(t.Definition()); err != nil {
-			return err
+		if !t.BuiltIn() {
+			if err := s.ensureProductReady(t.Definition()); err != nil {
+				return err
+			}
 		}
 	}
 

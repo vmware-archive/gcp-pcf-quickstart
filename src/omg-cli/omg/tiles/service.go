@@ -8,4 +8,5 @@ import (
 type TileInstaller interface {
 	Definition() config.Tile
 	Configure(cfg *config.Config, om *ops_manager.Sdk) error
+	BuiltIn() bool
 }

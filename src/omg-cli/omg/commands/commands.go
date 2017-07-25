@@ -3,10 +3,10 @@ package commands
 import (
 	"log"
 
+	"omg-cli/config"
 	"omg-cli/omg/tiles"
 	"omg-cli/omg/tiles/ert"
-
-	"omg-cli/config"
+	"omg-cli/omg/tiles/gcp_director"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -19,6 +19,7 @@ const (
 )
 
 var selectedTiles = []tiles.TileInstaller{
+	gcp_director.Tile{},
 	ert.Tile{},
 }
 

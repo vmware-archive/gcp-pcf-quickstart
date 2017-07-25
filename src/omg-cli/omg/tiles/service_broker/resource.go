@@ -28,3 +28,7 @@ func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 func (Tile) Definition() config.Tile {
 	return tile
 }
+
+func (Tile) BuiltIn() bool {
+	return false
+}

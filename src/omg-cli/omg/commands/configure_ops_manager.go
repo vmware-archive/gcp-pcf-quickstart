@@ -40,7 +40,6 @@ func (comc *ConfigureOpsManagerCommand) run(c *kingpin.ParseContext) error {
 	return runSteps([]step{
 		opsMan.PoolTillOnline,
 		opsMan.Unlock,
-		opsMan.SetupBosh,
 		opsMan.ConfigureTiles,
 		opsMan.ApplyChanges,
 	})

@@ -22,3 +22,7 @@ type Tile struct{}
 func (Tile) Definition() config.Tile {
 	return tile
 }
+
+func (Tile) BuiltIn() bool {
+	return false
+}

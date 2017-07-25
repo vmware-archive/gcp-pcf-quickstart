@@ -1,9 +1,11 @@
-package bosh_director
+package gcp_director
 
 import (
 	"fmt"
 	"net"
 	"omg-cli/config"
+
+	"omg-cli/ops_manager"
 
 	"github.com/pivotal-cf/om/commands"
 )
@@ -11,6 +13,12 @@ import (
 const (
 	metadataService = "169.254.169.254"
 )
+
+func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+	networks, networkAssignment := networkCfg(cfg)
+
+	return om.SetupBosh(gcp(cfg), director(), avalibilityZones(cfg), networks, networkAssignment, resources())
+}
 
 func buildNetwork(cfg *config.Config, name, cidrRange, gateway string) commands.NetworkConfiguration {
 	// Reserve .1-.20
@@ -38,7 +46,7 @@ func buildNetwork(cfg *config.Config, name, cidrRange, gateway string) commands.
 	}
 }
 
-func Network(cfg *config.Config) (networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) {
+func networkCfg(cfg *config.Config) (networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) {
 	networks = commands.NetworksConfiguration{
 		ICMP: false,
 		Networks: []commands.NetworkConfiguration{
@@ -56,15 +64,15 @@ func Network(cfg *config.Config) (networks commands.NetworksConfiguration, netwo
 	return
 }
 
-func Director() (director commands.DirectorConfiguration) {
+func director() (director commands.DirectorConfiguration) {
 	director = commands.DirectorConfiguration{
-		NTPServers: metadataService, // GCP metadata service
+		NTPServers: metadataService, // gcp metadata service
 	}
 
 	return
 }
 
-func Resources() commands.ResourceConfiguration {
+func resources() commands.ResourceConfiguration {
 	f := false
 	return commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
@@ -76,7 +84,7 @@ func Resources() commands.ResourceConfiguration {
 	}
 }
 
-func GCP(cfg *config.Config) commands.GCPIaaSConfiguration {
+func gcp(cfg *config.Config) commands.GCPIaaSConfiguration {
 	return commands.GCPIaaSConfiguration{
 		Project:              cfg.ProjectName,
 		DefaultDeploymentTag: cfg.DeploymentTargetTag,
@@ -84,7 +92,7 @@ func GCP(cfg *config.Config) commands.GCPIaaSConfiguration {
 	}
 }
 
-func AvalibilityZones(cfg *config.Config) commands.AvailabilityZonesConfiguration {
+func avalibilityZones(cfg *config.Config) commands.AvailabilityZonesConfiguration {
 	return commands.AvailabilityZonesConfiguration{
 		AvailabilityZones: []commands.AvailabilityZone{
 			{Name: cfg.Zone1},
