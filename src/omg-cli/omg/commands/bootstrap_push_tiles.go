@@ -39,7 +39,7 @@ func (bj *BootstrapPushTilesCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("connect to jumpbox: %v", err)
 	}
 
-	return runSteps([]step{
+	return run([]step{
 		jb.PoolTillStarted,
 		jb.UploadDependencies,
 		func() error {

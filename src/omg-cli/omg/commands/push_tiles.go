@@ -46,7 +46,7 @@ func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
 
 	opsMan := setup.NewService(cfg, omSdk, pivnetSdk, bic.logger, selectedTiles)
 
-	return runSteps([]step{
+	return run([]step{
 		opsMan.PoolTillOnline,
 		opsMan.SetupAuth,
 		opsMan.UploadTiles,

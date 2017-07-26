@@ -10,6 +10,8 @@ import (
 	"omg-cli/omg/tiles/service_broker"
 	"omg-cli/omg/tiles/stackdriver_nozzle"
 
+	"fmt"
+
 	"github.com/alecthomas/kingpin"
 )
 
@@ -46,13 +48,27 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 
 type step func() error
 
-func runSteps(steps []step) error {
+func run(steps []step) error {
 	for _, v := range steps {
 		if err := v(); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func retry(fn step, times int) error {
+	errs := []error{}
+
+	for i := 0; i < times; i++ {
+		if err := fn(); err != nil {
+			errs = append(errs, err)
+		} else {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("failed after %d attempts, errors: %v", times, errs)
 }
 
 func registerOpsManagerFlags(c *kingpin.CmdClause, cfg *config.OpsManagerCredentials) {

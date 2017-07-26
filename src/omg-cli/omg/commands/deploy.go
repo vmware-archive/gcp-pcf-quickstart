@@ -38,10 +38,10 @@ func (comc *Deploy) run(c *kingpin.ParseContext) error {
 
 	opsMan := setup.NewService(cfg, omSdk, nil, comc.logger, selectedTiles)
 
-	return runSteps([]step{
+	return run([]step{
 		opsMan.PoolTillOnline,
 		opsMan.Unlock,
 		opsMan.ConfigureTiles,
-		opsMan.ApplyChanges,
+		func() error { return retry(opsMan.ApplyChanges, 5) },
 	})
 }
