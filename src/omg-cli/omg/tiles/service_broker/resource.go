@@ -16,6 +16,14 @@ var tile = config.Tile{
 		"gcp-service-broker",
 		"3.4.1",
 	},
+
+	&config.StemcellMetadata{
+		config.PivnetMetadata{"stemcells",
+			"5884",
+			"23445",
+			"9b3175baf9d0b8b0bb1f37b029298e88cf352011aa632472a637d023bf928832"},
+		"light-bosh-stemcell-3363.26-google-kvm-ubuntu-trusty-go_agent",
+	},
 }
 
 type Tile struct{}

@@ -6,9 +6,11 @@ import (
 	"omg-cli/pivnet"
 
 	"errors"
+	"fmt"
 	"log"
 	"omg-cli/omg/tiles"
 	"os"
+	"path"
 	"time"
 )
 
@@ -73,13 +75,33 @@ func (s *OpsManager) ensureProductReady(tile config.Tile) error {
 		return err
 	}
 
-	file, err := s.pivnet.DownloadTile(tile.Pivnet)
+	return s.uploadProduct(tile.Pivnet)
+}
+
+func (s *OpsManager) uploadProduct(tile config.PivnetMetadata) error {
+	file, err := s.pivnet.DownloadTile(tile)
 	if err != nil {
 		return err
 	}
 	defer os.Remove(file.Name())
 
 	return s.om.UploadProduct(file.Name())
+}
+
+func (s *OpsManager) uploadStemcell(tile config.StemcellMetadata) error {
+	file, err := s.pivnet.DownloadTile(tile.PivnetMetadata)
+	if err != nil {
+		return err
+	}
+
+	newPath := path.Join(path.Dir(file.Name()), fmt.Sprintf("%s.tgz", tile.StemcellName))
+	if err := os.Rename(file.Name(), newPath); err != nil {
+		os.Remove(file.Name())
+		return fmt.Errorf("unable to rename download stemcell: %v", err)
+	}
+	defer os.Remove(newPath)
+
+	return s.om.UploadStemcell(newPath)
 }
 
 func (s *OpsManager) PoolTillOnline() error {
@@ -114,6 +136,12 @@ func (s *OpsManager) UploadTiles() error {
 		if !t.BuiltIn() {
 			if err := s.ensureProductReady(t.Definition()); err != nil {
 				return err
+			}
+
+			if stemcell := t.Definition().Stemcell; stemcell != nil {
+				if err := s.uploadStemcell(*stemcell); err != nil {
+					return err
+				}
 			}
 		}
 	}

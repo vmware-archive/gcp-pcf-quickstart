@@ -7,12 +7,18 @@ type PivnetMetadata struct {
 	Sha256    string
 }
 
+type StemcellMetadata struct {
+	PivnetMetadata
+	StemcellName string
+}
+
 type OpsManagerMetadata struct {
 	Name    string
 	Version string
 }
 
 type Tile struct {
-	Pivnet  PivnetMetadata
-	Product OpsManagerMetadata
+	Pivnet   PivnetMetadata
+	Product  OpsManagerMetadata
+	Stemcell *StemcellMetadata
 }

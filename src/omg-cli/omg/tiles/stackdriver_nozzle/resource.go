@@ -16,6 +16,7 @@ var tile = config.Tile{
 		"stackdriver-nozzle",
 		"1.0.3",
 	},
+	nil,
 }
 
 type Tile struct{}

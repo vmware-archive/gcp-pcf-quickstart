@@ -15,6 +15,7 @@ var tile = config.Tile{
 		"cf",
 		"1.11.2",
 	},
+	nil,
 }
 
 type Tile struct{}
