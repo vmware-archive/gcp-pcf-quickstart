@@ -21,6 +21,36 @@
 			"revisionTime": "2017-06-30T16:19:38Z"
 		},
 		{
+			"checksumSHA1": "MmCTPsOggOJxeRYGr/VLY5Uv5vE=",
+			"path": "code.cloudfoundry.org/clock",
+			"revision": "2269160ae1757f96bbb8c6475e6fa36c805e73e0",
+			"revisionTime": "2017-02-23T02:47:09Z"
+		},
+		{
+			"checksumSHA1": "xkL8isAttknQuBcxjLZ3m+JQJns=",
+			"path": "code.cloudfoundry.org/lager",
+			"revision": "438ab98cc3b9b81e97c2281422b2722cd8e80ed8",
+			"revisionTime": "2017-06-29T16:29:18Z"
+		},
+		{
+			"checksumSHA1": "LRiZfI3UiLXniYooTtyxJ2NTufE=",
+			"path": "code.cloudfoundry.org/trace-logger",
+			"revision": "107ef08a939d5be6092ce2b5f171a16aba149cb2",
+			"revisionTime": "2017-01-19T23:03:01Z"
+		},
+		{
+			"checksumSHA1": "ws2BXPfbCNB2RRRxsUKUD54X8g4=",
+			"path": "code.cloudfoundry.org/uaa-go-client/config",
+			"revision": "64195cff4edb7b374b4777d6ded2a42d6ef8e994",
+			"revisionTime": "2017-07-21T21:11:52Z"
+		},
+		{
+			"checksumSHA1": "6JbvyMDFsm4oDiszmFrrqxrqkMU=",
+			"path": "code.cloudfoundry.org/uaa-go-client/schema",
+			"revision": "64195cff4edb7b374b4777d6ded2a42d6ef8e994",
+			"revisionTime": "2017-07-21T21:11:52Z"
+		},
+		{
 			"checksumSHA1": "iTyK6+LglXn9zjYGbjMTLxtLXio=",
 			"path": "github.com/PuerkitoBio/goquery",
 			"revision": "8806ada2a4ab225c06e9106f9631be80932db7ce",
@@ -61,6 +91,18 @@
 			"path": "github.com/cheggaaa/pb",
 			"revision": "f6ccf2184de4dd34495277e38dc19b6e7fbe0ea2",
 			"revisionTime": "2017-05-08T13:24:47Z"
+		},
+		{
+			"checksumSHA1": "08a8dDQ0INX3GPeRy1+FnKEWjCI=",
+			"path": "github.com/cloudfoundry-incubator/uaa-go-client",
+			"revision": "64195cff4edb7b374b4777d6ded2a42d6ef8e994",
+			"revisionTime": "2017-07-21T21:11:52Z"
+		},
+		{
+			"checksumSHA1": "hKEzxF3LpDkQK//6n5rx/8b+DGM=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "f62f64ea222e5e6d6d86421b5507b0862a3ebf7f",
+			"revisionTime": "2015-09-23T20:28:32Z"
 		},
 		{
 			"checksumSHA1": "qlPUeFabwF4RKAOF1H+yBFU1Veg=",
