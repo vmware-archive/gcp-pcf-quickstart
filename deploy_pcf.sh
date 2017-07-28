@@ -16,7 +16,7 @@ fi
 gcloud config set project ${PROJECT_ID}
 
 if [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
-    export BASE_IMAGE_SELFLINK="projects/graphite-demo-jjcf/global/images/baked-opsman-1501021113"
+    export BASE_IMAGE_SELFLINK="projects/jrjohnsonkube/global/images/baked-opsman-1501261888"
     echo "BASE_IMAGE_SELFLINK unset, using: ${BASE_IMAGE_SELFLINK}"
 fi
 
