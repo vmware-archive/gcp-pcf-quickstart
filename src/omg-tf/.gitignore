@@ -1,4 +1,5 @@
 keys/
+env.json
 terraform.tfstate*
 terraform.tfvars
 .terraform/*

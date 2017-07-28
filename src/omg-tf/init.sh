@@ -60,10 +60,10 @@ servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJ
 servicebroker_service_account_file=$(mktemp)
 
 gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null
-gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${servicebroker_service_account_email}
+gcloud iam service-accounts keys create ${servicebroker_service_account_file} --iam-account ${servicebroker_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${servicebroker_service_account_email} \
-  --role roles/editor
+  --role roles/owner
 
 mkdir -p keys
 pushd keys
@@ -101,7 +101,7 @@ stackdriver_service_account_key = <<SERVICE_ACCOUNT_KEY
 $(cat ${stackdriver_service_account_file})
 SERVICE_ACCOUNT_KEY
 
-servicebroker_service_account_key = <<SERVICE_ACCOUNT_KEY
+service_broker_service_account_key = <<SERVICE_ACCOUNT_KEY
 $(cat ${servicebroker_service_account_file})
 SERVICE_ACCOUNT_KEY
 

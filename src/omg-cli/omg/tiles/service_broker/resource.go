@@ -2,7 +2,6 @@ package service_broker
 
 import (
 	"omg-cli/config"
-	"omg-cli/ops_manager"
 )
 
 var tile = config.Tile{
@@ -16,7 +15,6 @@ var tile = config.Tile{
 		"gcp-service-broker",
 		"3.4.1",
 	},
-
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
 			"5884",
@@ -27,11 +25,6 @@ var tile = config.Tile{
 }
 
 type Tile struct{}
-
-func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	println("TODO: Configure Service Broker. Skipping.")
-	return nil
-}
 
 func (Tile) Definition() config.Tile {
 	return tile

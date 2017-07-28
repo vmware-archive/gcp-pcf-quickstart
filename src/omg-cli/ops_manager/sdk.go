@@ -180,6 +180,21 @@ func (om *Sdk) UploadProduct(path string) error {
 		"--product", path})
 }
 
+// UploadStemcell pushes a given stemcell located locally at path to the target
+func (om *Sdk) UploadStemcell(path string) error {
+	diagnosticService := api.NewDiagnosticService(om.client)
+	form, err := formcontent.NewForm()
+	if err != nil {
+		return err
+	}
+
+	uploadStemcellService := api.NewUploadStemcellService(om.client, progress.NewBar())
+	cmd := commands.NewUploadStemcell(form, uploadStemcellService, diagnosticService, om.logger)
+
+	return cmd.Execute([]string{
+		"--stemcell", path})
+}
+
 // StageProduct moves a given name, version to the list of tiles that will be deployed
 func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
 	diagnosticService := api.NewDiagnosticService(om.client)

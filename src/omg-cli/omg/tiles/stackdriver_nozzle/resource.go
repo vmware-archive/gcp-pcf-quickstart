@@ -16,7 +16,13 @@ var tile = config.Tile{
 		"stackdriver-nozzle",
 		"1.0.3",
 	},
-	nil,
+	&config.StemcellMetadata{
+		config.PivnetMetadata{"stemcells",
+			"5884",
+			"23445",
+			"9b3175baf9d0b8b0bb1f37b029298e88cf352011aa632472a637d023bf928832"},
+		"light-bosh-stemcell-3363.26-google-kvm-ubuntu-trusty-go_agent",
+	},
 }
 
 type Tile struct{}
@@ -33,3 +39,10 @@ func (Tile) Definition() config.Tile {
 func (Tile) BuiltIn() bool {
 	return false
 }
+
+
+/*
+.properties.firehose_endpoint
+.properties.firehose_username
+.properties.firehose_password][secret]
+ */

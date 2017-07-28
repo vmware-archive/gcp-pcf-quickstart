@@ -27,8 +27,12 @@ type Config struct {
 	SslCertificate                     string
 	SslPrivateKey                      string
 	OpsManServiceAccount               string
-	ServiceBrokerServiceAccountKey     string
 	StackdriverNozzleServiceAccountKey string
+
+	ServiceBrokerServiceAccountKey string
+	ServiceBrokerDbIp              string
+	ServiceBrokerDbUsername        string
+	ServiceBrokerDbPassword        string
 
 	Region      string
 	Zone1       string

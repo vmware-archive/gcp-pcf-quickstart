@@ -57,7 +57,7 @@ variable "stackdriver_service_account_key" {
   type = "string"
 }
 
-variable "servicebroker_service_account_key" {
+variable "service_broker_service_account_key" {
   type = "string"
 }
 
@@ -131,4 +131,12 @@ variable "iso_seg_ssl_cert_private_key" {
   type        = "string"
   description = "ssl certificate private key content"
   default     = ""
+}
+
+/*****************************
+ * Service Broker Options    *
+ *****************************/
+variable "service_broker_sql_db_tier" {
+  type    = "string"
+  default = "db-f1-micro"
 }

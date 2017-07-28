@@ -33,8 +33,12 @@ type TerraformConfigSchema struct {
 	SslCertificate                     string `json:"ssl_cert"`
 	SslPrivateKey                      string `json:"ssl_cert_private_key"`
 	OpsManServiceAccount               string `json:"service_account_email"`
-	ServiceBrokerServiceAccountKey     string `json:"servicebroker_service_account_key"`
 	StackdriverNozzleServiceAccountKey string `json:"stackdriver_service_account_key"`
+
+	ServiceBrokerServiceAccountKey string `json:"service_broker_service_account_key"`
+	ServiceBrokerDbIp              string `json:"service_broker_db_ip"`
+	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
+	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
 
 	Region      string `json:"region"`
 	Zone1       string `json:"azs_0"`

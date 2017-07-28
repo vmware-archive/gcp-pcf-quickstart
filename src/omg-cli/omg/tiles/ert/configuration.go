@@ -4,22 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"omg-cli/config"
+	"omg-cli/omg/tiles"
 	"omg-cli/ops_manager"
 )
-
-type AvalibilityZone struct {
-	Name string `json:"name"`
-}
-
-type NetworkName struct {
-	Name string `json:"name"`
-}
-
-type Network struct {
-	SingletonAvalibilityZone AvalibilityZone   `json:"singleton_availability_zone"`
-	OtherAvailabilityZones   []AvalibilityZone `json:"other_availability_zones"`
-	Network                  NetworkName       `json:"network"`
-}
 
 type Properties struct {
 	// Domains
@@ -104,11 +91,7 @@ func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		return err
 	}
 
-	network := Network{
-		AvalibilityZone{cfg.Zone1},
-		[]AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
-		NetworkName{cfg.ErtSubnetName},
-	}
+	network := tiles.NetworkConfig(cfg.ErtSubnetName, cfg)
 
 	networkBytes, err := json.Marshal(&network)
 	if err != nil {

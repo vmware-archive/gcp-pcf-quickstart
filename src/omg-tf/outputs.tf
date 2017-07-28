@@ -170,6 +170,18 @@ output "stackdriver_service_account_key" {
   value = "${var.stackdriver_service_account_key}"
 }
 
-output "servicebroker_service_account_key" {
-  value = "${var.servicebroker_service_account_key}"
+output "service_broker_service_account_key" {
+  value = "${var.service_broker_service_account_key}"
+}
+
+output "service_broker_db_ip" {
+  value = "${google_sql_database_instance.service_broker.ip_address.0.ip_address}"
+}
+
+output "service_broker_db_username" {
+  value = "${random_id.service_broker_username.b64}"
+}
+
+output "service_broker_db_password" {
+  value = "${random_id.service_broker_password.b64}"
 }

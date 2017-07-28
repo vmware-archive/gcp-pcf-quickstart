@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -ue
+cd "$(dirname "$0")"
 
 if [ -z ${DNS_ZONE_NAME+x} ]; then
     echo "DNS_ZONE_NAME required"
@@ -31,7 +32,5 @@ pushd src/omg-tf
 popd
 
 # Deploy PCF
-pushd src/omg-cli
-    go build
-    ./omg-cli bootstrap-deploy --ssh-key-path ../omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}
-popd
+go install omg-cli
+omg-cli bootstrap-deploy --ssh-key-path src/omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}

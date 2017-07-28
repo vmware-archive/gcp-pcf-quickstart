@@ -123,6 +123,7 @@ func (s *OpsManager) PoolTillOnline() error {
 
 func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
+		s.logger.Printf("configuring tile: %s", t.Definition().Product.Name)
 		if err := t.Configure(s.cfg, s.om); err != nil {
 			return err
 		}

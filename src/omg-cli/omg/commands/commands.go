@@ -25,8 +25,8 @@ const (
 var selectedTiles = []tiles.TileInstaller{
 	gcp_director.Tile{},
 	ert.Tile{},
-	stackdriver_nozzle.Tile{},
 	service_broker.Tile{},
+	stackdriver_nozzle.Tile{},
 }
 
 type register interface {
