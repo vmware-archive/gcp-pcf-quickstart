@@ -40,7 +40,3 @@ resource "google_compute_instance" "ops-manager" {
   }
 }
 
-resource "google_storage_bucket" "director" {
-  name          = "${var.env_name}-director"
-  force_destroy = true
-}
