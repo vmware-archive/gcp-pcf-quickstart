@@ -11,37 +11,44 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
-type Deploy struct {
+type DeployCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
 	opsManCreds         config.OpsManagerCredentials
+	applyChanges        bool
 }
 
 const DeployName = "deploy"
 
-func (comc *Deploy) register(app *kingpin.Application) {
-	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(comc.run)
-	registerTerraformConfigFlag(c, &comc.terraformConfigPath)
-	registerOpsManagerFlags(c, &comc.opsManCreds)
+func (dc *DeployCommand) register(app *kingpin.Application) {
+	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(dc.run)
+	registerTerraformConfigFlag(c, &dc.terraformConfigPath)
+	registerOpsManagerFlags(c, &dc.opsManCreds)
+	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&dc.applyChanges)
 }
 
-func (comc *Deploy) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(comc.terraformConfigPath)
+func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
+	cfg, err := config.FromTerraform(dc.terraformConfigPath)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), comc.opsManCreds, *comc.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), dc.opsManCreds, *dc.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, nil, comc.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, omSdk, nil, dc.logger, selectedTiles)
 
-	return run([]step{
+	steps := []step{
 		opsMan.PoolTillOnline,
 		opsMan.Unlock,
 		opsMan.ConfigureTiles,
-		func() error { return retry(opsMan.ApplyChanges, 5) },
-	})
+	}
+
+	if dc.applyChanges {
+		steps = append(steps, func() error { return retry(opsMan.ApplyChanges, 3) })
+	}
+
+	return run(steps)
 }

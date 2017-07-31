@@ -22,12 +22,8 @@ const (
 	defaultSkipSSLVerify    = "true"
 )
 
-var selectedTiles = []tiles.TileInstaller{
-	gcp_director.Tile{},
-	ert.Tile{},
-	service_broker.Tile{},
-	stackdriver_nozzle.Tile{},
-}
+// TODO(jrjohnson): Remove? Move?
+var selectedTiles []tiles.TileInstaller
 
 type register interface {
 	register(app *kingpin.Application)
@@ -36,13 +32,20 @@ type register interface {
 func Configure(logger *log.Logger, app *kingpin.Application) {
 	cmds := []register{
 		&PushTilesCommand{logger: logger},
-		&Deploy{logger: logger},
+		&DeployCommand{logger: logger},
 		&BootstrapDeployCommand{logger: logger},
 		&BootstrapPushTilesCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
 		c.register(app)
+	}
+
+	selectedTiles = []tiles.TileInstaller{
+		&gcp_director.Tile{},
+		&ert.Tile{},
+		&stackdriver_nozzle.Tile{Logger: logger},
+		&service_broker.Tile{},
 	}
 }
 

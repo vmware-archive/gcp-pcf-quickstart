@@ -12,9 +12,9 @@ var tile = config.Tile{
 
 type Tile struct{}
 
-func (Tile) Definition() config.Tile {
+func (*Tile) Definition() config.Tile {
 	return tile
 }
-func (Tile) BuiltIn() bool {
+func (*Tile) BuiltIn() bool {
 	return true
 }

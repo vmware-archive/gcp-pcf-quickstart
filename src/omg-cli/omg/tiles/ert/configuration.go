@@ -86,7 +86,7 @@ type Resource struct {
 	InternetConnected bool     `json:"internet_connected"`
 }
 
-func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
 	}

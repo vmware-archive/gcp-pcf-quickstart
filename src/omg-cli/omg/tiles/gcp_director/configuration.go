@@ -14,7 +14,7 @@ const (
 	metadataService = "169.254.169.254"
 )
 
-func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	networks, networkAssignment := networkCfg(cfg)
 
 	return om.SetupBosh(gcp(cfg), director(), avalibilityZones(cfg), networks, networkAssignment, resources())

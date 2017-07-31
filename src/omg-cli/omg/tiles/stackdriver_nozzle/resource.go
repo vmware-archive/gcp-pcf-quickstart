@@ -1,8 +1,8 @@
 package stackdriver_nozzle
 
 import (
+	"log"
 	"omg-cli/config"
-	"omg-cli/ops_manager"
 )
 
 var tile = config.Tile{
@@ -25,24 +25,14 @@ var tile = config.Tile{
 	},
 }
 
-type Tile struct{}
-
-func (Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	println("TODO: Configure Stackdriver Nozzle. Skipping.")
-	return nil
+type Tile struct {
+	Logger *log.Logger
 }
 
-func (Tile) Definition() config.Tile {
+func (*Tile) Definition() config.Tile {
 	return tile
 }
 
-func (Tile) BuiltIn() bool {
+func (*Tile) BuiltIn() bool {
 	return false
 }
-
-
-/*
-.properties.firehose_endpoint
-.properties.firehose_username
-.properties.firehose_password][secret]
- */

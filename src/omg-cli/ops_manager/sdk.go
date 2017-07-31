@@ -13,6 +13,10 @@ import (
 
 	"omg-cli/config"
 
+	"io"
+
+	"io/ioutil"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -34,6 +38,20 @@ type Sdk struct {
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
 	httpClient            *http.Client
+}
+
+type CredentialResponse struct {
+	Credential CredentialWrapper `json:"credential"`
+}
+
+type CredentialWrapper struct {
+	Type  string           `json:"type"`
+	Value SimpleCredential `json:"value"`
+}
+
+type SimpleCredential struct {
+	Identity string `json:"identity"`
+	Password string `json:"password"`
 }
 
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
@@ -245,4 +263,53 @@ func (om *Sdk) ConfigureProduct(name, networks, properties string, resources str
 		"--product-properties", properties,
 		"--product-resources", resources,
 	})
+}
+
+type ErrorResponse struct {
+	Errors map[string][]string `json:errors`
+}
+
+func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
+	request, err := http.NewRequest(method, fmt.Sprintf("%s/%s", om.target, path), data)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := om.client.Do(request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the OpsMan API returned an error
+	errResp := ErrorResponse{make(map[string][]string)}
+	if err := json.Unmarshal(body, &errResp); err == nil {
+		if len(errResp.Errors) != 0 {
+			return nil, fmt.Errorf("error from Ops Manager API requesting %s: %v", path, errResp.Errors)
+		}
+	}
+
+	return body, nil
+}
+
+func (om *Sdk) GetCredentials(productGuid, credential string) (*SimpleCredential, error) {
+	body, err := om.curl(fmt.Sprintf("api/v0/deployed/products/%s/credentials/%s", productGuid, credential), http.MethodGet, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp CredentialResponse
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, fmt.Errorf("malformed credentials response: %s", string(body))
+	}
+
+	if resp.Credential.Value.Password == "" || resp.Credential.Value.Identity == "" {
+		return nil, fmt.Errorf("recieved an empty credential: %s", string(body))
+	}
+
+	return &resp.Credential.Value, nil
 }
