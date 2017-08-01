@@ -47,7 +47,7 @@ func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	if dc.applyChanges {
-		steps = append(steps, func() error { return retry(opsMan.ApplyChanges, 3) })
+		steps = append(steps, opsMan.ApplyChanges)
 	}
 
 	return run(steps)

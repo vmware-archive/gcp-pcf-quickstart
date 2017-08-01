@@ -65,8 +65,10 @@ func networkCfg(cfg *config.Config) (networks commands.NetworksConfiguration, ne
 }
 
 func director() (director commands.DirectorConfiguration) {
+	t := true
 	director = commands.DirectorConfiguration{
-		NTPServers: metadataService, // gcp metadata service
+		NTPServers:              metadataService, // gcp metadata service
+		EnableBoshDeployRetries: &t,
 	}
 
 	return
