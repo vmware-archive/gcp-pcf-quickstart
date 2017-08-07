@@ -27,10 +27,10 @@ pushd src/omg-tf
     if [ ! -f terraform.tfvars ]; then
         ./init.sh
     fi
-    terraform apply
+    terraform apply --parallelism=100
     terraform output -json > ${terraform_output}
 popd
 
 # Deploy PCF
 go install omg-cli
-omg-cli bootstrap-deploy --ssh-key-path src/omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output}
+omg-cli bootstrap-deploy --ssh-key-path src/omg-tf/keys/jumpbox_ssh --username omg --terraform-output-path ${terraform_output} $@
