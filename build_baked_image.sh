@@ -31,7 +31,7 @@ pushd src/omg-tf
     if [ ! -f terraform.tfvars ]; then
         ./init.sh
     fi
-    terraform apply
+    terraform apply --parallelism=100
     terraform output -json > ${terraform_output}
     export opsman_instance_name=$(terraform output ops_manager_instance_name)
     export opsman_instance_zone=$(terraform output ops_manager_instance_zone)
