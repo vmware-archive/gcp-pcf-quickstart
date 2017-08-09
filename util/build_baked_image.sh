@@ -17,7 +17,7 @@
 #
 
 set -eu
-cd "$(dirname "$0")../"
+cd "$(dirname "$0")/../"
 
 if [ -z ${PROJECT_ID+x} ]; then
     export PROJECT_ID=${PROJECT_ID-`gcloud config get-value project  2> /dev/null`}
@@ -47,7 +47,7 @@ if [ -z ${ENV_NAME+X} ]; then
 fi
 
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="$PWD/env"
+    export ENV_DIR="$PWD/env/${ENV_NAME}"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
 mkdir -p ${ENV_DIR}
