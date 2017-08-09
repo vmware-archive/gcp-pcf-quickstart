@@ -1,7 +1,6 @@
 # OMG! Ops Manager on Google
 
-- [Design Doc](https://docs.google.com/document/d/1HNZ_rV59DGCyuZqz_gUMvccbBPawQHBh7kqFq1phaLY/edit#heading=h.jgubdjc8el47)
-- [Dogfood Doc](https://docs.google.com/document/d/10Pvix0372eaUUXBJWU8e9EIUWOFaHr6Xe6VEj7gCMsU/edit#)
+TODO: Introduction
 
 ## TODO: Prerequisites
 
