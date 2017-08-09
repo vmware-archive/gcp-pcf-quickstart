@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -eu
+cd "$(dirname "$0")../"
 
 if [ -z ${PROJECT_ID+x} ]; then
     export PROJECT_ID=${PROJECT_ID-`gcloud config get-value project  2> /dev/null`}
@@ -24,17 +25,29 @@ if [ -z ${DNS_ZONE_NAME+x} ]; then
     exit 1
 fi
 
-terraform_output=$(mktemp)
+if [ -z ${ENV_NAME+X} ]; then
+    export ENV_NAME="omg"
+    echo "ENV_NAME unset, using: ${ENV_NAME}"
+fi
+
+if [ -z ${ENV_DIR+X} ]; then
+    export ENV_DIR="$PWD/env"
+    echo "ENV_DIR unset, using: ${ENV_DIR}"
+fi
+mkdir -p ${ENV_DIR}
+
+terraform_output="${ENV_DIR}/env.json"
+terraform_config="${ENV_DIR}/terraform.tfvars"
 
 # Setup infrastructure
 pushd src/omg-tf
     if [ ! -f terraform.tfvars ]; then
         ./init.sh
     fi
-    terraform apply --parallelism=100
-    terraform output -json > ${terraform_output}
-    export opsman_instance_name=$(terraform output ops_manager_instance_name)
-    export opsman_instance_zone=$(terraform output ops_manager_instance_zone)
+    terraform apply --parallelism=100 -state=${ENV_DIR}
+    terraform output -json -state=${ENV_DIR} > ${terraform_output}
+    export opsman_instance_name=$(terraform output -state=${ENV_DIR} ops_manager_instance_name)
+    export opsman_instance_zone=$(terraform output -state=${ENV_DIR} ops_manager_instance_zone)
 popd
 
 # Hydrate Ops Manager

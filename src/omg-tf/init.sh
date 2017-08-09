@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+if [ -z ${ENV_DIR+X} ]; then
+    echo "ENV_DIR required"
+    exit
+fi
+
+cd ${ENV_DIR}
+
 if [ -z ${DNS_ZONE_NAME+x} ]; then
     echo "DNS_ZONE_NAME required"
     exit 1
@@ -18,6 +25,7 @@ if [ -z ${DNS_SUFFIX+x} ]; then
 
     if [ `dig ${DNS_SUFFIX} NS +short | wc -l` == "0" ]; then
         echo "Failed to resolve NS records for ${DNS_SUFFIX}"
+        exit 1
     fi
 fi
 
@@ -25,11 +33,6 @@ fi
 if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     echo "BASE_IMAGE_URL or BASE_IMAGE_SELFLINK is required"
     exit 1
-fi
-
-if [ -z ${ENV_NAME+X} ]; then
-    export ENV_NAME="omg"
-    echo "ENV_NAME unset, using: ${ENV_NAME}"
 fi
 
 # Terraform Service Account
@@ -67,7 +70,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 
 mkdir -p keys
 pushd keys
-  openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
+  openssl genrsa -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
   -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${ENV_NAME}.${DNS_SUFFIX}"

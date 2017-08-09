@@ -19,8 +19,10 @@ You will need to enable the following Google Cloud APIs:
 export PROJECT_ID="your-gcp-project"
 export DNS_SUFFIX="cf.your-domain.example.org"
 export BASE_IMAGE="https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz"
+export ENV_DIR="$HOME/omg-env/"
+mkdir -p ${ENV_DIR}
 ./init.sh
-terraform apply
+terraform apply --state=${ENV_DIR}
 ```
 
 ### Destroying
@@ -32,12 +34,12 @@ rm terraform.tfvars
 ## Connecting to the environment
 
 ```bash
-sshuttle -e "ssh -i keys/jumpbox_ssh" -r $(terraform output jumpbox_public_ip) 10.0.0.0/16
+sshuttle -e "ssh -i ${ENV_DIR}/keys/jumpbox_ssh" -r $(terraform output jumpbox_public_ip --state=${ENV_DIR}) 10.0.0.0/16
 ```
 
 ## Configuration for omg-cli
 ```bash
-terraform output -json > ../omg-cli/env.json
+terraform output -json > ${ENV_DIR}/env.json
 ```
 
 ## Appendix

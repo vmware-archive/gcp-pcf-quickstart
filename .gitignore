@@ -2,5 +2,5 @@ pkg/*
 bin/*
 .cache
 .idea/*
+env/*
 service_account.json
-
