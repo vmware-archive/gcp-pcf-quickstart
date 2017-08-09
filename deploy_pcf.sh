@@ -16,7 +16,7 @@ fi
 gcloud config set project ${PROJECT_ID}
 
 if [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
-    export BASE_IMAGE_SELFLINK="baked-opsman-dogfood-1501261888"
+    export BASE_IMAGE_SELFLINK="baked-opsman-1501261888"
     echo "BASE_IMAGE_SELFLINK unset, using: ${BASE_IMAGE_SELFLINK}"
 fi
 
