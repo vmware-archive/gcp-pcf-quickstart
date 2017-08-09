@@ -165,3 +165,7 @@ func (s *OpsManager) UploadTiles() error {
 
 	return nil
 }
+
+func (s *OpsManager) DeleteInstallation() error {
+	return s.om.DeleteInstallation()
+}

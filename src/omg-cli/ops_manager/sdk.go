@@ -329,3 +329,12 @@ func (om *Sdk) GetCredentials(productGuid, credential string) (*SimpleCredential
 
 	return &resp.Credential.Value, nil
 }
+
+func (om *Sdk) DeleteInstallation() error {
+	logWriter := commands.NewLogWriter(os.Stdout)
+	deleteInstallationService := api.NewInstallationAssetService(om.client, nil, nil)
+	installationsService := api.NewInstallationsService(om.client)
+	cmd := commands.NewDeleteInstallation(deleteInstallationService, installationsService, logWriter, om.logger, poolingIntervalSec)
+
+	return cmd.Execute(nil)
+}
