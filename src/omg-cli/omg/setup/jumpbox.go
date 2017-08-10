@@ -23,6 +23,7 @@ import (
 	"log"
 	"omg-cli/ssh"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -31,6 +32,8 @@ type Jumpbox struct {
 	session             *ssh.Connection
 	terraformConfigPath string
 }
+
+const packageName = "omg-cli"
 
 func NewJumpbox(logger *log.Logger, ip, username, sshKeyPath, terraformConfigPath string) (*Jumpbox, error) {
 	jumpboxLogger := *logger
@@ -72,16 +75,24 @@ func (jb *Jumpbox) UploadDependencies() error {
 		return err
 	}
 
-	me, err := os.Executable()
+	rebuilt, err := ioutil.TempFile("", "tile")
 	if err != nil {
 		return err
+	}
+	defer os.Remove(rebuilt.Name())
+	build := exec.Command("go", "build", "-o", rebuilt.Name(), packageName)
+	build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64", fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH")))
+	build.Stderr = os.Stderr
+	build.Stdout = os.Stdout
+	if err := build.Run(); err != nil {
+		return fmt.Errorf("rebuilding go: %v", err)
 	}
 
 	for _, f := range []struct {
 		local string
 		dest  string
 	}{
-		{me, "omg-cli"},
+		{rebuilt.Name(), packageName},
 		{jb.terraformConfigPath, "env.json"},
 	} {
 		if err := jb.session.UploadFile(f.local, f.dest); err != nil {
@@ -97,5 +108,5 @@ func (jb *Jumpbox) RunOmg(args string) error {
 		return err
 	}
 
-	return jb.session.RunCommand(fmt.Sprintf("~/omg-cli %s", args))
+	return jb.session.RunCommand(fmt.Sprintf("~/%s %s", packageName, args))
 }
