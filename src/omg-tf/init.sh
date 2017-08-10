@@ -35,6 +35,11 @@ fi
 
 if [ -z ${DNS_SUFFIX+x} ]; then
     dns_suffix=`gcloud dns managed-zones describe ${DNS_ZONE_NAME} --project ${PROJECT_ID} --format="value(dnsName)"  2> /dev/null`
+    if [ $? != 0 ]; then
+        echo "Expected to find Cloud DNS managed zone ${DNS_ZONE_NAME} in ${PROJECT_ID}"
+        exit 1
+    fi
+
     # trim trailing '.' from response
     export DNS_SUFFIX=${dns_suffix%.}
     echo "DNS_SUFFIX unset, using: ${DNS_SUFFIX}"
