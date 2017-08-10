@@ -57,7 +57,7 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
 fi
 
 # Terraform Service Account
-terraform_service_account_name=omg-terraform
+terraform_service_account_name=${ENV_NAME}-terraform
 terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 terraform_service_account_file=$(mktemp)
 
