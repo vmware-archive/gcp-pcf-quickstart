@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -u
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_NAME+X} ]; then
