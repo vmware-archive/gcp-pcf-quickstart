@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #
 # Copyright 2017 Google Inc.
 #
@@ -15,7 +16,7 @@
 # limitations under the License.
 #
 
-set -eu
+set -u
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_NAME+X} ]; then
