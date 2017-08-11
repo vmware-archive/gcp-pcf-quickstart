@@ -77,7 +77,7 @@ func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	dic.logger.Printf("username: %s", cred.Identity)
+	dic.logger.Printf("identity: %s", cred.Identity)
 	dic.logger.Printf("password: %s", cred.Password)
 
 	return nil
