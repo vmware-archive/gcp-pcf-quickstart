@@ -23,9 +23,6 @@ import (
 	"omg-cli/config"
 	"omg-cli/ops_manager"
 
-	"encoding/json"
-	"os"
-
 	"github.com/alecthomas/kingpin"
 )
 
@@ -80,16 +77,8 @@ func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	dic.logger.Printf("fetched credential")
-
-	val, err := json.Marshal(&cred)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(os.Stderr, "%s", string(val))
-
-	fmt.Println()
+	dic.logger.Printf("username: %s", cred.Identity)
+	dic.logger.Printf("password: %s", cred.Password)
 
 	return nil
 }
