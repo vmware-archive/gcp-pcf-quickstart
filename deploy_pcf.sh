@@ -66,4 +66,4 @@ popd
 export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
-omg-cli remote --env-dir="${ENV_DIR}" --command="deploy $@"
+omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"
