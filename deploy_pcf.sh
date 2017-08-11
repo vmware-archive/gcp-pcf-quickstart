@@ -66,4 +66,4 @@ popd
 export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
-omg-cli bootstrap-deploy --ssh-key-path "${ENV_DIR}/keys/jumpbox_ssh" --username omg --terraform-output-path ${terraform_output} $@
+omg-cli remote --env-dir="${ENV_DIR}" --command="deploy $@"

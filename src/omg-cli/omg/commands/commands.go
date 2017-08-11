@@ -49,10 +49,9 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 	cmds := []register{
 		&PushTilesCommand{logger: logger},
 		&DeployCommand{logger: logger},
-		&BootstrapDeployCommand{logger: logger},
-		&BootstrapPushTilesCommand{logger: logger},
 		&DeleteInstallationCommand{logger: logger},
 		&GetCredentialCommand{logger: logger},
+		&RemoteCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
