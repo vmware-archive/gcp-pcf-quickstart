@@ -41,8 +41,8 @@ const (
 
 func (bc *RemoteCommand) register(app *kingpin.Application) {
 	c := app.Command(RemoteName, "Run an OMG command from outside of the network").Action(bc.run)
-	c.Flag("env-dir", "path to environment configuration and state").Required().StringVar(&bc.envDir)
-	c.Flag("command", "command and arguments to execute").Required().StringVar(&bc.command)
+	c.Flag("env-dir", "path to environment configuration and state").Default("env/omg").StringVar(&bc.envDir)
+	c.Arg("command", "command and arguments to execute").Required().StringVar(&bc.command)
 }
 
 func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
