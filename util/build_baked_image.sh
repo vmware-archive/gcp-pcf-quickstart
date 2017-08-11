@@ -67,10 +67,10 @@ pushd src/omg-tf
 popd
 
 # Hydrate Ops Manager
-pushd src/omg-cli
-    go build
-    ./omg-cli bootstrap-push-tiles --ssh-key-path ../omg-tf/keys/jumpbox_ssh --username omg --pivnet-api-token=${PIVNET_API_TOKEN} --terraform-output-path ${terraform_output}
-popd
+export GOPATH=`pwd`
+export PATH=$PATH:$GOPATH/bin
+go install omg-cli
+omg-cli remote --env-dir="${ENV_DIR}" --command="push-tiles --pivnet-api-token=${PIVNET_API_TOKEN}"
 
 # Capture image
 image_name="baked-opsman-$(date +%s)"
