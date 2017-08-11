@@ -51,6 +51,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&DeployCommand{logger: logger},
 		&DeleteInstallationCommand{logger: logger},
 		&GetCredentialCommand{logger: logger},
+		&GetProductsCommand{logger: logger},
 		&RemoteCommand{logger: logger},
 	}
 

@@ -29,26 +29,21 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
-type GetCredentialCommand struct {
+type GetProductsCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
 	opsManCreds         config.OpsManagerCredentials
-	productType         string
-	credential          string
 }
 
-const GetCredentialName = "get-credential"
+const GetProductsName = "get-products"
 
-func (dic *GetCredentialCommand) register(app *kingpin.Application) {
-	c := app.Command(GetCredentialName, "Fetch a credential for a tile").Action(dic.run)
+func (dic *GetProductsCommand) register(app *kingpin.Application) {
+	c := app.Command(GetProductsName, "List installed products").Action(dic.run)
 	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
 	registerOpsManagerFlags(c, &dic.opsManCreds)
-
-	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&dic.productType)
-	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&dic.credential)
 }
 
-func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
+func (dic *GetProductsCommand) run(c *kingpin.ParseContext) error {
 	cfg, err := config.FromTerraform(dic.terraformConfigPath)
 	if err != nil {
 		return err
@@ -64,25 +59,9 @@ func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	appGuid := ""
-	for _, p := range products {
-		if p.Type == dic.productType {
-			appGuid = p.Guid
-		}
-	}
+	dic.logger.Printf("fetched products")
 
-	if appGuid == "" {
-		return fmt.Errorf("could not find installed application by name: %s", dic.productType)
-	}
-
-	cred, err := omSdk.GetCredentials(appGuid, dic.credential)
-	if err != nil {
-		return err
-	}
-
-	dic.logger.Printf("fetched credential")
-
-	val, err := json.Marshal(&cred)
+	val, err := json.Marshal(&products)
 	if err != nil {
 		return err
 	}

@@ -70,6 +70,12 @@ type SimpleCredential struct {
 	Password string `json:"password"`
 }
 
+type Product struct {
+	InstallationName string `json:"installation_name"`
+	Guid             string `json:"guid"`
+	Type             string `json:"type"`
+}
+
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
 	if err != nil {
@@ -310,6 +316,20 @@ func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func (om *Sdk) GetProducts() ([]Product, error) {
+	body, err := om.curl("api/v0/deployed/products", http.MethodGet, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []Product
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, fmt.Errorf("malformed products response: %s", string(body))
+	}
+
+	return resp, nil
 }
 
 func (om *Sdk) GetCredentials(productGuid, credential string) (*SimpleCredential, error) {
