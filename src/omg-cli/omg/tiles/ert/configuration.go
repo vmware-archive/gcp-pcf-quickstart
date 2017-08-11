@@ -29,11 +29,12 @@ type Properties struct {
 	AppsDomain Value `json:".cloud_controller.apps_domain"`
 	SysDomain  Value `json:".cloud_controller.system_domain"`
 	// Networking
-	NetworkingPointOfEntry    Value `json:".properties.networking_point_of_entry"`
-	TcpRouting                Value `json:".properties.tcp_routing"`
-	TcpRoutingReservablePorts Value `json:".properties.tcp_routing.enable.reservable_ports"`
-	//SkipSSLVerification       BooleanValue `json:".properties.route_services.enable.ignore_ssl_cert_verification"`
-	SkipSSLVerification BooleanValue `json:".ha_proxy.skip_cert_verify"`
+	NetworkingPointOfEntry    Value        `json:".properties.networking_point_of_entry"`
+	TcpRouting                Value        `json:".properties.tcp_routing"`
+	TcpRoutingReservablePorts Value        `json:".properties.tcp_routing.enable.reservable_ports"`
+	SkipSSLVerification       BooleanValue `json:".ha_proxy.skip_cert_verify"`
+	// Application Containers
+	ContainerDNSServers Value `json:".diego_cell.dns_servers"`
 	// Application Security Groups
 	SecurityAcknowledgement Value `json:".properties.security_acknowledgement"`
 	// UAA
@@ -118,6 +119,7 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		AppsDomain:                 Value{fmt.Sprintf("apps.%s", cfg.DnsSuffix)},
 		SysDomain:                  Value{fmt.Sprintf("sys.%s", cfg.DnsSuffix)},
 		NetworkingPointOfEntry:     Value{"external_non_ssl"},
+		ContainerDNSServers:        Value{"8.8.8.8,8.8.4.4"},
 		SkipSSLVerification:        BooleanValue{true},
 		TcpRouting:                 Value{"enable"},
 		TcpRoutingReservablePorts:  Value{cfg.TcpPortRange},
