@@ -31,12 +31,10 @@ const (
 )
 
 type Properties struct {
-	Endpoint          Value       `json:".properties.firehose_endpoint"`
-	Username          Value       `json:".properties.firehose_username"`
-	Password          SecretValue `json:".properties.firehose_password"`
-	SkipSSLValidation Value       `json:".properties.firehose_skip_ssl"`
-	ServiceAccount    Value       `json:".properties.service_account"`
-	ProjectID         Value       `json:".properties.project_id"`
+	Endpoint          Value `json:".properties.firehose_endpoint"`
+	SkipSSLValidation Value `json:".properties.firehose_skip_ssl"`
+	ServiceAccount    Value `json:".properties.service_account"`
+	ProjectID         Value `json:".properties.project_id"`
 }
 
 type Value struct {
@@ -56,15 +54,6 @@ type SecretValue struct {
 }
 
 func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	// TODO(jrjohnson): Should we create a new, scoped UAA user here?
-	// What about `.uaa.stackdriver_nozzle_credentials` Is that a real user?
-	cred, err := om.GetCredentials(cfGuid, uaaCredential)
-	if err != nil {
-		// TODO(jrjohnson): We should check if ERT has been successfully deployed
-		t.Logger.Printf("stackdriver nozzle: error getting credentials. skipping configuration. If ERT isn't deployed yet then this ignore this error: %v", err)
-		return nil
-	}
-
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
 	}
@@ -77,8 +66,6 @@ func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	}
 
 	properties := &Properties{
-		Username:          Value{cred.Identity},
-		Password:          SecretValue{Secret{cred.Password}},
 		Endpoint:          Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
 		SkipSSLValidation: Value{skipSSLValidation},
 		ServiceAccount:    Value{cfg.StackdriverNozzleServiceAccountKey},
