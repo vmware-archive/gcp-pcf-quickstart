@@ -625,6 +625,12 @@
 			"revisionTime": "2017-07-05T20:32:08Z"
 		},
 		{
+			"checksumSHA1": "2iDO1ND8992m8diFkBT4+8vaWok=",
+			"path": "google.golang.org/api/servicemanagement/v1",
+			"revision": "ed10e890a8366167a7ce33fac2b12447987bcb1c",
+			"revisionTime": "2017-08-17T17:08:30Z"
+		},
+		{
 			"checksumSHA1": "WPEbk80NB3Esdh4Yk0PXr2K7xVU=",
 			"path": "google.golang.org/appengine",
 			"revision": "ad2570cd3913654e00c5f0183b39d2f998e54046",
