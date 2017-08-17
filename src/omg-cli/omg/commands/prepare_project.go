@@ -51,10 +51,7 @@ func (ppc *PrepareProjectCommand) register(app *kingpin.Application) {
 	c.Flag("region", "Region (if not using terraform-config)").StringVar(&ppc.region)
 }
 
-func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
-	var cfg *config.Config
-	var gcpClient *http.Client
-
+func (ppc *PrepareProjectCommand) parseArgs() (cfg *config.Config, gcpClient *http.Client, err error) {
 	if _, err := os.Stat(ppc.terraformConfigPath); err == nil {
 		cfg, err = config.FromTerraform(ppc.terraformConfigPath)
 		if err != nil {
@@ -75,45 +72,67 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 		}
 
 		if ppc.projectId == "" {
-			return errors.New("specify --project-id")
+			err = errors.New("specify --project-id")
 		}
 
 		if ppc.region == "" {
-			return errors.New("specify --region")
+			err = errors.New("specify --region")
 		}
 	}
 
-	quotaService, err := google.NewQuotaService(ppc.logger, cfg.ProjectName, gcpClient)
+	return
+}
+
+func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
+	cfg, gcpClient, err := ppc.parseArgs()
 	if err != nil {
-		ppc.logger.Fatalf("creating QuotaService: %v", err)
+		return err
 	}
 
-	apiService, err := google.NewAPIService(ppc.logger, cfg.ProjectName, gcpClient)
-	if err != nil {
-		ppc.logger.Fatalf("creating ApiService: %v", err)
-	}
-
-	validator, err := setup.NewProjectValiadtor(ppc.logger, quotaService, apiService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg), setup.RequiredAPIs())
+	validator, err := createValidator(ppc.logger, cfg, gcpClient)
 	if err != nil {
 		ppc.logger.Fatalf("creating ProjectValidator: %v", err)
 	}
 
+	validateQuotas(ppc.logger, validator)
+	validateApis(ppc.logger, validator)
+
+	return nil
+}
+
+func createValidator(logger *log.Logger, cfg *config.Config, gcpClient *http.Client) (*setup.ProjectValidator, error) {
+	quotaService, err := google.NewQuotaService(logger, cfg.ProjectName, gcpClient)
+	if err != nil {
+		logger.Fatalf("creating QuotaService: %v", err)
+	}
+
+	apiService, err := google.NewAPIService(logger, cfg.ProjectName, gcpClient)
+	if err != nil {
+		logger.Fatalf("creating ApiService: %v", err)
+	}
+
+	return setup.NewProjectValiadtor(logger, quotaService, apiService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg), setup.RequiredAPIs())
+}
+
+func validateQuotas(logger *log.Logger, validator *setup.ProjectValidator) {
+	logger.Printf("validating Google Cloud Compute Engine quotas")
 	errors, satisfied, err := validator.ValidateQuotas()
 
 	for _, quotaError := range errors {
-		ppc.logger.Printf("Compute Engine quota requirement not satisfied: Name %s, Region: %s, Minimum Required: %v (Current Quota: %v)", quotaError.Name, quotaError.Region, quotaError.Limit, quotaError.Actual)
+		logger.Printf("Compute Engine quota requirement not satisfied: Name %s, Region: %s, Minimum Required: %v (Current Quota: %v)", quotaError.Name, quotaError.Region, quotaError.Limit, quotaError.Actual)
 	}
 
 	if err != nil {
-		ppc.logger.Fatal(err)
+		logger.Fatal(err)
 	}
-	ppc.logger.Printf("quotaService quota is adequate, satisfied %v rules", len(satisfied))
+	logger.Printf("Compute Engine quota is adequate, satisfied %v rules", len(satisfied))
+}
 
+func validateApis(logger *log.Logger, validator *setup.ProjectValidator) {
+	logger.Printf("enabling Google Cloud APIs")
 	enabledApis, err := validator.EnableAPIs()
 	if err != nil {
-		ppc.logger.Fatal(err)
+		logger.Fatal(err)
 	}
-	ppc.logger.Printf("enabled %d API(s)", len(enabledApis))
-
-	return nil
+	logger.Printf("enusred %d API(s) are enabled", len(enabledApis))
 }
