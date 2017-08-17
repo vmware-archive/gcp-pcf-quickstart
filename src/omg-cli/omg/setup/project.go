@@ -26,8 +26,10 @@ import (
 type ProjectValidator struct {
 	logger              *log.Logger
 	quotaService        google.QuotaService
+	apiService          google.APIService
 	projectRequirements []google.Quota
 	regionRequirements  map[string][]google.Quota
+	apiRequirements     []google.API
 }
 
 type QuotaError struct {
@@ -38,14 +40,14 @@ type QuotaError struct {
 
 var UnsatisfiedQuotaErr = errors.New("Compute Engine quota is unsatisfied, request an increase at: https://conscloud.google.com/iam-admin/quota")
 
-func NewProjectValiadtor(logger *log.Logger, projectService google.QuotaService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota) (*ProjectValidator, error) {
+func NewProjectValiadtor(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
-	return &ProjectValidator{logger, projectService, projectRequirements, regionRequirements}, nil
+	return &ProjectValidator{logger, quotaService, apiService, projectRequirements, regionRequirements, apiRequirements}, nil
 }
 
-func (pv *ProjectValidator) EnsureQuota() (errors []QuotaError, satisfied []google.Quota, err error) {
+func (pv *ProjectValidator) ValidateQuotas() (errors []QuotaError, satisfied []google.Quota, err error) {
 	quotas, err := pv.quotaService.Project()
 	if err != nil {
 		return nil, nil, err
@@ -86,6 +88,14 @@ func validateQuotas(requirements []google.Quota, quotas map[string]google.Quota,
 	return
 }
 
+func (pv *ProjectValidator) EnableAPIs() ([]google.API, error) {
+	enabled, err := pv.apiService.Enable(pv.apiRequirements)
+	if err != nil {
+		return nil, err
+	}
+	return enabled, nil
+}
+
 func ProjectQuotaRequirements() []google.Quota {
 	return []google.Quota{
 		{"NETWORKS", 2.0},
@@ -116,5 +126,35 @@ func RegionalQuotaRequirements(cfg *config.Config) map[string][]google.Quota {
 			{"INSTANCE_GROUPS", 10.0},
 			{"INSTANCES", 100.0},
 		},
+	}
+}
+
+func RequiredAPIs() []google.API {
+	return []google.API{
+		{"bigquery-json.googleapis.com"},
+		{"clouddebugger.googleapis.com"},
+		{"cloudresourcemanager.googleapis.com"},
+		{"datastore.googleapis.com"},
+		{"storage-component.googleapis.com"},
+		{"pubsub.googleapis.com"},
+		{"vision.googleapis.com"},
+		{"storage-api.googleapis.com"},
+		{"logging.googleapis.com"},
+		{"resourceviews.googleapis.com"},
+		{"replicapool.googleapis.com"},
+		{"cloudapis.googleapis.com"},
+		{"deploymentmanager.googleapis.com"},
+		{"containerregistry.googleapis.com"},
+		{"sqladmin.googleapis.com"},
+		{"monitoring.googleapis.com"},
+		{"dns.googleapis.com"},
+		{"runtimeconfig.googleapis.com"},
+		{"stackdriverprovisioning.googleapis.com"},
+		{"compute.googleapis.com"},
+		{"sql-component.googleapis.com"},
+		{"iam.googleapis.com"},
+		{"cloudtrace.googleapis.com"},
+		{"servicemanagement.googleapis.com"},
+		{"replicapoolupdater.googleapis.com"},
 	}
 }

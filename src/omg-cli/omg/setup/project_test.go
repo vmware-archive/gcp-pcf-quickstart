@@ -46,10 +46,10 @@ var _ = Describe("GcpProject", func() {
 			service := &googlefakes.FakeQuotaService{ProjectStub: func() (map[string]google.Quota, error) {
 				return nil, errors.New("My Error")
 			}}
-			project, err := NewProjectValiadtor(logger, service, []google.Quota{}, map[string][]google.Quota{})
+			project, err := NewProjectValiadtor(logger, service, nil, []google.Quota{}, map[string][]google.Quota{}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
 
-			quotaErrors, _, err := project.EnsureQuota()
+			quotaErrors, _, err := project.ValidateQuotas()
 			Expect(err).To(HaveOccurred())
 			Expect(quotaErrors).To(BeNil())
 		})
@@ -63,10 +63,10 @@ var _ = Describe("GcpProject", func() {
 				}, nil
 			}}
 
-			project, err := NewProjectValiadtor(logger, service, []google.Quota{quotaRequirement}, map[string][]google.Quota{})
+			project, err := NewProjectValiadtor(logger, service, nil, []google.Quota{quotaRequirement}, map[string][]google.Quota{}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
 
-			quotaErrors, satisfied, err := project.EnsureQuota()
+			quotaErrors, satisfied, err := project.ValidateQuotas()
 			Expect(err).To(Equal(UnsatisfiedQuotaErr))
 			Expect(quotaErrors).ToNot(BeNil())
 			Expect(quotaErrors).To(ContainElement(QuotaError{quotaRequirement, 0.0, "global"}))
@@ -82,10 +82,10 @@ var _ = Describe("GcpProject", func() {
 				}, nil
 			}}
 
-			project, err := NewProjectValiadtor(logger, service, []google.Quota{quotaRequirement}, map[string][]google.Quota{})
+			project, err := NewProjectValiadtor(logger, service, nil, []google.Quota{quotaRequirement}, map[string][]google.Quota{}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
 
-			errors, satisfied, err := project.EnsureQuota()
+			errors, satisfied, err := project.ValidateQuotas()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(errors).To(BeEmpty())
 			Expect(satisfied).To(ContainElement(quotaRequirement))
@@ -102,10 +102,10 @@ var _ = Describe("GcpProject", func() {
 				}, nil
 			}}
 
-			project, err := NewProjectValiadtor(logger, service, []google.Quota{}, map[string][]google.Quota{"us-east1": {quotaRequirement}})
+			project, err := NewProjectValiadtor(logger, service, nil, []google.Quota{}, map[string][]google.Quota{"us-east1": {quotaRequirement}}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
 
-			errors, satisfied, err := project.EnsureQuota()
+			errors, satisfied, err := project.ValidateQuotas()
 			Expect(err).To(Equal(UnsatisfiedQuotaErr))
 			Expect(errors).To(ContainElement(QuotaError{quotaRequirement, 10.0, "us-east1"}))
 			Expect(satisfied).To(BeEmpty())
@@ -122,6 +122,27 @@ var _ = Describe("GcpProject", func() {
 			req := RegionalQuotaRequirements(cfg)
 			Expect(req).To(HaveKey("us-west1"))
 			Expect(req["us-west1"]).NotTo(BeEmpty())
+		})
+	})
+
+	Describe("EnableAPIs", func() {
+		It("enables", func() {
+			service := &googlefakes.FakeAPIService{}
+			requiredApis := []google.API{{"foo"}, {"bar"}}
+
+			project, err := NewProjectValiadtor(logger, nil, service, []google.Quota{}, map[string][]google.Quota{}, requiredApis)
+			Expect(err).NotTo(HaveOccurred())
+
+			project.EnableAPIs()
+
+			Expect(service.EnableCallCount()).To(Equal(1))
+			Expect(service.EnableArgsForCall(0)).To(Equal(requiredApis))
+		})
+	})
+
+	Describe("RequiredAPIs", func() {
+		It("generates required APIs", func() {
+			Expect(RequiredAPIs()).NotTo(BeEmpty())
 		})
 	})
 })
