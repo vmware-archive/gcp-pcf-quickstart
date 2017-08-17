@@ -17,13 +17,18 @@ package google
  */
 
 import (
+	"context"
 	"errors"
 	"log"
+
+	"net/http"
+
+	compute "google.golang.org/api/compute/v1"
 )
 
 type Quota struct {
 	Name  string
-	Limit float32
+	Limit float64
 }
 
 //go:generate counterfeiter ./ ProjectService
@@ -34,15 +39,34 @@ type ProjectService interface {
 type projectService struct {
 	logger    *log.Logger
 	projectId string
+	client    *http.Client
 }
 
 func (ps *projectService) Quotas() (map[string]Quota, error) {
-	panic("implement me")
+	ctx := context.Background()
+
+	computeService, err := compute.New(ps.client)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := computeService.Projects.Get(ps.projectId).Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	quotas := map[string]Quota{}
+	for _, quota := range project.Quotas {
+		quotas[quota.Metric] = Quota{quota.Metric, quota.Limit}
+	}
+
+	return quotas, nil
 }
 
-func NewProjectService(logger *log.Logger, projectId string) (ProjectService, error) {
+func NewProjectService(logger *log.Logger, projectId string, client *http.Client) (ProjectService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
-	return &projectService{logger, projectId}, nil
+
+	return &projectService{logger, projectId, client}, nil
 }

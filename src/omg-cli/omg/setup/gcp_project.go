@@ -30,7 +30,7 @@ type ProjectValidator struct {
 
 type QuotaError struct {
 	google.Quota
-	Actual float32
+	Actual float64
 }
 
 var UnsatisfiedQuotaErr = errors.New("quota unsatisfied")

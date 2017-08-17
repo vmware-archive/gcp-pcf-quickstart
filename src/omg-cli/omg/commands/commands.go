@@ -53,6 +53,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&GetCredentialCommand{logger: logger},
 		&GetProductsCommand{logger: logger},
 		&RemoteCommand{logger: logger},
+		&PrepareProjectCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
