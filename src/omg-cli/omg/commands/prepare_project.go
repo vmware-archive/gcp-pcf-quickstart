@@ -59,14 +59,14 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("creating ProjectService: %v", err)
 	}
 
-	validator, err := setup.NewProjectValiadtor(ppc.logger, project, []google.Quota{})
+	validator, err := setup.NewProjectValiadtor(ppc.logger, project, setup.QuotaRequirements())
 	if err != nil {
 		return fmt.Errorf("creating ProjectValidator: %v", err)
 	}
 
-	quotaErrors, err := validator.EnsureQuota()
+	errors, satisfied, err := validator.EnsureQuota()
 	if err == nil {
-		ppc.logger.Printf("project quota is adequate")
+		ppc.logger.Printf("project quota is adequate, satisfied %v rules", len(satisfied))
 		return nil
 	}
 
@@ -74,7 +74,7 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("error validating quota: %v", err)
 	}
 
-	for _, quotaError := range quotaErrors {
+	for _, quotaError := range errors {
 		ppc.logger.Printf("QuotaError: %v, Expected Limit: %v, Actual: %v", quotaError.Name, quotaError.Limit, quotaError.Actual)
 	}
 

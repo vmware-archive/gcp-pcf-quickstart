@@ -47,7 +47,7 @@ var _ = Describe("GcpProject", func() {
 			project, err := NewProjectValiadtor(logger, service, []google.Quota{})
 			Expect(err).NotTo(HaveOccurred())
 
-			quotaErrors, err := project.EnsureQuota()
+			quotaErrors, _, err := project.EnsureQuota()
 			Expect(err).To(HaveOccurred())
 			Expect(quotaErrors).To(BeNil())
 		})
@@ -64,10 +64,11 @@ var _ = Describe("GcpProject", func() {
 			project, err := NewProjectValiadtor(logger, service, []google.Quota{quotaRequirement})
 			Expect(err).NotTo(HaveOccurred())
 
-			quotaErrors, err := project.EnsureQuota()
+			quotaErrors, satisfied, err := project.EnsureQuota()
 			Expect(err).To(Equal(UnsatisfiedQuotaErr))
 			Expect(quotaErrors).ToNot(BeNil())
 			Expect(quotaErrors).To(ContainElement(QuotaError{quotaRequirement, 0.0}))
+			Expect(satisfied).To(BeEmpty())
 		})
 
 		It("detects adequate quota", func() {
@@ -82,9 +83,10 @@ var _ = Describe("GcpProject", func() {
 			project, err := NewProjectValiadtor(logger, service, []google.Quota{quotaRequirement})
 			Expect(err).NotTo(HaveOccurred())
 
-			quotaErrors, err := project.EnsureQuota()
+			errors, satisfied, err := project.EnsureQuota()
 			Expect(err).NotTo(HaveOccurred())
-			Expect(quotaErrors).To(BeNil())
+			Expect(errors).To(BeEmpty())
+			Expect(satisfied).To(ContainElement(quotaRequirement))
 		})
 	})
 })

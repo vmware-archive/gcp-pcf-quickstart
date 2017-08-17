@@ -42,13 +42,14 @@ func NewProjectValiadtor(logger *log.Logger, projectService google.ProjectServic
 	return &ProjectValidator{logger, projectService, requirements}, nil
 }
 
-func (pv *ProjectValidator) EnsureQuota() ([]QuotaError, error) {
+func (pv *ProjectValidator) EnsureQuota() (errors []QuotaError, satisfied []google.Quota, err error) {
 	quotas, err := pv.project.Quotas()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	errors := []QuotaError{}
+	errors = []QuotaError{}
+	satisfied = []google.Quota{}
 
 	for _, requirement := range pv.requirements {
 		quota, ok := quotas[requirement.Name]
@@ -57,13 +58,34 @@ func (pv *ProjectValidator) EnsureQuota() ([]QuotaError, error) {
 		} else {
 			if quota.Limit < requirement.Limit {
 				errors = append(errors, QuotaError{requirement, quota.Limit})
+			} else {
+				satisfied = append(satisfied, requirement)
 			}
 		}
 	}
 
 	if len(errors) != 0 {
-		return errors, UnsatisfiedQuotaErr
+		err = UnsatisfiedQuotaErr
 	}
+	return
+}
 
-	return nil, nil
+func QuotaRequirements() []google.Quota {
+	return []google.Quota{
+		{"NETWORKS", 2.0},
+		{"FIREWALLS", 7.0},
+		{"IMAGES", 15.0},
+		{"STATIC_ADDRESSES", 1.0},
+		{"ROUTES", 20.0},
+		{"FORWARDING_RULES", 4.0},
+		{"TARGET_POOLS", 2.0},
+		{"HEALTH_CHECKS", 3.0},
+		{"IN_USE_ADDRESSES", 4.0},
+		{"TARGET_HTTP_PROXIES", 1.0},
+		{"URL_MAPS", 2.0},
+		{"BACKEND_SERVICES", 4.0},
+		{"TARGET_HTTPS_PROXIES", 1.0},
+		{"SSL_CERTIFICATES", 1.0},
+		{"SUBNETWORKS", 15.0},
+	}
 }
