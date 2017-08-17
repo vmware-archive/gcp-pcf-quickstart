@@ -1,4 +1,4 @@
-package google
+package setup_test
 
 /*
  * Copyright 2017 Google Inc.
@@ -17,32 +17,13 @@ package google
  */
 
 import (
-	"errors"
-	"log"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"testing"
 )
 
-type Quota struct {
-	Name  string
-	Limit float32
-}
-
-//go:generate counterfeiter ./ ProjectService
-type ProjectService interface {
-	Quotas() (map[string]Quota, error)
-}
-
-type projectService struct {
-	logger    *log.Logger
-	projectId string
-}
-
-func (ps *projectService) Quotas() (map[string]Quota, error) {
-	panic("implement me")
-}
-
-func NewProjectService(logger *log.Logger, projectId string) (ProjectService, error) {
-	if logger == nil {
-		return nil, errors.New("missing logger")
-	}
-	return &projectService{logger, projectId}, nil
+func TestSetup(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Setup Suite")
 }
