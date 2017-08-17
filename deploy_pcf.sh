@@ -51,6 +51,16 @@ terraform_output="${ENV_DIR}/env.json"
 terraform_config="${ENV_DIR}/terraform.tfvars"
 terraform_state="${ENV_DIR}/terraform.tfstate"
 
+# TODO(jrjohnson): support region/zone selection
+REGION="us-east1"
+
+# Verify project is ready
+export GOPATH=`pwd`
+export PATH=$PATH:$GOPATH/bin
+go install omg-cli
+
+omg-cli prepare-project --project-id ${PROJECT_ID} --region ${REGION}
+
 # Setup infrastructure
 pushd src/omg-tf
     if [ ! -f $terraform_config ]; then
@@ -63,7 +73,4 @@ pushd src/omg-tf
 popd
 
 # Deploy PCF
-export GOPATH=`pwd`
-export PATH=$PATH:$GOPATH/bin
-go install omg-cli
 omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"

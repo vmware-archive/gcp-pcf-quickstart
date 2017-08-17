@@ -101,7 +101,7 @@ func registerOpsManagerFlags(c *kingpin.CmdClause, cfg *config.OpsManagerCredent
 }
 
 func registerTerraformConfigFlag(c *kingpin.CmdClause, path *string) {
-	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").Default("env.json").StringVar(path)
+	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").StringVar(path)
 }
 
 func registerPivnetFlag(c *kingpin.CmdClause, apiToken *string) {

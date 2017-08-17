@@ -17,12 +17,17 @@ package commands
  */
 
 import (
-	"fmt"
+	"context"
 	"log"
+	"net/http"
 
 	"omg-cli/config"
 	"omg-cli/google"
 	"omg-cli/omg/setup"
+
+	"os"
+
+	"errors"
 
 	"github.com/alecthomas/kingpin"
 	"golang.org/x/oauth2"
@@ -33,6 +38,8 @@ import (
 type PrepareProjectCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
+	projectId           string
+	region              string
 }
 
 const PrepareProjectName = "prepare-project"
@@ -40,28 +47,50 @@ const PrepareProjectName = "prepare-project"
 func (ppc *PrepareProjectCommand) register(app *kingpin.Application) {
 	c := app.Command(PrepareProjectName, "Prepare the GCP Project").Action(ppc.run)
 	registerTerraformConfigFlag(c, &ppc.terraformConfigPath)
+	c.Flag("project-id", "Project ID (if not using terraform-config)").StringVar(&ppc.projectId)
+	c.Flag("region", "Region (if not using terraform-config)").StringVar(&ppc.region)
 }
 
 func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(ppc.terraformConfigPath)
-	if err != nil {
-		return err
-	}
+	var cfg *config.Config
+	var gcpClient *http.Client
 
-	creds, err := googleauth.JWTConfigFromJSON([]byte(cfg.ServiceAccountKey), compute.CloudPlatformScope)
-	if err != nil {
-		return fmt.Errorf("loading ServiceAccountKey: %v ", err)
+	if _, err := os.Stat(ppc.terraformConfigPath); err == nil {
+		cfg, err = config.FromTerraform(ppc.terraformConfigPath)
+		if err != nil {
+			ppc.logger.Fatalf("loading terraform config: %v", err)
+		}
+
+		creds, err := googleauth.JWTConfigFromJSON([]byte(cfg.ServiceAccountKey), compute.CloudPlatformScope)
+		if err != nil {
+			ppc.logger.Fatalf("loading ServiceAccountKey: %v ", err)
+		}
+		gcpClient = creds.Client(oauth2.NoContext)
+
+	} else {
+		cfg = &config.Config{ProjectName: ppc.projectId, Region: ppc.region}
+		gcpClient, err = googleauth.DefaultClient(context.Background(), compute.CloudPlatformScope)
+		if err != nil {
+			ppc.logger.Fatalf("loading application default credentials: %v.\nHave you ran `gcloud auth application-default login`?", err)
+		}
+
+		if ppc.projectId == "" {
+			return errors.New("specify --project-id")
+		}
+
+		if ppc.region == "" {
+			return errors.New("specify --region")
+		}
 	}
-	gcpClient := creds.Client(oauth2.NoContext)
 
 	quotaService, err := google.NewQuotaService(ppc.logger, cfg.ProjectName, gcpClient)
 	if err != nil {
-		return fmt.Errorf("creating QuotaService: %v", err)
+		ppc.logger.Fatalf("creating QuotaService: %v", err)
 	}
 
 	validator, err := setup.NewProjectValiadtor(ppc.logger, quotaService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg))
 	if err != nil {
-		return fmt.Errorf("creating ProjectValidator: %v", err)
+		ppc.logger.Fatalf("creating ProjectValidator: %v", err)
 	}
 
 	errors, satisfied, err := validator.EnsureQuota()
@@ -71,7 +100,7 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	if err != setup.UnsatisfiedQuotaErr {
-		return fmt.Errorf("error validating quota: %v", err)
+		ppc.logger.Fatalf("error validating quota: %v", err)
 	}
 
 	for _, quotaError := range errors {
