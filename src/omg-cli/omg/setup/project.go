@@ -19,58 +19,74 @@ package setup
 import (
 	"errors"
 	"log"
+	"omg-cli/config"
 	"omg-cli/google"
 )
 
 type ProjectValidator struct {
-	logger       *log.Logger
-	project      google.ProjectService
-	requirements []google.Quota
+	logger              *log.Logger
+	quotaService        google.QuotaService
+	projectRequirements []google.Quota
+	regionRequirements  map[string][]google.Quota
 }
 
 type QuotaError struct {
 	google.Quota
 	Actual float64
+	Region string
 }
 
-var UnsatisfiedQuotaErr = errors.New("quota unsatisfied")
+var UnsatisfiedQuotaErr = errors.New("Compute Engine quota is unsatisfied, request an increase at: https://conscloud.google.com/iam-admin/quota")
 
-func NewProjectValiadtor(logger *log.Logger, projectService google.ProjectService, requirements []google.Quota) (*ProjectValidator, error) {
+func NewProjectValiadtor(logger *log.Logger, projectService google.QuotaService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota) (*ProjectValidator, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
-	return &ProjectValidator{logger, projectService, requirements}, nil
+	return &ProjectValidator{logger, projectService, projectRequirements, regionRequirements}, nil
 }
 
 func (pv *ProjectValidator) EnsureQuota() (errors []QuotaError, satisfied []google.Quota, err error) {
-	quotas, err := pv.project.Quotas()
+	quotas, err := pv.quotaService.Project()
 	if err != nil {
 		return nil, nil, err
 	}
 
+	errors, satisfied = validateQuotas(pv.projectRequirements, quotas, "global")
+
+	for region, requirements := range pv.regionRequirements {
+		quotas, err = pv.quotaService.Region(region)
+		regionErrors, regionSatisfied := validateQuotas(requirements, quotas, region)
+		errors = append(errors, regionErrors...)
+		satisfied = append(satisfied, regionSatisfied...)
+	}
+
+	if len(errors) != 0 {
+		err = UnsatisfiedQuotaErr
+	}
+	return errors, satisfied, err
+}
+
+func validateQuotas(requirements []google.Quota, quotas map[string]google.Quota, region string) (errors []QuotaError, satisfied []google.Quota) {
 	errors = []QuotaError{}
 	satisfied = []google.Quota{}
 
-	for _, requirement := range pv.requirements {
+	for _, requirement := range requirements {
 		quota, ok := quotas[requirement.Name]
 		if !ok {
-			errors = append(errors, QuotaError{requirement, 0})
+			errors = append(errors, QuotaError{requirement, 0, region})
 		} else {
 			if quota.Limit < requirement.Limit {
-				errors = append(errors, QuotaError{requirement, quota.Limit})
+				errors = append(errors, QuotaError{requirement, quota.Limit, region})
 			} else {
 				satisfied = append(satisfied, requirement)
 			}
 		}
 	}
 
-	if len(errors) != 0 {
-		err = UnsatisfiedQuotaErr
-	}
 	return
 }
 
-func QuotaRequirements() []google.Quota {
+func ProjectQuotaRequirements() []google.Quota {
 	return []google.Quota{
 		{"NETWORKS", 2.0},
 		{"FIREWALLS", 7.0},
@@ -87,5 +103,18 @@ func QuotaRequirements() []google.Quota {
 		{"TARGET_HTTPS_PROXIES", 1.0},
 		{"SSL_CERTIFICATES", 1.0},
 		{"SUBNETWORKS", 15.0},
+	}
+}
+
+func RegionalQuotaRequirements(cfg *config.Config) map[string][]google.Quota {
+	return map[string][]google.Quota{
+		cfg.Region: {
+			{"CPUS", 200.0},
+			{"DISKS_TOTAL_GB", 2000.0},
+			{"STATIC_ADDRESSES", 5.0},
+			{"IN_USE_ADDRESSES", 6.0},
+			{"INSTANCE_GROUPS", 10.0},
+			{"INSTANCES", 100.0},
+		},
 	}
 }

@@ -54,19 +54,19 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 	}
 	gcpClient := creds.Client(oauth2.NoContext)
 
-	project, err := google.NewProjectService(ppc.logger, cfg.ProjectName, gcpClient)
+	quotaService, err := google.NewQuotaService(ppc.logger, cfg.ProjectName, gcpClient)
 	if err != nil {
-		return fmt.Errorf("creating ProjectService: %v", err)
+		return fmt.Errorf("creating QuotaService: %v", err)
 	}
 
-	validator, err := setup.NewProjectValiadtor(ppc.logger, project, setup.QuotaRequirements())
+	validator, err := setup.NewProjectValiadtor(ppc.logger, quotaService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg))
 	if err != nil {
 		return fmt.Errorf("creating ProjectValidator: %v", err)
 	}
 
 	errors, satisfied, err := validator.EnsureQuota()
 	if err == nil {
-		ppc.logger.Printf("project quota is adequate, satisfied %v rules", len(satisfied))
+		ppc.logger.Printf("quotaService quota is adequate, satisfied %v rules", len(satisfied))
 		return nil
 	}
 
@@ -75,7 +75,11 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	for _, quotaError := range errors {
-		ppc.logger.Printf("QuotaError: %v, Expected Limit: %v, Actual: %v", quotaError.Name, quotaError.Limit, quotaError.Actual)
+		ppc.logger.Printf("Compute Engine quota requirement not satisfied: Name %s, Region: %s, Minimum Required: %v (Current Quota: %v)", quotaError.Name, quotaError.Region, quotaError.Limit, quotaError.Actual)
+	}
+
+	if err != nil {
+		ppc.logger.Fatal(err)
 	}
 
 	return nil

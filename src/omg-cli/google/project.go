@@ -31,42 +31,54 @@ type Quota struct {
 	Limit float64
 }
 
-//go:generate counterfeiter ./ ProjectService
-type ProjectService interface {
-	Quotas() (map[string]Quota, error)
+//go:generate counterfeiter ./ QuotaService
+type QuotaService interface {
+	Project() (map[string]Quota, error)
+	Region(string) (map[string]Quota, error)
 }
 
-type projectService struct {
-	logger    *log.Logger
-	projectId string
-	client    *http.Client
+type quotaService struct {
+	logger         *log.Logger
+	projectId      string
+	computeService *compute.Service
 }
 
-func (ps *projectService) Quotas() (map[string]Quota, error) {
-	ctx := context.Background()
-
-	computeService, err := compute.New(ps.client)
-	if err != nil {
-		return nil, err
-	}
-
-	project, err := computeService.Projects.Get(ps.projectId).Context(ctx).Do()
-	if err != nil {
-		return nil, err
-	}
-
+func transformQuotas(computeQuotas []*compute.Quota) map[string]Quota {
 	quotas := map[string]Quota{}
-	for _, quota := range project.Quotas {
+	for _, quota := range computeQuotas {
 		quotas[quota.Metric] = Quota{quota.Metric, quota.Limit}
 	}
 
-	return quotas, nil
+	return quotas
 }
 
-func NewProjectService(logger *log.Logger, projectId string, client *http.Client) (ProjectService, error) {
+func (ps *quotaService) Project() (map[string]Quota, error) {
+	project, err := ps.computeService.Projects.Get(ps.projectId).Context(context.Background()).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return transformQuotas(project.Quotas), nil
+}
+
+func (ps *quotaService) Region(region string) (map[string]Quota, error) {
+	regionResponse, err := ps.computeService.Regions.Get(ps.projectId, region).Context(context.Background()).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return transformQuotas(regionResponse.Quotas), nil
+}
+
+func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) (QuotaService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
 
-	return &projectService{logger, projectId, client}, nil
+	computeService, err := compute.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return &quotaService{logger, projectId, computeService}, nil
 }
