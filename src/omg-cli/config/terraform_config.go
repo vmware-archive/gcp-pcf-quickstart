@@ -56,6 +56,8 @@ type TerraformConfigSchema struct {
 	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
 	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
 
+	ServiceAccountKey string `json:"service_account_key"`
+
 	Region      string `json:"region"`
 	Zone1       string `json:"azs_0"`
 	Zone2       string `json:"azs_1"`

@@ -174,6 +174,10 @@ output "service_broker_service_account_key" {
   value = "${var.service_broker_service_account_key}"
 }
 
+output "service_account_key" {
+  value = "${var.service_account_key}"
+}
+
 output "service_broker_db_ip" {
   value = "${google_sql_database_instance.service_broker.ip_address.0.ip_address}"
 }

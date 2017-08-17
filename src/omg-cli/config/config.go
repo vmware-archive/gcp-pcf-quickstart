@@ -50,6 +50,8 @@ type Config struct {
 	ServiceBrokerDbUsername        string
 	ServiceBrokerDbPassword        string
 
+	ServiceAccountKey string
+
 	Region      string
 	Zone1       string
 	Zone2       string
