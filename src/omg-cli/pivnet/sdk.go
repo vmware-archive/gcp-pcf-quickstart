@@ -43,7 +43,7 @@ func NewSdk(apiToken string, logger *log.Logger) (*Sdk, error) {
 }
 
 func (s *Sdk) authorizedRequest(method, path string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://network.pivotal.io/%s", path), nil)
+	req, err := http.NewRequest(method, fmt.Sprintf("https://network.pivotal.io/%s", path), nil)
 	if err != nil {
 		return nil, err
 	}
