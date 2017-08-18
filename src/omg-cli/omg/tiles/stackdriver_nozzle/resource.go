@@ -30,7 +30,7 @@ var tile = config.Tile{
 	},
 	config.OpsManagerMetadata{
 		"stackdriver-nozzle",
-		"1.0.3",
+		"1.0.5",
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
