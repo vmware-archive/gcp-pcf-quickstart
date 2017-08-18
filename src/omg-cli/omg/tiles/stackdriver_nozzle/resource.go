@@ -24,9 +24,9 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"gcp-stackdriver-nozzle",
-		"5378",
-		"20350",
-		"b3156360159dbf20b5ac04b5ebd28c437741bc6d62bcb513587e72ac4e94fc18",
+		"6586",
+		"27540",
+		"8aabde09128db9f7ec0d26cd7e05d6e56530fff3aaded0e88d4fbde83b3e55b4",
 	},
 	config.OpsManagerMetadata{
 		"stackdriver-nozzle",
