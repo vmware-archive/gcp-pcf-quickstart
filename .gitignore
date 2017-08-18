@@ -4,3 +4,4 @@ bin/*
 .idea/*
 env/*
 service_account.json
+.envrc
