@@ -23,6 +23,7 @@ import (
 )
 
 type TerraformConfigSchema struct {
+	OpsManagerHostname                 string `json:"ops_manager_dns"`
 	OpsManagerIp                       string `json:"ops_manager_private_ip"`
 	JumpboxIp                          string `json:"jumpbox_public_ip"`
 	NetworkName                        string `json:"network_name"`
@@ -46,6 +47,8 @@ type TerraformConfigSchema struct {
 	ResourcesBucket                    string `json:"resources_bucket"`
 	DirectorBucket                     string `json:"director_blobstore_bucket"`
 	DnsSuffix                          string `json:"dns_suffix"`
+	AppsDomain                         string `json:"apps_domain"`
+	SysDomain                          string `json:"sys_domain"`
 	SslCertificate                     string `json:"ssl_cert"`
 	SslPrivateKey                      string `json:"ssl_cert_private_key"`
 	OpsManServiceAccount               string `json:"service_account_email"`
@@ -57,6 +60,8 @@ type TerraformConfigSchema struct {
 	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
 
 	ServiceAccountKey string `json:"service_account_key"`
+	PivnetApiToken    string `json:"pivnet_api_token"`
+	PivnetAcceptEula  bool
 
 	Region      string `json:"region"`
 	Zone1       string `json:"azs_0"`
@@ -85,6 +90,10 @@ func FromTerraform(filename string) (*Config, error) {
 	err = json.Unmarshal(flattendStr, &hydratedCfg)
 	if err != nil {
 		return nil, err
+	}
+
+	if flattened["pivnet_accept_eula"] == "yes" {
+		hydratedCfg.PivnetAcceptEula = true
 	}
 
 	cfg := Config(hydratedCfg)

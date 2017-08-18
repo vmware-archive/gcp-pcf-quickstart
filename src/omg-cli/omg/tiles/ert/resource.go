@@ -23,15 +23,21 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"5993",
-		"24044",
-		"a1d248287fff3328459dedb10921394949f818e7b89f017803ac7d23a6c27bf2",
+		"6434",
+		"26790",
+		"bdfdd6e7fce47de2d90377a50ed78bb11ef45bc4cf7b8c55f5d37046ff481533",
 	},
 	config.OpsManagerMetadata{
 		"cf",
-		"1.11.2",
+		"1.11.8",
 	},
-	nil,
+	&config.StemcellMetadata{
+		config.PivnetMetadata{"stemcells",
+			"6666",
+			"27817",
+			"fc532e98f479b87ac811b662236ee960e4f43a03e5ad0c2cddfe6dfcac63df31"},
+		"light-bosh-stemcell-3421.20-google-kvm-ubuntu-trusty-go_agent",
+	},
 }
 
 type Tile struct{}

@@ -31,11 +31,6 @@ if [ -z ${BASE_IMAGE_URL+x} ]; then
     exit 1
 fi
 
-if [ -z ${PIVNET_API_TOKEN+x} ]; then
-    echo "PIVNET_API_TOKEN required"
-    exit 1
-fi
-
 if [ -z ${DNS_ZONE_NAME+x} ]; then
     echo "DNS_ZONE_NAME required"
     exit 1
@@ -70,7 +65,7 @@ popd
 export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
-omg-cli remote --env-dir="${ENV_DIR}" "push-tiles --pivnet-api-token=${PIVNET_API_TOKEN}"
+omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
 
 # Capture image
 image_name="baked-opsman-$(date +%s)"

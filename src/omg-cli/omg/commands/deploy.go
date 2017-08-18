@@ -49,7 +49,7 @@ func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), dc.opsManCreds, *dc.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), dc.opsManCreds, *dc.logger)
 	if err != nil {
 		return err
 	}

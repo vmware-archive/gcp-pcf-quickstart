@@ -17,6 +17,7 @@
 package config
 
 type Config struct {
+	OpsManagerHostname                 string
 	OpsManagerIp                       string
 	JumpboxIp                          string
 	NetworkName                        string
@@ -40,6 +41,8 @@ type Config struct {
 	ResourcesBucket                    string
 	DirectorBucket                     string
 	DnsSuffix                          string
+	AppsDomain                         string
+	SysDomain                          string
 	SslCertificate                     string
 	SslPrivateKey                      string
 	OpsManServiceAccount               string
@@ -51,6 +54,8 @@ type Config struct {
 	ServiceBrokerDbPassword        string
 
 	ServiceAccountKey string
+	PivnetApiToken    string
+	PivnetAcceptEula  bool
 
 	Region      string
 	Zone1       string

@@ -3,7 +3,7 @@ output "service_account_email" {
 }
 
 output "ops_manager_dns" {
-  value = "${google_dns_record_set.ops-manager-dns.name}"
+  value = "${google_compute_instance.ops-manager.name}.c.${var.project}.internal"
 }
 
 output "ops_manager_instance_name" {
@@ -15,15 +15,15 @@ output "ops_manager_instance_zone" {
 }
 
 output "sys_domain" {
-  value = "sys.${var.env_name}.${var.dns_suffix}"
+  value = "sys.${var.dns_suffix}"
 }
 
 output "apps_domain" {
-  value = "apps.${var.env_name}.${var.dns_suffix}"
+  value = "apps.${var.dns_suffix}"
 }
 
 output "tcp_domain" {
-  value = "tcp.${var.env_name}.${var.dns_suffix}"
+  value = "tcp.${var.dns_suffix}"
 }
 
 output "dns_suffix" {
@@ -188,4 +188,12 @@ output "service_broker_db_username" {
 
 output "service_broker_db_password" {
   value = "${random_id.service_broker_password.b64}"
+}
+
+output "pivnet_api_token" {
+  value = "${var.pivnet_api_token}"
+}
+
+output "pivnet_accept_eula" {
+  value = "${var.pivnet_accept_eula}"
 }

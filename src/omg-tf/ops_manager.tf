@@ -21,7 +21,8 @@ resource "google_compute_instance" "ops-manager" {
 
   disk {
     image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : var.ops_manager_image_name}"
-    size  = 50
+    size  = 250
+    type  = "pd-ssd"
   }
 
   network_interface {

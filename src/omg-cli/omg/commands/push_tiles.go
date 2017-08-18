@@ -30,7 +30,6 @@ import (
 
 type PushTilesCommand struct {
 	logger              *log.Logger
-	apiToken            string
 	terraformConfigPath string
 	opsManCreds         config.OpsManagerCredentials
 }
@@ -41,7 +40,6 @@ func (bic *PushTilesCommand) register(app *kingpin.Application) {
 	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(bic.run)
 	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
 	registerOpsManagerFlags(c, &bic.opsManCreds)
-	registerPivnetFlag(c, &bic.apiToken)
 }
 
 func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
@@ -50,12 +48,12 @@ func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), bic.opsManCreds, *bic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), bic.opsManCreds, *bic.logger)
 	if err != nil {
 		return err
 	}
 
-	pivnetSdk, err := pivnet.NewSdk(bic.apiToken, bic.logger)
+	pivnetSdk, err := pivnet.NewSdk(cfg.PivnetApiToken, bic.logger)
 	if err != nil {
 		return err
 	}

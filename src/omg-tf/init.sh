@@ -21,6 +21,33 @@ if [ -z ${ENV_DIR+X} ]; then
     exit
 fi
 
+if [ -z ${ENV_NAME+X} ]; then
+    echo "ENV_NAME required"
+    exit
+fi
+
+if [ -z ${PIVNET_API_TOKEN+x} ]; then
+    echo "PIVNET_API_TOKEN required (requires registration)."
+    echo "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile"
+    echo "or go to https://network.pivotal.io/docs/api#how-to-authenticate for more info."
+    exit 1
+fi
+
+if [ -z ${PIVNET_ACCEPT_EULA+x} ]; then
+    echo "This deployment requires accepting EULAs from the Pivotal Network for:"
+    echo " - Elastic Runtime"
+    echo " - GCP Service Broker"
+    echo " - GCP Stackdriver Nozzle"
+    echo ""
+    read -p "Progamatically accept EULAs (y/n)? " choice
+
+    case "$choice" in
+      y|Y ) export PIVNET_ACCEPT_EULA="yes";;
+      * ) exit 0;;
+    esac
+
+fi
+
 cd ${ENV_DIR}
 
 if [ -z ${DNS_ZONE_NAME+x} ]; then
@@ -50,7 +77,6 @@ if [ -z ${DNS_SUFFIX+x} ]; then
     fi
 fi
 
-# TODO(jrjohnson): Once a baked OpsMan image is ready, default to using it here
 if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     echo "BASE_IMAGE_URL or BASE_IMAGE_SELFLINK is required"
     exit 1
@@ -68,7 +94,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role roles/owner
 
 # Stackdriver Nozzle Service Account
-stackdriver_service_account_name=stackdriver-nozzle
+stackdriver_service_account_name=${ENV_NAME}-stackdriver-nozzle
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 stackdriver_service_account_file=$(mktemp)
 
@@ -79,7 +105,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role roles/editor
 
 # Service Broker Service Account
-servicebroker_service_account_name=gcp-servicebroker
+servicebroker_service_account_name=${ENV_NAME}-gcp-servicebroker
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
 
@@ -94,7 +120,7 @@ pushd keys
   openssl genrsa -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${ENV_NAME}.${DNS_SUFFIX}"
+  -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${DNS_SUFFIX}"
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
   rm -f jumpbox_ssh jumpbox_ssh.pub
@@ -108,6 +134,8 @@ dns_suffix = "${DNS_SUFFIX}"
 dns_zone_name = "${DNS_ZONE_NAME}"
 opsman_image_url = "${BASE_IMAGE_URL}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK}"
+pivnet_api_token = "${PIVNET_API_TOKEN}"
+pivnet_accept_eula = "${PIVNET_ACCEPT_EULA}"
 
 ssl_cert = <<SSL_CERT
 $(cat keys/server.crt)

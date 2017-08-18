@@ -7,7 +7,8 @@ resource "google_compute_instance" "jumpbox" {
 
   disk {
     image = "ubuntu-1404-trusty-v20170703"
-    size  = 50
+    size  = 250
+    type  = "pd-ssd"
   }
 
   network_interface {

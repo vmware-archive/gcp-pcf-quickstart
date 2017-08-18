@@ -51,7 +51,7 @@ func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerIp), dic.opsManCreds, *dic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), dic.opsManCreds, *dic.logger)
 	if err != nil {
 		return err
 	}

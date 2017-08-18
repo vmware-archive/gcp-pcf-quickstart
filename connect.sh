@@ -16,8 +16,13 @@
 # limitations under the License.
 #
 
+if [ -z ${ENV_NAME+X} ]; then
+    export ENV_NAME="omg"
+    echo "ENV_NAME unset, using: ${ENV_NAME}"
+fi
+
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="$PWD/env/omg"
+    export ENV_DIR="$PWD/env/${ENV_NAME}"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
 

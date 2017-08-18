@@ -150,15 +150,23 @@ func (s *OpsManager) ConfigureTiles() error {
 
 func (s *OpsManager) UploadTiles() error {
 	for _, t := range s.tiles {
-		if !t.BuiltIn() {
-			if err := s.ensureProductReady(t.Definition()); err != nil {
-				return err
-			}
+		if t.BuiltIn() {
+			continue
+		}
 
-			if stemcell := t.Definition().Stemcell; stemcell != nil {
-				if err := s.uploadStemcell(*stemcell); err != nil {
-					return err
-				}
+		if s.cfg.PivnetAcceptEula {
+			if err := s.pivnet.AcceptEula(t.Definition().Pivnet); err != nil {
+				s.logger.Printf("warning, unable to accept eula: %v", err)
+			}
+		}
+
+		if err := s.ensureProductReady(t.Definition()); err != nil {
+			return err
+		}
+
+		if stemcell := t.Definition().Stemcell; stemcell != nil {
+			if err := s.uploadStemcell(*stemcell); err != nil {
+				return err
 			}
 		}
 	}

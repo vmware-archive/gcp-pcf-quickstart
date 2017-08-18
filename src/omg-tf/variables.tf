@@ -61,6 +61,14 @@ variable "service_broker_service_account_key" {
   type = "string"
 }
 
+variable "pivnet_api_token" {
+  type = "string"
+}
+
+variable "pivnet_accept_eula" {
+  type = "string"
+}
+
 variable "dns_suffix" {
   type = "string"
 }

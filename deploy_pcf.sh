@@ -32,8 +32,8 @@ fi
 gcloud config set project ${PROJECT_ID}
 
 if [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
-    export BASE_IMAGE_SELFLINK="baked-opsman-1501261888"
-    echo "BASE_IMAGE_SELFLINK unset, using: ${BASE_IMAGE_SELFLINK}"
+    export BASE_IMAGE_URL="https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz"
+    echo "BASE_IMAGE_SELFLINK unset, using public Ops Manager image: ${BASE_IMAGE_URL}"
 fi
 
 if [ -z ${ENV_NAME+X} ]; then
@@ -59,11 +59,10 @@ export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
 
-omg-cli prepare-project --project-id ${PROJECT_ID} --region ${REGION}
-
 # Setup infrastructure
 pushd src/omg-tf
     if [ ! -f $terraform_config ]; then
+         omg-cli prepare-project --project-id ${PROJECT_ID} --region ${REGION}
         ./init.sh
     fi
     terraform init
@@ -73,4 +72,5 @@ pushd src/omg-tf
 popd
 
 # Deploy PCF
+omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
 omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"

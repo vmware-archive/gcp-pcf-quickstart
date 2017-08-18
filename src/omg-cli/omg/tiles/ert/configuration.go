@@ -116,8 +116,8 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	}
 
 	properties := Properties{
-		AppsDomain:                 Value{fmt.Sprintf("apps.%s", cfg.DnsSuffix)},
-		SysDomain:                  Value{fmt.Sprintf("sys.%s", cfg.DnsSuffix)},
+		AppsDomain:                 Value{cfg.AppsDomain},
+		SysDomain:                  Value{cfg.SysDomain},
 		NetworkingPointOfEntry:     Value{"external_non_ssl"},
 		ContainerDNSServers:        Value{"8.8.8.8,8.8.4.4"},
 		SkipSSLVerification:        BooleanValue{true},
