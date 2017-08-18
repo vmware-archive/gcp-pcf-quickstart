@@ -67,7 +67,7 @@ pushd src/omg-tf
     fi
     terraform init
     terraform get
-    terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
+    terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} || terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
     terraform output -json -state=${terraform_state} > ${terraform_output}
 popd
 
