@@ -1,0 +1,58 @@
+---
+jobs:  
+- name: build-test-image
+  public: true
+  serial: true
+  plan:
+  - get: omg-src-in
+    trigger: true
+  - put: docker-image-test
+    params:
+      build: omg-src-in/ci/docker-image
+
+- name: verify-test-image
+  public: true
+  serial: true
+  plan:
+  - {trigger: true, passed: [build-test-image], get: omg-src-in}
+  - task: verify-test-image
+    file: omg-src-in/ci/docker-image/tasks/verify-test-image.yml
+    params:
+      docker_image: {{docker_hub_test_repo}}
+
+- name: build-docker-image
+  public: true
+  serial: true
+  plan:
+  - get: omg-src-in
+    trigger: true
+    passed: [verify-test-image]
+  - put: docker-image
+    params:
+      build: omg-src-in/ci/docker-image
+
+resources:  
+  - name: omg-src-in
+    type: git
+    source: 
+      uri:      {{source_uri}}
+      branch:   {{source_branch}}
+      username: {{source_username}}
+      password: {{source_password}}
+      paths:    ci/docker-image
+
+  - name: docker-image-test
+    type: docker-image
+    source:
+      email: {{docker_hub_email}}
+      username: {{docker_hub_username}}
+      password: {{docker_hub_password}}
+      repository: {{docker_hub_test_repo}}
+
+  - name: docker-image
+    type: docker-image
+    source:
+      email: {{docker_hub_email}}
+      username: {{docker_hub_username}}
+      password: {{docker_hub_password}}
+      repository: {{docker_hub_repo}}

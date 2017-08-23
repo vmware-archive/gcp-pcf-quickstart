@@ -1,0 +1,10 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: {{docker_image}}
+inputs:
+- name: omg-src-in
+run:
+  path: omg-src-in/ci/docker-image/tasks/run-unit.sh
