@@ -5,7 +5,7 @@ jobs:
         - {trigger: true, get: omg-src, resource: omg-src-in}
 
       - task: unit-tests
-        file: gcscli-src/ci/tasks/run-unit.yml
+        file: omg-src-in/ci/tasks/run-unit.yml
 
 resources:
   - name: omg-src-in

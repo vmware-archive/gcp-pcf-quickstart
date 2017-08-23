@@ -5,8 +5,7 @@ image_resource:
   source: {repository: boshcpi/bosh-gcscli}
 inputs:
 - name: omg-src-in
-  path: omg-src
 run:
-  path: omg-src/ci/tasks/run-unit.sh
+  path: omg-src-in/ci/tasks/run-unit.sh
 params:
   GOOS: linux
