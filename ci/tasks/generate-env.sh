@@ -35,6 +35,6 @@ pushd ${omg_tf_dir}
 popd
 
 env_file="${workspace_dir}/omg-env-out/${env_file_name}"
-pushd "${ENV_DIR}/${env_name}"
+pushd "${ENV_DIR}"
 	tar czvf ${env_file} .
 popd
