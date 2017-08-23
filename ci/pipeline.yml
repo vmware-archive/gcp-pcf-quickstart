@@ -39,8 +39,23 @@ jobs:
           BASE_IMAGE_URL: {{BASE_IMAGE_URL}}
 
       - aggregate:
-        - put: omg-env-out
-          params: {file: omg-env-out/{{env_file_name}}}
+        - put: omg-env
+          params: {file: omg-env/*.tgz}
+
+  - name: create-infrastructure
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [generate-env], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [generate-env], get: omg-env, resource: omg-env}
+      - aggregate: 
+        task: create-infrastructure
+        file: omg-src-in/ci/tasks/create-infrastructure.yml
+        params:
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+      - aggregate:
+        - put: omg-env
+          params: {file: omg-env/*.tgz}
 
 resources:
   - name: omg-src-in
@@ -51,14 +66,7 @@ resources:
       username: {{source_username}}
       password: {{source_password}}
 
-  # - name: omg-env-in
-  #   type: gcs-resource
-  #   source:
-  #     bucket: {{ci_bucket_name}}
-  #     json_key: {{ci_json_key_date}}
-  #     versioned_file: {{env_file_name}}
-
-  - name: omg-env-out
+  - name: omg-env
     type: gcs-resource
     source:
       bucket: {{ci_bucket_name}}
