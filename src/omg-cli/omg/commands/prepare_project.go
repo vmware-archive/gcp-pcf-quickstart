@@ -94,8 +94,8 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 		ppc.logger.Fatalf("creating ProjectValidator: %v", err)
 	}
 
-	validateQuotas(ppc.logger, validator)
 	validateApis(ppc.logger, validator)
+	validateQuotas(ppc.logger, validator)
 
 	return nil
 }
