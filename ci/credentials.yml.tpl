@@ -13,3 +13,4 @@ ci_bucket_name:	                # GCS bucket for CI to store data
 google_project:
 google_json_key_data:
 google_region:
+env_file_name: env.tgz

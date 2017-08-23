@@ -19,6 +19,19 @@ jobs:
           google_json_key_data: {{google_json_key_data}}
           google_region: {{google_region}}
 
+  - name: generate-env
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [prepare-project], get: omg-src-in, resource: omg-src-in}
+
+      - task: generate-env
+        file: omg-src-in/ci/tasks/generate-env.yml
+        params:
+          google_project: {{google_project}}
+          google_json_key_data: {{google_json_key_data}}
+          google_region: {{google_region}}
+          env_file_name: {{env_file_name}}
+
 resources:
   - name: omg-src-in
     type: git
@@ -26,4 +39,18 @@ resources:
       uri:      {{source_uri}}
       branch:   {{source_branch}}
       username: {{source_username}}
-      password: {{source_password}} 
+      password: {{source_password}}
+
+  - name: omg-env-in
+    type: gcs-resource
+    source:
+      bucket: {{ci_bucket_name}}
+      json_key: {{ci_json_key_date}}
+      versioned_file: {{env_file_name}}
+
+  - name: omg-env-out
+    type: gcs-resource
+    source:
+      bucket: {{ci_bucket_name}}
+      json_key: {{ci_json_key_date}}
+      versioned_file: {{env_file_name}}
