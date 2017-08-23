@@ -5,7 +5,9 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: omg-src-in
+  path: ""
 - name: omg-env
+  path: ""
 outputs:
 - nme: omg-env
 run:
