@@ -16,7 +16,17 @@ jobs:
   plan:
   - {trigger: true, passed: [build-test-image], get: omg-src-in}
   - task: verify-test-image
-    file: omg-src-in/ci/docker-image/tasks/verify-test-image.yml
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: {{docker_hub_test_repo}}
+      inputs:
+      - name: omg-src-in
+      run:
+        path: omg-src-in/ci/docker-image/tasks/verify-test-image.sh
+
 
 - name: build-docker-image
   public: true
