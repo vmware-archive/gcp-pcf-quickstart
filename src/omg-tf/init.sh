@@ -16,6 +16,8 @@
 # limitations under the License.
 #
 
+set -e
+
 if [ -z ${ENV_DIR+X} ]; then
     echo "ENV_DIR required"
     exit 1
@@ -87,7 +89,7 @@ terraform_service_account_name=${ENV_NAME}-terraform
 terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 terraform_service_account_file=$(mktemp)
 
-gcloud iam service-accounts create ${terraform_service_account_name}  2> /dev/null
+gcloud iam service-accounts create ${terraform_service_account_name}  2> /dev/null || true
 gcloud iam service-accounts keys create ${terraform_service_account_file} --iam-account ${terraform_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${terraform_service_account_email} \
@@ -98,7 +100,7 @@ stackdriver_service_account_name=${ENV_NAME}-stackdriver-nozzle
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 stackdriver_service_account_file=$(mktemp)
 
-gcloud iam service-accounts create ${stackdriver_service_account_name}  2> /dev/null
+gcloud iam service-accounts create ${stackdriver_service_account_name}  2> /dev/null || true
 gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${stackdriver_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${stackdriver_service_account_email} \
@@ -109,7 +111,7 @@ servicebroker_service_account_name=${ENV_NAME}-gcp-servicebroker
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
 
-gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null
+gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null || true
 gcloud iam service-accounts keys create ${servicebroker_service_account_file} --iam-account ${servicebroker_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${servicebroker_service_account_email} \
