@@ -50,5 +50,6 @@ set_gcloud_config() {
 
 	key=$(mktemp)
 	echo $google_json_key_data > ${key}
+  export GOOGLE_APPLICATION_CREDENTIALS=${key}
 	gcloud auth activate-service-account --key-file=${key}
 }
