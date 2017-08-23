@@ -9,4 +9,4 @@ inputs:
 outputs:
 - nme: omg-env
 run:
-  path: omg-src-in/ci/tasks/push-tiles.sh
+  path: omg-src-in/ci/tasks/create-infrastructure.sh
