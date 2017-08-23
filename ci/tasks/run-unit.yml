@@ -7,5 +7,3 @@ inputs:
 - name: omg-src-in
 run:
   path: omg-src-in/ci/tasks/run-unit.sh
-params:
-  GOOS: linux

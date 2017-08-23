@@ -2,10 +2,22 @@ jobs:
   - name: run-unit
     plan:
       - aggregate:
-        - {trigger: true, get: omg-src, resource: omg-src-in}
+        - {trigger: true, get: omg-src-in, resource: omg-src-in}
 
       - task: unit-tests
         file: omg-src-in/ci/tasks/run-unit.yml
+
+  - name: prepare-project
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
+
+      - task: prepare-project
+        file: omg-src-in/ci/tasks/prepare-project.yml
+        params:
+          google_project: {{google_project}}
+          google_json_key_data: {{google_json_key_data}}
+          google_region: {{google_region}}
 
 resources:
   - name: omg-src-in
