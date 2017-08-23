@@ -104,7 +104,7 @@ stackdriver_service_account_file=$(mktemp)
 
 gcloud iam service-accounts create ${stackdriver_service_account_name}  2> /dev/null || true
 gcloud iam service-accounts keys list --iam-account=${stackdriver_service_account_name} --format="value(KEY_ID)" | \
-    while read keyId ; do yes "y" | gcloud iam service-accounts keys delete ${keyId} --iam-account=${terraform_service_account_email}; done || true
+    while read keyId ; do yes "y" | gcloud iam service-accounts keys delete ${keyId} --iam-account=${stackdriver_service_account_email}; done || true
 gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${stackdriver_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${stackdriver_service_account_email} \
@@ -117,7 +117,7 @@ servicebroker_service_account_file=$(mktemp)
 
 gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null || true
 gcloud iam service-accounts keys list --iam-account=${stackdriver_service_account_name} --format="value(KEY_ID)" | \
-    while read keyId ; do yes "y" | gcloud iam service-accounts keys delete ${keyId} --iam-account=${terraform_service_account_email}; done || true
+    while read keyId ; do yes "y" | gcloud iam service-accounts keys delete ${keyId} --iam-account=${servicebroker_service_account_email}; done || true
 gcloud iam service-accounts keys create ${servicebroker_service_account_file} --iam-account ${servicebroker_service_account_email}
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:${servicebroker_service_account_email} \
