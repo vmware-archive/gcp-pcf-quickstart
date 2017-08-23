@@ -17,8 +17,6 @@ jobs:
   - {trigger: true, passed: [build-test-image], get: omg-src-in}
   - task: verify-test-image
     file: omg-src-in/ci/docker-image/tasks/verify-test-image.yml
-    params:
-      docker_image: {{docker_hub_test_repo}}
 
 - name: build-docker-image
   public: true
@@ -39,7 +37,7 @@ resources:
       branch:   {{source_branch}}
       username: {{source_username}}
       password: {{source_password}}
-      paths:    ci/docker-image
+      paths:    [ci/docker-image]
 
   - name: docker-image-test
     type: docker-image
