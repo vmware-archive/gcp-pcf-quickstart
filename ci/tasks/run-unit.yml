@@ -4,7 +4,7 @@ image_resource:
   type: docker-image
   source: {repository: boshcpi/bosh-gcscli}
 inputs:
-- name: omg-src
+- name: omg-src-in
   path: omg-src
 run:
   path: omg-src/ci/tasks/run-unit.sh
