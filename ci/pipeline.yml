@@ -1,0 +1,17 @@
+jobs:
+  - name: run-unit
+    plan:
+      - aggregate:
+        - {trigger: true, get: omg-src, resource: omg-src-in}
+
+      - task: unit-tests
+        file: gcscli-src/ci/tasks/run-unit.yml
+
+resources:
+  - name: omg-src-in
+    type: git
+    source: 
+      uri:      {{source_uri}}
+      branch:   {{source_branch}}
+      username: {{source_username}}
+      password: {{source_password}} 
