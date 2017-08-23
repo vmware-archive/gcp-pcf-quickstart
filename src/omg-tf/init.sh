@@ -18,12 +18,12 @@
 
 if [ -z ${ENV_DIR+X} ]; then
     echo "ENV_DIR required"
-    exit
+    exit 1
 fi
 
 if [ -z ${ENV_NAME+X} ]; then
     echo "ENV_NAME required"
-    exit
+    exit 1
 fi
 
 if [ -z ${PIVNET_API_TOKEN+x} ]; then
