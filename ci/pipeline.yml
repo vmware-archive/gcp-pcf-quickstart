@@ -32,6 +32,11 @@ jobs:
           google_json_key_data: {{google_json_key_data}}
           google_region: {{google_region}}
           env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+          PIVNET_API_TOKEN: {{PIVNET_API_TOKEN}}
+          PIVNET_ACCEPT_EULA: {{PIVNET_ACCEPT_EULA}}
+          DNS_ZONE_NAME: {{DNS_ZONE_NAME}}
+          BASE_IMAGE_URL: {{BASE_IMAGE_URL}}
 
       - aggregate:
         - put: omg-env-out

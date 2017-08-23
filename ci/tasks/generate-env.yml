@@ -9,8 +9,3 @@ outputs:
 - name: omg-env-out
 run:
   path: omg-src-in/ci/tasks/generate-env.sh
-params:
-  google_project: CHANGE-ME
-  google_json_key_data: CHANGE-ME
-  google_region: CHANGE-ME
-  env_file_name: CHANGE-ME

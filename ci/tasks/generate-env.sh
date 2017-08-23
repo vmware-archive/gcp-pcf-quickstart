@@ -16,9 +16,18 @@ pushd ${release_dir} > /dev/null
 popd > /dev/null
 
 check_param ${google_region}
+check_param ${env_file_name}
+check_param ${env_name}
+check_param ${IVNET_API_TOKEN}
+check_param ${IVNET_ACCEPT_EULA}
+check_param ${NS_ZONE_NAME}
+check_param ${ASE_IMAGE_URL}
+
 set_gcloud_config
 
 export ENV_DIR="${workspace_dir}/env"
+export ENV_NAME="${env_name}"
+
 mkdir -p ${ENV_DIR}
 
 pushd ${omg_tf_dir}
@@ -26,6 +35,6 @@ pushd ${omg_tf_dir}
 popd
 
 env_file="${workspace_dir}/omg-env-out/${env_file_name}"
-pushd ${ENV_DIR}
+pushd "${ENV_DIR}/${env_name}"
 	tar czvf ${env_file} .
 popd
