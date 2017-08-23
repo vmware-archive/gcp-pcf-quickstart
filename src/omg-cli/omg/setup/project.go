@@ -149,7 +149,6 @@ func RequiredAPIs() []google.API {
 		{"monitoring.googleapis.com"},
 		{"dns.googleapis.com"},
 		{"runtimeconfig.googleapis.com"},
-		{"stackdriverprovisioning.googleapis.com"},
 		{"compute.googleapis.com"},
 		{"sql-component.googleapis.com"},
 		{"iam.googleapis.com"},
