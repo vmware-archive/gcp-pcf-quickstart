@@ -7,7 +7,7 @@ my_dir="$( cd $(dirname $0) && pwd )"
 release_dir="$( cd ${my_dir} && cd ../.. && pwd )"
 workspace_dir="$( cd ${release_dir} && cd .. && pwd )"
 omg_tf_dir="${release_dir}/src/omg-tf"
-env_output_dir="${workspace_dir}/omg-env"
+env_output_dir="${workspace_dir}/omg-env-out"
 
 export GOPATH=${release_dir}
 export PATH=${GOPATH}/bin:${PATH}

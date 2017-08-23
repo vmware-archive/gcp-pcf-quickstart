@@ -6,7 +6,9 @@ image_resource:
 inputs:
 - name: omg-src-in
 - name: omg-env
+  path: omg-env-in
 outputs:
 - name: omg-env
+  path: omg-env-out
 run:
   path: omg-src-in/ci/tasks/create-infrastructure.sh
