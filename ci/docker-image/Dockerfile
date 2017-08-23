@@ -9,7 +9,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y -qq update && apt-get -y -qq insta
   software-properties-common \
   wget \
   curl \
-  dnsutils
+  dnsutils \
+  unzip
 
 WORKDIR /tmp/docker-build
 
@@ -40,6 +41,17 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
     mv google-cloud-sdk / && cd /google-cloud-sdk  && ./install.sh
 
 ENV PATH=$PATH:/google-cloud-sdk/bin
+
+ENV TERRAFORM_VERSION=0.10.2
+ENV TERRAFORM_SHA1SUM=28a13e8ce6cfad7249714b0df9cb968b558f2748
+
+RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    -O terraform.zip && \
+    echo "${TERRAFORM_SHA1SUM}  terraform.zip" > terraform_SHA1SUM && \
+    sha1sum -cw --status terraform_SHA1SUM && \
+    unzip terraform.zip && \
+    mv terraform /usr/local/bin && \
+    chmod a+x /usr/local/bin/terraform
 
 # Cleanup
 RUN rm -rf /tmp/docker-build
