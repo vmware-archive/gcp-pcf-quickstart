@@ -33,6 +33,8 @@ terraform_config="${env_dir}/terraform.tfvars"
 terraform_state="${env_dir}/terraform.tfstate"
 
 pushd "${omg_tf_dir}"
+	terraform init
+	terraform get
 	yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
 popd
 
