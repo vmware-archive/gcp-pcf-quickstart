@@ -16,10 +16,14 @@ pushd ${release_dir} > /dev/null
 popd > /dev/null
 check_param ${env_file_name}
 
-mkdir -p ${env_dir}
-pushd ${env_dir}
-	tar zxvf ${env_file}
-popd
+# This task may run as part of a failed job. In that case
+# the env_dir will already exist and contain the state.
+if [ ! -d ${env_dir} ]; then
+	mkdir -p ${env_dir}
+	pushd ${env_dir}
+		tar zxvf ${env_file}
+	popd
+fi
 
 export GOPATH=${release_dir}
 export PATH=${GOPATH}/bin:${PATH}

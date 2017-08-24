@@ -24,4 +24,4 @@ export GOPATH=${release_dir}
 export PATH=${GOPATH}/bin:${PATH}
 
 go install omg-cli
-omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
+omg-cli remote --env-dir="${env_dir}" "push-tiles"
