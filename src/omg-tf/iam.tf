@@ -1,5 +1,9 @@
+resource "random_id" "opsman-name {
+  byte_length = 4
+}
+
 resource "google_service_account" "opsman_service_account" {
-  account_id   = "${var.env_name}-opsman"
+  account_id   = "${var.env_name}-${replace(lower(random_id.opsman-name.b64), "_", "-")}-opsman"
   display_name = "${var.env_name} Ops Manager VM Service Account"
 }
 
