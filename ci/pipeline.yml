@@ -53,9 +53,25 @@ jobs:
         params:
           env_file_name: {{env_file_name}}
           env_name: {{env_name}}
+        on_failure: &destroy_infrastructure
+          task: destroy-infrastructure
+          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
       - aggregate:
         - put: omg-env
           params: {file: omg-env/*.tgz}
+
+  - name: push-tiles
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [create-infrastructure], get: omg-env, resource: omg-env}
+      - aggregate: 
+        task: push-tiles
+        file: omg-src-in/ci/tasks/push-tiles.yml
+        params:
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+        on_failure: &destroy_infrastructure
 
 resources:
   - name: omg-src-in
