@@ -28,10 +28,6 @@ terraform_output="${env_dir}/env.json"
 terraform_config="${env_dir}/terraform.tfvars"
 terraform_state="${env_dir}/terraform.tfstate"
 
-echo "DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-cat ${terraform_config}
-echo "DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-
 pushd "${omg_tf_dir}"
 	terraform init
 	terraform get
