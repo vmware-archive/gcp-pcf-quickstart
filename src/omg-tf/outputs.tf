@@ -3,7 +3,7 @@ output "service_account_email" {
 }
 
 output "ops_manager_dns" {
-  value = "${google_compute_instance.ops-manager.name}.c.${var.project}.internal"
+  value = "pcf.${var.dns_suffix}"
 }
 
 output "ops_manager_instance_name" {
