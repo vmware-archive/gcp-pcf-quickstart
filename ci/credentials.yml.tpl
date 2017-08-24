@@ -7,7 +7,7 @@ source_password:
 
 # CI data
 ci_json_key_date: |             # service account with access to the omg source and GCS storage
-ci_bucket_name:	                # GCS bucket for CI to store data
+ci_bucket_name:	                # GCS bucket for CI to store data. Bucket must have Object Versioning enabled. To enable: gsutil versioning set on gs://[bucket_name]
 
 # Target project for deploying OMG
 google_project:                   # Project to deploy to
