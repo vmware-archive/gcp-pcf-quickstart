@@ -104,19 +104,19 @@ ensure_service_account() {
 seed=$(date +%s)
 
 # Terraform
-terraform_service_account_name=${ENV_NAME}-${seed}-terraform
+terraform_service_account_name=${ENV_NAME}-${seed}-tf
 terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 terraform_service_account_file=$(mktemp)
 ensure_service_account "${terraform_service_account_name}" "${terraform_service_account_email}" "${terraform_service_account_file}" "roles/owner"
 
 # Stackdriver Nozzle
-stackdriver_service_account_name=${ENV_NAME}-${seed}-stackdriver-nozzle
+stackdriver_service_account_name=${ENV_NAME}-${seed}-noz
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 stackdriver_service_account_file=$(mktemp)
 ensure_service_account "${stackdriver_service_account_name}" "${stackdriver_service_account_email}" "${stackdriver_service_account_file}" "roles/editor"
 
 # Service Broker
-servicebroker_service_account_name=${ENV_NAME}-${seed}-gcp-servicebroker
+servicebroker_service_account_name=${ENV_NAME}-${seed}-sb
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
 
