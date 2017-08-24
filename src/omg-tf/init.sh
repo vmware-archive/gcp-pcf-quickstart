@@ -94,29 +94,29 @@ ensure_service_account() {
   key_file=$3
   role=$4
 
-  gcloud iam service-accounts create "${name}"  2> /dev/null || true
-  gcloud iam service-accounts keys list --iam-account="${email}" --format="value(KEY_ID)" | \
-      while read keyId ; do yes "y" | gcloud iam service-accounts keys delete ${keyId} --iam-account="${email}"; done || true
+  gcloud iam service-accounts create "${name}"
   gcloud iam service-accounts keys create "${key_file}" --iam-account="${email}"
   gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member "serviceAccount:${email}" \
     --role "${role}"
 }
 
+seed=$(date +%s)
+
 # Terraform
-terraform_service_account_name=${ENV_NAME}-terraform
+terraform_service_account_name=${ENV_NAME}-${seed}-terraform
 terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 terraform_service_account_file=$(mktemp)
 ensure_service_account "${terraform_service_account_name}" "${terraform_service_account_email}" "${terraform_service_account_file}" "roles/owner"
 
 # Stackdriver Nozzle
-stackdriver_service_account_name=${ENV_NAME}-stackdriver-nozzle
+stackdriver_service_account_name=${ENV_NAME}-${seed}-stackdriver-nozzle
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 stackdriver_service_account_file=$(mktemp)
 ensure_service_account "${stackdriver_service_account_name}" "${stackdriver_service_account_email}" "${stackdriver_service_account_file}" "roles/editor"
 
 # Service Broker
-servicebroker_service_account_name=${ENV_NAME}-gcp-servicebroker
+servicebroker_service_account_name=${ENV_NAME}-${seed}-gcp-servicebroker
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
 
