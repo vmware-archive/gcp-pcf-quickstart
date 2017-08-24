@@ -42,8 +42,8 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 
 ENV PATH=$PATH:/google-cloud-sdk/bin
 
-ENV TERRAFORM_VERSION=0.10.2
-ENV TERRAFORM_SHA1SUM=28a13e8ce6cfad7249714b0df9cb968b558f2748
+ENV TERRAFORM_VERSION=0.9.11
+ENV TERRAFORM_SHA1SUM=0abed5458214a4e3e17fe4d351bacdf69e78c7fc
 
 RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     -O terraform.zip && \
