@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
+set -eE
 
 my_dir="$( cd $(dirname $0) && pwd )"
 release_dir="$( cd ${my_dir} && cd ../.. && pwd )"
@@ -21,6 +20,21 @@ pushd ${env_dir}
 	tar zxvf ${env_file}
 popd
 
+function save_terraform_state {
+	env_file="${env_output_dir}/${env_file_name}"
+	pushd "${env_dir}"
+		tar czvf ${env_file} .
+	popd
+}
+trap save_terraform_state EXIT
+
+function rollback {
+	pushd "${omg_tf_dir}"
+		yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
+	popd
+}
+trap rollback ERR
+
 export GOPATH=${release_dir}
 export PATH=${GOPATH}/bin:${PATH}
 
@@ -35,7 +49,3 @@ pushd "${omg_tf_dir}"
 	terraform output -json -state=${terraform_state} > ${terraform_output}
 popd
 
-env_file="${env_output_dir}/${env_file_name}"
-pushd "${env_dir}"
-	tar czvf ${env_file} .
-popd
