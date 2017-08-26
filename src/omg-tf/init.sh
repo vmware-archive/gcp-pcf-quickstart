@@ -16,14 +16,16 @@
 # limitations under the License.
 #
 
+set -e
+
 if [ -z ${ENV_DIR+X} ]; then
     echo "ENV_DIR required"
-    exit
+    exit 1
 fi
 
 if [ -z ${ENV_NAME+X} ]; then
     echo "ENV_NAME required"
-    exit
+    exit 1
 fi
 
 if [ -z ${PIVNET_API_TOKEN+x} ]; then
@@ -82,38 +84,47 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     exit 1
 fi
 
-# Terraform Service Account
-terraform_service_account_name=${ENV_NAME}-terraform
+#
+# Provision service accounts
+#
+
+ensure_service_account() {
+  name=$1
+  email=$2
+  key_file=$3
+  role=$4
+
+  gcloud iam service-accounts create "${name}"
+  gcloud iam service-accounts keys create "${key_file}" --iam-account="${email}"
+  gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member "serviceAccount:${email}" \
+    --role "${role}"
+}
+
+seed=$(date +%s)
+
+# Terraform
+terraform_service_account_name=${ENV_NAME}-${seed}-tf
 terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 terraform_service_account_file=$(mktemp)
+ensure_service_account "${terraform_service_account_name}" "${terraform_service_account_email}" "${terraform_service_account_file}" "roles/owner"
 
-gcloud iam service-accounts create ${terraform_service_account_name}  2> /dev/null
-gcloud iam service-accounts keys create ${terraform_service_account_file} --iam-account ${terraform_service_account_email}
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:${terraform_service_account_email} \
-  --role roles/owner
-
-# Stackdriver Nozzle Service Account
-stackdriver_service_account_name=${ENV_NAME}-stackdriver-nozzle
+# Stackdriver Nozzle
+stackdriver_service_account_name=${ENV_NAME}-${seed}-noz
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 stackdriver_service_account_file=$(mktemp)
+ensure_service_account "${stackdriver_service_account_name}" "${stackdriver_service_account_email}" "${stackdriver_service_account_file}" "roles/editor"
 
-gcloud iam service-accounts create ${stackdriver_service_account_name}  2> /dev/null
-gcloud iam service-accounts keys create ${stackdriver_service_account_file} --iam-account ${stackdriver_service_account_email}
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:${stackdriver_service_account_email} \
-  --role roles/editor
-
-# Service Broker Service Account
-servicebroker_service_account_name=${ENV_NAME}-gcp-servicebroker
+# Service Broker
+servicebroker_service_account_name=${ENV_NAME}-${seed}-sb
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
 
-gcloud iam service-accounts create ${servicebroker_service_account_name}  2> /dev/null
-gcloud iam service-accounts keys create ${servicebroker_service_account_file} --iam-account ${servicebroker_service_account_email}
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:${servicebroker_service_account_email} \
-  --role roles/owner
+ensure_service_account "${servicebroker_service_account_name}" "${servicebroker_service_account_email}" "${servicebroker_service_account_file}" "roles/owner"
+
+#
+# Generate SSL/SSH Keys
+#
 
 mkdir -p keys
 pushd keys
@@ -126,6 +137,10 @@ pushd keys
   rm -f jumpbox_ssh jumpbox_ssh.pub
   ssh-keygen -b 2048 -t rsa -f jumpbox_ssh -q -N ""
 popd
+
+#
+# Create environment config
+#
 
 cat << VARS_FILE > terraform.tfvars
 env_name = "${ENV_NAME}"

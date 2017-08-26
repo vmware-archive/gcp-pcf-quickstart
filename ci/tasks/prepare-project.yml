@@ -1,0 +1,13 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: jrjohnsongoog/omgci}
+inputs:
+- name: omg-src-in
+run:
+  path: omg-src-in/ci/tasks/prepare-project.sh
+params:
+  google_project: CHANGE-ME
+  google_json_key_data: CHANGE-ME
+  google_region: CHANGE-ME

@@ -1,0 +1,136 @@
+jobs:
+  - name: run-unit
+    plan:
+      - aggregate:
+        - {trigger: true, get: omg-src-in, resource: omg-src-in}
+
+      - task: unit-tests
+        file: omg-src-in/ci/tasks/run-unit.yml
+
+  - name: prepare-project
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
+
+      - task: prepare-project
+        file: omg-src-in/ci/tasks/prepare-project.yml
+        params:
+          google_project: {{google_project}}
+          google_json_key_data: {{google_json_key_data}}
+          google_region: {{google_region}}
+
+  - name: generate-env
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
+
+      - aggregate: 
+        task: generate-env
+        file: omg-src-in/ci/tasks/generate-env.yml
+        params:
+          google_project: {{google_project}}
+          google_json_key_data: {{google_json_key_data}}
+          google_region: {{google_region}}
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+          PIVNET_API_TOKEN: {{PIVNET_API_TOKEN}}
+          PIVNET_ACCEPT_EULA: {{PIVNET_ACCEPT_EULA}}
+          DNS_ZONE_NAME: {{DNS_ZONE_NAME}}
+          BASE_IMAGE_URL: {{BASE_IMAGE_URL}}
+
+      - aggregate:
+        - put: omg-env
+          params: {file: omg-env/*.tgz}
+
+  - name: create-infrastructure
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [generate-env], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [generate-env], get: omg-env, resource: omg-env}
+      - aggregate: 
+        task: create-infrastructure
+        file: omg-src-in/ci/tasks/create-infrastructure.yml
+        params:
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+      - aggregate:
+        - put: omg-env
+          params: {file: omg-env/*.tgz}
+
+  - name: push-tiles
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [create-infrastructure], get: omg-env, resource: omg-env}
+      - aggregate: 
+        task: push-tiles
+        file: omg-src-in/ci/tasks/push-tiles.yml
+        params:
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+        on_failure: &destroy_infrastructure
+          task: destroy-infrastructure
+          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
+          params:
+            env_file_name: {{env_file_name}}
+            env_name: {{env_name}}
+
+  - name: deploy-pcf
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [push-tiles], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [push-tiles], get: omg-env, resource: omg-env}
+      - aggregate: 
+        task: deploy-pcf
+        file: omg-src-in/ci/tasks/deploy-pcf.yml
+        params:
+          env_file_name: {{env_file_name}}
+          env_name: {{env_name}}
+        on_failure: 
+          aggregate:
+          - *destroy_infrastructure
+          - &destroy_pcf
+            task: destroy-pcf
+            file: omg-src-in/ci/tasks/destroy-pcf.yml
+            params:
+              env_file_name: {{env_file_name}}
+              env_name: {{env_name}}
+
+  - name: destroy-pcf
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [deploy-pcf], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [deploy-pcf], get: omg-env, resource: omg-env}
+      - aggregate:
+        - *destroy_pcf
+        on_failure: *destroy_infrastructure
+
+  - name: destroy-infrastructure
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [destroy-pcf], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [destroy-pcf], get: omg-env, resource: omg-env}
+      - aggregate:
+        - *destroy_infrastructure
+
+resources:
+  - name: omg-src-in
+    type: git
+    source: 
+      uri:      {{source_uri}}
+      branch:   {{source_branch}}
+      username: {{source_username}}
+      password: {{source_password}}
+
+  - name: omg-env
+    type: gcs-resource
+    source:
+      bucket: {{ci_bucket_name}}
+      json_key: {{ci_json_key_date}}
+      versioned_file: {{env_file_name}}
+
+resource_types:
+  - name: gcs-resource
+    type: docker-image
+    source:
+      repository: frodenas/gcs-resource

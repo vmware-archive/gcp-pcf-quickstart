@@ -94,8 +94,8 @@ func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
 		ppc.logger.Fatalf("creating ProjectValidator: %v", err)
 	}
 
-	validateQuotas(ppc.logger, validator)
 	validateApis(ppc.logger, validator)
+	validateQuotas(ppc.logger, validator)
 
 	return nil
 }
@@ -119,7 +119,7 @@ func validateQuotas(logger *log.Logger, validator *setup.ProjectValidator) {
 	errors, satisfied, err := validator.ValidateQuotas()
 
 	for _, quotaError := range errors {
-		logger.Printf("Compute Engine quota requirement not satisfied: Name %s, Region: %s, Minimum Required: %v (Current Quota: %v)", quotaError.Name, quotaError.Region, quotaError.Limit, quotaError.Actual)
+		logger.Printf("Compute Engine quota requirement not satisfied: Name: %s, Region: %s, Minimum Required: %v (Current Quota: %v)", quotaError.Name, quotaError.Region, quotaError.Limit, quotaError.Actual)
 	}
 
 	if err != nil {
