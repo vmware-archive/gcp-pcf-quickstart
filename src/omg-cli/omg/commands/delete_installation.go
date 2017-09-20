@@ -30,7 +30,6 @@ import (
 type DeleteInstallationCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
-	opsManCreds         config.OpsManagerCredentials
 }
 
 const DeleteInstallationName = "delete-installation"
@@ -38,7 +37,6 @@ const DeleteInstallationName = "delete-installation"
 func (dic *DeleteInstallationCommand) register(app *kingpin.Application) {
 	c := app.Command(DeleteInstallationName, "Delete an Ops Manager installation").Action(dic.run)
 	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
-	registerOpsManagerFlags(c, &dic.opsManCreds)
 }
 
 func (dic *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
@@ -47,7 +45,7 @@ func (dic *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), dic.opsManCreds, *dic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dic.logger)
 	if err != nil {
 		return err
 	}

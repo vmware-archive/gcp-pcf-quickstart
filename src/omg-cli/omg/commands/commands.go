@@ -19,7 +19,6 @@ package commands
 import (
 	"log"
 
-	"omg-cli/config"
 	"omg-cli/omg/tiles"
 	"omg-cli/omg/tiles/ert"
 	"omg-cli/omg/tiles/gcp_director"
@@ -32,10 +31,7 @@ import (
 )
 
 const (
-	defaultUsername         = "foo"
-	defaultPassword         = "foobar"
-	defaultDecryptionPhrase = "foobar"
-	defaultSkipSSLVerify    = "true"
+	defaultSkipSSLVerify = "true"
 )
 
 // TODO(jrjohnson): Remove? Move?
@@ -91,13 +87,6 @@ func retry(fn step, times int) error {
 	}
 
 	return fmt.Errorf("failed after %d attempts, errors: %v", times, errs)
-}
-
-func registerOpsManagerFlags(c *kingpin.CmdClause, cfg *config.OpsManagerCredentials) {
-	c.Flag("opsman-username", "Username for Ops Manager").Default(defaultUsername).StringVar(&cfg.Username)
-	c.Flag("opsman-password", "Password for Ops Manager").Default(defaultPassword).StringVar(&cfg.Password)
-	c.Flag("opsman-decryption-phrase", "Decryption Phrase for Ops Manager").Default(defaultDecryptionPhrase).StringVar(&cfg.DecryptionPhrase)
-	c.Flag("opsman-skip-ssl-verification", "Skip SSL Validation for Ops Manager").Default(defaultSkipSSLVerify).BoolVar(&cfg.SkipSSLVerification)
 }
 
 func registerTerraformConfigFlag(c *kingpin.CmdClause, path *string) {

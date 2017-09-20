@@ -149,6 +149,7 @@ dns_suffix = "${DNS_SUFFIX}"
 dns_zone_name = "${DNS_ZONE_NAME}"
 opsman_image_url = "${BASE_IMAGE_URL}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK}"
+ops_manager_skip_ssl_verify = "true"
 pivnet_api_token = "${PIVNET_API_TOKEN}"
 pivnet_accept_eula = "${PIVNET_ACCEPT_EULA}"
 

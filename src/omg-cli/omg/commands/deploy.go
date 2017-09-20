@@ -30,7 +30,6 @@ import (
 type DeployCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
-	opsManCreds         config.OpsManagerCredentials
 	applyChanges        bool
 }
 
@@ -39,7 +38,6 @@ const DeployName = "deploy"
 func (dc *DeployCommand) register(app *kingpin.Application) {
 	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(dc.run)
 	registerTerraformConfigFlag(c, &dc.terraformConfigPath)
-	registerOpsManagerFlags(c, &dc.opsManCreds)
 	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&dc.applyChanges)
 }
 
@@ -49,7 +47,7 @@ func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), dc.opsManCreds, *dc.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dc.logger)
 	if err != nil {
 		return err
 	}

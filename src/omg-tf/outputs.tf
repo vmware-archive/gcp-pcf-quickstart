@@ -197,3 +197,19 @@ output "pivnet_api_token" {
 output "pivnet_accept_eula" {
   value = "${var.pivnet_accept_eula}"
 }
+
+output "ops_manager_username" {
+  value = "${var.ops_manager_username}"
+}
+
+output "ops_manager_password" {
+  value = "${var.ops_manager_password == "" ? random_id.ops_manager_password_generator.b64 : var.ops_manager_password}"
+}
+
+output "ops_manager_decryption_phrase" {
+  value = "${var.ops_manager_decryption_phrase == "" ? random_id.ops_manager_decryption_phrase_generator.b64 : var.ops_manager_decryption_phrase}"
+}
+
+output "ops_manager_skip_ssl_verify" {
+  value = "${var.ops_manager_skip_ssl_verify}"
+}

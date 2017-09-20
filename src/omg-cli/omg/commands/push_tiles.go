@@ -31,7 +31,6 @@ import (
 type PushTilesCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
-	opsManCreds         config.OpsManagerCredentials
 }
 
 const PushTilesName = "push-tiles"
@@ -39,7 +38,6 @@ const PushTilesName = "push-tiles"
 func (bic *PushTilesCommand) register(app *kingpin.Application) {
 	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(bic.run)
 	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
-	registerOpsManagerFlags(c, &bic.opsManCreds)
 }
 
 func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
@@ -48,7 +46,7 @@ func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), bic.opsManCreds, *bic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *bic.logger)
 	if err != nil {
 		return err
 	}

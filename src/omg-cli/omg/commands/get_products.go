@@ -32,7 +32,6 @@ import (
 type GetProductsCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
-	opsManCreds         config.OpsManagerCredentials
 }
 
 const GetProductsName = "get-products"
@@ -40,7 +39,6 @@ const GetProductsName = "get-products"
 func (dic *GetProductsCommand) register(app *kingpin.Application) {
 	c := app.Command(GetProductsName, "List installed products").Action(dic.run)
 	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
-	registerOpsManagerFlags(c, &dic.opsManCreds)
 }
 
 func (dic *GetProductsCommand) run(c *kingpin.ParseContext) error {
@@ -49,7 +47,7 @@ func (dic *GetProductsCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), dic.opsManCreds, *dic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dic.logger)
 	if err != nil {
 		return err
 	}

@@ -120,6 +120,31 @@ variable "opsman_sql_db_host" {
   default = ""
 }
 
+variable "ops_manager_username" {
+  description = "Administrator username for authenticating with Ops Manager"
+  type        = "string"
+  default     = "admin"
+}
+
+variable "ops_manager_password" {
+  description = "Password for administrator user. Generated if left blank."
+  type        = "string"
+  default     = ""
+}
+
+variable "ops_manager_decryption_phrase" {
+  description = "Decryption Phrase for Ops Manager Authentication. Generated if left blank."
+  type        = "string"
+  default     = ""
+}
+
+variable "ops_manager_skip_ssl_verify" {
+  description = "Skip SSL veririfcation for Ops Manager HTTPS endpoint"
+  type    = "string"
+  default = ""
+}
+
+
 /*****************************
  * Isolation Segment Options *
  *****************************/

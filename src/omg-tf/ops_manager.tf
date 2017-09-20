@@ -41,3 +41,12 @@ resource "google_compute_instance" "ops-manager" {
   }
 }
 
+resource "random_id" "ops_manager_password_generator" {
+  byte_length = 16
+}
+
+resource "random_id" "ops_manager_decryption_phrase_generator" {
+  byte_length = 16
+}
+
+

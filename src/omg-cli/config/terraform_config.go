@@ -68,6 +68,8 @@ type TerraformConfigSchema struct {
 	Zone2       string `json:"azs_1"`
 	Zone3       string `json:"azs_2"`
 	ProjectName string `json:"project"`
+
+	OpsManager OpsManagerCredentials
 }
 
 func FromTerraform(filename string) (*Config, error) {
@@ -95,6 +97,14 @@ func FromTerraform(filename string) (*Config, error) {
 	if flattened["pivnet_accept_eula"] == "yes" {
 		hydratedCfg.PivnetAcceptEula = true
 	}
+
+	if flattened["ops_manager_skip_ssl_verify"] == "true" {
+		hydratedCfg.OpsManager.SkipSSLVerification = true
+	}
+
+	hydratedCfg.OpsManager.Username = flattened["ops_manager_username"]
+	hydratedCfg.OpsManager.Password = flattened["ops_manager_password"]
+	hydratedCfg.OpsManager.DecryptionPhrase = flattened["ops_manager_decryption_phrase"]
 
 	cfg := Config(hydratedCfg)
 

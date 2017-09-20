@@ -62,6 +62,8 @@ type Config struct {
 	Zone2       string
 	Zone3       string
 	ProjectName string
+
+	OpsManager OpsManagerCredentials
 }
 
 type OpsManagerCredentials struct {
