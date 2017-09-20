@@ -19,17 +19,15 @@
 set -u
 cd "$(dirname "$0")/../"
 
-if [ -z ${ENV_NAME+X} ]; then
-    export ENV_NAME="omg"
-    echo "ENV_NAME unset, using: ${ENV_NAME}"
-fi
-
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="$PWD/env/${ENV_NAME}"
+    export ENV_DIR="env/omg"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
 
-read -p "Delete ${ENV_NAME} (y/n)? " choice
+# Ensure absolute path
+export ENV_DIR=$(readlink -f ${ENV_DIR})
+
+read -p "Delete deployment in ${ENV_DIR} (y/n)? " choice
 case "$choice" in
   y|Y ) echo "begin delete";;
   * ) exit 0;;
@@ -47,5 +45,3 @@ omg-cli remote --env-dir ${ENV_DIR} "delete-installation"
 pushd src/omg-tf
     yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
 popd
-
-echo "${ENV_NAME} has been deleted"
