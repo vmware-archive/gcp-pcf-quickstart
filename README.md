@@ -5,5 +5,6 @@ This repository contains tools and instructions for deploying Pivotal Cloud Foun
 This project aims to make installing PCF on GCP straightforward. It is **not** an official Google product.
 
 # Getting Started
+1. Verify and setup [prerequisites](./docs/prerequisites.md)
 # Related Resources
 # Contributing
