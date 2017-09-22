@@ -32,6 +32,8 @@ Cloud Shell already includes many of the dependencies and is an excellent way to
    curl -L -o /tmp/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github"
    tar zxf /tmp/cf.tgz cf
    export PATH=$PATH:~/bin
+   cd
+   
    ```
    
 The machine that hosts your Cloud Shell session is ephemeral but your user directory will be restored for future sessions.
