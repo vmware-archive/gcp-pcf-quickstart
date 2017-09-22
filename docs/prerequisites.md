@@ -22,7 +22,7 @@ Cloud Shell already includes many of the dependencies and is an excellent way to
 1. Open the [Google Cloud Console](https://console.cloud.google.com)
 1. Ensure your project is active (See the Project Info section)
 1. Click on the `>_` icon in the upper right corner
-1. Paste the following snippet into the console to install remaining dependencies:
+1. Paste the following snippet into the console to install [terraform](https://www.terraform.io) and the [cf cli](https://github.com/cloudfoundry/cli) to your local user directory:
 
    ```bash
    mkdir -p bin
@@ -34,7 +34,10 @@ Cloud Shell already includes many of the dependencies and is an excellent way to
    export PATH=$PATH:~/bin
    ```
    
-This installs [terraform](https://www.terraform.io) and the [cf cli](https://github.com/cloudfoundry/cli) to your local user directory. The machine that hosts your Cloud Shell session is ephemeral but your user directory will be restored for future sessions. 
+The machine that hosts your Cloud Shell session is ephemeral but your user directory will be restored for future sessions.
+
+
+**> With these prerequisites installed you can move on to [Setting up DNS](./dns.md)**
 
 ### Option 2: Running Locally
 
@@ -52,3 +55,4 @@ A Linux or Mac machine is required with the following dependencies installed:
   - OSX: `pip install sshuttle`
 - [git](https://git-scm.com/downloads)
 
+**> With these prerequisites installed you can move on to [Setting up DNS](./dns.md)**
