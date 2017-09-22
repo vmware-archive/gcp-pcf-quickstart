@@ -8,6 +8,7 @@ jobs:
         file: omg-src-in/ci/tasks/run-unit.yml
 
   - name: prepare-project
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
@@ -20,6 +21,7 @@ jobs:
           google_region: {{google_region}}
 
   - name: generate-env
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
@@ -43,6 +45,7 @@ jobs:
           params: {file: omg-env/*.tgz}
 
   - name: create-infrastructure
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [generate-env], get: omg-src-in, resource: omg-src-in}
@@ -58,6 +61,7 @@ jobs:
           params: {file: omg-env/*.tgz}
 
   - name: push-tiles
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
@@ -76,6 +80,7 @@ jobs:
             env_name: {{env_name}}
 
   - name: deploy-pcf
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [push-tiles], get: omg-src-in, resource: omg-src-in}
@@ -97,6 +102,7 @@ jobs:
               env_name: {{env_name}}
 
   - name: destroy-pcf
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [deploy-pcf], get: omg-src-in, resource: omg-src-in}
@@ -106,6 +112,7 @@ jobs:
         on_failure: *destroy_infrastructure
 
   - name: destroy-infrastructure
+    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [destroy-pcf], get: omg-src-in, resource: omg-src-in}
@@ -113,10 +120,50 @@ jobs:
       - aggregate:
         - *destroy_infrastructure
 
+  - name: promote-candidate-major
+    serial: true
+    plan:
+      - aggregate:
+        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                                   get: release-version-semver, params: {bump: major}}
+      - aggregate: &promote_candidate
+        - task: promote
+          file: omg-src-in/ci/tasks/promote-candidate.yml
+
+        - put: release-version-semver
+          params: {file: release-version-semver/number}
+
+        - put: omg-src-out
+          params: {repository: promoted/repo, rebase: true, tag_prefix: "v", tag: promoted/semver_version}
+
+  - name: promote-candidate-minor
+    serial: true
+    plan:
+      - aggregate:
+        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                                   get: release-version-semver, params: {bump: minor}}
+      - aggregate: *promote_candidate
+
+  - name: promote-candidate-patch
+    serial: true
+    plan:
+      - aggregate:
+        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                                   get: release-version-semver, params: {bump: patch}}
+      - aggregate: *promote_candidate
+
 resources:
   - name: omg-src-in
     type: git
     source: 
+      uri:      {{source_uri}}
+      branch:   {{source_branch}}
+      username: {{source_username}}
+      password: {{source_password}}
+
+  - name: omg-src-out
+    type: git
+    source:
       uri:      {{source_uri}}
       branch:   {{source_branch}}
       username: {{source_username}}
@@ -129,8 +176,22 @@ resources:
       json_key: {{ci_json_key_date}}
       versioned_file: {{env_file_name}}
 
+  - name: release-version-semver
+    type: semver
+    source:
+      driver:            gcs
+      key:               release-current-version
+      bucket:            {{ci_bucket_name}}
+      json_key:          {{ci_json_key_date}}
+
 resource_types:
   - name: gcs-resource
     type: docker-image
     source:
       repository: frodenas/gcs-resource
+
+  - name: semver
+    type: docker-image
+    source:
+      repository: concourse/semver-resource
+      tag: latest

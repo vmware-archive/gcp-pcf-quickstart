@@ -1,0 +1,12 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: jrjohnsongoog/omgci}
+inputs:
+  - name: omg-src-in
+  - name: release-version-semver
+outputs:
+  - name: promoted
+run:
+  path: omg-src-in/ci/tasks/promote-candidate.sh
