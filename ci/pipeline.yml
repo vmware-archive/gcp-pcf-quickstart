@@ -93,13 +93,13 @@ jobs:
           env_name: {{env_name}}
         on_failure: 
           aggregate:
-          - *destroy_infrastructure
           - &destroy_pcf
             task: destroy-pcf
             file: omg-src-in/ci/tasks/destroy-pcf.yml
             params:
               env_file_name: {{env_file_name}}
               env_name: {{env_name}}
+          - *destroy_infrastructure
 
   - name: destroy-pcf
     serial: true
