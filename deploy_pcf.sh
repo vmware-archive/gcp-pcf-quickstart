@@ -20,7 +20,7 @@ set -ue
 cd "$(dirname "$0")"
 
 if [ -z ${DNS_ZONE_NAME+x} ]; then
-    export DNS_ZONE_NAME=omg-zone
+    export DNS_ZONE_NAME=pcf-zone
     echo "DNS_ZONE_NAME unset, using: ${DNS_ZONE_NAME}"
 fi
 
