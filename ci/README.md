@@ -9,5 +9,5 @@ See `credentials.yml.tpl`
 ## Running
 
 ```bash
-fly -t (your concourse) -p omg set-pipeline -c pipeline.yml -l credentials.yml
+fly -t (your concourse) set-pipeline -p omg -c pipeline.yml -l credentials.yml
 ```
