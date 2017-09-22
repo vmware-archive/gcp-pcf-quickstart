@@ -47,7 +47,7 @@ func (s *Sdk) authorizedRequest(method, path string, body io.Reader) (*http.Requ
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Token %s", s.apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Token %s", s.apiToken))
 
 	return req, nil
 }
