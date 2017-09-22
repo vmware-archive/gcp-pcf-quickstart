@@ -28,6 +28,8 @@ import (
 
 	"omg-cli/config"
 
+	"omg-cli/version"
+
 	"github.com/pivotal-cf/om/progress"
 )
 
@@ -48,6 +50,7 @@ func (s *Sdk) authorizedRequest(method, path string, body io.Reader) (*http.Requ
 		return nil, err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Token %s", s.apiToken))
+	req.Header.Set("User-Agent", version.UserAgent())
 
 	return req, nil
 }

@@ -25,6 +25,8 @@ import (
 
 	"time"
 
+	"omg-cli/version"
+
 	servicemanagement "google.golang.org/api/servicemanagement/v1"
 )
 
@@ -52,6 +54,7 @@ func NewAPIService(logger *log.Logger, projectId string, client *http.Client) (A
 	if err != nil {
 		return nil, err
 	}
+	servicemanagementService.UserAgent = version.UserAgent()
 
 	return &apiService{logger, projectId, servicemanagementService}, nil
 }

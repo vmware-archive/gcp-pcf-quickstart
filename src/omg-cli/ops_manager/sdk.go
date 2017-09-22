@@ -33,6 +33,8 @@ import (
 
 	"io/ioutil"
 
+	"omg-cli/version"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -119,7 +121,7 @@ func (om *Sdk) Unlock() error {
 	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
 	body, err := json.Marshal(&unlockReq)
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v0/unlock", om.target), bytes.NewReader(body))
+	req, err := om.newRequest("PUT", fmt.Sprintf("%s/api/v0/unlock", om.target), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -136,7 +138,7 @@ func (om *Sdk) Unlock() error {
 
 // ReadyForAuth checks if the Ops Manager authentication system is ready
 func (om *Sdk) ReadyForAuth() bool {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/login/ensure_availability", om.target), nil)
+	req, err := om.newRequest("GET", fmt.Sprintf("%s/login/ensure_availability", om.target), nil)
 	if err != nil {
 		return false
 	}
@@ -249,7 +251,7 @@ func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
 
 // Online checks if Ops Manager is running on the target.
 func (om *Sdk) Online() bool {
-	req, err := http.NewRequest("GET", om.target, nil)
+	req, err := om.newRequest("GET", om.target, nil)
 	if err != nil {
 		return false
 	}
@@ -292,11 +294,11 @@ type ErrorResponse struct {
 }
 
 func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
-	request, err := http.NewRequest(method, fmt.Sprintf("%s/%s", om.target, path), data)
+	req, err := om.newRequest(method, fmt.Sprintf("%s/%s", om.target, path), data)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := om.client.Do(request)
+	resp, err := om.client.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -357,4 +359,12 @@ func (om *Sdk) DeleteInstallation() error {
 	cmd := commands.NewDeleteInstallation(deleteInstallationService, installationsService, logWriter, om.logger, poolingIntervalSec)
 
 	return cmd.Execute(nil)
+}
+
+func (om *Sdk) newRequest(method, url string, body io.Reader) (req *http.Request, err error) {
+	req, err = http.NewRequest(method, url, body)
+	if req != nil {
+		req.Header.Set("User-Agent", version.UserAgent())
+	}
+	return
 }

@@ -23,6 +23,8 @@ import (
 
 	"net/http"
 
+	"omg-cli/version"
+
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -79,6 +81,7 @@ func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) 
 	if err != nil {
 		return nil, err
 	}
+	computeService.UserAgent = version.UserAgent()
 
 	return &quotaService{logger, projectId, computeService}, nil
 }
