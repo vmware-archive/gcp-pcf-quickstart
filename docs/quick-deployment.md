@@ -18,6 +18,7 @@ Kick off the deployment script and sit back. If a failure occurs follow
 any provided instructions and re-run the script. It is safe to repeat.
 
 ```bash
+export PIVNET_API_TOKEN=<Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile>
 ./deploy_pcf.sh
 ```
 
