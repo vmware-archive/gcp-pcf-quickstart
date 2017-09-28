@@ -28,4 +28,4 @@ fi
 export ENV_DIR=$(readlink -f ${ENV_DIR})
 
 terraform_state="${ENV_DIR}/terraform.tfstate"
-terraform output -state "${terraform_state}" @$
+terraform output -state "${terraform_state}" $@
