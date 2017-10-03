@@ -26,7 +26,7 @@ Cloud Shell already includes many of the dependencies and is an excellent way to
    ```bash
    mkdir -p bin
    cd bin
-   curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.10.6/terraform_0.10.6_linux_amd64.zip
+   curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip
    unzip /tmp/terraform.zip terraform
    curl -L -o /tmp/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github"
    tar zxf /tmp/cf.tgz cf
@@ -45,7 +45,7 @@ The machine that hosts your Cloud Shell session is ephemeral but your user direc
 A Linux or Mac machine is required with the following dependencies installed:
 
 - [gcloud](https://cloud.google.com/sdk/downloads)
-- [terraform](https://www.terraform.io/downloads.html) (v0.9.11+)
+- [terraform](https://www.terraform.io/downloads.html) (v0.9.11 exactly)
 - dig
   - Debian/Ubuntu: `sudo apt-get install dnsutils`
   - OSX: preinstalled
