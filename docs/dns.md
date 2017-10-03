@@ -24,7 +24,7 @@ The follow record must be created:
 
 - **DNS Name**: `pcf.<your-domain-name.com>`
 - **Record Type**: `NS`
-- **Name Server**: Populate with the rrdatas from: `gcloud dns record-sets list --zone=zzz --format=flattened --filter="type=NS"`.
+- **Name Server**: Populate with the rrdatas from: `gcloud dns record-sets list --zone=pcf-zone --format=flattened --filter="type=NS"`.
   They will be in the format of `ns-cloud-{a,b,c,..}{1,2,3..}.googledomains.com`
 
 ## Verifying NS records
