@@ -8,7 +8,7 @@ From your deployment machine in the `gcp-pcf-quickstart` folder run the
 following command:
 
 ```bash
-util/remote.sh "get-credential --app-name=cf --credential=.uaa.admin_credentials"
+bin/omg-cli remote --env-dir=env/omg "get-credential --app-name=cf --credential=.uaa.admin_credentials"
 ```
 
 This will return an `Identity` and `Password`
