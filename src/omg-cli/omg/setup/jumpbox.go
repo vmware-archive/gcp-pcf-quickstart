@@ -80,7 +80,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 		return err
 	}
 	defer os.Remove(rebuilt.Name())
-	build := exec.Command("go", "build", "-o", rebuilt.Name(), packageName)
+	build := exec.Command("go", "build", "-ldflags='-s -w'", "-o", rebuilt.Name(), packageName)
 	build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64", fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH")))
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
