@@ -30,7 +30,14 @@ import (
 
 	"omg-cli/version"
 
+	"time"
+
 	"github.com/pivotal-cf/om/progress"
+)
+
+const (
+	retryAttempts = 5 // How many times to retry downloading a tile from PivNet
+	retryDelay    = 5 // How long wait in between download retries
 )
 
 type Sdk struct {
@@ -79,7 +86,23 @@ func (s *Sdk) checkCredentials() error {
 // If an error is returned no os.File will be returned
 //
 // Caller is responsible for deleting the os.File
-func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (*os.File, error) {
+func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (file *os.File, err error) {
+	for i := 0; i < retryAttempts; i++ {
+		file, err = s.downloadTile(tile)
+
+		// Success or recoverable error
+		if err == nil || err != io.ErrUnexpectedEOF {
+			return
+		}
+
+		s.logger.Printf("download tile failed, retrying in %d seconds", retryDelay)
+		time.Sleep(time.Duration(retryDelay) * time.Second)
+	}
+
+	return nil, fmt.Errorf("download tile failed after %d attempts", retryAttempts)
+}
+
+func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
 	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.VersionId, tile.FileId), nil)
 	if err != nil {
 		return nil, err
