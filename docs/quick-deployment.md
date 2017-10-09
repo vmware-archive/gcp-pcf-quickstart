@@ -35,5 +35,5 @@ Once it's begun (evident by the streaming of BOSH output) it's safe to
 exit the command.
 
 ## What's Next?
-- [Login to Cloud Foundry](./login-to-cf-cli.md) and deploy your first app
+- [Login to Pivotal Cloud Foundry](login-to-pcf.md) and deploy your first app
 - [Delete Deployment](./delete-deployment.md)

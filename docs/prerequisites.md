@@ -51,9 +51,6 @@ A Linux or Mac machine is required with the following dependencies installed:
   - OSX: preinstalled
 - [go](https://golang.org/doc/install) (v1.8+)
 - [cf](https://github.com/cloudfoundry/cli#installers-and-compressed-binaries)
-- [sshuttle](https://github.com/apenwarr/sshuttle)
-  - Debian/Ubuntu: `sudo apt-get install sshuttle`
-  - OSX: `pip install sshuttle`
 - [git](https://git-scm.com/downloads)
 
 **> With these prerequisites installed you can move on to [Setting up DNS](./dns.md)**
