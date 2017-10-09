@@ -1,3 +1,19 @@
+---
+groups:
+- name: gcp-pcf-quickstart
+  jobs:
+    - run-unit
+    - prepare-project
+    - generate-env
+    - create-infrastructure
+    - push-tiles
+    - deploy-pcf
+    - destroy-pcf
+    - destroy-infrastructure
+    - promote-candidate-major
+    - promote-candidate-minor
+    - promote-candidate-patch
+
 jobs:
   - name: run-unit
     plan:
@@ -8,7 +24,6 @@ jobs:
         file: omg-src-in/ci/tasks/run-unit.yml
 
   - name: prepare-project
-    serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
