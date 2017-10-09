@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-set -e
+set -u
 
 if [ -z ${ENV_DIR+X} ]; then
     echo "ENV_DIR required"
@@ -62,21 +62,20 @@ if [ -z ${PROJECT_ID+x} ]; then
     echo "PROJECT_ID unset, using: ${PROJECT_ID}"
 fi
 
-if [ -z ${DNS_SUFFIX+x} ]; then
-    dns_suffix=`gcloud dns managed-zones describe ${DNS_ZONE_NAME} --project ${PROJECT_ID} --format="value(dnsName)"  2> /dev/null`
-    if [ $? != 0 ]; then
-        echo "Expected to find Cloud DNS managed zone ${DNS_ZONE_NAME} in ${PROJECT_ID}"
-        exit 1
-    fi
+dns_suffix=$(gcloud dns managed-zones describe ${DNS_ZONE_NAME} --project ${PROJECT_ID} --format="value(dnsName)" 2> /dev/null)
 
-    # trim trailing '.' from response
-    export DNS_SUFFIX=${dns_suffix%.}
-    echo "DNS_SUFFIX unset, using: ${DNS_SUFFIX}"
+if [ $? != 0 ]; then
+    echo "ERROR: Expected to find Cloud DNS managed zone ${DNS_ZONE_NAME} in project ${PROJECT_ID}"
+    exit 1
+fi
 
-    if [ `dig ${DNS_SUFFIX} NS +short | wc -l` == "0" ]; then
-        echo "Failed to resolve NS records for ${DNS_SUFFIX}"
-        exit 1
-    fi
+# trim trailing '.' from response
+export DNS_SUFFIX=${dns_suffix%.}
+echo "DNS_SUFFIX set to: ${DNS_SUFFIX}"
+
+if [ `dig ${DNS_SUFFIX} NS +short | wc -l` == "0" ]; then
+    echo "Failed to resolve NS records for ${DNS_SUFFIX}"
+    exit 1
 fi
 
 if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
@@ -101,6 +100,7 @@ ensure_service_account() {
     --role "${role}"
 }
 
+set -e
 seed=$(date +%s)
 
 # Terraform
