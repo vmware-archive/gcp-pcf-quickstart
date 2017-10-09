@@ -6,7 +6,7 @@ resource "google_compute_instance" "jumpbox" {
   tags           = ["${var.env_name}-jumpbox-external"]
 
   disk {
-    image = "ubuntu-1404-trusty-v20170703"
+    image = "ubuntu-os-cloud/ubuntu-1404-lts"
     size  = 250
     type  = "pd-ssd"
   }

@@ -7,7 +7,7 @@ resource "google_compute_instance" "nat" {
   count          = "${var.nat_instance_count}"
 
   disk {
-    image = "debian-8-jessie-v20170619"
+    image = "debian-cloud/debian-8"
     size  = 10
   }
 
