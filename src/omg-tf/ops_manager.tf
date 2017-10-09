@@ -19,7 +19,7 @@ resource "google_compute_instance" "ops-manager" {
   create_timeout = 10
   tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
-  disk {
+  boot_disk {
     image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : var.ops_manager_image_name}"
     size  = 250
     type  = "pd-ssd"
