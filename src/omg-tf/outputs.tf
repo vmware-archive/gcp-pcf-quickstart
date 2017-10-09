@@ -3,15 +3,15 @@ output "service_account_email" {
 }
 
 output "ops_manager_dns" {
-  value = "${google_compute_instance.ops-manager.name}.c.${var.project}.internal"
+  value = "pcf.${var.dns_suffix}"
 }
 
 output "ops_manager_instance_name" {
-  value = "${google_compute_instance.ops-manager.name}"
+  value = "${var.opsman_external_ip != "" ? google_compute_instance.ops-manager-external.name : google_compute_instance.ops-manager-internal.name}"
 }
 
 output "ops_manager_instance_zone" {
-  value = "${google_compute_instance.ops-manager.zone}"
+  value = "${var.opsman_external_ip != "" ? google_compute_instance.ops-manager-external.zone : google_compute_instance.ops-manager-internal.zone}"
 }
 
 output "sys_domain" {
@@ -28,10 +28,6 @@ output "tcp_domain" {
 
 output "dns_suffix" {
   value = "${var.dns_suffix}"
-}
-
-output "ops_manager_private_ip" {
-  value = "${google_compute_instance.ops-manager.network_interface.0.address}"
 }
 
 output "project" {

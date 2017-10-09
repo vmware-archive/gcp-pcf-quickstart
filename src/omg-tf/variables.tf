@@ -34,6 +34,12 @@ variable "opsman_machine_type" {
   default = "n1-standard-2"
 }
 
+variable "opsman_external_ip" {
+  type        = "string"
+  description = "set a non-empty value to provide ops manager an external IP and use it for DNS records"
+  default     = ""
+}
+
 variable "jumpbox_machine_type" {
   type    = "string"
   default = "n1-standard-2"

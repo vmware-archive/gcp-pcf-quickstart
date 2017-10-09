@@ -1,10 +1,20 @@
-variable "ops_manager_image_name" {
-  default = "ops-manager-image"
+# Allow HTTP/S access to Ops Manager from the outside world if exposed
+resource "google_compute_firewall" "ops-manager-external" {
+  name        = "${var.env_name}-ops-manager-external"
+  network     = "${google_compute_network.pcf-network.name}"
+  target_tags = ["${var.env_name}-ops-manager-external"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
 }
 
 resource "google_compute_image" "ops-manager-image" {
-  count = "${var.opsman_image_selflink != "" ? 0 : 1}"
-  name           = "${var.ops_manager_image_name}"
+  count          = "${var.opsman_image_selflink != "" ? 0 : 1}"
+  name           = "${var.env_name}-ops-manager-image"
   create_timeout = 20
 
   raw_disk {
@@ -12,15 +22,17 @@ resource "google_compute_image" "ops-manager-image" {
   }
 }
 
-resource "google_compute_instance" "ops-manager" {
+resource "google_compute_instance" "ops-manager-internal" {
+  count          = "${var.opsman_external_ip != "" ? 0 : 1}"
+
   name           = "${var.env_name}-ops-manager"
   machine_type   = "${var.opsman_machine_type}"
   zone           = "${element(var.zones, 1)}"
   create_timeout = 10
   tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
-  boot_disk {
-    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : var.ops_manager_image_name}"
+  disk {
+    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : "${var.env_name}-ops-manager-image"}"
     size  = 250
     type  = "pd-ssd"
   }
@@ -28,6 +40,41 @@ resource "google_compute_instance" "ops-manager" {
   network_interface {
     subnetwork = "${google_compute_subnetwork.management-subnet.name}"
     address    = "10.0.0.6"
+  }
+
+  service_account {
+    email  = "${google_service_account.opsman_service_account.email}"
+    scopes = ["cloud-platform"]
+  }
+
+  metadata = {
+    ssh-keys               = "${format("ubuntu:%s", var.ssh_public_key)}"
+    block-project-ssh-keys = "TRUE"
+  }
+}
+
+resource "google_compute_instance" "ops-manager-external" {
+  count          = "${var.opsman_external_ip != "" ? 1 : 0}"
+
+  name           = "${var.env_name}-ops-manager"
+  machine_type   = "${var.opsman_machine_type}"
+  zone           = "${element(var.zones, 1)}"
+  create_timeout = 10
+  tags           = ["${var.env_name}-ops-manager", "${var.env_name}-ops-manager-external"]
+
+  disk {
+    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : "${var.env_name}-ops-manager-image"}"
+    size  = 250
+    type  = "pd-ssd"
+  }
+
+  network_interface {
+    subnetwork = "${google_compute_subnetwork.management-subnet.name}"
+    address    = "10.0.0.6"
+
+    access_config {
+      # Empty for ephemeral external IP allocation
+    }
   }
 
   service_account {
