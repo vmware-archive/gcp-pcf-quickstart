@@ -115,11 +115,11 @@ func (svc *apiService) filterCompleted(operations map[API]string) (pending map[A
 	for api, operationName := range operations {
 		oper, err := svc.servicemanagementService.Operations.Get(operationName).Do()
 		if err != nil {
-			return operations, completed, fmt.Errorf("pooling for api: %s, operation: %s", api.Name, operationName, err)
+			return operations, completed, fmt.Errorf("pooling for api: %s, operation: %s, err: %v", api.Name, operationName, err)
 		}
 
 		if oper.Error != nil {
-			return operations, completed, fmt.Errorf("enabling api: %s, operation %s", api.Name, operationName, err)
+			return operations, completed, fmt.Errorf("enabling api: %s, operation: %s, err: %+v", api.Name, operationName, oper.Error.Message)
 		}
 
 		if !oper.Done {
