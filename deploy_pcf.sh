@@ -54,17 +54,18 @@ terraform_state="${ENV_DIR}/terraform.tfstate"
 # TODO(jrjohnson): support region/zone selection
 REGION="us-east1"
 
-# Verify project is ready
 export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
 
-# Setup infrastructure
 pushd src/omg-tf
+    # Verify project is ready
     if [ ! -f $terraform_config ]; then
          omg-cli prepare-project --project-id ${PROJECT_ID} --region ${REGION}
         ./init.sh
     fi
+
+    # Setup infrastructure
     terraform init
     terraform get
     terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} || terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
