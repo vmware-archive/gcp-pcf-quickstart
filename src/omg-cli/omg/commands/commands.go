@@ -50,6 +50,8 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&GetProductsCommand{logger: logger},
 		&RemoteCommand{logger: logger},
 		&PrepareProjectCommand{logger: logger},
+		&GenerateConfigCommand{logger: logger},
+		&SourceConfigCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
@@ -95,4 +97,8 @@ func registerTerraformConfigFlag(c *kingpin.CmdClause, path *string) {
 
 func registerPivnetFlag(c *kingpin.CmdClause, apiToken *string) {
 	c.Flag("pivnet-api-token", "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.").StringVar(apiToken)
+}
+
+func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
+	c.Flag("env-dir", "path to environment configuration and state").Default("env/pcf").StringVar(path)
 }

@@ -153,6 +153,8 @@ opsman_external_ip = "true"
 ops_manager_skip_ssl_verify = "true"
 pivnet_api_token = "${PIVNET_API_TOKEN}"
 pivnet_accept_eula = "${PIVNET_ACCEPT_EULA}"
+region = "${REGION}"
+zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
 
 ssl_cert = <<SSL_CERT
 $(cat keys/server.crt)

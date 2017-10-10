@@ -41,7 +41,7 @@ const (
 
 func (bc *RemoteCommand) register(app *kingpin.Application) {
 	c := app.Command(RemoteName, "Run an OMG command from outside of the network").Action(bc.run)
-	c.Flag("env-dir", "path to environment configuration and state").Default("env/omg").StringVar(&bc.envDir)
+	registerEnvConfigFlag(c, &bc.envDir)
 	c.Arg("command", "command and arguments to execute").Required().StringVar(&bc.command)
 }
 
