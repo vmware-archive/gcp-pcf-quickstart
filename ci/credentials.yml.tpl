@@ -32,21 +32,11 @@ google_project:
 # JSON key for a GCP Service Account with Owner access to the `google_project`
 google_json_key_data:
 
-# Change not currently supported
+# Target region to deploy OMG
 google_region: us-east1
 
-# Optionally provide unique names to deploy multiple envs to the same project
+# Optionally provide unique name to deploy multiple envs to the same project
 env_file_name: env.tgz
-env_name: omg-ci
 
-# API Token to network.pivotal.io account (more info: https://network.pivotal.io/docs/api#how-to-authenticate)
-PIVNET_API_TOKEN:
-
-# Enter "yes" to accept all network.pivotal.io EULAs
-PIVNET_ACCEPT_EULA:
-
-# Existing Cloud DNS Zone hosted in the `google_project` to use for PCF deployment
-DNS_ZONE_NAME: omg-zone
-
-# URL to base image of Ops Manager
-BASE_IMAGE_URL: https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.11.4.tar.gz
+# Configuration for omg config.json. Generate a sample with `omg-cli generate-config`.
+env_config: replace-me

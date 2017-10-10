@@ -8,6 +8,6 @@ inputs:
 run:
   path: omg-src-in/ci/tasks/prepare-project.sh
 params:
-  google_project: CHANGE-ME
-  google_json_key_data: CHANGE-ME
-  google_region: CHANGE-ME
+  google_project: replace-me
+  google_json_key_data: replace-me
+  google_region: replace-me

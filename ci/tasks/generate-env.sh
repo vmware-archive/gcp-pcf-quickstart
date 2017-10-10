@@ -16,20 +16,24 @@ pushd ${release_dir} > /dev/null
 	source ci/tasks/utils.sh
 popd > /dev/null
 
-check_param ${google_region}
-check_param ${env_file_name}
-check_param ${env_name}
-check_param ${PIVNET_API_TOKEN}
-check_param ${PIVNET_ACCEPT_EULA}
-check_param ${DNS_ZONE_NAME}
-check_param ${BASE_IMAGE_URL}
+check_param 'google_project'
+check_param 'google_json_key_data'
+check_param 'env_config'
+
+check_param 'PIVNET_API_TOKEN'
+check_param 'PIVNET_ACCEPT_EULA'
 
 set_gcloud_config
 
 export ENV_DIR="${workspace_dir}/env"
-export ENV_NAME="${env_name}"
 
 mkdir -p ${ENV_DIR}
+echo "${env_config}" > "${ENV_DIR}/config.json"
+
+go install omg-cli
+set -o allexport
+eval $(omg-cli source-config --env-dir="${ENV_DIR}")
+set +o allexport
 
 pushd ${omg_tf_dir}
 	./init.sh

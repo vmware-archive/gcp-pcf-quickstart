@@ -47,13 +47,10 @@ jobs:
         params:
           google_project: {{google_project}}
           google_json_key_data: {{google_json_key_data}}
-          google_region: {{google_region}}
           env_file_name: {{env_file_name}}
-          env_name: {{env_name}}
+          env_config: {{env_config}}
           PIVNET_API_TOKEN: {{PIVNET_API_TOKEN}}
           PIVNET_ACCEPT_EULA: {{PIVNET_ACCEPT_EULA}}
-          DNS_ZONE_NAME: {{DNS_ZONE_NAME}}
-          BASE_IMAGE_URL: {{BASE_IMAGE_URL}}
 
       - aggregate:
         - put: omg-env
@@ -70,7 +67,6 @@ jobs:
         file: omg-src-in/ci/tasks/create-infrastructure.yml
         params:
           env_file_name: {{env_file_name}}
-          env_name: {{env_name}}
       - aggregate:
         - put: omg-env
           params: {file: omg-env/*.tgz}
@@ -86,13 +82,11 @@ jobs:
         file: omg-src-in/ci/tasks/push-tiles.yml
         params:
           env_file_name: {{env_file_name}}
-          env_name: {{env_name}}
         on_failure: &destroy_infrastructure
           task: destroy-infrastructure
           file: omg-src-in/ci/tasks/destroy-infrastructure.yml
           params:
             env_file_name: {{env_file_name}}
-            env_name: {{env_name}}
 
   - name: deploy-pcf
     serial: true
@@ -105,15 +99,13 @@ jobs:
         file: omg-src-in/ci/tasks/deploy-pcf.yml
         params:
           env_file_name: {{env_file_name}}
-          env_name: {{env_name}}
-        on_failure: 
+        on_failure:
           aggregate:
           - &destroy_pcf
             task: destroy-pcf
             file: omg-src-in/ci/tasks/destroy-pcf.yml
             params:
               env_file_name: {{env_file_name}}
-              env_name: {{env_name}}
           - *destroy_infrastructure
 
   - name: destroy-pcf
