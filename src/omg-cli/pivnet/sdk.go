@@ -114,6 +114,11 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("received non-200 %s response from server, body: %q", resp.Status, body)
+	}
+
 	out, err := ioutil.TempFile("", "tile")
 	if err != nil {
 		return nil, err
