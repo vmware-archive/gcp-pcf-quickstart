@@ -33,7 +33,7 @@ jobs:
         params:
           google_project: {{google_project}}
           google_json_key_data: {{google_json_key_data}}
-          google_region: {{google_region}}
+          env_config: {{env_config}}
 
   - name: generate-env
     serial: true

@@ -40,7 +40,7 @@ type QuotaError struct {
 
 var UnsatisfiedQuotaErr = errors.New("Compute Engine quota is unsatisfied, request an increase at: https://conscloud.google.com/iam-admin/quota")
 
-func NewProjectValiadtor(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
+func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
@@ -116,7 +116,7 @@ func ProjectQuotaRequirements() []google.Quota {
 	}
 }
 
-func RegionalQuotaRequirements(cfg *config.Config) map[string][]google.Quota {
+func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota {
 	return map[string][]google.Quota{
 		cfg.Region: {
 			{"CPUS", 200.0},

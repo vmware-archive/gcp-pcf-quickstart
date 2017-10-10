@@ -10,13 +10,17 @@ omg_dir="${release_dir}/src/omg-cli"
 
 export GOPATH=${workspace_dir}
 export PATH=${GOPATH}/bin:${PATH}
+go install omg-cli
 
 pushd ${release_dir} > /dev/null
 	source ci/tasks/utils.sh
 popd > /dev/null
 
-check_param ${google_region}
+check_param 'env_config'
 set_gcloud_config
 
-go install omg-cli
-omg-cli prepare-project --project-id=${google_project} --region=${google_region}
+
+mkdir -p env/
+echo "${env_config}" > env/config.json
+
+omg-cli prepare-project --env-dir=$PWD/env

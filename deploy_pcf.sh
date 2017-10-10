@@ -58,7 +58,7 @@ set +o allexport
 pushd src/omg-tf
     # Verify project is ready
     if [ ! -f $terraform_config ]; then
-         omg-cli prepare-project --project-id ${PROJECT_ID} --region ${REGION}
+         omg-cli prepare-project --env-dir="${ENV_DIR}"
         ./init.sh
     fi
 

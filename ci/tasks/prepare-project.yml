@@ -10,4 +10,4 @@ run:
 params:
   google_project: replace-me
   google_json_key_data: replace-me
-  google_region: replace-me
+  env_config: replace-me

@@ -25,93 +25,65 @@ import (
 	"omg-cli/google"
 	"omg-cli/omg/setup"
 
-	"os"
-
-	"errors"
-
 	"github.com/alecthomas/kingpin"
-	"golang.org/x/oauth2"
 	googleauth "golang.org/x/oauth2/google"
 	compute "google.golang.org/api/compute/v1"
 )
 
 type PrepareProjectCommand struct {
-	logger              *log.Logger
-	terraformConfigPath string
-	projectId           string
-	region              string
+	logger *log.Logger
+	envDir string
 }
 
 const PrepareProjectName = "prepare-project"
 
-func (ppc *PrepareProjectCommand) register(app *kingpin.Application) {
-	c := app.Command(PrepareProjectName, "Prepare the GCP Project").Action(ppc.run)
-	registerTerraformConfigFlag(c, &ppc.terraformConfigPath)
-	c.Flag("project-id", "Project ID (if not using terraform-config)").StringVar(&ppc.projectId)
-	c.Flag("region", "Region (if not using terraform-config)").StringVar(&ppc.region)
+func (cmd *PrepareProjectCommand) register(app *kingpin.Application) {
+	c := app.Command(PrepareProjectName, "Prepare the GCP Project").Action(cmd.run)
+	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
-func (ppc *PrepareProjectCommand) parseArgs() (cfg *config.Config, gcpClient *http.Client, err error) {
-	if _, err := os.Stat(ppc.terraformConfigPath); err == nil {
-		cfg, err = config.FromTerraform(ppc.terraformConfigPath)
-		if err != nil {
-			ppc.logger.Fatalf("loading terraform config: %v", err)
-		}
+func (cmd *PrepareProjectCommand) parseArgs() (cfg *config.EnvConfig, gcpClient *http.Client) {
+	var err error
+	cfg, err = config.FromEnvironmentDirectory(cmd.envDir)
+	if err != nil {
+		cmd.logger.Fatalf("loading environment config: %v", err)
+	}
 
-		creds, err := googleauth.JWTConfigFromJSON([]byte(cfg.ServiceAccountKey), compute.CloudPlatformScope)
-		if err != nil {
-			ppc.logger.Fatalf("loading ServiceAccountKey: %v ", err)
-		}
-		gcpClient = creds.Client(oauth2.NoContext)
-
-	} else {
-		cfg = &config.Config{ProjectName: ppc.projectId, Region: ppc.region}
-		gcpClient, err = googleauth.DefaultClient(context.Background(), compute.CloudPlatformScope)
-		if err != nil {
-			ppc.logger.Fatalf("loading application default credentials: %v.\nHave you ran `gcloud auth application-default login`?", err)
-		}
-
-		if ppc.projectId == "" {
-			err = errors.New("specify --project-id")
-		}
-
-		if ppc.region == "" {
-			err = errors.New("specify --region")
-		}
+	gcpClient, err = googleauth.DefaultClient(context.Background(), compute.CloudPlatformScope)
+	if err != nil {
+		cmd.logger.Fatalf("loading application default credentials: %v.\nHave you ran `gcloud auth application-default login`?", err)
 	}
 
 	return
 }
 
-func (ppc *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
-	cfg, gcpClient, err := ppc.parseArgs()
-	if err != nil {
-		return err
-	}
+func (cmd *PrepareProjectCommand) run(c *kingpin.ParseContext) error {
+	cfg, gcpClient := cmd.parseArgs()
+	validator := cmd.createValidator(cfg, gcpClient)
 
-	validator, err := createValidator(ppc.logger, cfg, gcpClient)
-	if err != nil {
-		ppc.logger.Fatalf("creating ProjectValidator: %v", err)
-	}
-
-	validateApis(ppc.logger, validator)
-	validateQuotas(ppc.logger, validator)
+	validateApis(cmd.logger, validator)
+	validateQuotas(cmd.logger, validator)
 
 	return nil
 }
 
-func createValidator(logger *log.Logger, cfg *config.Config, gcpClient *http.Client) (*setup.ProjectValidator, error) {
-	quotaService, err := google.NewQuotaService(logger, cfg.ProjectName, gcpClient)
+func (cmd *PrepareProjectCommand) createValidator(cfg *config.EnvConfig, gcpClient *http.Client) *setup.ProjectValidator {
+	quotaService, err := google.NewQuotaService(cmd.logger, cfg.ProjectID, gcpClient)
 	if err != nil {
-		logger.Fatalf("creating QuotaService: %v", err)
+		cmd.logger.Fatalf("creating QuotaService: %v", err)
 	}
 
-	apiService, err := google.NewAPIService(logger, cfg.ProjectName, gcpClient)
+	apiService, err := google.NewAPIService(cmd.logger, cfg.ProjectID, gcpClient)
 	if err != nil {
-		logger.Fatalf("creating ApiService: %v", err)
+		cmd.logger.Fatalf("creating ApiService: %v", err)
 	}
 
-	return setup.NewProjectValiadtor(logger, quotaService, apiService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg), setup.RequiredAPIs())
+	validator, err := setup.NewProjectValidator(cmd.logger, quotaService, apiService, setup.ProjectQuotaRequirements(), setup.RegionalQuotaRequirements(cfg), setup.RequiredAPIs())
+	if err != nil {
+		cmd.logger.Fatalf("creating ProjectValidator: %v", err)
+	}
+
+	return validator
 }
 
 func validateQuotas(logger *log.Logger, validator *setup.ProjectValidator) {

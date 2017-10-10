@@ -22,8 +22,6 @@ import (
 
 	"omg-cli/config"
 
-	"fmt"
-
 	"encoding/json"
 
 	"strings"
@@ -56,7 +54,7 @@ func nameToEnv(name string) string {
 }
 
 func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromEnvironment(fmt.Sprintf("%s/config.json", cmd.envDir))
+	cfg, err := config.FromEnvironmentDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}

@@ -43,8 +43,8 @@ function add_on_exit {
 }
 
 set_gcloud_config() {
-	check_param google_project
-	check_param google_json_key_data
+	check_param 'google_project'
+	check_param 'google_json_key_data'
 
 	gcloud config set project $google_project
 

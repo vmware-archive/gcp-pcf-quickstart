@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"strings"
@@ -54,7 +55,11 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 	return c, nil
 }
 
-func FromEnvironment(filename string) (*EnvConfig, error) {
+func FromEnvironmentDirectory(path string) (*EnvConfig, error) {
+	return fromEnvironment(fmt.Sprintf("%s/config.json", path))
+}
+
+func fromEnvironment(filename string) (*EnvConfig, error) {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
