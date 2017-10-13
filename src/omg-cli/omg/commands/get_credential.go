@@ -29,7 +29,7 @@ import (
 type GetCredentialCommand struct {
 	logger              *log.Logger
 	terraformConfigPath string
-	productType         string
+	appName             string
 	credential          string
 }
 
@@ -39,7 +39,7 @@ func (dic *GetCredentialCommand) register(app *kingpin.Application) {
 	c := app.Command(GetCredentialName, "Fetch a credential for a tile").Action(dic.run)
 	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
 
-	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&dic.productType)
+	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&dic.appName)
 	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&dic.credential)
 }
 
@@ -54,23 +54,7 @@ func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	products, err := omSdk.GetProducts()
-	if err != nil {
-		return err
-	}
-
-	appGuid := ""
-	for _, p := range products {
-		if p.Type == dic.productType {
-			appGuid = p.Guid
-		}
-	}
-
-	if appGuid == "" {
-		return fmt.Errorf("could not find installed application by name: %s", dic.productType)
-	}
-
-	cred, err := omSdk.GetCredentials(appGuid, dic.credential)
+	cred, err := omSdk.GetCredentials(dic.appName, dic.credential)
 	if err != nil {
 		return err
 	}

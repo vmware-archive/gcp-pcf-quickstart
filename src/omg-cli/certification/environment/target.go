@@ -19,6 +19,17 @@ package environment
 import (
 	"net/http"
 
+	"sync"
+
+	"fmt"
+	"os"
+
+	"omg-cli/config"
+
+	"omg-cli/ops_manager"
+
+	"log"
+
 	"github.com/onsi/ginkgo"
 )
 
@@ -29,16 +40,44 @@ type TargetSite interface {
 	// GoogleClient returns an authenticated http client that
 	// can be used to create service objects for GCP APIs
 	GoogleClient() *http.Client
-	// isMocked identifies if this TargetSite is a mock
-	isMocked() bool
 }
 
-func SkipIfMocked(ts TargetSite) {
-	if ts.isMocked() {
-		ginkgo.Skip("test skipped under mocked environment")
-	}
-}
+var target TargetSite
+var targetOnce sync.Once
+
+const envDirName = "ENV_DIR"
 
 func Target() TargetSite {
-	return nil
+	targetOnce.Do(func() {
+		envDir := os.Getenv(envDirName)
+		if envDir == "" {
+			ginkgo.Fail(fmt.Sprintf("missing test data, expected environment variable %s to contain path", envDirName))
+		}
+
+		cfg, err := config.FromTerraformDirectory(envDir)
+		if err != nil {
+			ginkgo.Fail(fmt.Sprintf("loading terraform state: %v", err))
+		}
+
+		target = &liveTarget{cfg: cfg}
+	})
+	return target
+}
+
+type liveTarget struct {
+	cfg *config.Config
+}
+
+func (lt *liveTarget) OpsManager() OpsManagerQuery {
+	logger := log.New(os.Stdout, "TODO(jrjohnson): test logger", 0)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", lt.cfg.OpsManagerHostname), lt.cfg.OpsManager, *logger)
+	if err != nil {
+		ginkgo.Fail(fmt.Sprintf("creating ops manager sdk: %v", err))
+	}
+
+	return &liveOpsManager{sdk: omSdk}
+}
+
+func (lt *liveTarget) GoogleClient() *http.Client {
+	panic("implement me")
 }

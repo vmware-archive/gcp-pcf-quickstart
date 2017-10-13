@@ -72,6 +72,10 @@ type TerraformConfigSchema struct {
 	OpsManager OpsManagerCredentials
 }
 
+func FromTerraformDirectory(path string) (*Config, error) {
+	return FromTerraform(fmt.Sprintf("%s/env.json", path))
+}
+
 func FromTerraform(filename string) (*Config, error) {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {

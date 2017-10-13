@@ -16,6 +16,11 @@
 
 package environment
 
+import (
+	"fmt"
+	"omg-cli/ops_manager"
+)
+
 type OpsManagerQuery interface {
 	// Tile returns a TileQuery interface if a tile is installed
 	// or an error if it's not found
@@ -23,9 +28,51 @@ type OpsManagerQuery interface {
 
 	// MustGetTile returns a TileQuery or panics if it is not installed
 	MustGetTile(name string) TileQuery
+
+	// Director returns information about the deployed BOSH director
+	Director() *ops_manager.DirectorProperties
 }
 
 type TileQuery interface {
 	// Property returns the value of the given property set on the tile
-	Property(name string) string
+	Property(name string) ops_manager.Property
+}
+
+type liveOpsManager struct {
+	sdk *ops_manager.Sdk
+}
+
+func (lom *liveOpsManager) Tile(name string) (TileQuery, error) {
+	props, err := lom.sdk.GetProduct(name)
+	if err != nil {
+		return nil, fmt.Errorf("getting product propeties: %v", err)
+	}
+
+	return &liveTileQuery{props: props}, nil
+}
+
+func (lom *liveOpsManager) MustGetTile(name string) TileQuery {
+	tile, err := lom.Tile(name)
+	if err != nil {
+		panic(fmt.Errorf("expected tile: %v", err))
+	}
+
+	return tile
+}
+
+func (lom *liveOpsManager) Director() *ops_manager.DirectorProperties {
+	prop, err := lom.sdk.GetDirector()
+	if err != nil {
+		panic(fmt.Errorf("retreving director: %v", err))
+	}
+
+	return prop
+}
+
+type liveTileQuery struct {
+	props *ops_manager.ProductProperties
+}
+
+func (ltq *liveTileQuery) Property(name string) ops_manager.Property {
+	return ltq.props.Properties[name]
 }

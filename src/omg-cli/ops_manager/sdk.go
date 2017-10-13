@@ -78,6 +78,28 @@ type Product struct {
 	Type             string `json:"type"`
 }
 
+type ProductProperties struct {
+	Properties map[string]Property `json:"properties"`
+}
+type Property struct {
+	Type         string      `json:"type"`
+	Configurable bool        `json:"configurable"`
+	Credential   bool        `json:"credential"`
+	Value        interface{} `json:"value"`
+	Optional     bool        `json:"optional"`
+}
+
+type DirectorProperties struct {
+	IAAS     map[string]interface{} `json:"iaas_configuration"`
+	Director map[string]interface{} `json:"director_configuration"`
+	Security map[string]interface{} `json:"security_configuration"`
+	Syslog   map[string]interface{} `json:"syslog_configuration"`
+}
+
+type ErrorResponse struct {
+	Errors map[string][]string `json:errors`
+}
+
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
 	if err != nil {
@@ -289,8 +311,38 @@ func (om *Sdk) ConfigureProduct(name, networks, properties string, resources str
 	})
 }
 
-type ErrorResponse struct {
-	Errors map[string][]string `json:errors`
+// GetProduct fetches settings for a given tile by name
+func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
+	productGuid, err := om.productGuidByType(name)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := om.curl(fmt.Sprintf("api/v0/staged/products/%s/properties", productGuid), "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var prop ProductProperties
+	if err := json.Unmarshal(resp, &prop); err != nil {
+		return nil, err
+	}
+
+	return &prop, nil
+}
+
+func (om *Sdk) GetDirector() (*DirectorProperties, error) {
+	resp, err := om.curl("/api/v0/staged/director/properties", "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var prop DirectorProperties
+cd 	if err := json.Unmarshal(resp, &prop); err != nil {
+		return nil, err
+	}
+
+	return &prop, nil
 }
 
 func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
@@ -334,7 +386,34 @@ func (om *Sdk) GetProducts() ([]Product, error) {
 	return resp, nil
 }
 
-func (om *Sdk) GetCredentials(productGuid, credential string) (*SimpleCredential, error) {
+func (om *Sdk) productGuidByType(product string) (string, error) {
+	products, err := om.GetProducts()
+	if err != nil {
+		return "", err
+	}
+
+	appGuid := ""
+	for _, p := range products {
+		if p.Type == product {
+			appGuid = p.Guid
+			break
+		}
+	}
+
+	if appGuid == "" {
+		return "", fmt.Errorf("could not find installed application by name: %s", product)
+	}
+
+	return appGuid, nil
+
+}
+
+func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error) {
+	productGuid, err := om.productGuidByType(name)
+	if err != nil {
+		return nil, err
+	}
+
 	body, err := om.curl(fmt.Sprintf("api/v0/deployed/products/%s/credentials/%s", productGuid, credential), http.MethodGet, nil)
 	if err != nil {
 		return nil, err
