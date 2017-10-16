@@ -20,7 +20,7 @@ set -u
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="env/omg"
+    export ENV_DIR="env/pcf"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
 
