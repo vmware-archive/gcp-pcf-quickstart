@@ -9,8 +9,8 @@ Follow this guide to prepare you Google Cloud Project and deployment machine.
 1. Enable the [Cloud Resource Manager API](https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com/overview)
 1. Enable [billing](https://support.google.com/cloud/answer/6293499?hl=en#enable-billing)
 1. Verify your [existing quota](https://console.cloud.google.com/iam-admin/quotas) for the following resources and file a [quota increase](https://cloud.google.com/compute/quotas) of necessary
-   - Persistent Disk Standard (GB) (in us-east1): 10,000 GB
-   - CPUs (in us-east1): 200
+   - Persistent Disk Standard (GB) (in desired region): 10,000 GB
+   - CPUs (in desired region): 200
 
 ## Setting up your Deployment Machine
 
