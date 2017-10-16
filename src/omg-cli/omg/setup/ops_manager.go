@@ -95,6 +95,10 @@ func (s *OpsManager) ensureProductReady(tile config.Tile) error {
 }
 
 func (s *OpsManager) uploadProduct(tile config.PivnetMetadata) error {
+	if err := s.pivnet.AcceptEula(tile); err != nil {
+		s.logger.Printf("warning, unable to accept eula: %v", err)
+	}
+
 	file, err := s.pivnet.DownloadTile(tile)
 	if err != nil {
 		return err
@@ -105,6 +109,10 @@ func (s *OpsManager) uploadProduct(tile config.PivnetMetadata) error {
 }
 
 func (s *OpsManager) uploadStemcell(tile config.StemcellMetadata) error {
+	if err := s.pivnet.AcceptEula(tile.PivnetMetadata); err != nil {
+		s.logger.Printf("warning, unable to accept eula: %v", err)
+	}
+
 	file, err := s.pivnet.DownloadTile(tile.PivnetMetadata)
 	if err != nil {
 		return err
