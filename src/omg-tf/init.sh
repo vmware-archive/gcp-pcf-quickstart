@@ -93,7 +93,7 @@ ensure_service_account() {
   key_file=$3
   role=$4
 
-  gcloud iam service-accounts create "${name}"
+  gcloud iam service-accounts create "${name}" --project ${PROJECT_ID}
   gcloud iam service-accounts keys create "${key_file}" --iam-account="${email}"
   gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member "serviceAccount:${email}" \
