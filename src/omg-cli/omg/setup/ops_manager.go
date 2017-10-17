@@ -130,7 +130,7 @@ func (s *OpsManager) uploadStemcell(tile config.StemcellMetadata) error {
 
 func (s *OpsManager) PoolTillOnline() error {
 	timer := time.After(time.Duration(0 * time.Second))
-	timeout := time.After(time.Duration(120 * time.Second))
+	timeout := time.After(time.Duration(240 * time.Second))
 	for {
 		select {
 		case <-timeout:
