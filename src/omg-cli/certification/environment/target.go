@@ -33,6 +33,7 @@ import (
 	"github.com/onsi/ginkgo"
 )
 
+// TargetSite represents the PCF Environment
 type TargetSite interface {
 	// OpsManager returns an OpsManagerQuery that can be used
 	// to access properties about the target Ops Manager
@@ -47,6 +48,7 @@ var targetOnce sync.Once
 
 const envDirName = "ENV_DIR"
 
+// Target returns the specific PCF Environment being tested
 func Target() TargetSite {
 	targetOnce.Do(func() {
 		envDir := os.Getenv(envDirName)
