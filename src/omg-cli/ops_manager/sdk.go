@@ -89,6 +89,12 @@ type Property struct {
 	Optional     bool        `json:"optional"`
 }
 
+type Resource struct {
+	RouterNames       []string    `json:"elb_names,omitempty"`
+	Instances         interface{} `json:"instances,omitempty"`
+	InternetConnected bool        `json:"internet_connected"`
+}
+
 type DirectorProperties struct {
 	IAAS     map[string]interface{} `json:"iaas_configuration"`
 	Director map[string]interface{} `json:"director_configuration"`
@@ -98,6 +104,15 @@ type DirectorProperties struct {
 
 type ErrorResponse struct {
 	Errors map[string][]string `json:errors`
+}
+
+type Job struct {
+	Name string `json:"name"`
+	Guid string `json:"guid"`
+}
+
+type JobsResponse struct {
+	Jobs []Job `json:"jobs"`
 }
 
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
@@ -338,7 +353,31 @@ func (om *Sdk) GetDirector() (*DirectorProperties, error) {
 	}
 
 	var prop DirectorProperties
-cd 	if err := json.Unmarshal(resp, &prop); err != nil {
+	if err := json.Unmarshal(resp, &prop); err != nil {
+		return nil, err
+	}
+
+	return &prop, nil
+}
+
+func (om *Sdk) GetResource(name, jobName string) (*Resource, error) {
+	productGuid, err := om.productGuidByType(name)
+	if err != nil {
+		return nil, err
+	}
+
+	jobGuid, err := om.jobGuidByName(productGuid, jobName)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := om.curl(fmt.Sprintf("/api/v0/staged/products/%s/jobs/%s/resource_config", productGuid, jobGuid), "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var prop Resource
+	if err := json.Unmarshal(resp, &prop); err != nil {
 		return nil, err
 	}
 
@@ -405,7 +444,32 @@ func (om *Sdk) productGuidByType(product string) (string, error) {
 	}
 
 	return appGuid, nil
+}
 
+func (om *Sdk) jobGuidByName(productGuid, jobName string) (string, error) {
+	resp, err := om.curl(fmt.Sprintf("/api/v0/staged/products/%s/jobs", productGuid), "GET", nil)
+	if err != nil {
+		return "", err
+	}
+
+	var jobResp JobsResponse
+	if err := json.Unmarshal(resp, &jobResp); err != nil {
+		return "", err
+	}
+
+	jobGuid := ""
+	for _, j := range jobResp.Jobs {
+		if j.Name == jobName {
+			jobGuid = j.Guid
+			break
+		}
+	}
+
+	if jobGuid == "" {
+		return "", fmt.Errorf("job %s not found for product %s", jobName, productGuid)
+	}
+
+	return jobGuid, nil
 }
 
 func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error) {

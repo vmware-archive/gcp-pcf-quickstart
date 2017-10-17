@@ -36,6 +36,9 @@ type OpsManagerQuery interface {
 type TileQuery interface {
 	// Property returns the value of the given property set on the tile
 	Property(name string) ops_manager.Property
+
+	// Resource returns information about a given resource for a job declared by the tile
+	Resource(name string) ops_manager.Resource
 }
 
 type liveOpsManager struct {
@@ -48,7 +51,7 @@ func (lom *liveOpsManager) Tile(name string) (TileQuery, error) {
 		return nil, fmt.Errorf("getting product propeties: %v", err)
 	}
 
-	return &liveTileQuery{props: props}, nil
+	return &liveTileQuery{name, props, lom.sdk}, nil
 }
 
 func (lom *liveOpsManager) MustGetTile(name string) TileQuery {
@@ -70,9 +73,19 @@ func (lom *liveOpsManager) Director() *ops_manager.DirectorProperties {
 }
 
 type liveTileQuery struct {
+	name  string
 	props *ops_manager.ProductProperties
+	sdk   *ops_manager.Sdk
 }
 
 func (ltq *liveTileQuery) Property(name string) ops_manager.Property {
 	return ltq.props.Properties[name]
+}
+
+func (ltq *liveTileQuery) Resource(jobId string) ops_manager.Resource {
+	resource, err := ltq.sdk.GetResource(ltq.name, jobId)
+	if err != nil {
+		panic(err)
+	}
+	return *resource
 }
