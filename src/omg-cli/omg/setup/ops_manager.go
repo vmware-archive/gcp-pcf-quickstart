@@ -162,12 +162,6 @@ func (s *OpsManager) UploadTiles() error {
 			continue
 		}
 
-		if s.cfg.PivnetAcceptEula {
-			if err := s.pivnet.AcceptEula(t.Definition().Pivnet); err != nil {
-				s.logger.Printf("warning, unable to accept eula: %v", err)
-			}
-		}
-
 		if err := s.ensureProductReady(t.Definition()); err != nil {
 			return err
 		}
