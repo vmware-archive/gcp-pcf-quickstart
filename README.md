@@ -2,7 +2,7 @@
 
 This repository contains tools and instructions for deploying Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP).
 
-This project aims to make installing PCF 1.11 on GCP straightforward and is currently in **alpha**. It is **not** an official Google product.
+This project aims to make installing PCF 1.12 on GCP straightforward and is currently in **alpha**. It is **not** an official Google product.
 
 # Getting Started
 1. Verify and setup [prerequisites](./docs/prerequisites.md)

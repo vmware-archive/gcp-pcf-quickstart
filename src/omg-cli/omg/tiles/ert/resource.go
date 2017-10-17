@@ -23,20 +23,20 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"6434",
-		"26790",
-		"bdfdd6e7fce47de2d90377a50ed78bb11ef45bc4cf7b8c55f5d37046ff481533",
+		"7295",
+		"32099",
+		"869c0b8cdae06fc6bc1d8b708d27e88d6425163db48d3f8b867b1f9c13253d87",
 	},
 	config.OpsManagerMetadata{
 		"cf",
-		"1.11.8",
+		"1.12.3",
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
-			"6666",
-			"27817",
-			"742f683a87405af46ef9eb7546f12d1461da91898ac23b63b8cc65624ecebea4"},
-		"light-bosh-stemcell-3421.20-google-kvm-ubuntu-trusty-go_agent",
+			"7069",
+			"30701",
+			"978683f9243fce813a2b4fe0a9e62395e93df8cbde9258bb676bc3c199df398d"},
+		"light-bosh-stemcell-3445.11-google-kvm-ubuntu-trusty-go_agent",
 	},
 }
 

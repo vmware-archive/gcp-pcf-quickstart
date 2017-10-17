@@ -29,10 +29,14 @@ type Properties struct {
 	AppsDomain Value `json:".cloud_controller.apps_domain"`
 	SysDomain  Value `json:".cloud_controller.system_domain"`
 	// Networking
-	NetworkingPointOfEntry    Value        `json:".properties.networking_point_of_entry"`
-	TcpRouting                Value        `json:".properties.tcp_routing"`
-	TcpRoutingReservablePorts Value        `json:".properties.tcp_routing.enable.reservable_ports"`
-	SkipSSLVerification       BooleanValue `json:".ha_proxy.skip_cert_verify"`
+	NetworkingPointOfEntry    Value            `json:".properties.networking_point_of_entry"`
+	TcpRouting                Value            `json:".properties.tcp_routing"`
+	TcpRoutingReservablePorts Value            `json:".properties.tcp_routing.enable.reservable_ports"`
+	GoRouterSSLCiphers        Value            `json:".properties.gorouter_ssl_ciphers"`
+	HAProxySSLCiphers         Value            `json:".properties.haproxy_ssl_ciphers"`
+	SkipSSLVerification       BooleanValue     `json:".ha_proxy.skip_cert_verify"`
+	HAProxyForwardTLS         Value            `json:".properties.haproxy_forward_tls"`
+	IngressCertificates       CertificateValue `json:".properties.networking_poe_ssl_cert"`
 	// Application Containers
 	ContainerDNSServers Value `json:".diego_cell.dns_servers"`
 	// Application Security Groups
@@ -66,14 +70,11 @@ type Resources struct {
 	DiegoBrain                   Resource `json:"diego_brain"`
 	ConsulServer                 Resource `json:"consul_server"`
 	Nats                         Resource `json:"nats"`
-	EtcdTlsServer                Resource `json:"etcd_tls_server"`
 	NfsServer                    Resource `json:"nfs_server"`
 	MysqlProxy                   Resource `json:"mysql_proxy"`
 	Mysql                        Resource `json:"mysql"`
 	BackupPrepare                Resource `json:"backup-prepare"`
-	Ccdb                         Resource `json:"ccdb"`
 	DiegoDatabase                Resource `json:"diego_database"`
-	Uaadb                        Resource `json:"uaadb"`
 	Uaa                          Resource `json:"uaa"`
 	CloudController              Resource `json:"cloud_controller"`
 	HaProxy                      Resource `json:"ha_proxy"`
@@ -90,6 +91,7 @@ type Resources struct {
 	Notifications                Resource `json:"notifications"`
 	NotificationsUi              Resource `json:"notifications-ui"`
 	PushPivotalAccount           Resource `json:"push-pivotal-account"`
+	PushUsageService             Resource `json:"push-usage-service"`
 	Autoscaling                  Resource `json:"autoscaling"`
 	AutoscalingRegisterBroker    Resource `json:"autoscaling-register-broker"`
 	Nfsbrokerpush                Resource `json:"nfsbrokerpush"`
@@ -121,8 +123,12 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		NetworkingPointOfEntry:     Value{"external_non_ssl"},
 		ContainerDNSServers:        Value{"8.8.8.8,8.8.4.4"},
 		SkipSSLVerification:        BooleanValue{true},
+		HAProxyForwardTLS:          Value{"disable"},
+		IngressCertificates:        CertificateValue{Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
 		TcpRouting:                 Value{"enable"},
 		TcpRoutingReservablePorts:  Value{cfg.TcpPortRange},
+		GoRouterSSLCiphers:         Value{"ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
+		HAProxySSLCiphers:          Value{"DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		SecurityAcknowledgement:    Value{"X"},
 		ServiceProviderCredentials: CertificateValue{Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
 		MySqlMonitorRecipientEmail: Value{"admin@example.org"},
