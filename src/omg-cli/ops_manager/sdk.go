@@ -27,12 +27,10 @@ import (
 	"strings"
 	"time"
 
-	"omg-cli/config"
-
 	"io"
-
 	"io/ioutil"
 
+	"omg-cli/config"
 	"omg-cli/version"
 
 	"github.com/gosuri/uilive"
@@ -58,63 +56,7 @@ type Sdk struct {
 	httpClient            *http.Client
 }
 
-type CredentialResponse struct {
-	Credential CredentialWrapper `json:"credential"`
-}
-
-type CredentialWrapper struct {
-	Type  string           `json:"type"`
-	Value SimpleCredential `json:"value"`
-}
-
-type SimpleCredential struct {
-	Identity string `json:"identity"`
-	Password string `json:"password"`
-}
-
-type Product struct {
-	InstallationName string `json:"installation_name"`
-	Guid             string `json:"guid"`
-	Type             string `json:"type"`
-}
-
-type ProductProperties struct {
-	Properties map[string]Property `json:"properties"`
-}
-type Property struct {
-	Type         string      `json:"type"`
-	Configurable bool        `json:"configurable"`
-	Credential   bool        `json:"credential"`
-	Value        interface{} `json:"value"`
-	Optional     bool        `json:"optional"`
-}
-
-type Resource struct {
-	RouterNames       []string    `json:"elb_names,omitempty"`
-	Instances         interface{} `json:"instances,omitempty"`
-	InternetConnected bool        `json:"internet_connected"`
-}
-
-type DirectorProperties struct {
-	IAAS     map[string]interface{} `json:"iaas_configuration"`
-	Director map[string]interface{} `json:"director_configuration"`
-	Security map[string]interface{} `json:"security_configuration"`
-	Syslog   map[string]interface{} `json:"syslog_configuration"`
-}
-
-type ErrorResponse struct {
-	Errors map[string][]string `json:errors`
-}
-
-type Job struct {
-	Name string `json:"name"`
-	Guid string `json:"guid"`
-}
-
-type JobsResponse struct {
-	Jobs []Job `json:"jobs"`
-}
-
+// NewSdk creates an authenticated session and object to interact with Ops Manager
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
 	if err != nil {
@@ -145,10 +87,6 @@ func (om *Sdk) SetupAuth() error {
 		"--username", om.creds.Username,
 		"--password", om.creds.Password,
 		"--decryption-passphrase", om.creds.DecryptionPhrase})
-}
-
-type UnlockRequest struct {
-	Passphrase string `json:"passphrase"`
 }
 
 // Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
@@ -346,6 +284,7 @@ func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
 	return &prop, nil
 }
 
+// GetDirector fetches settings for the BOSH director
 func (om *Sdk) GetDirector() (*DirectorProperties, error) {
 	resp, err := om.curl("/api/v0/staged/director/properties", "GET", nil)
 	if err != nil {
@@ -360,8 +299,9 @@ func (om *Sdk) GetDirector() (*DirectorProperties, error) {
 	return &prop, nil
 }
 
-func (om *Sdk) GetResource(name, jobName string) (*Resource, error) {
-	productGuid, err := om.productGuidByType(name)
+// GetResource fetches resource settings for a specific job of a tile
+func (om *Sdk) GetResource(tileName, jobName string) (*Resource, error) {
+	productGuid, err := om.productGuidByType(tileName)
 	if err != nil {
 		return nil, err
 	}
@@ -411,7 +351,7 @@ func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
 	return body, nil
 }
 
-func (om *Sdk) GetProducts() ([]Product, error) {
+func (om *Sdk) getProducts() ([]Product, error) {
 	body, err := om.curl("api/v0/deployed/products", http.MethodGet, nil)
 	if err != nil {
 		return nil, err
@@ -426,7 +366,7 @@ func (om *Sdk) GetProducts() ([]Product, error) {
 }
 
 func (om *Sdk) productGuidByType(product string) (string, error) {
-	products, err := om.GetProducts()
+	products, err := om.getProducts()
 	if err != nil {
 		return "", err
 	}
