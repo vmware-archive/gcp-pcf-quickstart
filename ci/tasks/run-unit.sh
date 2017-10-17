@@ -12,5 +12,5 @@ export GOPATH=${workspace_dir}
 export PATH=${GOPATH}/bin:${PATH}
 
 pushd ${omg_dir}
-	ginkgo -r .
+	ginkgo -skipPackage=certification -r .
 popd
