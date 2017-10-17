@@ -8,6 +8,7 @@ groups:
     - create-infrastructure
     - push-tiles
     - deploy-pcf
+    - run-certification
     - destroy-pcf
     - destroy-infrastructure
     - promote-candidate-major
@@ -108,12 +109,28 @@ jobs:
               env_file_name: {{env_file_name}}
           - *destroy_infrastructure
 
-  - name: destroy-pcf
+  - name: run-certification
     serial: true
     plan:
       - aggregate:
         - {trigger: true, passed: [deploy-pcf], get: omg-src-in, resource: omg-src-in}
         - {trigger: true, passed: [deploy-pcf], get: omg-env, resource: omg-env}
+      - aggregate:
+        task: run-certification
+        file: omg-src-in/ci/tasks/run-certification.yml
+        params:
+          env_file_name: {{env_file_name}}
+        on_failure:
+          aggregate:
+           - *destroy_pcf
+           - *destroy_infrastructure
+
+  - name: destroy-pcf
+    serial: true
+    plan:
+      - aggregate:
+        - {trigger: true, passed: [run-certification], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [run-certification], get: omg-env, resource: omg-env}
       - aggregate:
         - *destroy_pcf
         on_failure: *destroy_infrastructure

@@ -1,0 +1,10 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: jrjohnsongoog/omgci}
+inputs:
+- name: omg-src-in
+- name: omg-env
+run:
+  path: omg-src-in/ci/tasks/run-certification.sh
