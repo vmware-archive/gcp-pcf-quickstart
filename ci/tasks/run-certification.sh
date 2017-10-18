@@ -19,7 +19,7 @@ pushd ${env_dir}
 	tar zxvf ${env_file}
 popd
 
-export GOPATH=${workspace_dir}
+export GOPATH=${release_dir}
 export PATH=${GOPATH}/bin:${PATH}
 export ENV_DIR=${env_dir}
 
