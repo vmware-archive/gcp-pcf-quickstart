@@ -15,7 +15,7 @@ resource "google_dns_record_set" "ops-manager-dns-external" {
 
   name = "pcf.${var.dns_suffix}."
   type = "A"
-  ttl  = 300
+  ttl  = 30
 
   managed_zone = "${var.dns_zone_name}"
 
