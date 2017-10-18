@@ -6,5 +6,6 @@ image_resource:
 inputs:
 - name: omg-src-in
 - name: omg-env
+  path: omg-env-in
 run:
   path: omg-src-in/ci/tasks/run-certification.sh

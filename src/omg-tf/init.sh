@@ -94,10 +94,16 @@ ensure_service_account() {
   role=$4
 
   gcloud iam service-accounts create "${name}" --project ${PROJECT_ID}
+  # Attempting to sleep in between operations to work around:
+  # "Resource in project [..] is the subject of a conflict: There were concurrent policy changes.
+  # Please retry the whole read-modify-write with exponential backoff"
+  sleep 10
   gcloud iam service-accounts keys create "${key_file}" --iam-account="${email}"
+  sleep 10
   gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member "serviceAccount:${email}" \
     --role "${role}"
+  sleep 10
 }
 
 set -e

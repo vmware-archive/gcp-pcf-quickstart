@@ -1,45 +1,27 @@
 #!/usr/bin/env bash
 
-set -e
-
+set -ex
 
 my_dir="$( cd $(dirname $0) && pwd )"
-release_dir="$( cd ${my_dir} && cd ../.. && pwd )"
-workspace_dir="$( cd ${release_dir} && cd .. && pwd )"
-omg_tf_dir="${release_dir}/src/omg-tf"
-env_output_dir="${workspace_dir}/omg-env-out"
-
-export GOPATH=${release_dir}
-export PATH=${GOPATH}/bin:${PATH}
-
-pushd ${release_dir} > /dev/null
-	source ci/tasks/utils.sh
+pushd ${my_dir} > /dev/null
+	source utils.sh
+	set_resource_dirs
+    check_param 'google_project'
+    check_param 'google_json_key_data'
+    check_param 'env_config'
+    check_param 'PIVNET_API_TOKEN'
+    check_param 'PIVNET_ACCEPT_EULA'
+    export
+    set_gcloud_config
+    generate_env_config
 popd > /dev/null
-
-check_param 'google_project'
-check_param 'google_json_key_data'
-check_param 'env_config'
-
-check_param 'PIVNET_API_TOKEN'
-check_param 'PIVNET_ACCEPT_EULA'
-
-set_gcloud_config
-
-export ENV_DIR="${workspace_dir}/env"
-
-mkdir -p ${ENV_DIR}
-echo "${env_config}" > "${ENV_DIR}/config.json"
 
 go install omg-cli
 set -o allexport
-eval $(omg-cli source-config --env-dir="${ENV_DIR}")
+eval $(omg-cli source-config --env-dir="${env_dir}")
 set +o allexport
 
-pushd ${omg_tf_dir}
-	./init.sh
-popd
-
-env_file="${env_output_dir}/${env_file_name}"
-pushd "${ENV_DIR}"
-	tar czvf ${env_file} .
+trap save_terraform_state EXIT
+pushd "${release_dir}/src/omg-tf"
+	ENV_DIR=${env_dir} ./init.sh
 popd
