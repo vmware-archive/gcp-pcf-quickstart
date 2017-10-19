@@ -17,5 +17,5 @@
 
 package version
 
-const semver = "dev"
-const revision = "89d5c87"
+const semver = "0.5.0"
+const revision = "efefadb"
