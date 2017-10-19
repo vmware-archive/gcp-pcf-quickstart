@@ -150,7 +150,7 @@ jobs:
       - aggregate:
         - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
         - {trigger: false,                                   get: release-version-semver, params: {bump: major}}
-      - aggregate: &promote_candidate
+      - do: &promote_candidate
         - task: promote
           file: omg-src-in/ci/tasks/promote-candidate.yml
 
@@ -166,7 +166,7 @@ jobs:
       - aggregate:
         - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
         - {trigger: false,                                   get: release-version-semver, params: {bump: minor}}
-      - aggregate: *promote_candidate
+      - do: *promote_candidate
 
   - name: promote-candidate-patch
     serial: true
@@ -174,7 +174,7 @@ jobs:
       - aggregate:
         - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
         - {trigger: false,                                   get: release-version-semver, params: {bump: patch}}
-      - aggregate: *promote_candidate
+      - do: *promote_candidate
 
 resources:
   - name: omg-src-in
