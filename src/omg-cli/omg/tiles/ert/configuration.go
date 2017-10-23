@@ -143,6 +143,7 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		TcpRouter: Resource{
 			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 			InternetConnected: false,
+			Instances:         3,
 		},
 		Router: Resource{
 			RouterNames:       []string{fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},

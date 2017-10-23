@@ -14,7 +14,7 @@ var _ = Describe("TcpRouter", func() {
 	BeforeSuite(func() {
 		ert = Target().OpsManager().MustGetTile("cf")
 	})
-	XIt("has highly available TCP routing", func() {
+	It("has highly available TCP routing", func() {
 		tcpRouter := ert.Resource("tcp_router")
 		Expect(tcpRouter.Instances).To(BeNumerically(">=", 3))
 	})
