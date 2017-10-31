@@ -16,6 +16,13 @@
 # limitations under the License.
 #
 
+if ! terraform version | grep -q "v0.9.11"; then
+    echo "Error: Incompatible version of terraform. v0.9.11 required."
+    echo ""
+    echo "Linux: https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip"
+    exit 1
+fi
+
 set -ue
 cd "$(dirname "$0")"
 
