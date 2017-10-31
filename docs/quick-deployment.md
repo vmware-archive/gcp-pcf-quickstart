@@ -5,10 +5,11 @@ Now that you have setup your [prerequisites](./prerequisites.md) and
 
 ## Fetch Tools
 
-Login to your deployment machine and fetch this repository:
+Login to your deployment machine and fetch a snapshot of this repository:
 
 ```bash
-git clone https://github.com/cf-platform-eng/gcp-pcf-quickstart.git
+wget https://storage.googleapis.com/dogfood-omg/gcp-pcf-quickstart.tgz
+tar zxvf gcp-pcf-quickstart.tgz
 cd gcp-pcf-quickstart
 ```
 
