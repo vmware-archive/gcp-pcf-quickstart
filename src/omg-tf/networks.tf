@@ -29,3 +29,10 @@ resource "google_compute_subnetwork" "services-subnet" {
   network       = "${google_compute_network.pcf-network.self_link}"
   region        = "${var.region}"
 }
+
+resource "google_compute_subnetwork" "dynamic-services-subnet" {
+  name          = "${var.env_name}-odb-services-subnet"
+  ip_cidr_range = "10.0.12.0/22"
+  network       = "${google_compute_network.pcf-network.self_link}"
+  region        = "${var.region}"
+}

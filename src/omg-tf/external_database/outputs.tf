@@ -2,6 +2,10 @@ output "sql_db_ip" {
   value = "${google_sql_database_instance.master.ip_address.0.ip_address}"
 }
 
+output "sql_db_port" {
+  value = "3306"
+}
+
 output "opsman_sql_db_name" {
   value = "${google_sql_database.opsman.name}"
 }

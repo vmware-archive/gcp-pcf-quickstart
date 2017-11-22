@@ -115,6 +115,12 @@ terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.
 terraform_service_account_file=$(mktemp)
 ensure_service_account "${terraform_service_account_name}" "${terraform_service_account_email}" "${terraform_service_account_file}" "roles/owner"
 
+# Ops Manager
+opsman_service_account_name=${ENV_NAME}-${seed}-ops
+opsman_service_account_email=${opsman_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
+opsman_service_account_file=$(mktemp)
+ensure_service_account "${opsman_service_account_name}" "${opsman_service_account_email}" "${opsman_service_account_file}" "roles/owner"
+
 # Stackdriver Nozzle
 stackdriver_service_account_name=${ENV_NAME}-${seed}-noz
 stackdriver_service_account_email=${stackdriver_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
@@ -125,7 +131,6 @@ ensure_service_account "${stackdriver_service_account_name}" "${stackdriver_serv
 servicebroker_service_account_name=${ENV_NAME}-${seed}-sb
 servicebroker_service_account_email=${servicebroker_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
 servicebroker_service_account_file=$(mktemp)
-
 ensure_service_account "${servicebroker_service_account_name}" "${servicebroker_service_account_email}" "${servicebroker_service_account_file}" "roles/owner"
 
 #
@@ -161,6 +166,7 @@ pivnet_api_token = "${PIVNET_API_TOKEN}"
 pivnet_accept_eula = "${PIVNET_ACCEPT_EULA}"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
+external_database = "true"
 
 ssl_cert = <<SSL_CERT
 $(cat keys/server.crt)
@@ -174,6 +180,10 @@ service_account_key = <<SERVICE_ACCOUNT_KEY
 $(cat ${terraform_service_account_file})
 SERVICE_ACCOUNT_KEY
 
+ops_manager_service_account_key = <<SERVICE_ACCOUNT_KEY
+$(cat ${opsman_service_account_file})
+SERVICE_ACCOUNT_KEY
+
 stackdriver_service_account_key = <<SERVICE_ACCOUNT_KEY
 $(cat ${stackdriver_service_account_file})
 SERVICE_ACCOUNT_KEY
@@ -185,5 +195,4 @@ SERVICE_ACCOUNT_KEY
 ssh_public_key = <<SSH_PUBLIC_KEY
 $(cat keys/jumpbox_ssh.pub)
 SSH_PUBLIC_KEY
-
 VARS_FILE

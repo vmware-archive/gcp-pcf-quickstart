@@ -1,7 +1,7 @@
 resource "google_compute_instance" "nat" {
   name           = "${var.env_name}-nat-${count.index}"
   machine_type   = "${var.nat_machine_type}"
-  zone           = "${element(var.zones, 1)}"
+  zone           = "${element(var.zones, (count.index % length(var.zones)))}"
   create_timeout = 10
   tags           = ["${var.env_name}-nat-external"]
   count          = "${var.nat_instance_count}"
@@ -37,7 +37,7 @@ resource "google_compute_route" "nat-primary" {
   dest_range             = "0.0.0.0/0"
   network                = "${google_compute_network.pcf-network.name}"
   next_hop_instance      = "${var.env_name}-nat-${count.index}"
-  next_hop_instance_zone = "${google_compute_instance.nat.0.zone}"
+  next_hop_instance_zone = "${element(var.zones, (count.index % length(var.zones)))}"
   priority               = 800
   tags                   = ["${var.no_ip_instance_tag}"]
   count                  = "${var.nat_instance_count}"

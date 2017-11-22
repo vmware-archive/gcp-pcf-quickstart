@@ -1,9 +1,5 @@
-output "service_account_email" {
-  value = "${google_service_account.opsman_service_account.email}"
-}
-
 output "ops_manager_dns" {
-  value = "pcf.${var.dns_suffix}"
+  value = "opsman.${var.dns_suffix}"
 }
 
 output "ops_manager_instance_name" {
@@ -24,6 +20,14 @@ output "apps_domain" {
 
 output "tcp_domain" {
   value = "tcp.${var.dns_suffix}"
+}
+
+output "doppler_domain" {
+  value = "doppler.sys.${var.dns_suffix}"
+}
+
+output "loggregator_domain" {
+  value = "loggregator.sys.${var.dns_suffix}"
 }
 
 output "dns_suffix" {
@@ -52,6 +56,10 @@ output "network_name" {
 
 output "sql_db_ip" {
   value = "${module.external_database.ip}"
+}
+
+output "sql_db_port" {
+  value = "${module.external_database.sql_db_port}"
 }
 
 output "management_subnet_gateway" {
@@ -94,6 +102,18 @@ output "services_subnet_name" {
   value = "${google_compute_subnetwork.services-subnet.name}"
 }
 
+output "dynamic_services_subnet_gateway" {
+  value = "${google_compute_subnetwork.dynamic-services-subnet.gateway_address}"
+}
+
+output "dynamic_services_subnet_cidrs" {
+  value = ["${google_compute_subnetwork.dynamic-services-subnet.ip_cidr_range}"]
+}
+
+output "dynamic_services_subnet_name" {
+  value = "${google_compute_subnetwork.dynamic-services-subnet.name}"
+}
+
 output "http_lb_backend_name" {
   value = "${google_compute_backend_service.http_lb_backend_service.name}"
 }
@@ -104,6 +124,10 @@ output "isoseg_lb_backend_name" {
 
 output "ssh_router_pool" {
   value = "${google_compute_target_pool.cf-ssh.name}"
+}
+
+output "wss_router_pool" {
+  value = "${google_compute_target_pool.cf-wss.name}"
 }
 
 output "tcp_router_pool" {
@@ -170,8 +194,8 @@ output "service_broker_service_account_key" {
   value = "${var.service_broker_service_account_key}"
 }
 
-output "service_account_key" {
-  value = "${var.service_account_key}"
+output "ops_manager_service_account_key" {
+  value = "${var.ops_manager_service_account_key}"
 }
 
 output "service_broker_db_ip" {

@@ -43,6 +43,41 @@ type Properties struct {
 	SecurityAcknowledgement Value `json:".properties.security_acknowledgement"`
 	// UAA
 	ServiceProviderCredentials CertificateValue `json:".uaa.service_provider_key_credentials"`
+
+	UaaDbChoice   Value        `json:".properties.uaa_database"`
+	UaaDbIp       Value        `json:".properties.uaa_database.external.host"`
+	UaaDbPort     IntegerValue `json:".properties.uaa_database.external.port"`
+	UaaDbUsername Value        `json:".properties.uaa_database.external.uaa_username"`
+	UaaDbPassword SecretValue  `json:".properties.uaa_database.external.uaa_password"`
+
+	// Databases
+	ErtDbChoice Value        `json:".properties.system_database"`
+	ErtDbIp     Value        `json:".properties.system_database.external.host"`
+	ErtDbPort   IntegerValue `json:".properties.system_database.external.port"`
+
+	ErtDbAppUsageUsername            Value       `json:".properties.system_database.external.app_usage_service_username"`
+	ErtDbAppUsagePassword            SecretValue `json:".properties.system_database.external.app_usage_service_password"`
+	ErtDbAutoscaleUsername           Value       `json:".properties.system_database.external.autoscale_username"`
+	ErtDbAutoscalePassword           SecretValue `json:".properties.system_database.external.autoscale_password"`
+	ErtDbCloudControllerUsername     Value       `json:".properties.system_database.external.ccdb_username"`
+	ErtDbCloudControllerPassword     SecretValue `json:".properties.system_database.external.ccdb_password"`
+	ErtDbDiegoUsername               Value       `json:".properties.system_database.external.diego_username"`
+	ErtDbDiegoPassword               SecretValue `json:".properties.system_database.external.diego_password"`
+	ErtDbLocketUsername              Value       `json:".properties.system_database.external.locket_username"`
+	ErtDbLocketPassword              SecretValue `json:".properties.system_database.external.locket_password"`
+	ErtDbNetworkPolicyServerUsername Value       `json:".properties.system_database.external.networkpolicyserver_username"`
+	ErtDbNetworkPolicyServerPassword SecretValue `json:".properties.system_database.external.networkpolicyserver_password"`
+	ErtDbNfsUsername                 Value       `json:".properties.system_database.external.nfsvolume_username"`
+	ErtDbNfsPassword                 SecretValue `json:".properties.system_database.external.nfsvolume_password"`
+	ErtDbNotificationsUsername       Value       `json:".properties.system_database.external.notifications_username"`
+	ErtDbNotificationsPassword       SecretValue `json:".properties.system_database.external.notifications_password"`
+	ErtDbAccountUsername             Value       `json:".properties.system_database.external.account_username"`
+	ErtDbAccountPassword             SecretValue `json:".properties.system_database.external.account_password"`
+	ErtDbRoutingUsername             Value       `json:".properties.system_database.external.routing_username"`
+	ErtDbRoutingPassword             SecretValue `json:".properties.system_database.external.routing_password"`
+	ErtDbSilkUsername                Value       `json:".properties.system_database.external.silk_username"`
+	ErtDbSilkPassword                SecretValue `json:".properties.system_database.external.silk_password"`
+
 	// MySQL
 	MySqlMonitorRecipientEmail Value `json:".mysql_monitor.recipient_email"`
 }
@@ -51,8 +86,20 @@ type Value struct {
 	Value string `json:"value"`
 }
 
+type IntegerValue struct {
+	Value int `json:"value"`
+}
+
 type BooleanValue struct {
 	Value bool `json:"value"`
+}
+
+type Secret struct {
+	Value string `json:"secret"`
+}
+
+type SecretValue struct {
+	Sec Secret `json:"value"`
 }
 
 type Certificate struct {
@@ -131,6 +178,39 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		HAProxySSLCiphers:          Value{"DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		SecurityAcknowledgement:    Value{"X"},
 		ServiceProviderCredentials: CertificateValue{Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
+
+		UaaDbChoice:   Value{"external"},
+		UaaDbIp:       Value{cfg.ExternalSqlIp},
+		UaaDbPort:     IntegerValue{cfg.ExternalSqlPort},
+		UaaDbUsername: Value{cfg.ERTSqlUsername},
+		UaaDbPassword: SecretValue{Secret{cfg.ERTSqlPassword}},
+
+		ErtDbChoice:                      Value{"external"},
+		ErtDbIp:                          Value{cfg.ExternalSqlIp},
+		ErtDbPort:                        IntegerValue{cfg.ExternalSqlPort},
+		ErtDbAppUsageUsername:            Value{cfg.ERTSqlUsername},
+		ErtDbAppUsagePassword:            SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbAutoscaleUsername:           Value{cfg.ERTSqlUsername},
+		ErtDbAutoscalePassword:           SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbCloudControllerUsername:     Value{cfg.ERTSqlUsername},
+		ErtDbCloudControllerPassword:     SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbDiegoUsername:               Value{cfg.ERTSqlUsername},
+		ErtDbDiegoPassword:               SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbLocketUsername:              Value{cfg.ERTSqlUsername},
+		ErtDbLocketPassword:              SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbNetworkPolicyServerUsername: Value{cfg.ERTSqlUsername},
+		ErtDbNetworkPolicyServerPassword: SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbNfsUsername:                 Value{cfg.ERTSqlUsername},
+		ErtDbNfsPassword:                 SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbNotificationsUsername:       Value{cfg.ERTSqlUsername},
+		ErtDbNotificationsPassword:       SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbAccountUsername:             Value{cfg.ERTSqlUsername},
+		ErtDbAccountPassword:             SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbRoutingUsername:             Value{cfg.ERTSqlUsername},
+		ErtDbRoutingPassword:             SecretValue{Secret{cfg.ERTSqlPassword}},
+		ErtDbSilkUsername:                Value{cfg.ERTSqlUsername},
+		ErtDbSilkPassword:                SecretValue{Secret{cfg.ERTSqlPassword}},
+
 		MySqlMonitorRecipientEmail: Value{"admin@example.org"},
 	}
 
@@ -146,7 +226,7 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 			Instances:         3,
 		},
 		Router: Resource{
-			RouterNames:       []string{fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
 			InternetConnected: false,
 		},
 		DiegoBrain: Resource{

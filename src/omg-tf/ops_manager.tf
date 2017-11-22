@@ -42,15 +42,15 @@ resource "google_compute_instance" "ops-manager-internal" {
     address    = "10.0.0.6"
   }
 
-  service_account {
-    email  = "${google_service_account.opsman_service_account.email}"
-    scopes = ["cloud-platform"]
-  }
-
   metadata = {
     ssh-keys               = "${format("ubuntu:%s", var.ssh_public_key)}"
     block-project-ssh-keys = "TRUE"
   }
+}
+
+resource "google_compute_address" "ops-manager-external" {
+  count          = "${var.opsman_external_ip != "" ? 1 : 0}"
+  name           = "${var.env_name}-ops-manager"
 }
 
 resource "google_compute_instance" "ops-manager-external" {
@@ -73,13 +73,8 @@ resource "google_compute_instance" "ops-manager-external" {
     address    = "10.0.0.6"
 
     access_config {
-      # Empty for ephemeral external IP allocation
+      nat_ip = "${google_compute_address.ops-manager-external.address}"
     }
-  }
-
-  service_account {
-    email  = "${google_service_account.opsman_service_account.email}"
-    scopes = ["cloud-platform"]
   }
 
   metadata = {

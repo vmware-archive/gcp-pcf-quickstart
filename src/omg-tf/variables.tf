@@ -59,6 +59,10 @@ variable "service_account_key" {
   type = "string"
 }
 
+variable "ops_manager_service_account_key" {
+  type = "string"
+}
+
 variable "stackdriver_service_account_key" {
   type = "string"
 }

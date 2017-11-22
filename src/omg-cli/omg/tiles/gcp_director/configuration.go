@@ -19,6 +19,7 @@ package gcp_director
 import (
 	"fmt"
 	"net"
+
 	"omg-cli/config"
 
 	"omg-cli/ops_manager"
@@ -33,10 +34,10 @@ const (
 func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	networks, networkAssignment := networkCfg(cfg)
 
-	return om.SetupBosh(gcp(cfg), director(), avalibilityZones(cfg), networks, networkAssignment, resources())
+	return om.SetupBosh(gcp(cfg), director(cfg), avalibilityZones(cfg), networks, networkAssignment, resources())
 }
 
-func buildNetwork(cfg *config.Config, name, cidrRange, gateway string) commands.NetworkConfiguration {
+func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNetwork bool) commands.NetworkConfiguration {
 	// Reserve .1-.20
 	lowerIp, _, err := net.ParseCIDR(cidrRange)
 	lowerIp = lowerIp.To4()
@@ -48,7 +49,8 @@ func buildNetwork(cfg *config.Config, name, cidrRange, gateway string) commands.
 	upperIp[3] = 20
 
 	return commands.NetworkConfiguration{
-		Name: name,
+		Name:           name,
+		ServiceNetwork: &serviceNetwork,
 		Subnets: []commands.Subnet{
 			{
 				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", cfg.NetworkName, name, cfg.Region),
@@ -66,9 +68,10 @@ func networkCfg(cfg *config.Config) (networks commands.NetworksConfiguration, ne
 	networks = commands.NetworksConfiguration{
 		ICMP: false,
 		Networks: []commands.NetworkConfiguration{
-			buildNetwork(cfg, cfg.MgmtSubnetName, cfg.MgmtSubnetCIDR, cfg.MgmtSubnetGateway),
-			buildNetwork(cfg, cfg.ServicesSubnetName, cfg.ServicesSubnetCIDR, cfg.ServicesSubnetGateway),
-			buildNetwork(cfg, cfg.ErtSubnetName, cfg.ErtSubnetCIDR, cfg.ErtSubnetGateway),
+			buildNetwork(cfg, cfg.MgmtSubnetName, cfg.MgmtSubnetCIDR, cfg.MgmtSubnetGateway, false),
+			buildNetwork(cfg, cfg.ServicesSubnetName, cfg.ServicesSubnetCIDR, cfg.ServicesSubnetGateway, false),
+			buildNetwork(cfg, cfg.DynamicServicesSubnetName, cfg.DynamicServicesSubnetCIDR, cfg.DynamicServicesSubnetGateway, true),
+			buildNetwork(cfg, cfg.ErtSubnetName, cfg.ErtSubnetCIDR, cfg.ErtSubnetGateway, false),
 		},
 	}
 
@@ -80,11 +83,20 @@ func networkCfg(cfg *config.Config) (networks commands.NetworksConfiguration, ne
 	return
 }
 
-func director() (director commands.DirectorConfiguration) {
+func director(cfg *config.Config) (director commands.DirectorConfiguration) {
 	t := true
 	director = commands.DirectorConfiguration{
-		NTPServers:              metadataService, // gcp metadata service
-		EnableBoshDeployRetries: &t,
+		NTPServers:                metadataService, // gcp metadata service
+		EnableBoshDeployRetries:   &t,
+		EnableVMResurrectorPlugin: &t,
+		DatabaseType:              "external",
+		ExternalDatabaseOptions: commands.ExternalDatabaseOptions{
+			Host:     cfg.ExternalSqlIp,
+			Database: cfg.OpsManagerSqlDbName,
+			Username: cfg.OpsManagerSqlUsername,
+			Password: cfg.OpsManagerSqlPassword,
+			Port:     &cfg.ExternalSqlPort,
+		},
 	}
 
 	return
@@ -106,7 +118,7 @@ func gcp(cfg *config.Config) commands.GCPIaaSConfiguration {
 	return commands.GCPIaaSConfiguration{
 		Project:              cfg.ProjectName,
 		DefaultDeploymentTag: cfg.DeploymentTargetTag,
-		AuthJSON:             "",
+		AuthJSON:             cfg.OpsManagerServiceAccountKey,
 	}
 }
 
