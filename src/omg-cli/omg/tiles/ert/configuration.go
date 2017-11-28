@@ -198,6 +198,9 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
 			InternetConnected: false,
 		},
+		HaProxy: tiles.Resource{
+			Instances: 0,
+		},
 	}
 	resorucesBytes, err := json.Marshal(&resoruces)
 	if err != nil {
