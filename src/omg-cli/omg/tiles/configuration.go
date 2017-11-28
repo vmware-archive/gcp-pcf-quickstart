@@ -41,3 +41,38 @@ func NetworkConfig(subnetName string, cfg *config.Config) Network {
 		NetworkName{subnetName},
 	}
 }
+
+type Value struct {
+	Value string `json:"value"`
+}
+
+type IntegerValue struct {
+	Value int `json:"value"`
+}
+
+type BooleanValue struct {
+	Value bool `json:"value"`
+}
+
+type Secret struct {
+	Value string `json:"secret"`
+}
+
+type SecretValue struct {
+	Sec Secret `json:"value"`
+}
+
+type Certificate struct {
+	PublicKey  string `json:"cert_pem"`
+	PrivateKey string `json:"private_key_pem"`
+}
+
+type CertificateValue struct {
+	Value Certificate `json:"value"`
+}
+
+type Resource struct {
+	RouterNames       []string `json:"elb_names,omitempty"`
+	Instances         int      `json:"instances,omitempty"`
+	InternetConnected bool     `json:"internet_connected"`
+}

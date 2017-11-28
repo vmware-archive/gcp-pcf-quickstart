@@ -24,10 +24,10 @@ import (
 )
 
 type Properties struct {
-	ServiceAccountKey Value       `json:".properties.root_service_account_json"`
-	DatabaseHost      Value       `json:".properties.db_host"`
-	DatabaseUsername  Value       `json:".properties.db_username"`
-	DatabasePassword  SecretValue `json:".properties.db_password"`
+	ServiceAccountKey tiles.Value       `json:".properties.root_service_account_json"`
+	DatabaseHost      tiles.Value       `json:".properties.db_host"`
+	DatabaseUsername  tiles.Value       `json:".properties.db_username"`
+	DatabasePassword  tiles.SecretValue `json:".properties.db_password"`
 
 	CloudSQLPlans CloudSQLPlansValue `json:".properties.cloudsql_custom_plans"`
 	BigTablePlans BigTablePlansValue `json:".properties.bigtable_custom_plans"`
@@ -65,18 +65,6 @@ const (
 	bigTableService = "b8e19880-ac58-42ef-b033-f7cd9c94d1fe"
 )
 
-type Value struct {
-	Value string `json:"value"`
-}
-
-type Secret struct {
-	Value string `json:"secret"`
-}
-
-type SecretValue struct {
-	Sec Secret `json:"value"`
-}
-
 func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
@@ -90,10 +78,10 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	}
 
 	properties := Properties{
-		ServiceAccountKey: Value{cfg.ServiceBrokerServiceAccountKey},
-		DatabaseHost:      Value{cfg.ServiceBrokerDbIp},
-		DatabaseUsername:  Value{cfg.ServiceBrokerDbUsername},
-		DatabasePassword:  SecretValue{Secret{cfg.ServiceBrokerDbPassword}},
+		ServiceAccountKey: tiles.Value{cfg.ServiceBrokerServiceAccountKey},
+		DatabaseHost:      tiles.Value{cfg.ServiceBrokerDbIp},
+		DatabaseUsername:  tiles.Value{cfg.ServiceBrokerDbUsername},
+		DatabasePassword:  tiles.SecretValue{tiles.Secret{cfg.ServiceBrokerDbPassword}},
 		CloudSQLPlans: CloudSQLPlansValue{[]CloudSQLPlan{
 			{
 				Name:        "mysql-micro-dev",

@@ -31,26 +31,10 @@ const (
 )
 
 type Properties struct {
-	Endpoint          Value `json:".properties.firehose_endpoint"`
-	SkipSSLValidation Value `json:".properties.firehose_skip_ssl"`
-	ServiceAccount    Value `json:".properties.service_account"`
-	ProjectID         Value `json:".properties.project_id"`
-}
-
-type Value struct {
-	Value string `json:"value"`
-}
-
-type BoolValue struct {
-	Value bool `json:"value"`
-}
-
-type Secret struct {
-	Value string `json:"secret"`
-}
-
-type SecretValue struct {
-	Sec Secret `json:"value"`
+	Endpoint          tiles.Value `json:".properties.firehose_endpoint"`
+	SkipSSLValidation tiles.Value `json:".properties.firehose_skip_ssl"`
+	ServiceAccount    tiles.Value `json:".properties.service_account"`
+	ProjectID         tiles.Value `json:".properties.project_id"`
 }
 
 func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
@@ -66,10 +50,10 @@ func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	}
 
 	properties := &Properties{
-		Endpoint:          Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
-		SkipSSLValidation: Value{skipSSLValidation},
-		ServiceAccount:    Value{cfg.StackdriverNozzleServiceAccountKey},
-		ProjectID:         Value{cfg.ProjectName},
+		Endpoint:          tiles.Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
+		SkipSSLValidation: tiles.Value{skipSSLValidation},
+		ServiceAccount:    tiles.Value{cfg.StackdriverNozzleServiceAccountKey},
+		ProjectID:         tiles.Value{cfg.ProjectName},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
