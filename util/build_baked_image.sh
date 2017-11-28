@@ -37,7 +37,7 @@ if [ -z ${DNS_ZONE_NAME+x} ]; then
 fi
 
 if [ -z ${ENV_NAME+X} ]; then
-    export ENV_NAME="omg"
+    export ENV_NAME="pcf"
     echo "ENV_NAME unset, using: ${ENV_NAME}"
 fi
 
