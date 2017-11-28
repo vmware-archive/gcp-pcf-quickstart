@@ -25,8 +25,6 @@ import (
 )
 
 const (
-	cfGuid            = "cf-96162609e45ab17f57bd"
-	uaaCredential     = ".uaa.admin_credentials"
 	skipSSLValidation = "true"
 )
 
@@ -35,6 +33,10 @@ type Properties struct {
 	SkipSSLValidation tiles.Value `json:".properties.firehose_skip_ssl"`
 	ServiceAccount    tiles.Value `json:".properties.service_account"`
 	ProjectID         tiles.Value `json:".properties.project_id"`
+}
+
+type Resources struct {
+	StackdriverNozzle tiles.Resource `json:"stackdriver-nozzle"`
 }
 
 func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
@@ -61,7 +63,15 @@ func (t *Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		return err
 	}
 
-	resoruces := "{}"
+	resoruces := Resources{
+		StackdriverNozzle: tiles.Resource{
+			InternetConnected: false,
+		},
+	}
+	resorucesBytes, err := json.Marshal(&resoruces)
+	if err != nil {
+		return err
+	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), resoruces)
+	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
 }
