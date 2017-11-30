@@ -8,8 +8,7 @@ Now that you have setup your [prerequisites](./prerequisites.md) and
 Login to your deployment machine and fetch a snapshot of this repository:
 
 ```bash
-wget https://storage.googleapis.com/dogfood-omg/gcp-pcf-quickstart.tgz
-tar zxvf gcp-pcf-quickstart.tgz
+git clone https://github.com/cf-platform-eng/gcp-pcf-quickstart.git
 cd gcp-pcf-quickstart
 ```
 
