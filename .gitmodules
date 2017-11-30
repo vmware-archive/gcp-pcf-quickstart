@@ -1,3 +1,0 @@
-[submodule "vendor/terraforming-gcp"]
-	path = vendor/terraforming-gcp
-	url = https://github.com/pivotal-cf/terraforming-gcp.git
