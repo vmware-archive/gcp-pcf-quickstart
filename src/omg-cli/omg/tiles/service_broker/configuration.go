@@ -28,7 +28,25 @@ type Properties struct {
 	DatabaseHost      Value       `json:".properties.db_host"`
 	DatabaseUsername  Value       `json:".properties.db_username"`
 	DatabasePassword  SecretValue `json:".properties.db_password"`
+
+	CloudSQLPlans CloudSQLPlanValue `json:".properties.cloudsql_custom_plans"`
 }
+
+type CloudSQLPlanValue struct {
+	Plans []CloudSQLPlan `json:"value"`
+}
+
+type CloudSQLPlan struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Description string `json:"description"`
+	Service     string `json:"service"`
+	Tier        string `json:"tier"`
+	MaxDiskSize string `json:"max_disk_size"`
+	PricingPlan string `json:"pricing_plan"`
+}
+
+const cloudSqlService = "4bc59b9a-8520-409f-85da-1c7552315863"
 
 type Value struct {
 	Value string `json:"value"`
@@ -59,6 +77,26 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		DatabaseHost:      Value{cfg.ServiceBrokerDbIp},
 		DatabaseUsername:  Value{cfg.ServiceBrokerDbUsername},
 		DatabasePassword:  SecretValue{Secret{cfg.ServiceBrokerDbPassword}},
+		CloudSQLPlans: CloudSQLPlanValue{[]CloudSQLPlan{
+			{
+				Name:        "mysql-micro-dev",
+				DisplayName: "MySQL Micro Development",
+				Description: "Micro instance with shared CPU and 0.6 GB of memory for development",
+				Service:     cloudSqlService,
+				Tier:        "db-f1-micro",
+				MaxDiskSize: "100",
+				PricingPlan: "PER_USE",
+			},
+			{
+				Name:        "mysql-n1-standard-2",
+				DisplayName: "MySQL 2 CPU, 7.5 GB Memory",
+				Description: "Instance with 2 dedicated CPUs and 7.5 GB of Memory",
+				Service:     cloudSqlService,
+				Tier:        "db-f1-micro",
+				MaxDiskSize: "1000",
+				PricingPlan: "PACKAGE",
+			},
+		}},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
