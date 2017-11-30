@@ -29,10 +29,11 @@ type Properties struct {
 	DatabaseUsername  Value       `json:".properties.db_username"`
 	DatabasePassword  SecretValue `json:".properties.db_password"`
 
-	CloudSQLPlans CloudSQLPlanValue `json:".properties.cloudsql_custom_plans"`
+	CloudSQLPlans CloudSQLPlansValue `json:".properties.cloudsql_custom_plans"`
+	BigTablePlans BigTablePlansValue `json:".properties.bigtable_custom_plans"`
 }
 
-type CloudSQLPlanValue struct {
+type CloudSQLPlansValue struct {
 	Plans []CloudSQLPlan `json:"value"`
 }
 
@@ -46,7 +47,23 @@ type CloudSQLPlan struct {
 	PricingPlan string `json:"pricing_plan"`
 }
 
-const cloudSqlService = "4bc59b9a-8520-409f-85da-1c7552315863"
+type BigTablePlansValue struct {
+	Plans []BigTablePlan `json:"value"`
+}
+
+type BigTablePlan struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Description string `json:"description"`
+	Service     string `json:"service"`
+	StorageType string `json:"storage_type"`
+	NodeCount   string `json:"num_nodes"`
+}
+
+const (
+	cloudSqlService = "4bc59b9a-8520-409f-85da-1c7552315863"
+	bigTableService = "b8e19880-ac58-42ef-b033-f7cd9c94d1fe"
+)
 
 type Value struct {
 	Value string `json:"value"`
@@ -77,7 +94,7 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		DatabaseHost:      Value{cfg.ServiceBrokerDbIp},
 		DatabaseUsername:  Value{cfg.ServiceBrokerDbUsername},
 		DatabasePassword:  SecretValue{Secret{cfg.ServiceBrokerDbPassword}},
-		CloudSQLPlans: CloudSQLPlanValue{[]CloudSQLPlan{
+		CloudSQLPlans: CloudSQLPlansValue{[]CloudSQLPlan{
 			{
 				Name:        "mysql-micro-dev",
 				DisplayName: "MySQL Micro Development",
@@ -95,6 +112,24 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 				Tier:        "db-f1-micro",
 				MaxDiskSize: "1000",
 				PricingPlan: "PACKAGE",
+			},
+		}},
+		BigTablePlans: BigTablePlansValue{[]BigTablePlan{
+			{
+				Name:        "bigtable-micro-dev",
+				DisplayName: "BigTable Micro Development",
+				Description: "3 nodes count with HDD storage",
+				Service:     bigTableService,
+				StorageType: "HDD",
+				NodeCount:   "3",
+			},
+			{
+				Name:        "bigtable-medium",
+				DisplayName: "BigTable Medium Deployment",
+				Description: "10 nodes with SDD storage",
+				Service:     bigTableService,
+				StorageType: "SDD",
+				NodeCount:   "10",
 			},
 		}},
 	}
