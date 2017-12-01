@@ -23,6 +23,12 @@ import (
 	"omg-cli/ops_manager"
 )
 
+const (
+	cloudSqlService = "4bc59b9a-8520-409f-85da-1c7552315863"
+	bigTableService = "b8e19880-ac58-42ef-b033-f7cd9c94d1fe"
+	spannerService  = "51b3e27e-d323-49ce-8c5f-1211e6409e82"
+)
+
 type Properties struct {
 	ServiceAccountKey tiles.Value       `json:".properties.root_service_account_json"`
 	DatabaseHost      tiles.Value       `json:".properties.db_host"`
@@ -31,6 +37,7 @@ type Properties struct {
 
 	CloudSQLPlans CloudSQLPlansValue `json:".properties.cloudsql_custom_plans"`
 	BigTablePlans BigTablePlansValue `json:".properties.bigtable_custom_plans"`
+	SpannerPlans  SpannerPlansValue  `json:".properties.spanner_custom_plans"`
 }
 
 type CloudSQLPlansValue struct {
@@ -60,10 +67,17 @@ type BigTablePlan struct {
 	NodeCount   string `json:"num_nodes"`
 }
 
-const (
-	cloudSqlService = "4bc59b9a-8520-409f-85da-1c7552315863"
-	bigTableService = "b8e19880-ac58-42ef-b033-f7cd9c94d1fe"
-)
+type SpannerPlansValue struct {
+	Plans []SpannerPlan `json:"value"`
+}
+
+type SpannerPlan struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Description string `json:"description"`
+	Service     string `json:"service"`
+	NodeCount   string `json:"num_nodes"`
+}
 
 func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
@@ -85,8 +99,8 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		CloudSQLPlans: CloudSQLPlansValue{[]CloudSQLPlan{
 			{
 				Name:        "mysql-micro-dev",
-				DisplayName: "MySQL Micro Development",
-				Description: "Micro instance with shared CPU and 0.6 GB of memory for development",
+				DisplayName: "MySQL Micro (Development)",
+				Description: "Micro instance with shared CPU, 0.6 GB of memory",
 				Service:     cloudSqlService,
 				Tier:        "db-f1-micro",
 				MaxDiskSize: "100",
@@ -95,28 +109,85 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 			{
 				Name:        "mysql-n1-standard-2",
 				DisplayName: "MySQL 2 CPU, 7.5 GB Memory",
-				Description: "Instance with 2 dedicated CPUs and 7.5 GB of Memory",
+				Description: "Instance with 2 dedicated CPUs, 7.5 GB of Memory",
 				Service:     cloudSqlService,
-				Tier:        "db-f1-micro",
-				MaxDiskSize: "1000",
+				Tier: "db-n1-standard-2	",
+				MaxDiskSize: "10000",
+				PricingPlan: "PACKAGE",
+			},
+			{
+				Name:        "mysql-n1-standard-16",
+				DisplayName: "MySQL 16 CPU, 60 GB Memory",
+				Description: "Instance with 16 dedicated CPUs, 60 GB of Memory",
+				Service:     cloudSqlService,
+				Tier:        "db-n1-standard-16",
+				MaxDiskSize: "10000",
+				PricingPlan: "PACKAGE",
+			},
+			{
+				Name:        "mysql-n1-highmem-16",
+				DisplayName: "MySQL 16 CPU, 60 GB Memory",
+				Description: "Instance with 16 dedicated CPUs, 104 GB of Memory",
+				Service:     cloudSqlService,
+				Tier:        "db-n1-highmem-16",
+				MaxDiskSize: "10000",
 				PricingPlan: "PACKAGE",
 			},
 		}},
 		BigTablePlans: BigTablePlansValue{[]BigTablePlan{
 			{
-				Name:        "bigtable-micro-dev",
-				DisplayName: "BigTable Micro Development",
+				Name:        "bigtable-hdd-10",
+				DisplayName: "BigTable Micro (Development)",
 				Description: "3 nodes count with HDD storage",
 				Service:     bigTableService,
 				StorageType: "HDD",
 				NodeCount:   "3",
 			},
 			{
-				Name:        "bigtable-medium",
-				DisplayName: "BigTable Medium Deployment",
+				Name:        "bigtable-ssd-10",
+				DisplayName: "BigTable 10 Nodes",
 				Description: "10 nodes with SDD storage",
 				Service:     bigTableService,
 				StorageType: "SDD",
+				NodeCount:   "10",
+			},
+			{
+				Name:        "bigtable-ssd-20",
+				DisplayName: "BigTable 20 Nodes",
+				Description: "20 nodes with SDD storage",
+				Service:     bigTableService,
+				StorageType: "SDD",
+				NodeCount:   "20",
+			},
+			{
+				Name:        "bigtable-ssd-30",
+				DisplayName: "BigTable 30 Nodes",
+				Description: "30 nodes with SDD storage",
+				Service:     bigTableService,
+				StorageType: "SDD",
+				NodeCount:   "30",
+			},
+		}},
+		SpannerPlans: SpannerPlansValue{[]SpannerPlan{
+			{
+				Name:        "spanner-regional-micro-dev",
+				DisplayName: "Spanner Micro (Development)",
+				Description: "Spanner Instance with 1 node",
+				Service:     spannerService,
+				NodeCount:   "1",
+			},
+			{
+				Name:        "spanner-regional-3",
+				DisplayName: "Spanner 3 Node",
+				Description: "Spanner Instance with 3 nodes, minimum recommendation for production",
+				Service:     spannerService,
+				NodeCount:   "3",
+			},
+			{
+				Name:        "spanner-regional-10",
+				DisplayName: "Spanner 10 Node",
+				Description: "Spanner Instance with 10 nodes",
+				Service:     spannerService,
 				NodeCount:   "10",
 			},
 		}},
