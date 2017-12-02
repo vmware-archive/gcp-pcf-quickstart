@@ -179,25 +179,22 @@ jobs:
 resources:
   - name: omg-src-in
     type: git
-    source: 
-      uri:      {{source_uri}}
-      branch:   {{source_branch}}
-      username: {{source_username}}
-      password: {{source_password}}
+    source: &git_resource
+      uri:         {{source_uri}}
+      branch:      {{source_branch}}
+      username:    {{source_username}}
+      password:    {{source_password}}
+      private_key: {{source_private_key}}
 
   - name: omg-src-out
     type: git
-    source:
-      uri:      {{source_uri}}
-      branch:   {{source_branch}}
-      username: {{source_username}}
-      password: {{source_password}}
+    source: *git_resource
 
   - name: omg-env
     type: gcs-resource
     source:
-      bucket: {{ci_bucket_name}}
-      json_key: {{ci_json_key_date}}
+      bucket:         {{ci_bucket_name}}
+      json_key:       {{ci_json_key_date}}
       versioned_file: {{env_file_name}}
 
   - name: release-version-semver

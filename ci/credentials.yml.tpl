@@ -2,7 +2,7 @@
 # Source
 #
 # Parameters for a git repository with the OMG source code,
-# optionally secured TTP basic auth.
+# optionally secured HTTP basic auth or private key auth.
 #
 # Using Google Cloud Source Repositories:
 #  source_uri: https://source.developers.google.com/p/<project>/r/<repo name>
@@ -14,6 +14,7 @@ source_uri:
 source_branch:
 source_username:
 source_password:
+source_private_key:
 
 # CI data
 #
