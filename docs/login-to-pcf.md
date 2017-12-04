@@ -1,12 +1,12 @@
 # Login to Pivotal Cloud Foundry
 
-After you have [deployed PCF](./quick-deployment.md) your installation!
+After you have [deployed PCF](./quick-deployment.md) it's time to use it!
 
-## Access Pivotal Operations Manager
+## Access Pivotal Operations Manager (Ops Man)
 
 Run the following command from the `gcp-pcf-quickstart` folder on your deployment machine.
 ```bash
-printf "url: https://$(util/terraform_output.sh ops_manager_dns)\nusername: $(util/terraform_output.sh ops_manager_username)\npassword: $(util/terraform_output.sh ops_manager_password)\n"
+util/env_info.sh opsman
 ```
 
 The command will output the URL, username, password to access the Ops Manager web interface.
@@ -17,7 +17,7 @@ The command will output the URL, username, password to access the Ops Manager we
 
 Run the following command from the `gcp-pcf-quickstart` folder on your deployment machine:
 ```bash
-bin/omg-cli remote --env-dir=env/pcf "get-credential --app-name=cf --credential=.uaa.admin_credentials"
+util/env_info.sh cf
 ```
 
 This will return an `Identity` and `Password`

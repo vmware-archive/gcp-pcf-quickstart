@@ -19,17 +19,18 @@ set -u
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="env/pcf"
+    export ENV_DIR="${PWD}/env/pcf"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
+    echo ""
 fi
 
-# Ensure absolute path
-export ENV_DIR=$(readlink -f ${ENV_DIR})
+if [ -z ${1+X} ] || [ "${1}" == "opsman" ]; then
+    echo "Pivotal Operations Manager Credentials ================ "
+    printf "URL: https://$(util/terraform_output.sh ops_manager_dns)\nusername: $(util/terraform_output.sh ops_manager_username)\npassword: $(util/terraform_output.sh ops_manager_password)\n"
+fi
 
-echo "Ops Manager: "
-printf "URL: https://$(util/terraform_output.sh ops_manager_dns)\nusername: $(util/terraform_output.sh ops_manager_username)\npassword: $(util/terraform_output.sh ops_manager_password)\n"
-
-echo ""
-echo "Cloud Foundry: "
-echo "URL: https://api.$(util/terraform_output.sh sys_domain)"
-bin/omg-cli remote --env-dir=${ENV_DIR} "get-credential --app-name=cf --credential=.uaa.admin_credentials"
+if [ -z ${1+X} ] || [ "${1}" == "cf" ]; then
+    echo "Cloud Foundry API Credentials ========================= "
+    echo "URL: https://api.$(util/terraform_output.sh sys_domain)"
+    bin/omg-cli remote --env-dir=${ENV_DIR} "get-credential --app-name=cf --credential=.uaa.admin_credentials"
+fi
