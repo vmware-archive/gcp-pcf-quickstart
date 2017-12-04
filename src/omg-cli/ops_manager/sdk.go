@@ -90,7 +90,7 @@ func (om *Sdk) SetupAuth() error {
 }
 
 // Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
-// This task runs asynchronusly. Query the status by invoking ReadyForAuth.
+// This task runs asynchronously. Query the status by invoking ReadyForAuth.
 func (om *Sdk) Unlock() error {
 	om.logger.Println("decrypting Ops Manager")
 	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
