@@ -20,12 +20,9 @@ set -eu
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="$PWD/env/pcf"
+    export ENV_DIR="${PWD}/env/pcf"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
-
-# Ensure absolute path
-export ENV_DIR=$(readlink -f ${ENV_DIR})
 
 terraform_state="${ENV_DIR}/terraform.tfstate"
 ssh_key="${ENV_DIR}/keys/jumpbox_ssh"
