@@ -21,21 +21,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"omg-cli/config"
 	"omg-cli/ssh"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
 type Jumpbox struct {
-	logger              *log.Logger
-	session             *ssh.Connection
-	terraformConfigPath string
+	logger  *log.Logger
+	session *ssh.Connection
+	envDir  string
 }
 
 const packageName = "omg-cli"
 
-func NewJumpbox(logger *log.Logger, ip, username, sshKeyPath, terraformConfigPath string) (*Jumpbox, error) {
+func NewJumpbox(logger *log.Logger, ip, username, sshKeyPath, envDir string) (*Jumpbox, error) {
 	jumpboxLogger := *logger
 	jumpboxLogger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", jumpboxLogger.Prefix()))
 	key, err := ioutil.ReadFile(sshKeyPath)
@@ -43,7 +45,7 @@ func NewJumpbox(logger *log.Logger, ip, username, sshKeyPath, terraformConfigPat
 		return nil, err
 	}
 
-	jb := &Jumpbox{logger: &jumpboxLogger, terraformConfigPath: terraformConfigPath}
+	jb := &Jumpbox{logger: &jumpboxLogger, envDir: envDir}
 	jb.session, err = ssh.NewConnection(&jumpboxLogger, ip, ssh.Port, username, key)
 	if err != nil {
 		return nil, err
@@ -88,13 +90,16 @@ func (jb *Jumpbox) UploadDependencies() error {
 		return fmt.Errorf("rebuilding go: %v", err)
 	}
 
-	for _, f := range []struct {
-		local string
-		dest  string
-	}{
-		{rebuilt.Name(), packageName},
-		{jb.terraformConfigPath, "env.json"},
-	} {
+	type plan struct {
+		local, dest string
+	}
+	files := []plan{{rebuilt.Name(), packageName}}
+
+	for _, f := range config.ConfigFiles {
+		files = append(files, plan{filepath.Join(jb.envDir, f), f})
+	}
+
+	for _, f := range files {
 		if err := jb.session.UploadFile(f.local, f.dest); err != nil {
 			return err
 		}
@@ -108,5 +113,5 @@ func (jb *Jumpbox) RunOmg(args string) error {
 		return err
 	}
 
-	return jb.session.RunCommand(fmt.Sprintf("~/%s %s", packageName, args))
+	return jb.session.RunCommand(fmt.Sprintf("~/%s %s --env-dir=$PWD", packageName, args))
 }

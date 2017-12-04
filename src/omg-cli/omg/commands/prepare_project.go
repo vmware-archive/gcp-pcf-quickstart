@@ -44,7 +44,7 @@ func (cmd *PrepareProjectCommand) register(app *kingpin.Application) {
 
 func (cmd *PrepareProjectCommand) parseArgs() (cfg *config.EnvConfig, gcpClient *http.Client) {
 	var err error
-	cfg, err = config.FromEnvironmentDirectory(cmd.envDir)
+	cfg, err = config.ConfigFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}

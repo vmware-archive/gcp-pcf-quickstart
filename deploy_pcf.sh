@@ -35,20 +35,29 @@ if [ -z ${ENV_DIR+X} ]; then
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
 
+
 mkdir -p ${ENV_DIR}
-terraform_output="${ENV_DIR}/env.json"
+terraform_output="${ENV_DIR}/terraform_output.json"
 terraform_config="${ENV_DIR}/terraform.tfvars"
 terraform_state="${ENV_DIR}/terraform.tfstate"
 env_config="${ENV_DIR}/config.json"
 
 if [ ! -f $env_config ]; then
-    omg-cli generate-config --env-dir="${ENV_DIR}"
+    if [ -z ${PIVNET_API_TOKEN+x} ]; then
+        echo "PIVNET_API_TOKEN environment required (requires registration)."
+        echo "Find the value for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile"
+        echo "and run: export PIVNET_API_TOKEN=<value of 'API TOKEN'> before running this command."
+        exit 1
+    fi
 
+    omg-cli generate-config --env-dir="${ENV_DIR}"
+    echo ""
     echo "The following settings are defaults:"
+    echo ""
     omg-cli source-config --env-dir="${ENV_DIR}"
 
     echo ""
-    echo "Change these settings by editing: ${env_config} and re-running this script"
+    echo "Review the settings above. Modify them by editing the file: ${env_config} and re-running this script"
     echo ""
     read -p "Accept defaults (y/n)? " choice
 
@@ -61,6 +70,8 @@ fi
 set -o allexport
 eval $(omg-cli source-config --env-dir="${ENV_DIR}")
 set +o allexport
+
+omg-cli review-eulas --env-dir="${ENV_DIR}"
 
 pushd src/omg-tf
     # Verify project is ready

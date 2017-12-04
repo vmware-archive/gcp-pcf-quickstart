@@ -54,7 +54,7 @@ func nameToEnv(name string) string {
 }
 
 func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromEnvironmentDirectory(cmd.envDir)
+	cfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}

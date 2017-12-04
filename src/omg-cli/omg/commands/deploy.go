@@ -28,31 +28,31 @@ import (
 )
 
 type DeployCommand struct {
-	logger              *log.Logger
-	terraformConfigPath string
-	applyChanges        bool
+	logger       *log.Logger
+	envDir       string
+	applyChanges bool
 }
 
 const DeployName = "deploy"
 
-func (dc *DeployCommand) register(app *kingpin.Application) {
-	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(dc.run)
-	registerTerraformConfigFlag(c, &dc.terraformConfigPath)
-	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&dc.applyChanges)
+func (cmd *DeployCommand) register(app *kingpin.Application) {
+	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(cmd.run)
+	registerEnvConfigFlag(c, &cmd.envDir)
+	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&cmd.applyChanges)
 }
 
-func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(dc.terraformConfigPath)
+func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dc.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, nil, dc.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, omSdk, nil, cmd.logger, selectedTiles)
 
 	steps := []step{
 		opsMan.PoolTillOnline,
@@ -60,7 +60,7 @@ func (dc *DeployCommand) run(c *kingpin.ParseContext) error {
 		opsMan.ConfigureTiles,
 	}
 
-	if dc.applyChanges {
+	if cmd.applyChanges {
 		steps = append(steps, opsMan.ApplyChanges)
 	}
 

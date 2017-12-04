@@ -18,21 +18,23 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 type EnvConfig struct {
-	DnsZoneName  string
-	ProjectID    string
-	BaseImageURL string
-	EnvName      string
-	Region       string
-	Zone1        string
-	Zone2        string
-	Zone3        string
+	DnsZoneName    string
+	ProjectID      string
+	BaseImageURL   string
+	EnvName        string
+	Region         string
+	PivnetApiToken string
+	Zone1          string
+	Zone2          string
+	Zone3          string
 }
 
 func DefaultEnvConfig() (*EnvConfig, error) {
@@ -51,12 +53,13 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 		return nil, err
 	}
 	c.ProjectID = strings.TrimSuffix(string(projectId), "\n")
+	c.PivnetApiToken = os.Getenv("PIVNET_API_TOKEN")
 
 	return c, nil
 }
 
-func FromEnvironmentDirectory(path string) (*EnvConfig, error) {
-	return fromEnvironment(fmt.Sprintf("%s/config.json", path))
+func ConfigFromEnvDirectory(path string) (*EnvConfig, error) {
+	return fromEnvironment(filepath.Join(path, EnvConfigFile))
 }
 
 func fromEnvironment(filename string) (*EnvConfig, error) {

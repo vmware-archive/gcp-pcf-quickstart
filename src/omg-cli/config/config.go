@@ -24,3 +24,10 @@ type OpsManagerCredentials struct {
 	DecryptionPhrase    string
 	SkipSSLVerification bool
 }
+
+const (
+	TerraformOutputFile = "terraform_output.json"
+	EnvConfigFile       = "config.json"
+)
+
+var ConfigFiles = []string{TerraformOutputFile, EnvConfigFile}

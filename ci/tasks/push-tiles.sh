@@ -11,4 +11,5 @@ pushd ${my_dir} > /dev/null
 popd > /dev/null
 
 go install omg-cli
+omg-cli review-eulas --env-dir="${env_dir}" --accept-all
 omg-cli remote --env-dir="${env_dir}" "push-tiles"

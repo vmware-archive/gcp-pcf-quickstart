@@ -29,34 +29,39 @@ import (
 )
 
 type PushTilesCommand struct {
-	logger              *log.Logger
-	terraformConfigPath string
+	logger *log.Logger
+	envDir string
 }
 
 const PushTilesName = "push-tiles"
 
-func (bic *PushTilesCommand) register(app *kingpin.Application) {
-	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(bic.run)
-	registerTerraformConfigFlag(c, &bic.terraformConfigPath)
+func (cmd *PushTilesCommand) register(app *kingpin.Application) {
+	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(cmd.run)
+	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
-func (bic *PushTilesCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(bic.terraformConfigPath)
+func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *bic.logger)
+	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	pivnetSdk, err := pivnet.NewSdk(cfg.PivnetApiToken, bic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, pivnetSdk, bic.logger, selectedTiles)
+	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetApiToken, cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	opsMan := setup.NewService(cfg, omSdk, pivnetSdk, cmd.logger, selectedTiles)
 
 	return run([]step{
 		opsMan.PoolTillOnline,

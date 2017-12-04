@@ -18,10 +18,6 @@ function rollback {
 }
 trap rollback ERR
 
-terraform_output="${env_dir}/env.json"
-terraform_config="${env_dir}/terraform.tfvars"
-terraform_state="${env_dir}/terraform.tfstate"
-
 pushd "${release_dir}/src/omg-tf"
 	terraform init
 	terraform get

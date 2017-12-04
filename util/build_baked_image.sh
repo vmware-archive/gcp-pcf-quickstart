@@ -47,7 +47,7 @@ if [ -z ${ENV_DIR+X} ]; then
 fi
 mkdir -p ${ENV_DIR}
 
-terraform_output="${ENV_DIR}/env.json"
+terraform_output="${ENV_DIR}/terraform_output.json"
 terraform_config="${ENV_DIR}/terraform.tfvars"
 
 # Setup infrastructure

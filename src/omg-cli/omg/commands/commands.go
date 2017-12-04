@@ -51,6 +51,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&PrepareProjectCommand{logger: logger},
 		&GenerateConfigCommand{logger: logger},
 		&SourceConfigCommand{logger: logger},
+		&ReviewEulasCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
@@ -88,14 +89,6 @@ func retry(fn step, times int) error {
 	}
 
 	return fmt.Errorf("failed after %d attempts, errors: %v", times, errs)
-}
-
-func registerTerraformConfigFlag(c *kingpin.CmdClause, path *string) {
-	c.Flag("terraform-output-path", "JSON output from terraform state for deployment").Default("env.json").StringVar(path)
-}
-
-func registerPivnetFlag(c *kingpin.CmdClause, apiToken *string) {
-	c.Flag("pivnet-api-token", "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile.").StringVar(apiToken)
 }
 
 func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {

@@ -27,40 +27,40 @@ import (
 )
 
 type GetCredentialCommand struct {
-	logger              *log.Logger
-	terraformConfigPath string
-	appName             string
-	credential          string
+	logger     *log.Logger
+	envDir     string
+	appName    string
+	credential string
 }
 
 const GetCredentialName = "get-credential"
 
-func (dic *GetCredentialCommand) register(app *kingpin.Application) {
-	c := app.Command(GetCredentialName, "Fetch a credential for a tile").Action(dic.run)
-	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
+func (cmd *GetCredentialCommand) register(app *kingpin.Application) {
+	c := app.Command(GetCredentialName, "Fetch a credential for a tile").Action(cmd.run)
+	registerEnvConfigFlag(c, &cmd.envDir)
 
-	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&dic.appName)
-	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&dic.credential)
+	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&cmd.appName)
+	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&cmd.credential)
 }
 
-func (dic *GetCredentialCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(dic.terraformConfigPath)
+func (cmd *GetCredentialCommand) run(c *kingpin.ParseContext) error {
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	cred, err := omSdk.GetCredentials(dic.appName, dic.credential)
+	cred, err := omSdk.GetCredentials(cmd.appName, cmd.credential)
 	if err != nil {
 		return err
 	}
 
-	dic.logger.Printf("identity: %s", cred.Identity)
-	dic.logger.Printf("password: %s", cred.Password)
+	cmd.logger.Printf("identity: %s", cred.Identity)
+	cmd.logger.Printf("password: %s", cred.Password)
 
 	return nil
 }

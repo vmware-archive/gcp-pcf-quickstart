@@ -28,28 +28,6 @@ if [ -z ${ENV_NAME+X} ]; then
     exit 1
 fi
 
-if [ -z ${PIVNET_API_TOKEN+x} ]; then
-    echo "PIVNET_API_TOKEN required (requires registration)."
-    echo "Look for 'API TOKEN' at https://network.pivotal.io/users/dashboard/edit-profile"
-    echo "or go to https://network.pivotal.io/docs/api#how-to-authenticate for more info."
-    exit 1
-fi
-
-if [ -z ${PIVNET_ACCEPT_EULA+x} ]; then
-    echo "This deployment requires accepting EULAs from the Pivotal Network for:"
-    echo " - Elastic Runtime"
-    echo " - GCP Service Broker"
-    echo " - GCP Stackdriver Nozzle"
-    echo ""
-    read -p "Progamatically accept EULAs (y/n)? " choice
-
-    case "$choice" in
-      y|Y ) export PIVNET_ACCEPT_EULA="yes";;
-      * ) exit 0;;
-    esac
-
-fi
-
 cd ${ENV_DIR}
 
 if [ -z ${DNS_ZONE_NAME+x} ]; then
@@ -162,8 +140,6 @@ opsman_image_url = "${BASE_IMAGE_URL:-}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK:-}"
 opsman_external_ip = "true"
 ops_manager_skip_ssl_verify = "true"
-pivnet_api_token = "${PIVNET_API_TOKEN}"
-pivnet_accept_eula = "${PIVNET_ACCEPT_EULA}"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
 external_database = "true"

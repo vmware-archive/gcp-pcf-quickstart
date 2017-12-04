@@ -56,7 +56,7 @@ func Target() TargetSite {
 			ginkgo.Fail(fmt.Sprintf("missing test data, expected environment variable %s to contain path", envDirName))
 		}
 
-		cfg, err := config.FromTerraformDirectory(envDir)
+		cfg, err := config.TerraformFromEnvDirectory(envDir)
 		if err != nil {
 			ginkgo.Fail(fmt.Sprintf("loading terraform state: %v", err))
 		}

@@ -18,6 +18,7 @@ package pivnet
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -175,4 +176,52 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	}
 
 	return nil
+}
+
+type Eula struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+	Slug    string `json:"slug"`
+	Links   struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"_links"`
+}
+
+func (s *Sdk) GetEula(eulaSlug string) (*Eula, error) {
+	req, err := s.authorizedRequest("GET", "/api/v2/eulas", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetching eula: %s, recieved: %s", eulaSlug, resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var eulaResponse struct {
+		Eulas []Eula `json:"eulas"`
+	}
+	if err := json.Unmarshal(body, &eulaResponse); err != nil {
+		return nil, fmt.Errorf("unmarshalling pivnet response: %v", err)
+	}
+
+	for _, eula := range eulaResponse.Eulas {
+		if eula.Slug == eulaSlug {
+			return &eula, nil
+		}
+	}
+
+	return nil, fmt.Errorf("EULA not found: %s", eulaSlug)
 }

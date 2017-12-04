@@ -28,29 +28,29 @@ import (
 )
 
 type DeleteInstallationCommand struct {
-	logger              *log.Logger
-	terraformConfigPath string
+	logger *log.Logger
+	envDir string
 }
 
 const DeleteInstallationName = "delete-installation"
 
-func (dic *DeleteInstallationCommand) register(app *kingpin.Application) {
-	c := app.Command(DeleteInstallationName, "Delete an Ops Manager installation").Action(dic.run)
-	registerTerraformConfigFlag(c, &dic.terraformConfigPath)
+func (cmd *DeleteInstallationCommand) register(app *kingpin.Application) {
+	c := app.Command(DeleteInstallationName, "Delete an Ops Manager installation").Action(cmd.run)
+	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
-func (dic *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.FromTerraform(dic.terraformConfigPath)
+func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *dic.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, nil, dic.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, omSdk, nil, cmd.logger, selectedTiles)
 
 	steps := []step{
 		opsMan.PoolTillOnline,

@@ -20,12 +20,9 @@ set -u
 cd "$(dirname "$0")/../"
 
 if [ -z ${ENV_DIR+X} ]; then
-    export ENV_DIR="env/pcf"
+    export ENV_DIR="${PWD}/env/pcf"
     echo "ENV_DIR unset, using: ${ENV_DIR}"
 fi
-
-# Ensure absolute path
-export ENV_DIR=$(readlink -f ${ENV_DIR})
 
 read -p "Delete deployment in ${ENV_DIR} (y/n)? " choice
 case "$choice" in
@@ -33,7 +30,7 @@ case "$choice" in
   * ) exit 0;;
 esac
 
-terraform_output="${ENV_DIR}/env.json"
+terraform_output="${ENV_DIR}/terraform_output.json"
 terraform_config="${ENV_DIR}/terraform.tfvars"
 terraform_state="${ENV_DIR}/terraform.tfstate"
 

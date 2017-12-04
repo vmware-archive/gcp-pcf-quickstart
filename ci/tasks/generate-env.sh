@@ -9,8 +9,6 @@ pushd ${my_dir} > /dev/null
     check_param 'google_project'
     check_param 'google_json_key_data'
     check_param 'env_config'
-    check_param 'PIVNET_API_TOKEN'
-    check_param 'PIVNET_ACCEPT_EULA'
     export
     set_gcloud_config
     generate_env_config

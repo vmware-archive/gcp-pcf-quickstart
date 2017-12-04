@@ -46,15 +46,14 @@ func (bc *RemoteCommand) register(app *kingpin.Application) {
 }
 
 func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
-	terraformConfigPath := filepath.Join(bc.envDir, "env.json")
 	sshKeyPath := filepath.Join(bc.envDir, "keys", "jumpbox_ssh")
 
-	cfg, err := config.FromTerraform(terraformConfigPath)
+	cfg, err := config.TerraformFromEnvDirectory(bc.envDir)
 	if err != nil {
 		return fmt.Errorf("load terraform config: %v", err)
 	}
 
-	jb, err := setup.NewJumpbox(bc.logger, cfg.JumpboxIp, Username, sshKeyPath, terraformConfigPath)
+	jb, err := setup.NewJumpbox(bc.logger, cfg.JumpboxIp, Username, sshKeyPath, bc.envDir)
 	if err != nil {
 		return fmt.Errorf("connect to jumpbox: %v", err)
 	}

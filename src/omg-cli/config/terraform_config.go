@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strconv"
 )
 
@@ -85,9 +86,6 @@ type TerraformConfigSchema struct {
 	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
 	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
 
-	PivnetApiToken   string `json:"pivnet_api_token"`
-	PivnetAcceptEula bool
-
 	Region      string `json:"region"`
 	Zone1       string `json:"azs_0"`
 	Zone2       string `json:"azs_1"`
@@ -97,11 +95,11 @@ type TerraformConfigSchema struct {
 	OpsManager OpsManagerCredentials
 }
 
-func FromTerraformDirectory(path string) (*Config, error) {
-	return FromTerraform(fmt.Sprintf("%s/env.json", path))
+func TerraformFromEnvDirectory(path string) (*Config, error) {
+	return fromTerraform(filepath.Join(path, TerraformOutputFile))
 }
 
-func FromTerraform(filename string) (*Config, error) {
+func fromTerraform(filename string) (*Config, error) {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -121,10 +119,6 @@ func FromTerraform(filename string) (*Config, error) {
 	err = json.Unmarshal(flattendStr, &hydratedCfg)
 	if err != nil {
 		return nil, err
-	}
-
-	if flattened["pivnet_accept_eula"] == "yes" {
-		hydratedCfg.PivnetAcceptEula = true
 	}
 
 	if flattened["ops_manager_skip_ssl_verify"] == "true" {

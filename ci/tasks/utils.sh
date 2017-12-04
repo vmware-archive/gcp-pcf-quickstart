@@ -64,7 +64,7 @@ set_resource_dirs() {
     export env_dir="${workspace_dir}/env"
     export env_output_dir="${workspace_dir}/omg-env-out"
     export env_output_file="${env_output_dir}/${env_file_name}"
-    export terraform_output="${env_dir}/env.json"
+    export terraform_output="${env_dir}/terraform_output.json"
     export terraform_config="${env_dir}/terraform.tfvars"
     export terraform_state="${env_dir}/terraform.tfstate"
 

@@ -50,8 +50,6 @@ jobs:
           google_json_key_data: {{google_json_key_data}}
           env_file_name: {{env_file_name}}
           env_config: {{env_config}}
-          PIVNET_API_TOKEN: {{PIVNET_API_TOKEN}}
-          PIVNET_ACCEPT_EULA: {{PIVNET_ACCEPT_EULA}}
 
       - aggregate:
         - put: omg-env

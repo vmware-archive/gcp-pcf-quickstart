@@ -39,7 +39,7 @@ sshuttle -e "ssh -i ${ENV_DIR}/keys/jumpbox_ssh" -r $(terraform output jumpbox_p
 
 ## Configuration for omg-cli
 ```bash
-terraform output -json > ${ENV_DIR}/env.json
+terraform output -json > ${ENV_DIR}/terraform_output.json
 ```
 
 ## Appendix
