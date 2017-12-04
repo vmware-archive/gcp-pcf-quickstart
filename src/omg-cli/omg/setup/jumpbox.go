@@ -31,22 +31,32 @@ import (
 
 type Jumpbox struct {
 	logger  *log.Logger
+	output  *log.Logger
 	session *ssh.Connection
 	envDir  string
 }
 
 const packageName = "omg-cli"
 
-func NewJumpbox(logger *log.Logger, ip, username, sshKeyPath, envDir string) (*Jumpbox, error) {
-	jumpboxLogger := *logger
-	jumpboxLogger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", jumpboxLogger.Prefix()))
+func NewJumpbox(cmdLogger *log.Logger, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
+	var logger *log.Logger
+	var output *log.Logger
+	if !quiet {
+		// Duplicate the logger so we can modify the prefix
+		logger = &*cmdLogger
+		logger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", logger.Prefix()))
+		output = logger
+	} else {
+		output = cmdLogger
+		logger = log.New(ioutil.Discard, "", 0)
+	}
 	key, err := ioutil.ReadFile(sshKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	jb := &Jumpbox{logger: &jumpboxLogger, envDir: envDir}
-	jb.session, err = ssh.NewConnection(&jumpboxLogger, ip, ssh.Port, username, key)
+	jb := &Jumpbox{logger: logger, output: output, envDir: envDir}
+	jb.session, err = ssh.NewConnection(logger, output, ip, ssh.Port, username, key)
 	if err != nil {
 		return nil, err
 	}

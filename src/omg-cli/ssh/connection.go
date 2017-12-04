@@ -30,6 +30,7 @@ import (
 
 type Connection struct {
 	logger       *log.Logger
+	output       *log.Logger
 	client       *ssh.Client
 	hostname     string
 	port         int
@@ -38,7 +39,7 @@ type Connection struct {
 
 const Port = 22
 
-func NewConnection(logger *log.Logger, hostname string, port int, username string, key []byte) (*Connection, error) {
+func NewConnection(logger *log.Logger, output *log.Logger, hostname string, port int, username string, key []byte) (*Connection, error) {
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func NewConnection(logger *log.Logger, hostname string, port int, username strin
 		},
 	}
 
-	c := &Connection{logger: logger, hostname: hostname, port: port, clientConfig: cfg}
+	c := &Connection{logger: logger, output: output, hostname: hostname, port: port, clientConfig: cfg}
 
 	return c, nil
 }
@@ -96,7 +97,7 @@ func (c *Connection) RunCommand(cmd string) error {
 
 	c.logger.Printf("running command %s", cmd)
 
-	out := logstreamer.NewLogstreamer(c.logger, "", false)
+	out := logstreamer.NewLogstreamer(c.output, "", false)
 	defer out.Close()
 
 	ses.Stdout = out

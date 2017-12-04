@@ -94,3 +94,7 @@ func retry(fn step, times int) error {
 func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
 	c.Flag("env-dir", "path to environment configuration and state").Default("env/pcf").StringVar(path)
 }
+
+func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
+	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
+}
