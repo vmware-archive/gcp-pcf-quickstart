@@ -101,7 +101,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 
 	for _, f := range files {
 		if err := jb.session.UploadFile(f.local, f.dest); err != nil {
-			return err
+			return fmt.Errorf("uploading file %s: %v", f.local, err)
 		}
 	}
 
