@@ -108,4 +108,4 @@ cf delete awwvision
 
 ## What's Next?
 - [Related Resources](../README.md#resources)
-- [Delete Deployment](./delete-deployment.md)
+- [Delete Deployment](./deleting-deployment.md)

@@ -47,4 +47,4 @@ The last command will output the URL you can use to access the app.
 
 ## What's Next?
 - [Deploy an app using Google Cloud Storage and Vision APIs](./deploy-awwvision.md)
-- [Delete Deployment](./delete-deployment.md)
+- [Delete Deployment](./deleting-deployment.md)

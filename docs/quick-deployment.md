@@ -36,4 +36,4 @@ exit the command.
 
 ## What's Next?
 - [Login to Pivotal Cloud Foundry](login-to-pcf.md) and deploy your first app
-- [Delete Deployment](./delete-deployment.md)
+- [Delete Deployment](./deleting-deployment.md)
