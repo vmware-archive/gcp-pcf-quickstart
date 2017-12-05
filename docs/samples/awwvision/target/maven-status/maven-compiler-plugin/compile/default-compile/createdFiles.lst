@@ -1,0 +1,14 @@
+com/google/cloud/servicebroker/awwvision/VisionAPI.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$ListingData.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$Source.class
+com/google/cloud/servicebroker/awwvision/VisionDemoApplication.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$Data.class
+com/google/cloud/servicebroker/awwvision/RedditScraper.class
+com/google/cloud/servicebroker/awwvision/StorageAPI.class
+com/google/cloud/servicebroker/awwvision/ViewImages$Image.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$Preview.class
+com/google/cloud/servicebroker/awwvision/ViewImages.class
+com/google/cloud/servicebroker/awwvision/RedditResponse.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$Image.class
+com/google/cloud/servicebroker/awwvision/RedditResponse$Listing.class
+com/google/cloud/servicebroker/awwvision/VisionConfig.class

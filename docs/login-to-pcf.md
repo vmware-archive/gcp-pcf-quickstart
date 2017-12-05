@@ -11,7 +11,7 @@ util/env_info.sh opsman
 
 The command will output the URL, username, password to access the Ops Manager web interface.
 
-## Access the Cloud Foundry API
+## <a name="cfapi"></a>Access the Cloud Foundry API
 
 ### 1. Retrieve Credentials
 
@@ -20,16 +20,16 @@ Run the following command from the `gcp-pcf-quickstart` folder on your deploymen
 util/env_info.sh cf
 ```
 
-This will return an `Identity` and `Password`
+This will return an `identity` and `password`
 
 ### 2. Target Cloud Foundry
 
 ```bash
-cf login --skip-ssl-validation -a https://api.sys.$(util/terraform_output.sh dns_suffix)
+cf login --skip-ssl-validation -a https://api.sys.$(ENV_DIR=env/pcf util/terraform_output.sh dns_suffix)
 ```
 
-Use the `Identity` from the previous setp as the `Email` and the
-`Password` from the pervious step.
+Use the `identity` from the previous step as the `Email` and the
+`password` from the previous step. Select `system` for space when prompted.
 
 ### 3. Deploying Your First App
 
@@ -44,3 +44,7 @@ Use the `Identity` from the previous setp as the `Email` and the
    ```
    
 The last command will output the URL you can use to access the app.
+
+## What's Next?
+- [Deploy an app using Google Cloud Storage and Vision APIs](./deploy-awwvision.md)
+- [Delete Deployment](./delete-deployment.md)

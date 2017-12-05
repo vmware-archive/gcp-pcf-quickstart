@@ -1,0 +1,6 @@
+---
+applications:
+- name: awwvision
+  memory: 1024M
+  instances: 1
+  random-route: true
