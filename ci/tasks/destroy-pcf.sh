@@ -10,13 +10,6 @@ popd > /dev/null
 
 go install omg-cli
 
-set +e
-n=0
-until [ $n -ge 5 ]
-do
-  omg-cli remote --env-dir="${env_dir}" "delete-installation" && break
-  n=$[$n+1]
-  delay=180
-  echo "delete failed, trying again in ${delay} seconds"
-  sleep ${delay}
-done
+omg-cli remote --env-dir="${env_dir}" "delete-installation" && exit 0
+echo "delete failed, cleaning project instead"
+omg-cli cleanup-project --env-dir="${env_dir}" --no-dry-run

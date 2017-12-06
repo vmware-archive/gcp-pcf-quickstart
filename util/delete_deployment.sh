@@ -38,6 +38,7 @@ export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 go install omg-cli
 omg-cli remote --env-dir ${ENV_DIR} "delete-installation"
+omg-cli cleanup-project --env-dir ${ENV_DIR} --no-dry-run
 
 pushd src/omg-tf
     yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
