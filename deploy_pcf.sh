@@ -71,7 +71,11 @@ set -o allexport
 eval $(omg-cli source-config --env-dir="${ENV_DIR}")
 set +o allexport
 
-omg-cli review-eulas --env-dir="${ENV_DIR}"
+if [ -z ${PIVNET_ACCEPT_EULA+x} ]; then
+    omg-cli review-eulas --env-dir="${ENV_DIR}"
+else
+    omg-cli review-eulas --env-dir="${ENV_DIR}" --accept-all
+fi
 
 pushd src/omg-tf
     # Verify project is ready
