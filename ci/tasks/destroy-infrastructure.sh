@@ -14,5 +14,10 @@ trap save_terraform_state EXIT
 pushd "${release_dir}/src/omg-tf"
 	terraform init
 	terraform get
+	yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} && exit 0
+
+	seconds=300
+	echo "terraform destroy failed, trying again in ${seconds} seconds"
+	sleep ${seconds}
 	yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
 popd
