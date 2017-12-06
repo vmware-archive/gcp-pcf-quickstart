@@ -104,6 +104,8 @@ jobs:
             task: destroy-pcf
             file: omg-src-in/ci/tasks/destroy-pcf.yml
             params:
+              google_project: {{google_project}}
+              google_json_key_data: {{google_json_key_data}}
               env_file_name: {{env_file_name}}
           - *destroy_infrastructure
 
