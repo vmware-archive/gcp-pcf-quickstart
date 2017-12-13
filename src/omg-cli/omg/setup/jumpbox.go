@@ -19,6 +19,7 @@ package setup
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"omg-cli/config"
@@ -31,23 +32,20 @@ import (
 
 type Jumpbox struct {
 	logger  *log.Logger
-	output  *log.Logger
+	output  io.Writer
 	session *ssh.Connection
 	envDir  string
 }
 
 const packageName = "omg-cli"
 
-func NewJumpbox(cmdLogger *log.Logger, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
+func NewJumpbox(cmdLogger *log.Logger, output io.Writer, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
 	var logger *log.Logger
-	var output *log.Logger
 	if !quiet {
 		// Duplicate the logger so we can modify the prefix
 		logger = &*cmdLogger
 		logger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", logger.Prefix()))
-		output = logger
 	} else {
-		output = cmdLogger
 		logger = log.New(ioutil.Discard, "", 0)
 	}
 	key, err := ioutil.ReadFile(sshKeyPath)

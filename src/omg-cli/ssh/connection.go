@@ -23,14 +23,15 @@ import (
 
 	"fmt"
 
-	"github.com/kvz/logstreamer"
+	"io"
+
 	"github.com/tmc/scp"
 	"golang.org/x/crypto/ssh"
 )
 
 type Connection struct {
 	logger       *log.Logger
-	output       *log.Logger
+	output       io.Writer
 	client       *ssh.Client
 	hostname     string
 	port         int
@@ -39,7 +40,7 @@ type Connection struct {
 
 const Port = 22
 
-func NewConnection(logger *log.Logger, output *log.Logger, hostname string, port int, username string, key []byte) (*Connection, error) {
+func NewConnection(logger *log.Logger, output io.Writer, hostname string, port int, username string, key []byte) (*Connection, error) {
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
 		return nil, err
@@ -97,11 +98,8 @@ func (c *Connection) RunCommand(cmd string) error {
 
 	c.logger.Printf("running command %s", cmd)
 
-	out := logstreamer.NewLogstreamer(c.output, "", false)
-	defer out.Close()
-
-	ses.Stdout = out
-	ses.Stderr = out
+	ses.Stdout = c.output
+	ses.Stderr = c.output
 	if err := ses.Run(cmd); err != nil {
 		return fmt.Errorf("running command: %v", err)
 	}
