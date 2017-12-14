@@ -17,6 +17,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -31,7 +32,7 @@ type TerraformConfigSchema struct {
 	NetworkName         string `json:"network_name"`
 	DeploymentTargetTag string `json:"vm_tag"`
 
-	OpsManagerServiceAccountKey string `json:"ops_manager_service_account_key"`
+	OpsManagerServiceAccountKey string
 
 	ExternalSqlIp         string `json:"sql_db_ip"`
 	ExternalSqlPort       int
@@ -79,9 +80,9 @@ type TerraformConfigSchema struct {
 	SslCertificate string `json:"ssl_cert"`
 	SslPrivateKey  string `json:"ssl_cert_private_key"`
 
-	StackdriverNozzleServiceAccountKey string `json:"stackdriver_service_account_key"`
+	StackdriverNozzleServiceAccountKey string
 
-	ServiceBrokerServiceAccountKey string `json:"service_broker_service_account_key"`
+	ServiceBrokerServiceAccountKey string
 	ServiceBrokerDbIp              string `json:"service_broker_db_ip"`
 	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
 	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
@@ -97,6 +98,14 @@ type TerraformConfigSchema struct {
 
 func TerraformFromEnvDirectory(path string) (*Config, error) {
 	return fromTerraform(filepath.Join(path, TerraformOutputFile))
+}
+
+func decode(input string) string {
+	res, err := base64.StdEncoding.DecodeString(input)
+	if err != nil {
+		panic("unable to decode bas64 key")
+	}
+	return string(res)
 }
 
 func fromTerraform(filename string) (*Config, error) {
@@ -132,6 +141,10 @@ func fromTerraform(filename string) (*Config, error) {
 		}
 		hydratedCfg.ExternalSqlPort = int(parsed)
 	}
+
+	hydratedCfg.OpsManagerServiceAccountKey = decode(flattened["ops_manager_service_account_key_base64"])
+	hydratedCfg.ServiceBrokerServiceAccountKey = decode(flattened["service_broker_service_account_key_base64"])
+	hydratedCfg.StackdriverNozzleServiceAccountKey = decode(flattened["stackdriver_service_account_key_base64"])
 
 	hydratedCfg.OpsManager.Username = flattened["ops_manager_username"]
 	hydratedCfg.OpsManager.Password = flattened["ops_manager_password"]

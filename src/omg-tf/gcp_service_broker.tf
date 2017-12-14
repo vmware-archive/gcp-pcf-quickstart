@@ -44,3 +44,22 @@ resource "google_sql_user" "service_broker" {
   instance = "${google_sql_database_instance.service_broker.name}"
   host     = "${var.ert_sql_db_host}"
 }
+
+resource "random_id" "service_broker_account" {
+  byte_length = 4
+}
+
+resource "google_service_account" "service_broker" {
+  display_name = "GCP Service Broker"
+  account_id   = "sb-${random_id.service_broker_account.hex}"
+}
+
+resource "google_service_account_key" "service_broker" {
+  service_account_id = "${google_service_account.service_broker.id}"
+}
+
+resource "google_project_iam_member" "service_broker" {
+  project = "${var.project}"
+  role    = "roles/owner"
+  member  = "serviceAccount:${google_service_account.service_broker.email}"
+}

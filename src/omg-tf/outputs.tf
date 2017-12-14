@@ -186,16 +186,16 @@ output "tcp_port_range" {
   value = "${var.tcp_port_range}"
 }
 
-output "stackdriver_service_account_key" {
-  value = "${var.stackdriver_service_account_key}"
+output "stackdriver_service_account_key_base64" {
+  value = "${google_service_account_key.stackdrvier_nozzle.private_key}"
 }
 
-output "service_broker_service_account_key" {
-  value = "${var.service_broker_service_account_key}"
+output "service_broker_service_account_key_base64" {
+  value = "${google_service_account_key.service_broker.private_key}"
 }
 
-output "ops_manager_service_account_key" {
-  value = "${var.ops_manager_service_account_key}"
+output "ops_manager_service_account_key_base64" {
+  value = "${google_service_account_key.ops_manager.private_key}"
 }
 
 output "service_broker_db_ip" {

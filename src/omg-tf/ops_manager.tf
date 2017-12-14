@@ -95,4 +95,22 @@ resource "random_id" "ops_manager_decryption_phrase_generator" {
   byte_length = 16
 }
 
+resource "random_id" "ops_manager_account" {
+  byte_length = 4
+}
+
+resource "google_service_account" "ops_manager" {
+  display_name = "Ops Manager"
+  account_id   = "ops-${random_id.ops_manager_account.hex}"
+}
+
+resource "google_service_account_key" "ops_manager" {
+  service_account_id = "${google_service_account.ops_manager.id}"
+}
+
+resource "google_project_iam_member" "ops_manager" {
+  project = "${var.project}"
+  role    = "roles/owner"
+  member  = "serviceAccount:${google_service_account.ops_manager.email}"
+}
 
