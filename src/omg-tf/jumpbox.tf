@@ -16,7 +16,7 @@ resource "google_compute_instance" "jumpbox" {
   network_interface {
     subnetwork = "${google_compute_subnetwork.unmanaged-subnet.name}"
     access_config {
-      # ephemeral IP
+      nat_ip = "${google_compute_address.jumpbox.address}"
     }
   }
 
@@ -40,4 +40,8 @@ resource "google_compute_firewall" "jumpbox-external" {
   }
 
   source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_address" "jumpbox" {
+  name = "${var.env_name}-jumpbox"
 }

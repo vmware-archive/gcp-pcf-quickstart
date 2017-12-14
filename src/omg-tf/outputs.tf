@@ -171,7 +171,7 @@ output "opsman_sql_password" {
 }
 
 output "jumpbox_public_ip" {
-  value = "${google_compute_instance.jumpbox.network_interface.0.access_config.0.assigned_nat_ip}"
+  value = "${google_compute_address.jumpbox.address}"
 }
 
 output "ssl_cert" {
