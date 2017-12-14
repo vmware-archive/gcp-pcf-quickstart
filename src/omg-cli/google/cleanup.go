@@ -39,6 +39,7 @@ type vmFilter struct {
 	tag        string
 	namePrefix string
 	subnet     string
+	labels     map[string]string
 }
 
 func WithTag(tag string) VMFilter {
@@ -47,9 +48,18 @@ func WithTag(tag string) VMFilter {
 	}
 }
 
-func WithNamePrefix(prefix string) VMFilter {
+func WithNameRegex(prefix string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.namePrefix = prefix
+	}
+}
+
+func WithLabel(key, value string) VMFilter {
+	return func(opt *vmFilter) {
+		if opt.labels == nil {
+			opt.labels = make(map[string]string)
+		}
+		opt.labels[key] = value
 	}
 }
 
@@ -101,6 +111,16 @@ func contains(needle string, haystack []string) bool {
 	return false
 }
 
+func mapContains(subset, set map[string]string) bool {
+	for k, v := range subset {
+		if set[k] != v {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
 	listCall := cs.computeService.Instances.AggregatedList(cs.projectId)
 	filter := vmFilter{}
@@ -114,6 +134,10 @@ func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
 		for _, list := range page.Items {
 			for _, instance := range list.Instances {
 				if filter.tag != "" && !contains(filter.tag, instance.Tags.Items) {
+					continue
+				}
+
+				if filter.labels != nil && !mapContains(filter.labels, instance.Labels) {
 					continue
 				}
 

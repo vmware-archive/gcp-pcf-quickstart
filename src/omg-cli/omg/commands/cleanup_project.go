@@ -76,6 +76,7 @@ func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
 		cmd.deleteUpgradedOpsManagers,
 		cmd.deleteErtVMs,
 		cmd.deleteServicesVMs,
+		cmd.deleteDirectorVM,
 	}
 
 	return run(steps)
@@ -86,7 +87,7 @@ func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
 func (cmd *CleanupProjectCommand) deleteUpgradedOpsManagers() error {
 	deleted, err := cmd.cleanupService.DeleteVM(google.WithSubNetwork(cmd.cfg.MgmtSubnetName),
 		google.WithTag(fmt.Sprintf("%s-ops-manager", cmd.envCfg.EnvName)),
-		google.WithNamePrefix(fmt.Sprintf("%s-ops-manager-.*", cmd.envCfg.EnvName)))
+		google.WithNameRegex(fmt.Sprintf("%s-ops-manager-.*", cmd.envCfg.EnvName)))
 	cmd.logger.Printf("deleteUpgradedOpsManagers: deleted %d VMs", deleted)
 
 	return err
@@ -96,7 +97,7 @@ func (cmd *CleanupProjectCommand) deleteUpgradedOpsManagers() error {
 func (cmd *CleanupProjectCommand) deleteErtVMs() error {
 	deleted, err := cmd.cleanupService.DeleteVM(google.WithSubNetwork(cmd.cfg.ErtSubnetName),
 		google.WithTag("p-bosh"),
-		google.WithNamePrefix("vm-.*"))
+		google.WithNameRegex("vm-.*"))
 	cmd.logger.Printf("deleteErtVMs: deleted %d VMs", deleted)
 	return err
 }
@@ -105,7 +106,17 @@ func (cmd *CleanupProjectCommand) deleteErtVMs() error {
 func (cmd *CleanupProjectCommand) deleteServicesVMs() error {
 	deleted, err := cmd.cleanupService.DeleteVM(google.WithSubNetwork(cmd.cfg.ServicesSubnetName),
 		google.WithTag("p-bosh"),
-		google.WithNamePrefix("vm-.*"))
+		google.WithNameRegex("vm-.*"))
 	cmd.logger.Printf("deleteServicesVMs: deleted %d VMs", deleted)
+	return err
+}
+
+// Delete BOSH director VM
+func (cmd *CleanupProjectCommand) deleteDirectorVM() error {
+	deleted, err := cmd.cleanupService.DeleteVM(google.WithSubNetwork(cmd.cfg.MgmtSubnetName),
+		google.WithLabel("job", "bosh"),
+		google.WithNameRegex("vm-.*"))
+	cmd.logger.Printf("deleteDirectorVM: deleted %d VMs", deleted)
+
 	return err
 }
