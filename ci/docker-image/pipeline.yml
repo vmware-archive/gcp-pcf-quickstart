@@ -43,24 +43,25 @@ resources:
   - name: omg-src-in
     type: git
     source: 
-      uri:      {{source_uri}}
-      branch:   {{source_branch}}
-      username: {{source_username}}
-      password: {{source_password}}
-      paths:    [ci/docker-image]
+      uri:         {{source_uri}}
+      branch:      {{source_branch}}
+      username:    {{source_username}}
+      password:    {{source_password}}
+      private_key: {{source_private_key}}
+      paths:       [ci/docker-image]
 
   - name: docker-image-test
     type: docker-image
     source:
-      email: {{docker_hub_email}}
-      username: {{docker_hub_username}}
-      password: {{docker_hub_password}}
+      email:      {{docker_hub_email}}
+      username:   {{docker_hub_username}}
+      password:   {{docker_hub_password}}
       repository: {{docker_hub_test_repo}}
 
   - name: docker-image
     type: docker-image
     source:
-      email: {{docker_hub_email}}
-      username: {{docker_hub_username}}
-      password: {{docker_hub_password}}
+      email:      {{docker_hub_email}}
+      username:   {{docker_hub_username}}
+      password:   {{docker_hub_password}}
       repository: {{docker_hub_repo}}

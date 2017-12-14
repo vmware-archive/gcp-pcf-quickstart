@@ -1,9 +1,10 @@
 ---
-# Source for omg
-source_uri: 
-source_branch: 
-source_username: 
-source_password: 
+# Source for repo
+source_uri:
+source_branch:
+source_username:
+source_password:
+source_private_key:
 
 # Publishing target
 docker_hub_email: 
