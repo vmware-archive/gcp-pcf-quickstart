@@ -64,15 +64,16 @@ set -o allexport
 eval $(omg-cli source-config --env-dir="${ENV_DIR}")
 set +o allexport
 
-if [ -z ${PIVNET_ACCEPT_EULA+x} ]; then
-    omg-cli review-eulas --env-dir="${ENV_DIR}"
-else
-    omg-cli review-eulas --env-dir="${ENV_DIR}" --accept-all
-fi
-
 pushd src/omg-tf
-    # Verify project is ready
+    # Verify all prerequisites are ready. This ensures downloads will succeed from PivNet
+    # and the project we're deploying to is valid.
     if [ ! -f $terraform_config ]; then
+        if [ -z ${PIVNET_ACCEPT_EULA+x} ]; then
+            omg-cli review-eulas --env-dir="${ENV_DIR}"
+        else
+            omg-cli review-eulas --env-dir="${ENV_DIR}" --accept-all
+        fi
+
          omg-cli prepare-project --env-dir="${ENV_DIR}"
         ./init.sh
     fi
