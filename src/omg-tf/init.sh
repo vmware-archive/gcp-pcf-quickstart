@@ -61,37 +61,8 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     exit 1
 fi
 
-#
-# Provision service accounts
-#
-
-ensure_service_account() {
-  name=$1
-  email=$2
-  key_file=$3
-  role=$4
-
-  gcloud iam service-accounts create "${name}" --project ${PROJECT_ID}
-  # Attempting to sleep in between operations to work around:
-  # "Resource in project [..] is the subject of a conflict: There were concurrent policy changes.
-  # Please retry the whole read-modify-write with exponential backoff"
-  sleep 10
-  gcloud iam service-accounts keys create "${key_file}" --iam-account="${email}"
-  sleep 10
-  gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-    --member "serviceAccount:${email}" \
-    --role "${role}"
-  sleep 10
-}
-
 set -e
 seed=$(date +%s)
-
-# Terraform
-terraform_service_account_name=${ENV_NAME}-${seed}-tf
-terraform_service_account_email=${terraform_service_account_name}@${PROJECT_ID}.iam.gserviceaccount.com
-terraform_service_account_file=$(mktemp)
-ensure_service_account "${terraform_service_account_name}" "${terraform_service_account_email}" "${terraform_service_account_file}" "roles/owner"
 
 #
 # Generate SSL/SSH Keys
@@ -134,9 +105,7 @@ ssl_cert_private_key = <<SSL_KEY
 $(cat keys/server.key)
 SSL_KEY
 
-service_account_key = <<SERVICE_ACCOUNT_KEY
-$(cat ${terraform_service_account_file})
-SERVICE_ACCOUNT_KEY
+service_account_key = ""
 
 ssh_public_key = <<SSH_PUBLIC_KEY
 $(cat keys/jumpbox_ssh.pub)
