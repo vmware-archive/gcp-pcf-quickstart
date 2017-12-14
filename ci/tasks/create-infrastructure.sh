@@ -21,7 +21,7 @@ trap rollback ERR
 pushd "${release_dir}/src/omg-tf"
 	terraform init
 	terraform get
-	terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} || terraform apply --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
+	terraform apply --auto-approve --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
 	terraform output -json -state=${terraform_state} > ${terraform_output}
 popd
 

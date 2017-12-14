@@ -31,10 +31,12 @@ resource "google_compute_instance" "ops-manager-internal" {
   create_timeout = 10
   tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
-  disk {
-    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : "${var.env_name}-ops-manager-image"}"
-    size  = 250
-    type  = "pd-ssd"
+  boot_disk {
+    initialize_params {
+      image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : google_compute_image.ops-manager-image.self_link}"
+      size  = 250
+      type  = "pd-ssd"
+    }
   }
 
   network_interface {
@@ -62,10 +64,12 @@ resource "google_compute_instance" "ops-manager-external" {
   create_timeout = 10
   tags           = ["${var.env_name}-ops-manager", "${var.env_name}-ops-manager-external"]
 
-  disk {
-    image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : "${var.env_name}-ops-manager-image"}"
-    size  = 250
-    type  = "pd-ssd"
+  boot_disk {
+    initialize_params {
+      image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : google_compute_image.ops-manager-image.self_link}"
+      size = 250
+      type = "pd-ssd"
+    }
   }
 
   network_interface {

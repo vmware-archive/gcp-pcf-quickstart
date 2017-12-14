@@ -6,9 +6,11 @@ resource "google_compute_instance" "nat" {
   tags           = ["${var.env_name}-nat-external"]
   count          = "${var.nat_instance_count}"
 
-  disk {
-    image = "debian-cloud/debian-8"
-    size  = 10
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-8"
+      size = 10
+    }
   }
 
   network_interface {

@@ -5,10 +5,12 @@ resource "google_compute_instance" "jumpbox" {
   create_timeout = 10
   tags           = ["${var.env_name}-jumpbox-external"]
 
-  disk {
-    image = "ubuntu-os-cloud/ubuntu-1404-lts"
-    size  = 250
-    type  = "pd-ssd"
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-1404-lts"
+      size  = 250
+      type  = "pd-ssd"
+    }
   }
 
   network_interface {

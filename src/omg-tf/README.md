@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-`gcloud` and `terraform` **0.9.11+** is must be installed on your machine.
+`gcloud` and `terraform` **0.11.1+** is must be installed on your machine.
 
 You will need to enable the following Google Cloud APIs:
 - [Identity and Access Management](https://console.developers.google.com/apis/api/iam.googleapis.com)

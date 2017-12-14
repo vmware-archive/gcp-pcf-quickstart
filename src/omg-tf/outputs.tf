@@ -3,11 +3,11 @@ output "ops_manager_dns" {
 }
 
 output "ops_manager_instance_name" {
-  value = "${var.opsman_external_ip != "" ? google_compute_instance.ops-manager-external.name : google_compute_instance.ops-manager-internal.name}"
+  value = "${var.opsman_external_ip != "" ? element(concat(google_compute_instance.ops-manager-external.*.name, list("")), 0) : element(concat(google_compute_instance.ops-manager-internal.*.name, list("")), 0)}"
 }
 
 output "ops_manager_instance_zone" {
-  value = "${var.opsman_external_ip != "" ? google_compute_instance.ops-manager-external.zone : google_compute_instance.ops-manager-internal.zone}"
+  value = "${var.opsman_external_ip != "" ? element(concat(google_compute_instance.ops-manager-external.*.zone, list("")), 0) : element(concat(google_compute_instance.ops-manager-internal.*.zone, list("")), 0)}"
 }
 
 output "sys_domain" {
