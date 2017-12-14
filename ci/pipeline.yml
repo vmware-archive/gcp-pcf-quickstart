@@ -65,6 +65,8 @@ jobs:
         task: create-infrastructure
         file: omg-src-in/ci/tasks/create-infrastructure.yml
         params:
+          google_project: {{google_project}}
+          google_json_key_data: {{google_json_key_data}}
           env_file_name: {{env_file_name}}
       - aggregate:
         - put: omg-env
