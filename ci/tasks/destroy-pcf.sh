@@ -6,7 +6,7 @@ pushd ${my_dir} > /dev/null
 	source utils.sh
 	set_resource_dirs
 	set_gcloud_config
-    extract_env
+  extract_env
 popd > /dev/null
 
 go install omg-cli

@@ -6,7 +6,8 @@ my_dir="$( cd $(dirname $0) && pwd )"
 pushd ${my_dir} > /dev/null
 	source utils.sh
 	set_resource_dirs
-    extract_env
+  set_gcloud_config
+  extract_env
 popd > /dev/null
 
 trap save_terraform_state EXIT
