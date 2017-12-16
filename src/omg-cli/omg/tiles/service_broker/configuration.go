@@ -79,7 +79,7 @@ type SpannerPlan struct {
 	NodeCount   string `json:"num_nodes"`
 }
 
-func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ import (
 )
 
 type TileInstaller interface {
-	Definition() config.Tile
-	Configure(cfg *config.Config, om *ops_manager.Sdk) error
+	Definition(envConfig *config.EnvConfig) config.Tile
+	Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error
 	BuiltIn() bool
 }

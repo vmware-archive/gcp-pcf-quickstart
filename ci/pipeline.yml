@@ -38,6 +38,7 @@ jobs:
 
   - name: generate-env
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
@@ -57,6 +58,7 @@ jobs:
 
   - name: create-infrastructure
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [generate-env], get: omg-src-in, resource: omg-src-in}
@@ -74,6 +76,7 @@ jobs:
 
   - name: push-tiles
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
@@ -93,6 +96,7 @@ jobs:
 
   - name: deploy-pcf
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [push-tiles], get: omg-src-in, resource: omg-src-in}
@@ -115,6 +119,7 @@ jobs:
 
   - name: run-certification
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [deploy-pcf], get: omg-src-in, resource: omg-src-in}
@@ -131,6 +136,7 @@ jobs:
 
   - name: destroy-pcf
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [run-certification], get: omg-src-in, resource: omg-src-in}
@@ -141,6 +147,7 @@ jobs:
 
   - name: destroy-infrastructure
     serial: true
+    serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [destroy-pcf], get: omg-src-in, resource: omg-src-in}

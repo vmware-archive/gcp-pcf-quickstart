@@ -24,6 +24,8 @@ import (
 	"omg-cli/config"
 	"omg-cli/google"
 
+	"sync"
+
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
 	compute "google.golang.org/api/compute/v1"
@@ -74,12 +76,41 @@ func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
 
 	steps := []step{
 		cmd.deleteUpgradedOpsManagers,
+		cmd.deleteDirectorVM,
 		cmd.deleteErtVMs,
 		cmd.deleteServicesVMs,
-		cmd.deleteDirectorVM,
 	}
 
-	return run(steps)
+	return runAsync(steps)
+}
+
+func runAsync(steps []step) error {
+	wg := sync.WaitGroup{}
+
+	var errors []error
+	var errsMu sync.Mutex
+
+	for _, step := range steps {
+		step := step
+		wg.Add(1)
+		go func() {
+			if err := step(); err != nil {
+				fmt.Printf("error running step: %v", err)
+
+				errsMu.Lock()
+				errors = append(errors, err)
+				errsMu.Unlock()
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	if len(errors) != 0 {
+		return fmt.Errorf("errors running steps: %v", errors)
+	} else {
+		return nil
+	}
 }
 
 // Delete Ops Manager VMs created by the C0 Pipeline

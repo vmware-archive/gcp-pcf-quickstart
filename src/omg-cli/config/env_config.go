@@ -35,17 +35,19 @@ type EnvConfig struct {
 	Zone1          string
 	Zone2          string
 	Zone3          string
+	SmallFootprint bool
 }
 
 func DefaultEnvConfig() (*EnvConfig, error) {
 	c := &EnvConfig{
-		DnsZoneName:  "pcf-zone",
-		BaseImageURL: "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.12.5.tar.gz",
-		EnvName:      "pcf",
-		Region:       "us-east1",
-		Zone1:        "us-east1-b",
-		Zone2:        "us-east1-c",
-		Zone3:        "us-east1-d",
+		DnsZoneName:    "pcf-zone",
+		BaseImageURL:   "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.12.5.tar.gz",
+		EnvName:        "pcf",
+		Region:         "us-east1",
+		Zone1:          "us-east1-b",
+		Zone2:          "us-east1-c",
+		Zone3:          "us-east1-d",
+		SmallFootprint: true,
 	}
 
 	projectId, err := exec.Command("gcloud", "config", "get-value", "project").Output()

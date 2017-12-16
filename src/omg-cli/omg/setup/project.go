@@ -117,16 +117,21 @@ func ProjectQuotaRequirements() []google.Quota {
 }
 
 func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota {
-	return map[string][]google.Quota{
-		cfg.Region: {
-			{"CPUS", 200.0},
-			{"DISKS_TOTAL_GB", 2000.0},
-			{"STATIC_ADDRESSES", 5.0},
-			{"IN_USE_ADDRESSES", 6.0},
-			{"INSTANCE_GROUPS", 10.0},
-			{"INSTANCES", 100.0},
-		},
+	quotas := []google.Quota{
+		{"DISKS_TOTAL_GB", 2000.0},
+		{"STATIC_ADDRESSES", 5.0},
+		{"IN_USE_ADDRESSES", 6.0},
+		{"INSTANCE_GROUPS", 10.0},
+		{"INSTANCES", 100.0},
 	}
+
+	if cfg.SmallFootprint {
+		quotas = append(quotas, google.Quota{"CPUS", 24.0})
+	} else {
+		quotas = append(quotas, google.Quota{"CPUS", 200.0})
+	}
+
+	return map[string][]google.Quota{cfg.Region: quotas}
 }
 
 func RequiredAPIs() []google.API {

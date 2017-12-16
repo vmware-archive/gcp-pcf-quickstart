@@ -74,7 +74,7 @@ pushd src/omg-tf
             omg-cli review-eulas --env-dir="${ENV_DIR}" --accept-all
         fi
 
-         omg-cli prepare-project --env-dir="${ENV_DIR}"
+        omg-cli prepare-project --env-dir="${ENV_DIR}"
         ./init.sh
     fi
 

@@ -45,12 +45,17 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
+	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
 	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, nil, cmd.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, selectedTiles)
 
 	steps := []step{
 		opsMan.PoolTillOnline,

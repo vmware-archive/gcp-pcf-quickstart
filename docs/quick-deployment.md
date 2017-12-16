@@ -22,6 +22,11 @@ export PIVNET_API_TOKEN=<Look for 'API TOKEN' at https://network.pivotal.io/user
 ./deploy_pcf.sh
 ```
 
+The script will output a default set of configurations that can not be
+changed after deployment. At this time you can make the 
+decision to deploy the full Elastic Runtime by editing `env/pcf/config.json`
+and setting `SmallFootprint` to `false`. 
+
 ### Deployment Stages
 
 The installation will perform the following steps:

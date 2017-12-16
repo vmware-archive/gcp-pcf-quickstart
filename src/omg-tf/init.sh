@@ -61,6 +61,9 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     exit 1
 fi
 
+export NAT_INSTANCE_COUNT=3
+[ "${SMALL_FOOTPRINT}" == "true" ] && export NAT_INSTANCE_COUNT=1
+
 set -e
 seed=$(date +%s)
 
@@ -110,4 +113,6 @@ service_account_key = ""
 ssh_public_key = <<SSH_PUBLIC_KEY
 $(cat keys/jumpbox_ssh.pub)
 SSH_PUBLIC_KEY
+
+nat_instance_count = ${NAT_INSTANCE_COUNT}
 VARS_FILE

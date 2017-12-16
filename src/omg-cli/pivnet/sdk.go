@@ -104,7 +104,7 @@ func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (file *os.File, err error
 }
 
 func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
-	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.VersionId, tile.FileId), nil)
+	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.ReleaseId, tile.FileId), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
-	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", tile.Name, tile.VersionId), nil)
+	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", tile.Name, tile.ReleaseId), nil)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.VersionId, resp.Status)
+		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
 	}
 
 	return nil

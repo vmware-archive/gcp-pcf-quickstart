@@ -21,11 +21,12 @@ import (
 
 	"omg-cli/omg/tiles"
 	"omg-cli/omg/tiles/ert"
-	"omg-cli/omg/tiles/gcp_director"
 	"omg-cli/omg/tiles/service_broker"
 	"omg-cli/omg/tiles/stackdriver_nozzle"
 
 	"fmt"
+
+	"omg-cli/omg/tiles/gcp_director"
 
 	"github.com/alecthomas/kingpin"
 )

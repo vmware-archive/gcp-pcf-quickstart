@@ -31,10 +31,10 @@ const (
 	metadataService = "169.254.169.254"
 )
 
-func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	networks, networkAssignment := networkCfg(cfg)
 
-	return om.SetupBosh(gcp(cfg), director(cfg), avalibilityZones(cfg), networks, networkAssignment, resources())
+	return om.SetupBosh(gcp(cfg), director(cfg), avalibilityZones(cfg), networks, networkAssignment, resources(envConfig))
 }
 
 func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNetwork bool) commands.NetworkConfiguration {
@@ -102,8 +102,9 @@ func director(cfg *config.Config) (director commands.DirectorConfiguration) {
 	return
 }
 
-func resources() commands.ResourceConfiguration {
+func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
 	f := false
+
 	return commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
 			InternetConnected: &f,

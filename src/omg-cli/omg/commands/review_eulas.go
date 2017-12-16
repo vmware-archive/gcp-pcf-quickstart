@@ -32,6 +32,7 @@ import (
 type ReviewEulasCommand struct {
 	logger    *log.Logger
 	envDir    string
+	envConfig *config.EnvConfig
 	acceptAll bool
 	pivnetSdk *pivnet.Sdk
 }
@@ -47,12 +48,13 @@ func (cmd *ReviewEulasCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	var err error
+	cmd.envConfig, err = config.ConfigFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}
 
-	cmd.pivnetSdk, err = pivnet.NewSdk(cfg.PivnetApiToken, cmd.logger)
+	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetApiToken, cmd.logger)
 	if err != nil {
 		return err
 	}
@@ -100,7 +102,7 @@ func (cmd *ReviewEulasCommand) acceptEulas() error {
 			continue
 		}
 
-		tile := installer.Definition()
+		tile := installer.Definition(cmd.envConfig)
 
 		tileData = append(tileData, tile.Pivnet)
 		if tile.Stemcell != nil {

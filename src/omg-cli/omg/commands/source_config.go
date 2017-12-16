@@ -64,13 +64,13 @@ func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	flattened := map[string]string{}
+	flattened := map[string]interface{}{}
 	if err = json.Unmarshal(cfgBytes, &flattened); err != nil {
 		return err
 	}
 
 	for key, value := range flattened {
-		cmd.logger.Printf(`%s="%s"`, nameToEnv(key), value)
+		cmd.logger.Printf(`%s="%v"`, nameToEnv(key), value)
 	}
 
 	return nil

@@ -82,7 +82,7 @@ type Properties struct {
 	MySqlMonitorRecipientEmail tiles.Value `json:".mysql_monitor.recipient_email"`
 }
 
-type Resources struct {
+type LargeFootprintResources struct {
 	TcpRouter                    tiles.Resource `json:"tcp_router"`
 	Router                       tiles.Resource `json:"router"`
 	DiegoBrain                   tiles.Resource `json:"diego_brain"`
@@ -117,8 +117,33 @@ type Resources struct {
 	MysqlRejoinUnsafe            tiles.Resource `json:"mysql-rejoin-unsafe"`
 }
 
-func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
-	if err := om.StageProduct(tile.Product); err != nil {
+type SmallFootprintResources struct {
+	TcpRouter tiles.Resource `json:"tcp_router"`
+	Router    tiles.Resource `json:"router"`
+
+	Database    tiles.Resource `json:"database"`
+	Control     tiles.Resource `json:"control"`
+	Compute     tiles.Resource `json:"compute"`
+	FileStorage tiles.Resource `json:"blobstore"`
+
+	HaProxy                   tiles.Resource `json:"ha_proxy"`
+	BackupPrepare             tiles.Resource `json:"backup-prepare"`
+	MysqlMonitor              tiles.Resource `json:"mysql_monitor"`
+	SmokeTests                tiles.Resource `json:"smoke-tests"`
+	PushAppsManager           tiles.Resource `json:"push-apps-manager"`
+	Notifications             tiles.Resource `json:"notifications"`
+	NotificationsUi           tiles.Resource `json:"notifications-ui"`
+	PushPivotalAccount        tiles.Resource `json:"push-pivotal-account"`
+	PushUsageService          tiles.Resource `json:"push-usage-service"`
+	Autoscaling               tiles.Resource `json:"autoscaling"`
+	AutoscalingRegisterBroker tiles.Resource `json:"autoscaling-register-broker"`
+	Nfsbrokerpush             tiles.Resource `json:"nfsbrokerpush"`
+	Bootstrap                 tiles.Resource `json:"bootstrap"`
+	MysqlRejoinUnsafe         tiles.Resource `json:"mysql-rejoin-unsafe"`
+}
+
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
+	if err := om.StageProduct(product); err != nil {
 		return err
 	}
 
@@ -184,28 +209,58 @@ func (*Tile) Configure(cfg *config.Config, om *ops_manager.Sdk) error {
 		return err
 	}
 
-	resoruces := Resources{
-		TcpRouter: tiles.Resource{
-			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
-			InternetConnected: false,
-			Instances:         3,
-		},
-		Router: tiles.Resource{
-			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
-			InternetConnected: false,
-		},
-		DiegoBrain: tiles.Resource{
-			RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
-			InternetConnected: false,
-		},
-		HaProxy: tiles.Resource{
-			Instances: 0,
-		},
+	resorucesBytes := []byte{}
+
+	if envConfig.SmallFootprint {
+		resoruces := SmallFootprintResources{
+			TcpRouter: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
+				InternetConnected: false,
+				Instances:         1,
+			},
+			Router: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+				InternetConnected: false,
+			},
+			Control: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
+				InternetConnected: false,
+			},
+			HaProxy: tiles.Resource{
+				Instances: 0,
+			},
+			MysqlMonitor: tiles.Resource{
+				Instances: 0,
+			},
+		}
+		resorucesBytes, err = json.Marshal(&resoruces)
+	} else {
+		resoruces := LargeFootprintResources{
+			TcpRouter: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
+				InternetConnected: false,
+				Instances:         1,
+			},
+			Router: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+				InternetConnected: false,
+			},
+			DiegoBrain: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
+				InternetConnected: false,
+			},
+			HaProxy: tiles.Resource{
+				Instances: 0,
+			},
+			MysqlMonitor: tiles.Resource{
+				Instances: 0,
+			},
+		}
+		resorucesBytes, err = json.Marshal(&resoruces)
 	}
-	resorucesBytes, err := json.Marshal(&resoruces)
+
 	if err != nil {
 		return err
 	}
-
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
+	return om.ConfigureProduct(product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
 }

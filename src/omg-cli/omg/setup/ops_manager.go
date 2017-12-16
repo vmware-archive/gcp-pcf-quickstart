@@ -32,14 +32,15 @@ import (
 
 type OpsManager struct {
 	cfg    *config.Config
+	envCfg *config.EnvConfig
 	om     *ops_manager.Sdk
 	pivnet *pivnet.Sdk
 	logger *log.Logger
 	tiles  []tiles.TileInstaller
 }
 
-func NewService(cfg *config.Config, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *OpsManager {
-	return &OpsManager{cfg, omSdk, pivnetSdk, logger, tiles}
+func NewService(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *OpsManager {
+	return &OpsManager{cfg, envCfg, omSdk, pivnetSdk, logger, tiles}
 }
 
 func (s *OpsManager) SetupAuth() error {
@@ -139,8 +140,8 @@ func (s *OpsManager) PoolTillOnline() error {
 
 func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
-		s.logger.Printf("configuring tile: %s", t.Definition().Product.Name)
-		if err := t.Configure(s.cfg, s.om); err != nil {
+		s.logger.Printf("configuring tile: %s", t.Definition(s.envCfg).Product.Name)
+		if err := t.Configure(s.envCfg, s.cfg, s.om); err != nil {
 			return err
 		}
 	}
@@ -154,11 +155,11 @@ func (s *OpsManager) UploadTiles() error {
 			continue
 		}
 
-		if err := s.ensureProductReady(t.Definition()); err != nil {
+		if err := s.ensureProductReady(t.Definition(s.envCfg)); err != nil {
 			return err
 		}
 
-		if stemcell := t.Definition().Stemcell; stemcell != nil {
+		if stemcell := t.Definition(s.envCfg).Stemcell; stemcell != nil {
 			if err := s.uploadStemcell(*stemcell); err != nil {
 				return err
 			}

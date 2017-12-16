@@ -45,7 +45,7 @@ type Tile struct {
 	Logger *log.Logger
 }
 
-func (*Tile) Definition() config.Tile {
+func (*Tile) Definition(*config.EnvConfig) config.Tile {
 	return tile
 }
 

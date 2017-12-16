@@ -61,7 +61,7 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, omSdk, pivnetSdk, cmd.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, selectedTiles)
 
 	return run([]step{
 		opsMan.PoolTillOnline,

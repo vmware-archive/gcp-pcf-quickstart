@@ -42,7 +42,7 @@ variable "opsman_external_ip" {
 
 variable "jumpbox_machine_type" {
   type    = "string"
-  default = "n1-standard-2"
+  default = "n1-standard-1"
 }
 
 variable "nat_machine_type" {
