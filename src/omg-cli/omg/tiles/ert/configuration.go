@@ -252,9 +252,6 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			HaProxy: tiles.Resource{
 				Instances: 0,
 			},
-			MysqlMonitor: tiles.Resource{
-				Instances: 0,
-			},
 		}
 		resorucesBytes, err = json.Marshal(&resoruces)
 	}
