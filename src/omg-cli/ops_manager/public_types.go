@@ -52,3 +52,8 @@ type Resource struct {
 	Instances         interface{} `json:"instances,omitempty"`
 	InternetConnected bool        `json:"internet_connected"`
 }
+
+type StaticIP struct {
+	Name string   `json:"name"`
+	IPs  []string `json:"ips"`
+}

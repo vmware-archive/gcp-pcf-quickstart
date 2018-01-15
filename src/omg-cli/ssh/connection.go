@@ -89,6 +89,17 @@ func (c *Connection) UploadFile(path, destName string) error {
 	return scp.CopyPath(path, fmt.Sprintf("~/%s", destName), ses)
 }
 
+func (c *Connection) Mkdir(path string) error {
+	ses, err := c.client.NewSession()
+	if err != nil {
+		return fmt.Errorf("mkdir: %v", err)
+	}
+	defer ses.Close()
+
+	c.logger.Printf("mkdir -p ~/%q", path)
+	return ses.Run(fmt.Sprintf("mkdir -p ~/%q", path))
+}
+
 func (c *Connection) RunCommand(cmd string) error {
 	ses, err := c.client.NewSession()
 	if err != nil {

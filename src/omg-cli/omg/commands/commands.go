@@ -54,6 +54,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&SourceConfigCommand{logger: logger},
 		&ReviewEulasCommand{logger: logger},
 		&CleanupProjectCommand{logger: logger},
+		&DirectorSSHCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
