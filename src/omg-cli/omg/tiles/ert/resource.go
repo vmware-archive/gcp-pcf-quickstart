@@ -49,10 +49,10 @@ var product = config.OpsManagerMetadata{
 
 var stemcell = config.StemcellMetadata{
 	config.PivnetMetadata{"stemcells",
-		"9610",
-		"37837",
-		"6c44e71b4eabc9665bcaa5db753a7ddaba909383a8c07001bef78882b42e8784"},
-	"light-bosh-stemcell-3445.19-google-kvm-ubuntu-trusty-go_agent",
+		"28002",
+		"58592",
+		"fa6f3b8fe7e64987b628b17812989524550fea45a297fb7ead469c72d10f3b87"},
+	"light-bosh-stemcell-3445.22-google-kvm-ubuntu-trusty-go_agent",
 }
 
 type Tile struct{}
