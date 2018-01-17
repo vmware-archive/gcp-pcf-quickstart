@@ -10,5 +10,7 @@ pushd ${my_dir} > /dev/null
 popd > /dev/null
 
 pushd ${omg_dir}
+    [ $(cat ${env_dir}/config.json | jq .SmallFootprint) == "true" ] && echo "Skipping certification test on Small Footprint" && exit 0
+
 	ENV_DIR=${env_dir} ginkgo -r certification
 popd
