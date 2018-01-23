@@ -101,12 +101,20 @@ func (jb *Jumpbox) UploadDependencies() error {
 	type plan struct {
 		local, dest string
 	}
-	files := []plan{{rebuilt.Name(), packageName}}
+	files := []plan{
+		// Upload the omg-cli binary to be run remotely.
+		{rebuilt.Name(), packageName},
+		// Upload the jumpbox public SSH key for director-ssh cmd.
+		{filepath.Join(jb.envDir, "keys", "jumpbox_ssh.pub"), "keys/jumpbox_ssh.pub"},
+	}
 
 	for _, f := range config.ConfigFiles {
 		files = append(files, plan{filepath.Join(jb.envDir, f), f})
 	}
 
+	if err := jb.session.Mkdir("keys"); err != nil {
+		return err
+	}
 	for _, f := range files {
 		if err := jb.session.UploadFile(f.local, f.dest); err != nil {
 			return fmt.Errorf("uploading file %s: %v", f.local, err)

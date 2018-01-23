@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -417,8 +418,15 @@ func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error
 	if err != nil {
 		return nil, err
 	}
+	return om.getCredential(fmt.Sprintf("api/v0/deployed/products/%s/credentials/%s", productGuid, credential))
+}
 
-	body, err := om.curl(fmt.Sprintf("api/v0/deployed/products/%s/credentials/%s", productGuid, credential), http.MethodGet, nil)
+func (om *Sdk) GetDirectorCredentials(credential string) (*SimpleCredential, error) {
+	return om.getCredential(fmt.Sprintf("api/v0/deployed/director/credentials/%s", credential))
+}
+
+func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
+	body, err := om.curl(path, http.MethodGet, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -433,6 +441,27 @@ func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error
 	}
 
 	return &resp.Credential.Value, nil
+}
+
+func (om *Sdk) GetDirectorIP() (string, error) {
+	boshGuid, err := om.productGuidByType("p-bosh")
+	if err != nil {
+		return "", err
+	}
+	body, err := om.curl(fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGuid), http.MethodGet, nil)
+	if err != nil {
+		return "", err
+	}
+	var boshIPs []StaticIP
+	if err := json.Unmarshal(body, &boshIPs); err != nil {
+		return "", fmt.Errorf("malformed static_ips response: %s", string(body))
+	}
+	for _, ip := range boshIPs {
+		if strings.HasPrefix(ip.Name, "director") {
+			return ip.IPs[0], nil
+		}
+	}
+	return "", errors.New("static_ips response had no director job")
 }
 
 func (om *Sdk) DeleteInstallation() error {
