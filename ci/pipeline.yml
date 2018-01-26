@@ -6,11 +6,9 @@ groups:
     - prepare-project
     - generate-env
     - create-infrastructure
-    - push-tiles
     - deploy-pcf
     - run-certification
-    - destroy-pcf
-    - destroy-infrastructure
+    - destroy-all
     - promote-candidate-major
     - promote-candidate-minor
     - promote-candidate-patch
@@ -27,7 +25,7 @@ jobs:
   - name: prepare-project
     plan:
       - aggregate:
-        - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, get: omg-src-in, resource: omg-src-in}
 
       - task: prepare-project
         file: omg-src-in/ci/tasks/prepare-project.yml
@@ -41,7 +39,7 @@ jobs:
     serial_groups: [gcp-project]
     plan:
       - aggregate:
-        - {trigger: true, passed: [run-unit], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, get: omg-src-in, resource: omg-src-in}
 
       - aggregate: 
         task: generate-env
@@ -61,7 +59,7 @@ jobs:
     serial_groups: [gcp-project]
     plan:
       - aggregate:
-        - {trigger: true, passed: [generate-env], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [run-unit],     get: omg-src-in, resource: omg-src-in}
         - {trigger: true, passed: [generate-env], get: omg-env, resource: omg-env}
       - aggregate: 
         task: create-infrastructure
@@ -70,52 +68,42 @@ jobs:
           google_project: {{google_project}}
           google_json_key_data: {{google_json_key_data}}
           env_file_name: {{env_file_name}}
-      - aggregate:
-        - put: omg-env
-          params: {file: omg-env/*.tgz}
-
-  - name: push-tiles
-    serial: true
-    serial_groups: [gcp-project]
-    plan:
-      - aggregate:
-        - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
-        - {trigger: true, passed: [create-infrastructure], get: omg-env, resource: omg-env}
-      - aggregate: 
-        task: push-tiles
-        file: omg-src-in/ci/tasks/push-tiles.yml
-        params:
-          env_file_name: {{env_file_name}}
-        on_failure: &destroy_infrastructure
-          task: destroy-infrastructure
-          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
-          params:
-            google_project: {{google_project}}
-            google_json_key_data: {{google_json_key_data}}
-            env_file_name: {{env_file_name}}
+      - put: omg-env
+        params: {file: omg-env/*.tgz}
 
   - name: deploy-pcf
     serial: true
     serial_groups: [gcp-project]
     plan:
       - aggregate:
-        - {trigger: true, passed: [push-tiles], get: omg-src-in, resource: omg-src-in}
-        - {trigger: true, passed: [push-tiles], get: omg-env, resource: omg-env}
-      - aggregate: 
-        task: deploy-pcf
-        file: omg-src-in/ci/tasks/deploy-pcf.yml
-        params:
-          env_file_name: {{env_file_name}}
-        on_failure:
-          aggregate:
-          - &destroy_pcf
-            task: destroy-pcf
-            file: omg-src-in/ci/tasks/destroy-pcf.yml
+        - {trigger: true, passed: [create-infrastructure], get: omg-src-in, resource: omg-src-in}
+        - {trigger: true, passed: [create-infrastructure], get: omg-env, resource: omg-env}
+      - do:
+        - task: push-tiles
+          file: omg-src-in/ci/tasks/push-tiles.yml
+          params:
+            env_file_name: {{env_file_name}}
+          on_failure: &destroy_infrastructure
+            task: destroy-infrastructure
+            file: omg-src-in/ci/tasks/destroy-infrastructure.yml
             params:
               google_project: {{google_project}}
               google_json_key_data: {{google_json_key_data}}
               env_file_name: {{env_file_name}}
-          - *destroy_infrastructure
+        - task: deploy-pcf
+          file: omg-src-in/ci/tasks/deploy-pcf.yml
+          params:
+            env_file_name: {{env_file_name}}
+          on_failure:
+            do:
+            - &destroy_pcf
+              task: destroy-pcf
+              file: omg-src-in/ci/tasks/destroy-pcf.yml
+              params:
+                google_project: {{google_project}}
+                google_json_key_data: {{google_json_key_data}}
+                env_file_name: {{env_file_name}}
+            - *destroy_infrastructure
 
   - name: run-certification
     serial: true
@@ -130,37 +118,27 @@ jobs:
         params:
           env_file_name: {{env_file_name}}
         on_failure:
-          aggregate:
+          do: &destroy_all
            - *destroy_pcf
            - *destroy_infrastructure
 
-  - name: destroy-pcf
+  - name: destroy-all
     serial: true
     serial_groups: [gcp-project]
     plan:
       - aggregate:
         - {trigger: true, passed: [run-certification], get: omg-src-in, resource: omg-src-in}
         - {trigger: true, passed: [run-certification], get: omg-env, resource: omg-env}
-      - aggregate:
-        - *destroy_pcf
-        on_failure: *destroy_infrastructure
-
-  - name: destroy-infrastructure
-    serial: true
-    serial_groups: [gcp-project]
-    plan:
-      - aggregate:
-        - {trigger: true, passed: [destroy-pcf], get: omg-src-in, resource: omg-src-in}
-        - {trigger: true, passed: [destroy-pcf], get: omg-env, resource: omg-env}
-      - aggregate:
-        - *destroy_infrastructure
+      - do: *destroy_all
+        on_failure:
+          do: *destroy_all
 
   - name: promote-candidate-major
     serial: true
     plan:
       - aggregate:
-        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
-        - {trigger: false,                                   get: release-version-semver, params: {bump: major}}
+        - {trigger: false, passed: [destroy-all], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                        get: release-version-semver, params: {bump: major}}
       - do: &promote_candidate
         - task: promote
           file: omg-src-in/ci/tasks/promote-candidate.yml
@@ -175,16 +153,16 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
-        - {trigger: false,                                   get: release-version-semver, params: {bump: minor}}
+        - {trigger: false, passed: [destroy-all], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                        get: release-version-semver, params: {bump: minor}}
       - do: *promote_candidate
 
   - name: promote-candidate-patch
     serial: true
     plan:
       - aggregate:
-        - {trigger: false, passed: [destroy-infrastructure], get: omg-src-in, resource: omg-src-in}
-        - {trigger: false,                                   get: release-version-semver, params: {bump: patch}}
+        - {trigger: false, passed: [destroy-all], get: omg-src-in, resource: omg-src-in}
+        - {trigger: false,                        get: release-version-semver, params: {bump: patch}}
       - do: *promote_candidate
 
 resources:
