@@ -17,5 +17,5 @@
 
 package version
 
-const semver = "1.0.0"
-const revision = "3443f96"
+const semver = "1.1.0"
+const revision = "4564db3"
