@@ -103,14 +103,25 @@ func director(cfg *config.Config) (director commands.DirectorConfiguration) {
 }
 
 func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
-	f := false
+	var instanceCount *int
+	var instanceType commands.CompilationInstanceType
 
+	if envConfig.SmallFootprint {
+		one := 1
+		instanceCount = &one
+		small := "small"
+		instanceType.ID = &small
+	}
+
+	f := false
 	return commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
 			InternetConnected: &f,
 		},
 		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
-			InternetConnected: &f,
+			Instances:               instanceCount,
+			CompilationInstanceType: instanceType,
+			InternetConnected:       &f,
 		},
 	}
 }
