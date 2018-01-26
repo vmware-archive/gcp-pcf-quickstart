@@ -161,5 +161,5 @@ variable "iso_seg_ssl_cert_private_key" {
  *****************************/
 variable "service_broker_sql_db_tier" {
   type    = "string"
-  default = "D0"
+  default = "db-f1-micro"
 }
