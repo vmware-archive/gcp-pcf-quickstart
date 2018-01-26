@@ -10,7 +10,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y -qq update && apt-get -y -qq insta
   wget \
   curl \
   dnsutils \
-  unzip
+  unzip \
+  jq
 
 WORKDIR /tmp/docker-build
 

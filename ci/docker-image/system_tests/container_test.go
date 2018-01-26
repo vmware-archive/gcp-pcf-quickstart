@@ -29,6 +29,7 @@ var _ = Describe("Docker Image", func() {
 	commands := map[string][]string{
 		"gcloud":    []string{"--version"},
 		"gsutil":    []string{"--version"},
+		"jq":        []string{"--version"},
 		"ginkgo":    []string{"help"},
 		"go":        []string{"version"},
 		"dig":       []string{"-h"},
