@@ -213,6 +213,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 
 	zero := 0
 	one := 1
+	three := 3
 	if envConfig.SmallFootprint {
 		resoruces := SmallFootprintResources{
 			TcpRouter: tiles.Resource{
@@ -237,7 +238,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			TcpRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 				InternetConnected: false,
-				Instances:         &one,
+				Instances:         &three,
 			},
 			Router: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
