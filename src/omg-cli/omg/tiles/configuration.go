@@ -73,7 +73,7 @@ type CertificateValue struct {
 
 type Resource struct {
 	RouterNames       []string `json:"elb_names,omitempty"`
-	Instances         int      `json:"instances,omitempty"`
+	Instances         *int     `json:"instances,omitempty"`
 	InternetConnected bool     `json:"internet_connected"`
 	VmTypeId          string   `json:"vm_type_id,omitempty"`
 }

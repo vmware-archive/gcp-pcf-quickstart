@@ -73,7 +73,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		StackdriverNozzle: tiles.Resource{
 			InternetConnected: false,
 			VmTypeId:          vmType,
-			Instances:         vmCount,
+			Instances:         &vmCount,
 		},
 	}
 	resorucesBytes, err := json.Marshal(&resoruces)

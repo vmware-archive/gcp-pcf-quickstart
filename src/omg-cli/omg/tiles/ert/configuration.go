@@ -211,12 +211,14 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 
 	resorucesBytes := []byte{}
 
+	zero := 0
+	one := 1
 	if envConfig.SmallFootprint {
 		resoruces := SmallFootprintResources{
 			TcpRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 				InternetConnected: false,
-				Instances:         1,
+				Instances:         &one,
 			},
 			Router: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
@@ -226,12 +228,8 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
 				InternetConnected: false,
 			},
-			HaProxy: tiles.Resource{
-				Instances: 0,
-			},
-			MysqlMonitor: tiles.Resource{
-				Instances: 0,
-			},
+			HaProxy:      tiles.Resource{Instances: &zero},
+			MysqlMonitor: tiles.Resource{Instances: &zero},
 		}
 		resorucesBytes, err = json.Marshal(&resoruces)
 	} else {
@@ -239,7 +237,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			TcpRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 				InternetConnected: false,
-				Instances:         1,
+				Instances:         &one,
 			},
 			Router: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
@@ -249,9 +247,10 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
 				InternetConnected: false,
 			},
-			HaProxy: tiles.Resource{
-				Instances: 0,
-			},
+			HaProxy:      tiles.Resource{Instances: &zero},
+			MysqlProxy:   tiles.Resource{Instances: &zero},
+			Mysql:        tiles.Resource{Instances: &zero},
+			MysqlMonitor: tiles.Resource{Instances: &zero},
 		}
 		resorucesBytes, err = json.Marshal(&resoruces)
 	}
