@@ -44,5 +44,5 @@ fi
 omg-cli cleanup-project --env-dir ${ENV_DIR} --no-dry-run
 
 pushd src/omg-tf
-    yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} && rm -r ${ENV_DIR}
+    terraform destroy -force --parallelism=100 -state=${terraform_state} -var-file=${terraform_config} && rm -r ${ENV_DIR}
 popd
