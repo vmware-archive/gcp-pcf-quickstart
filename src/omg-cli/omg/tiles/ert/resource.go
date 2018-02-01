@@ -23,9 +23,9 @@ import (
 var fullRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"28181",
-		"58794",
-		"e7d3d2826f11d0e5d1a42c92d1fb41e7842ca1921ccebff7f1e56defb330b08d",
+		"32638",
+		"63742",
+		"6567cf2d85ed38c0486fc2acbca5c1dd5fe24382f685972a0387dd984976c7d8",
 	},
 	product,
 	&stemcell,
@@ -34,9 +34,9 @@ var fullRuntime = config.Tile{
 var smallRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"28181",
-		"58801",
-		"2ab0cb6959933332fc44cca452f1dd1a35461f4c181cc16c54aae2392c177424",
+		"32638",
+		"63747",
+		"c29c848cb6b2019afb2050c2a248f18369a4b7834f34a3ebf50e11b9c4f4358e",
 	},
 	product,
 	&stemcell,
@@ -44,7 +44,7 @@ var smallRuntime = config.Tile{
 
 var product = config.OpsManagerMetadata{
 	"cf",
-	"1.12.11",
+	"2.0.3",
 }
 
 var stemcell = config.StemcellMetadata{

@@ -32,13 +32,23 @@ type Network struct {
 	SingletonAvalibilityZone AvalibilityZone   `json:"singleton_availability_zone"`
 	OtherAvailabilityZones   []AvalibilityZone `json:"other_availability_zones"`
 	Network                  NetworkName       `json:"network"`
+	ODBNetwork               NetworkName       `json:"service_network"`
 }
 
 func NetworkConfig(subnetName string, cfg *config.Config) Network {
 	return Network{
-		AvalibilityZone{cfg.Zone1},
-		[]AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
-		NetworkName{subnetName},
+		SingletonAvalibilityZone: AvalibilityZone{cfg.Zone1},
+		OtherAvailabilityZones:   []AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
+		Network:                  NetworkName{subnetName},
+	}
+}
+
+func NetworkODBConfig(subnetName string, cfg *config.Config, odbNetworkName string) Network {
+	return Network{
+		SingletonAvalibilityZone: AvalibilityZone{cfg.Zone1},
+		OtherAvailabilityZones:   []AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
+		Network:                  NetworkName{subnetName},
+		ODBNetwork:               NetworkName{odbNetworkName},
 	}
 }
 
@@ -67,8 +77,29 @@ type Certificate struct {
 	PrivateKey string `json:"private_key_pem"`
 }
 
+type CertificateConstruct struct {
+	Certificate Certificate `json:"certificate"`
+	Name        string      `json:"name"`
+}
+
 type CertificateValue struct {
+	Value []CertificateConstruct `json:"value"`
+}
+
+type OldCertificateValue struct {
 	Value Certificate `json:"value"`
+}
+
+type KeyStruct struct {
+	Secret string `json:"secret"`
+}
+type EncryptionKey struct {
+	Name    string    `json:"name"`
+	Key     KeyStruct `json:"key"`
+	Primary bool      `json:"primary"`
+}
+type EncryptionKeyValue struct {
+	Value []EncryptionKey `json:"value"`
 }
 
 type Resource struct {

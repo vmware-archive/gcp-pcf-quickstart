@@ -66,6 +66,7 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	if cmd.applyChanges {
+		steps = append(steps, opsMan.ApplyDirector)
 		steps = append(steps, opsMan.ApplyChanges)
 	}
 

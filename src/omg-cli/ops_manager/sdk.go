@@ -182,6 +182,13 @@ func (om *Sdk) ApplyChanges() error {
 	return cmd.Execute(nil)
 }
 
+func (om *Sdk) ApplyDirector() error {
+	installationsService := api.NewInstallationsService(om.client)
+	logWriter := commands.NewLogWriter(os.Stdout)
+	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
+	return cmd.Execute([]string{"--skip-deploy-products"})
+}
+
 // UploadProduct pushes a given file located locally at path to the target
 func (om *Sdk) UploadProduct(path string) error {
 	liveWriter := uilive.New()
@@ -218,7 +225,8 @@ func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
 	diagnosticService := api.NewDiagnosticService(om.client)
 	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
 	stagedProductsService := api.NewStagedProductsService(om.client)
-	cmd := commands.NewStageProduct(stagedProductsService, availableProductsService, diagnosticService, om.logger)
+	deployedProductsService := api.NewDeployedProductsService(om.client)
+	cmd := commands.NewStageProduct(stagedProductsService, deployedProductsService, availableProductsService, diagnosticService, om.logger)
 	return cmd.Execute([]string{
 		"--product-name", tile.Name,
 		"--product-version", tile.Version,

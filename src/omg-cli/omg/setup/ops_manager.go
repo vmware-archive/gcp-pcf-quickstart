@@ -73,6 +73,10 @@ func (s *OpsManager) ApplyChanges() error {
 	return s.om.ApplyChanges()
 }
 
+func (s *OpsManager) ApplyDirector() error {
+	return s.om.ApplyDirector()
+}
+
 func (s *OpsManager) productInstalled(product config.OpsManagerMetadata) (bool, error) {
 	products, err := s.om.AvaliableProducts()
 	if err != nil {
