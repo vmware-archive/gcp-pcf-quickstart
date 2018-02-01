@@ -1,31 +1,26 @@
 package commands
 
 import (
-	"github.com/olekukonko/tablewriter"
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
+	"github.com/pivotal-cf/om/models"
+	"github.com/pivotal-cf/om/presenters"
 )
 
 type AvailableProducts struct {
-	service     availableProductsService
-	tableWriter tableWriter
-	logger      logger
+	service   availableProductsService
+	presenter presenters.Presenter
+	logger    logger
 }
 
 //go:generate counterfeiter -o ./fakes/available_products_service.go --fake-name AvailableProductsService . availableProductsService
+
 type availableProductsService interface {
 	List() (api.AvailableProductsOutput, error)
 }
 
-//go:generate counterfeiter -o ./fakes/table_writer.go --fake-name TableWriter . tableWriter
-type tableWriter interface {
-	SetHeader([]string)
-	Append([]string)
-	SetAlignment(int)
-	Render()
-}
-
-func NewAvailableProducts(apService availableProductsService, tableWriter tableWriter, logger logger) AvailableProducts {
-	return AvailableProducts{service: apService, tableWriter: tableWriter, logger: logger}
+func NewAvailableProducts(apService availableProductsService, presenter presenters.Presenter, logger logger) AvailableProducts {
+	return AvailableProducts{service: apService, presenter: presenter, logger: logger}
 }
 
 func (ap AvailableProducts) Execute(args []string) error {
@@ -39,20 +34,21 @@ func (ap AvailableProducts) Execute(args []string) error {
 		return nil
 	}
 
-	ap.tableWriter.SetAlignment(tablewriter.ALIGN_LEFT)
-	ap.tableWriter.SetHeader([]string{"Name", "Version"})
-
+	var products []models.Product
 	for _, product := range output.ProductsList {
-		ap.tableWriter.Append([]string{product.Name, product.Version})
+		products = append(products, models.Product{
+			Name:    product.Name,
+			Version: product.Version,
+		})
 	}
 
-	ap.tableWriter.Render()
+	ap.presenter.PresentAvailableProducts(products)
 
 	return nil
 }
 
-func (ap AvailableProducts) Usage() Usage {
-	return Usage{
+func (ap AvailableProducts) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all available products.",
 		ShortDescription: "list available products",
 	}

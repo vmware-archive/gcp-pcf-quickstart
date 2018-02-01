@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type ConfigureProduct struct {
@@ -15,10 +15,10 @@ type ConfigureProduct struct {
 	jobsService     jobsConfigurer
 	logger          logger
 	Options         struct {
-		ProductName       string `short:"n"  long:"product-name" description:"name of the product being configured"`
-		ProductProperties string `short:"p" long:"product-properties" description:"properties to be configured in JSON format" default:""`
-		NetworkProperties string `short:"pn" long:"product-network" description:"network properties in JSON format" default:""`
-		ProductResources  string `short:"pr" long:"product-resources" description:"resource configurations in JSON format" default:"{}"`
+		ProductName       string `long:"product-name"       short:"n"  required:"true" description:"name of the product being configured"`
+		ProductProperties string `long:"product-properties" short:"p"                  description:"properties to be configured in JSON format"`
+		NetworkProperties string `long:"product-network"    short:"pn"                 description:"network properties in JSON format"`
+		ProductResources  string `long:"product-resources"  short:"pr"                 description:"resource configurations in JSON format"`
 	}
 }
 
@@ -44,18 +44,13 @@ func NewConfigureProduct(productConfigurer productConfigurer, jobsConfigurer job
 }
 
 func (cp ConfigureProduct) Execute(args []string) error {
-	_, err := flags.Parse(&cp.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&cp.Options, args); err != nil {
 		return fmt.Errorf("could not parse configure-product flags: %s", err)
-	}
-
-	if cp.Options.ProductName == "" {
-		return fmt.Errorf("error: product-name is missing. Please see usage for more information.")
 	}
 
 	cp.logger.Printf("configuring product...")
 
-	if cp.Options.ProductProperties == "" && cp.Options.NetworkProperties == "" && cp.Options.ProductResources == "{}" {
+	if cp.Options.ProductProperties == "" && cp.Options.NetworkProperties == "" && cp.Options.ProductResources == "" {
 		cp.logger.Printf("Provided properties are empty, nothing to do here")
 		return nil
 	}
@@ -77,18 +72,6 @@ func (cp ConfigureProduct) Execute(args []string) error {
 		return fmt.Errorf(`could not find product "%s"`, cp.Options.ProductName)
 	}
 
-	if cp.Options.ProductProperties != "" {
-		cp.logger.Printf("setting properties")
-		err = cp.productsService.Configure(api.ProductsConfigurationInput{
-			GUID:          productGUID,
-			Configuration: cp.Options.ProductProperties,
-		})
-		if err != nil {
-			return fmt.Errorf("failed to configure product: %s", err)
-		}
-		cp.logger.Printf("finished setting properties")
-	}
-
 	if cp.Options.NetworkProperties != "" {
 		cp.logger.Printf("setting up network")
 		err = cp.productsService.Configure(api.ProductsConfigurationInput{
@@ -101,7 +84,19 @@ func (cp ConfigureProduct) Execute(args []string) error {
 		cp.logger.Printf("finished setting up network")
 	}
 
-	if cp.Options.ProductResources != "{}" {
+	if cp.Options.ProductProperties != "" {
+		cp.logger.Printf("setting properties")
+		err = cp.productsService.Configure(api.ProductsConfigurationInput{
+			GUID:          productGUID,
+			Configuration: cp.Options.ProductProperties,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to configure product: %s", err)
+		}
+		cp.logger.Printf("finished setting properties")
+	}
+
+	if cp.Options.ProductResources != "" {
 		var userProvidedConfig map[string]json.RawMessage
 		err = json.Unmarshal([]byte(cp.Options.ProductResources), &userProvidedConfig)
 		if err != nil {
@@ -122,6 +117,7 @@ func (cp ConfigureProduct) Execute(args []string) error {
 
 		cp.logger.Printf("applying resource configuration for the following jobs:")
 		for _, name := range names {
+			cp.logger.Printf("\t%s", name)
 			jobProperties, err := cp.jobsService.GetExistingJobConfig(productGUID, jobs[name])
 			if err != nil {
 				return fmt.Errorf("could not fetch existing job configuration: %s", err)
@@ -133,7 +129,6 @@ func (cp ConfigureProduct) Execute(args []string) error {
 			}
 
 			if !reflect.DeepEqual(jobProperties, api.JobProperties{}) {
-				cp.logger.Printf("\t%s", name)
 				err = cp.jobsService.ConfigureJob(productGUID, jobs[name], jobProperties)
 				if err != nil {
 					return fmt.Errorf("failed to configure resources: %s", err)
@@ -147,8 +142,8 @@ func (cp ConfigureProduct) Execute(args []string) error {
 	return nil
 }
 
-func (cp ConfigureProduct) Usage() Usage {
-	return Usage{
+func (cp ConfigureProduct) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command configures a staged product",
 		ShortDescription: "configures a staged product",
 		Flags:            cp.Options,

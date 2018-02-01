@@ -1,15 +1,17 @@
 package commands
 
 import (
+	"fmt"
+
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type DeleteProduct struct {
 	productsService ps
 	Options         struct {
-		Product string `short:"p"  long:"product-name"  description:"name of product"`
-		Version string `short:"v"  long:"product-version"  description:"version of product"`
+		Product string `long:"product-name"    short:"p" required:"true" description:"name of product"`
+		Version string `long:"product-version" short:"v" required:"true" description:"version of product"`
 	}
 }
 
@@ -25,12 +27,11 @@ func NewDeleteProduct(productsService ps) DeleteProduct {
 }
 
 func (dp DeleteProduct) Execute(args []string) error {
-	_, err := flags.Parse(&dp.Options, args)
-	if err != nil {
-		return err
+	if _, err := jhanda.Parse(&dp.Options, args); err != nil {
+		return fmt.Errorf("could not parse delete-product flags: %s", err)
 	}
 
-	err = dp.productsService.Delete(api.AvailableProductsInput{
+	err := dp.productsService.Delete(api.AvailableProductsInput{
 		ProductName:    dp.Options.Product,
 		ProductVersion: dp.Options.Version,
 	}, false)
@@ -41,8 +42,8 @@ func (dp DeleteProduct) Execute(args []string) error {
 	return nil
 }
 
-func (dp DeleteProduct) Usage() Usage {
-	return Usage{
+func (dp DeleteProduct) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command deletes the named product from the targeted Ops Manager",
 		ShortDescription: "deletes a product from the Ops Manager",
 		Flags:            dp.Options,

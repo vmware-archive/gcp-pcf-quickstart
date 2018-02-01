@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type ImportInstallation struct {
@@ -14,8 +14,9 @@ type ImportInstallation struct {
 	installationAssetImporterService installationAssetImporterService
 	setupService                     setupService
 	Options                          struct {
-		Installation string `short:"i"  long:"installation"  description:"path to installation."`
-		Passphrase   string `short:"dp" long:"decryption-passphrase" description:"passphrase for Ops Manager to decrypt the installation"`
+		Installation    string `long:"installation"          short:"i"  required:"true" description:"path to installation."`
+		Passphrase      string `long:"decryption-passphrase" short:"dp" required:"true" description:"passphrase for Ops Manager to decrypt the installation"`
+		PollingInterval int    `long:"polling-interval"      short:"pi"                 description:"interval (in seconds) at which to print status" default:"1"`
 	}
 }
 
@@ -33,8 +34,8 @@ func NewImportInstallation(multipart multipart, installationAssetImporterService
 	}
 }
 
-func (ii ImportInstallation) Usage() Usage {
-	return Usage{
+func (ii ImportInstallation) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This unauthenticated command attempts to import an installation to the Ops Manager targeted.",
 		ShortDescription: "imports a given installation to the Ops Manager targeted",
 		Flags:            ii.Options,
@@ -42,13 +43,8 @@ func (ii ImportInstallation) Usage() Usage {
 }
 
 func (ii ImportInstallation) Execute(args []string) error {
-	_, err := flags.Parse(&ii.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&ii.Options, args); err != nil {
 		return fmt.Errorf("could not parse import-installation flags: %s", err)
-	}
-
-	if ii.Options.Passphrase == "" {
-		return errors.New("could not parse import-installation flags: decryption passphrase not provided")
 	}
 
 	ensureAvailabilityOutput, err := ii.setupService.EnsureAvailability(api.EnsureAvailabilityInput{})
@@ -80,14 +76,16 @@ func (ii ImportInstallation) Execute(args []string) error {
 	ii.logger.Printf("beginning installation import to Ops Manager")
 
 	err = ii.installationAssetImporterService.Import(api.ImportInstallationInput{
-		ContentLength: submission.Length,
-		Installation:  submission.Content,
-		ContentType:   submission.ContentType,
+		ContentLength:   submission.Length,
+		Installation:    submission.Content,
+		ContentType:     submission.ContentType,
+		PollingInterval: ii.Options.PollingInterval,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to import installation: %s", err)
 	}
 
+	ii.logger.Printf("waiting for import to complete...")
 	for ensureAvailabilityOutput.Status != api.EnsureAvailabilityStatusComplete {
 		ensureAvailabilityOutput, err = ii.setupService.EnsureAvailability(api.EnsureAvailabilityInput{})
 		if err != nil {

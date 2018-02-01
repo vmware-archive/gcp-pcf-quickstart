@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type UploadProduct struct {
@@ -12,7 +12,8 @@ type UploadProduct struct {
 	logger          logger
 	productsService productUploader
 	Options         struct {
-		Product string `short:"p"  long:"product"  description:"path to product"`
+		Product         string `long:"product"          short:"p"  required:"true" description:"path to product"`
+		PollingInterval int    `long:"polling-interval" short:"pi"                 description:"interval (in seconds) at which to print status" default:"1"`
 	}
 	extractor extractor
 }
@@ -37,8 +38,8 @@ func NewUploadProduct(multipart multipart, extractor extractor, productUploader 
 	}
 }
 
-func (up UploadProduct) Usage() Usage {
-	return Usage{
+func (up UploadProduct) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command attempts to upload a product to the Ops Manager",
 		ShortDescription: "uploads a given product to the Ops Manager targeted",
 		Flags:            up.Options,
@@ -46,8 +47,7 @@ func (up UploadProduct) Usage() Usage {
 }
 
 func (up UploadProduct) Execute(args []string) error {
-	_, err := flags.Parse(&up.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&up.Options, args); err != nil {
 		return fmt.Errorf("could not parse upload-product flags: %s", err)
 	}
 
@@ -80,9 +80,10 @@ func (up UploadProduct) Execute(args []string) error {
 	up.logger.Printf("beginning product upload to Ops Manager")
 
 	_, err = up.productsService.Upload(api.UploadProductInput{
-		ContentLength: submission.Length,
-		Product:       submission.Content,
-		ContentType:   submission.ContentType,
+		ContentLength:   submission.Length,
+		Product:         submission.Content,
+		ContentType:     submission.ContentType,
+		PollingInterval: up.Options.PollingInterval,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload product: %s", err)

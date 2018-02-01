@@ -1,10 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func NewInstallationsService(client httpClient) InstallationsService {
 	}
 }
 
-func installationList(state string, is InstallationsService) ([]InstallationsServiceOutput, error) {
+func (is InstallationsService) ListInstallations() ([]InstallationsServiceOutput, error) {
 	req, err := http.NewRequest("GET", "/api/v0/installations", nil)
 	if err != nil {
 		return []InstallationsServiceOutput{}, err
@@ -58,40 +58,28 @@ func installationList(state string, is InstallationsService) ([]InstallationsSer
 		return []InstallationsServiceOutput{}, fmt.Errorf("failed to decode response: %s", err)
 	}
 
-	var returnStruct struct {
-		Installations []InstallationsServiceOutput
-	}
-
-	if state == "" {
-		return responseStruct.Installations, nil
-	} else {
-		for _, installation := range responseStruct.Installations {
-			if installation.Status == state {
-				returnStruct.Installations = append(returnStruct.Installations, installation)
-			}
-		}
-	}
-
-	return returnStruct.Installations, nil
+	return responseStruct.Installations, nil
 }
 
-func (is InstallationsService) RunningInstallation() (InstallationsServiceOutput, error) {
-	installationOutput, err := installationList(StatusRunning, is)
-	if len(installationOutput) > 0 {
-		return installationOutput[0], err
-	} else {
+func (is InstallationsService) Trigger(ignoreWarnings bool, deployProducts bool) (InstallationsServiceOutput, error) {
+	deployProductsVal := "none"
+	if deployProducts {
+		deployProductsVal = "all"
+	}
+
+	data, err := json.Marshal(&struct {
+		IgnoreWarnings string `json:"ignore_warnings"`
+		DeployProducts string `json:"deploy_products"`
+	}{
+		IgnoreWarnings: fmt.Sprintf("%t", ignoreWarnings),
+		DeployProducts: deployProductsVal,
+	})
+	fmt.Println(data)
+	if err != nil {
 		return InstallationsServiceOutput{}, err
 	}
-}
 
-func (is InstallationsService) ListInstallations() ([]InstallationsServiceOutput, error) {
-	return installationList("", is)
-}
-
-func (is InstallationsService) Trigger(ignoreWarnings bool) (InstallationsServiceOutput, error) {
-	ignore := fmt.Sprintf(`{"ignore_warnings": "%t"}`, ignoreWarnings)
-
-	req, err := http.NewRequest("POST", "/api/v0/installations", strings.NewReader(ignore))
+	req, err := http.NewRequest("POST", "/api/v0/installations", bytes.NewReader(data))
 	if err != nil {
 		return InstallationsServiceOutput{}, err
 	}
@@ -120,6 +108,17 @@ func (is InstallationsService) Trigger(ignoreWarnings bool) (InstallationsServic
 	}
 
 	return InstallationsServiceOutput{ID: installation.Install.ID}, nil
+}
+
+func (is InstallationsService) RunningInstallation() (InstallationsServiceOutput, error) {
+	installationOutput, err := is.ListInstallations()
+	if err != nil {
+		return InstallationsServiceOutput{}, err
+	}
+	if len(installationOutput) > 0 && installationOutput[0].Status == StatusRunning {
+		return installationOutput[0], nil
+	}
+	return InstallationsServiceOutput{}, nil
 }
 
 func (is InstallationsService) Status(id int) (InstallationsServiceOutput, error) {

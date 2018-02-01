@@ -14,9 +14,10 @@ import (
 const availableProductsEndpoint = "/api/v0/available_products"
 
 type UploadProductInput struct {
-	ContentLength int64
-	Product       io.Reader
-	ContentType   string
+	ContentLength   int64
+	Product         io.Reader
+	ContentType     string
+	PollingInterval int
 }
 
 type ProductInfo struct {
@@ -61,37 +62,42 @@ func (ap AvailableProductsService) Upload(input UploadProductInput) (UploadProdu
 	req.Header.Set("Content-Type", input.ContentType)
 	req.ContentLength = input.ContentLength
 
-	ap.progress.Kickoff()
-	respChan := make(chan error)
+	requestComplete := make(chan bool)
+	progressComplete := make(chan bool)
+
 	go func() {
+		ap.progress.Kickoff()
+		ap.liveWriter.Start()
+
 		for {
 			if ap.progress.GetCurrent() == ap.progress.GetTotal() {
 				ap.progress.End()
 				break
 			}
 
-			time.Sleep(1 * time.Second)
+			time.Sleep(time.Second)
 		}
 
-		ap.liveWriter.Start()
 		liveLog := log.New(ap.liveWriter, "", 0)
 		startTime := time.Now().Round(time.Second)
+		ticker := time.NewTicker(time.Duration(input.PollingInterval) * time.Second)
 
 		for {
 			select {
-			case _ = <-respChan:
+			case <-requestComplete:
+				ticker.Stop()
 				ap.liveWriter.Stop()
-				return
-			default:
-				time.Sleep(1 * time.Second)
-				timeNow := time.Now().Round(time.Second)
-				liveLog.Printf("%s elapsed, waiting for response from Ops Manager...\r", timeNow.Sub(startTime).String())
+				progressComplete <- true
+			case now := <-ticker.C:
+				liveLog.Printf("%s elapsed, waiting for response from Ops Manager...\r", now.Round(time.Second).Sub(startTime).String())
 			}
 		}
 	}()
 
 	resp, err := ap.client.Do(req)
-	respChan <- err
+	requestComplete <- true
+	<-progressComplete
+
 	if err != nil {
 		return UploadProductOutput{}, fmt.Errorf("could not make api request to available_products endpoint: %s", err)
 	}

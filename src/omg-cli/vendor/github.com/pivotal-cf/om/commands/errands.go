@@ -1,12 +1,13 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
+	"github.com/pivotal-cf/om/models"
+	"github.com/pivotal-cf/om/presenters"
 )
 
 //go:generate counterfeiter -o ./fakes/staged_products_finder.go --fake-name StagedProductsFinder . stagedProductsFinder
@@ -17,34 +18,29 @@ type stagedProductsFinder interface {
 //go:generate counterfeiter -o ./fakes/errands_service.go --fake-name ErrandsService . errandsService
 type errandsService interface {
 	List(productID string) (api.ErrandsListOutput, error)
-	SetState(productID, errandName, postDeployState, preDeleteState string) error
+	SetState(productID, errandName string, postDeployState, preDeleteState interface{}) error
 }
 
 type Errands struct {
-	tableWriter          tableWriter
+	presenter            presenters.Presenter
 	errandsService       errandsService
 	stagedProductsFinder stagedProductsFinder
 	Options              struct {
-		ProductName string `short:"p" long:"product-name" description:"name of product"`
+		ProductName string `long:"product-name" short:"p" required:"true" description:"name of product"`
 	}
 }
 
-func NewErrands(tableWriter tableWriter, errandsService errandsService, stagedProductsFinder stagedProductsFinder) Errands {
+func NewErrands(presenter presenters.Presenter, errandsService errandsService, stagedProductsFinder stagedProductsFinder) Errands {
 	return Errands{
-		tableWriter:          tableWriter,
+		presenter:            presenter,
 		errandsService:       errandsService,
 		stagedProductsFinder: stagedProductsFinder,
 	}
 }
 
 func (e Errands) Execute(args []string) error {
-	_, err := flags.Parse(&e.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&e.Options, args); err != nil {
 		return fmt.Errorf("could not parse errands flags: %s", err)
-	}
-
-	if e.Options.ProductName == "" {
-		return errors.New("error: product-name is missing. Please see usage for more information.")
 	}
 
 	findOutput, err := e.stagedProductsFinder.Find(e.Options.ProductName)
@@ -57,35 +53,33 @@ func (e Errands) Execute(args []string) error {
 		return fmt.Errorf("failed to list errands: %s", err)
 	}
 
-	e.tableWriter.SetHeader([]string{"Name", "Post Deploy Enabled", "Pre Delete Enabled"})
-
+	var errands []models.Errand
 	for _, errand := range errandsOutput.Errands {
-		var postDeploy, preDelete string
-
-		switch p := errand.PreDelete.(type) {
-		case string:
-			preDelete = p
-		case bool:
-			preDelete = strconv.FormatBool(p)
-		}
-
-		switch p := errand.PostDeploy.(type) {
-		case string:
-			postDeploy = p
-		case bool:
-			postDeploy = strconv.FormatBool(p)
-		}
-
-		e.tableWriter.Append([]string{errand.Name, postDeploy, preDelete})
+		errands = append(errands, models.Errand{
+			Name:              errand.Name,
+			PostDeployEnabled: boolStringFromType(errand.PostDeploy),
+			PreDeleteEnabled:  boolStringFromType(errand.PreDelete),
+		})
 	}
 
-	e.tableWriter.Render()
+	e.presenter.PresentErrands(errands)
 
 	return nil
 }
 
-func (e Errands) Usage() Usage {
-	return Usage{
+func boolStringFromType(object interface{}) string {
+	switch p := object.(type) {
+	case string:
+		return p
+	case bool:
+		return strconv.FormatBool(p)
+	default:
+		return ""
+	}
+}
+
+func (e Errands) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all errands for a product.",
 		ShortDescription: "list errands for a product",
 		Flags:            e.Options,

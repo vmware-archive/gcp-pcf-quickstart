@@ -29,6 +29,9 @@ type SetupInput struct {
 	DecryptionPassphrase             string
 	DecryptionPassphraseConfirmation string
 	EULAAccepted                     bool
+	HTTPProxyURL                     string
+	HTTPSProxyURL                    string
+	NoProxy                          string
 }
 
 type SetupOutput struct{}
@@ -43,6 +46,9 @@ func (ss SetupService) Setup(input SetupInput) (SetupOutput, error) {
 			DecryptionPassphrase             string `json:"decryption_passphrase"`
 			DecryptionPassphraseConfirmation string `json:"decryption_passphrase_confirmation"`
 			EULAAccepted                     string `json:"eula_accepted"`
+			HTTPProxyURL                     string `json:"http_proxy,omitempty"`
+			HTTPSProxyURL                    string `json:"https_proxy,omitempty"`
+			NoProxy                          string `json:"no_proxy,omitempty"`
 		} `json:"setup"`
 	}
 
@@ -52,6 +58,9 @@ func (ss SetupService) Setup(input SetupInput) (SetupOutput, error) {
 	setup.Setup.AdminPasswordConfirmation = input.AdminPasswordConfirmation
 	setup.Setup.DecryptionPassphrase = input.DecryptionPassphrase
 	setup.Setup.DecryptionPassphraseConfirmation = input.DecryptionPassphraseConfirmation
+	setup.Setup.HTTPProxyURL = input.HTTPProxyURL
+	setup.Setup.HTTPSProxyURL = input.HTTPSProxyURL
+	setup.Setup.NoProxy = input.NoProxy
 	setup.Setup.EULAAccepted = strconv.FormatBool(input.EULAAccepted)
 
 	payload, err := json.Marshal(setup)
@@ -117,6 +126,8 @@ func (ss SetupService) EnsureAvailability(input EnsureAvailabilityInput) (Ensure
 			status = EnsureAvailabilityStatusUnstarted
 		} else if location.Path == "/auth/cloudfoundry" {
 			status = EnsureAvailabilityStatusComplete
+		} else {
+			return EnsureAvailabilityOutput{}, fmt.Errorf("Unexpected redirect location: %s", location.Path)
 		}
 
 	case response.StatusCode == http.StatusOK:
@@ -127,7 +138,12 @@ func (ss SetupService) EnsureAvailability(input EnsureAvailabilityInput) (Ensure
 
 		if strings.Contains(string(respBody), "Waiting for authentication system to start...") {
 			status = EnsureAvailabilityStatusPending
+		} else {
+			return EnsureAvailabilityOutput{}, fmt.Errorf("Received OK with an unexpected body: %s", string(respBody))
 		}
+
+	default:
+		return EnsureAvailabilityOutput{}, fmt.Errorf("Unexpected response code: %d %s", response.StatusCode, http.StatusText(response.StatusCode))
 	}
 
 	return EnsureAvailabilityOutput{Status: status}, nil

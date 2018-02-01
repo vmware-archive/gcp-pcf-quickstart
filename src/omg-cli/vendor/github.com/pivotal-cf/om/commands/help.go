@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/pivotal-cf/om/flags"
+	"github.com/pivotal-cf/jhanda"
 )
 
 const tmpl = `{{.Title}}
@@ -33,10 +33,10 @@ type TemplateContext struct {
 type Help struct {
 	output   io.Writer
 	flags    string
-	commands Set
+	commands jhanda.CommandSet
 }
 
-func NewHelp(output io.Writer, flags string, commands Set) Help {
+func NewHelp(output io.Writer, flags string, commands jhanda.CommandSet) Help {
 	return Help{
 		output:   output,
 		flags:    flags,
@@ -73,8 +73,8 @@ func (h Help) Execute(args []string) error {
 	return nil
 }
 
-func (h Help) Usage() Usage {
-	return Usage{
+func (h Help) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command prints helpful usage information.",
 		ShortDescription: "prints this usage information",
 	}
@@ -122,7 +122,7 @@ func (h Help) buildCommandContext(command string) (TemplateContext, error) {
 		argsPlaceholder string
 	)
 	if usage.Flags != nil {
-		flagUsage, err := flags.Usage(usage.Flags)
+		flagUsage, err := jhanda.PrintUsage(usage.Flags)
 		if err != nil {
 			return TemplateContext{}, err
 		}

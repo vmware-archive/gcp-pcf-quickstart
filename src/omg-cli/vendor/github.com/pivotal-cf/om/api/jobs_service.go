@@ -18,6 +18,16 @@ type JobProperties struct {
 	InstanceType      InstanceType `json:"instance_type"`
 	InternetConnected *bool        `json:"internet_connected,omitempty"`
 	LBNames           []string     `json:"elb_names"`
+	NSXSecurityGroups []string     `json:"nsx_security_groups,omitempty"`
+	NSXLBS            []NSXLB      `json:"nsx_lbs,omitempty"`
+	FloatingIPs       string       `json:"floating_ips,omitempty"`
+}
+
+type NSXLB struct {
+	EdgeName      string `json:"edge_name"`
+	PoolName      string `json:"pool_name"`
+	SecurityGroup string `json:"security_group"`
+	Port          string `json:"port"`
 }
 
 type Disk struct {

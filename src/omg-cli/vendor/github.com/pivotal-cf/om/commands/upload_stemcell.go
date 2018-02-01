@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 	"github.com/pivotal-cf/om/formcontent"
 )
 
@@ -15,7 +15,8 @@ type UploadStemcell struct {
 	stemcellService   stemcellService
 	diagnosticService diagnosticService
 	Options           struct {
-		Stemcell string `short:"s"  long:"stemcell"  description:"path to stemcell"`
+		Stemcell string `long:"stemcell" short:"s" required:"true" description:"path to stemcell"`
+		Force    bool   `long:"force"    short:"f"                 description:"upload stemcell even if it already exists on the target Ops Manager"`
 	}
 }
 
@@ -45,40 +46,40 @@ func NewUploadStemcell(multipart multipart, stemcellService stemcellService, dia
 	}
 }
 
-func (us UploadStemcell) Usage() Usage {
-	return Usage{
-		Description:      "This command will upload a stemcell to the target Ops Manager. If your stemcell already exists that upload will be skipped",
+func (us UploadStemcell) Usage() jhanda.Usage {
+	return jhanda.Usage{
+		Description:      "This command will upload a stemcell to the target Ops Manager. Unless the force flag is used, if the stemcell already exists that upload will be skipped",
 		ShortDescription: "uploads a given stemcell to the Ops Manager targeted",
 		Flags:            us.Options,
 	}
 }
 
 func (us UploadStemcell) Execute(args []string) error {
-	_, err := flags.Parse(&us.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&us.Options, args); err != nil {
 		return fmt.Errorf("could not parse upload-stemcell flags: %s", err)
 	}
 
-	us.logger.Printf("processing stemcell")
+	if !us.Options.Force {
+		us.logger.Printf("processing stemcell")
+		report, err := us.diagnosticService.Report()
+		if err != nil {
+			switch err.(type) {
+			case api.DiagnosticReportUnavailable:
+				us.logger.Printf("%s", err)
+			default:
+				return fmt.Errorf("failed to get diagnostic report: %s", err)
+			}
+		}
 
-	report, err := us.diagnosticService.Report()
-	if err != nil {
-		switch err.(type) {
-		case api.DiagnosticReportUnavailable:
-			us.logger.Printf("%s", err)
-		default:
-			return fmt.Errorf("failed to get diagnostic report: %s", err)
+		for _, stemcell := range report.Stemcells {
+			if stemcell == filepath.Base(us.Options.Stemcell) {
+				us.logger.Printf("stemcell has already been uploaded")
+				return nil
+			}
 		}
 	}
 
-	for _, stemcell := range report.Stemcells {
-		if stemcell == filepath.Base(us.Options.Stemcell) {
-			us.logger.Printf("stemcell has already been uploaded")
-			return nil
-		}
-	}
-
-	err = us.multipart.AddFile("stemcell[file]", us.Options.Stemcell)
+	err := us.multipart.AddFile("stemcell[file]", us.Options.Stemcell)
 	if err != nil {
 		return fmt.Errorf("failed to load stemcell: %s", err)
 	}
