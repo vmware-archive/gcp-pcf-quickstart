@@ -163,3 +163,18 @@ variable "service_broker_sql_db_tier" {
   type    = "string"
   default = "db-f1-micro"
 }
+
+/*****************************
+ * Credhub Key Options    *
+ *****************************/
+variable "credhub_key_name" {
+  description = "Credhub encryption key name used by PAS"
+  type        = "string"
+  default     = ""
+}
+
+variable "credhub_key" {
+  description = "Credhub encryption key used by PAS"
+  type        = "string"
+  default     = ""
+}

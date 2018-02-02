@@ -31,14 +31,9 @@ const (
 type Properties struct {
 	OpsManagerURL     tiles.Value `json:".healthwatch-forwarder.opsmanager_url"`
 	BoshHealthCheckAZ tiles.Value `json:".healthwatch-forwarder.health_check_az"`
-	// Endpoint          tiles.Value `json:".properties.firehose_endpoint"`
-	// SkipSSLValidation tiles.Value `json:".properties.firehose_skip_ssl"`
-	// ServiceAccount    tiles.Value `json:".properties.service_account"`
-	// ProjectID         tiles.Value `json:".properties.project_id"`
 }
 
 type Resources struct {
-	// HealthWatchForwarder tiles.Resource `json:"healthwatch-forwarder"`
 }
 
 func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
@@ -56,10 +51,6 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	properties := &Properties{
 		OpsManagerURL:     tiles.Value{fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
 		BoshHealthCheckAZ: tiles.Value{cfg.Zone1},
-		// Endpoint:          tiles.Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
-		// SkipSSLValidation: tiles.Value{skipSSLValidation},
-		// ServiceAccount:    tiles.Value{cfg.StackdriverNozzleServiceAccountKey},
-		// ProjectID:         tiles.Value{cfg.ProjectName},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
@@ -67,19 +58,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	// vmType := ""
-	// vmCount := 2
-	// if envConfig.SmallFootprint {
-	// 	vmType = "micro"
-	// 	vmCount = 1
-	// }
-	resoruces := Resources{
-	// HealthWatchForwarder: tiles.Resource{
-	// 	InternetConnected: false,
-	// 	VmTypeId:          vmType,
-	// 	Instances:         &vmCount,
-	// },
-	}
+	resoruces := Resources{}
 	resorucesBytes, err := json.Marshal(&resoruces)
 	if err != nil {
 		return err

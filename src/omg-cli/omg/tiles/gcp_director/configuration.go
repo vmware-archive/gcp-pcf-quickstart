@@ -106,6 +106,13 @@ func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
 	var instanceCount *int
 	var instanceType commands.CompilationInstanceType
 
+	if envConfig.SmallFootprint {
+		one := 1
+		instanceCount = &one
+		large := "large"
+		instanceType.ID = &large
+	}
+
 	f := false
 	return commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{

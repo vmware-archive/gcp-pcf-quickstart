@@ -25,6 +25,11 @@ type OpsManagerCredentials struct {
 	SkipSSLVerification bool
 }
 
+type CredhubEncryptionKey struct {
+	Name string
+	Key  string
+}
+
 const (
 	TerraformOutputFile = "terraform_output.json"
 	EnvConfigFile       = "config.json"

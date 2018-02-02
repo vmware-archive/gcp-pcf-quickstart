@@ -94,6 +94,7 @@ type TerraformConfigSchema struct {
 	ProjectName string `json:"project"`
 
 	OpsManager OpsManagerCredentials
+	CredhubKey CredhubEncryptionKey
 }
 
 func TerraformFromEnvDirectory(path string) (*Config, error) {
@@ -149,6 +150,8 @@ func fromTerraform(filename string) (*Config, error) {
 	hydratedCfg.OpsManager.Username = flattened["ops_manager_username"]
 	hydratedCfg.OpsManager.Password = flattened["ops_manager_password"]
 	hydratedCfg.OpsManager.DecryptionPhrase = flattened["ops_manager_decryption_phrase"]
+	hydratedCfg.CredhubKey.Name = flattened["credhub_key_name"]
+	hydratedCfg.CredhubKey.Key = flattened["credhub_key"]
 
 	cfg := Config(hydratedCfg)
 

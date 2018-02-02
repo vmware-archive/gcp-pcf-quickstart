@@ -141,10 +141,8 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	}
 
 	properties := Properties{
-		AppsDomain: tiles.Value{cfg.AppsDomain},
-		SysDomain:  tiles.Value{cfg.SysDomain},
-		// NetworkingPointOfEntry:     tiles.Value{"external_non_ssl"},
-		// ContainerDNSServers:        tiles.Value{"8.8.8.8,8.8.4.4"},
+		AppsDomain:          tiles.Value{cfg.AppsDomain},
+		SysDomain:           tiles.Value{cfg.SysDomain},
 		SkipSSLVerification: tiles.BooleanValue{true},
 		HAProxyForwardTLS:   tiles.Value{"disable"},
 		IngressCertificates: tiles.CertificateValue{[]tiles.CertificateConstruct{
@@ -155,8 +153,8 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		},
 		CredhubEncryptionKey: tiles.EncryptionKeyValue{[]tiles.EncryptionKey{
 			{
-				Name:    "test",
-				Key:     tiles.KeyStruct{Secret: "aaaaaaaaaaaaaaaaaaaa"},
+				Name:    cfg.CredhubKey.Name,
+				Key:     tiles.KeyStruct{Secret: cfg.CredhubKey.Key},
 				Primary: true,
 			},
 		},
