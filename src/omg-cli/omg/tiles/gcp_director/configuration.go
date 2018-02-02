@@ -104,23 +104,27 @@ func director(cfg *config.Config) (director commands.DirectorConfiguration) {
 
 func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
 	var instanceCount *int
-	var instanceType commands.CompilationInstanceType
+	var compilation commands.CompilationInstanceType
+	var director commands.DirectorInstanceType
 
 	if envConfig.SmallFootprint {
 		one := 1
 		instanceCount = &one
-		large := "large"
-		instanceType.ID = &large
+
+		medium := "medium.mem"
+		compilation.ID = &medium
+		director.ID = &medium
 	}
 
 	f := false
 	return commands.ResourceConfiguration{
 		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
-			InternetConnected: &f,
+			DirectorInstanceType: director,
+			InternetConnected:    &f,
 		},
 		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
 			Instances:               instanceCount,
-			CompilationInstanceType: instanceType,
+			CompilationInstanceType: compilation,
 			InternetConnected:       &f,
 		},
 	}

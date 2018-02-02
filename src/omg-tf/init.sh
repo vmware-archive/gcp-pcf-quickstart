@@ -61,8 +61,12 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
     exit 1
 fi
 
-export NAT_INSTANCE_COUNT=3
-[ "${SMALL_FOOTPRINT}" == "true" ] && export NAT_INSTANCE_COUNT=1
+nat_instance_count=3
+opsman_machine_type="n1-standard-2"
+if [ "${SMALL_FOOTPRINT}" == "true" ]; then
+  nat_instance_count=1
+  opsman_machine_type="n1-standard-1"
+fi
 
 set -e
 seed=$(date +%s)
@@ -95,6 +99,7 @@ dns_zone_name = "${DNS_ZONE_NAME}"
 opsman_image_url = "${BASE_IMAGE_URL:-}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK:-}"
 opsman_external_ip = "true"
+opsman_machine_type = "${opsman_machine_type}"
 ops_manager_skip_ssl_verify = "true"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
@@ -114,5 +119,5 @@ ssh_public_key = <<SSH_PUBLIC_KEY
 $(cat keys/jumpbox_ssh.pub)
 SSH_PUBLIC_KEY
 
-nat_instance_count = ${NAT_INSTANCE_COUNT}
+nat_instance_count = ${nat_instance_count}
 VARS_FILE
