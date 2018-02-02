@@ -62,10 +62,14 @@ if [ -z ${BASE_IMAGE_URL+x} ] && [ -z ${BASE_IMAGE_SELFLINK+x} ]; then
 fi
 
 nat_instance_count=3
+nat_machine_type="n1-standard-1"
 opsman_machine_type="n1-standard-2"
+jumpbox_machine_type="n1-standard-1"
 if [ "${SMALL_FOOTPRINT}" == "true" ]; then
   nat_instance_count=1
+  nat_machine_type="g1-small"
   opsman_machine_type="n1-standard-1"
+  jumpbox_machine_type="g1-small"
 fi
 
 set -e
@@ -100,6 +104,8 @@ opsman_image_url = "${BASE_IMAGE_URL:-}"
 opsman_image_selflink = "${BASE_IMAGE_SELFLINK:-}"
 opsman_external_ip = "true"
 opsman_machine_type = "${opsman_machine_type}"
+nat_machine_type="${nat_machine_type}"
+jumpbox_machine_type="${jumpbox_machine_type}"
 ops_manager_skip_ssl_verify = "true"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
