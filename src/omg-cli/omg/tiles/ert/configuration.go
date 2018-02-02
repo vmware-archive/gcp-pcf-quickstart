@@ -101,17 +101,6 @@ type LargeFootprintResources struct {
 	SyslogAdapter                tiles.Resource `json:"syslog_adapter"`
 	SyslogScheduler              tiles.Resource `json:"syslog_scheduler"`
 	Doppler                      tiles.Resource `json:"doppler"`
-	SmokeTests                   tiles.Resource `json:"smoke-tests"`
-	PushAppsManager              tiles.Resource `json:"push-apps-manager"`
-	Notifications                tiles.Resource `json:"notifications"`
-	NotificationsUi              tiles.Resource `json:"notifications-ui"`
-	PushPivotalAccount           tiles.Resource `json:"push-pivotal-account"`
-	PushUsageService             tiles.Resource `json:"push-usage-service"`
-	Autoscaling                  tiles.Resource `json:"autoscaling"`
-	AutoscalingRegisterBroker    tiles.Resource `json:"autoscaling-register-broker"`
-	Nfsbrokerpush                tiles.Resource `json:"nfsbrokerpush"`
-	Bootstrap                    tiles.Resource `json:"bootstrap"`
-	MysqlRejoinUnsafe            tiles.Resource `json:"mysql-rejoin-unsafe"`
 }
 
 type SmallFootprintResources struct {
