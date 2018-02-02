@@ -1,23 +1,23 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/pivotal-cf/om/flags"
+	"github.com/pivotal-cf/jhanda"
 )
 
 type ExportInstallation struct {
 	logger                           logger
 	installationAssetExporterService installationAssetExporterService
 	Options                          struct {
-		OutputFile string `short:"o"  long:"output-file"  description:"output path to write installation to"`
+		OutputFile      string `long:"output-file"      short:"o"  required:"true" description:"output path to write installation to"`
+		PollingInterval int    `long:"polling-interval" short:"pi"                 description:"interval (in seconds) at which to print status" default:"1"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/installation_asset_exporter_service.go --fake-name InstallationAssetExporterService . installationAssetExporterService
 type installationAssetExporterService interface {
-	Export(string) error
+	Export(outputFile string, pollingInterval int) error
 }
 
 func NewExportInstallation(installationAssetExporterService installationAssetExporterService, logger logger) ExportInstallation {
@@ -27,8 +27,8 @@ func NewExportInstallation(installationAssetExporterService installationAssetExp
 	}
 }
 
-func (ei ExportInstallation) Usage() Usage {
-	return Usage{
+func (ei ExportInstallation) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command will export the current installation of the target Ops Manager.",
 		ShortDescription: "exports the installation of the target Ops Manager",
 		Flags:            ei.Options,
@@ -36,18 +36,13 @@ func (ei ExportInstallation) Usage() Usage {
 }
 
 func (ei ExportInstallation) Execute(args []string) error {
-	_, err := flags.Parse(&ei.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&ei.Options, args); err != nil {
 		return fmt.Errorf("could not parse export-installation flags: %s", err)
-	}
-
-	if ei.Options.OutputFile == "" {
-		return errors.New("expected flag --output-file. Run 'om help export-installation' for more information.")
 	}
 
 	ei.logger.Printf("exporting installation")
 
-	err = ei.installationAssetExporterService.Export(ei.Options.OutputFile)
+	err := ei.installationAssetExporterService.Export(ei.Options.OutputFile, ei.Options.PollingInterval)
 	if err != nil {
 		return fmt.Errorf("failed to export installation: %s", err)
 	}

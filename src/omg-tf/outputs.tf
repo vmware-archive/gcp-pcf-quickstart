@@ -225,3 +225,11 @@ output "ops_manager_decryption_phrase" {
 output "ops_manager_skip_ssl_verify" {
   value = "${var.ops_manager_skip_ssl_verify}"
 }
+
+output "credhub_key_name" {
+  value = "${var.credhub_key_name == "" ? random_id.credhub_key_name_generator.b64 : var.credhub_key_name}"
+}
+
+output "credhub_key" {
+  value = "${var.credhub_key == "" ? random_id.credhub_key_generator.b64 : var.credhub_key}"
+}

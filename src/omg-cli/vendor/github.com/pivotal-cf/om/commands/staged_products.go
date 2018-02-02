@@ -1,15 +1,20 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pivotal-cf/jhanda"
+	"github.com/pivotal-cf/om/presenters"
+)
 
 type StagedProducts struct {
-	tableWriter       tableWriter
+	presenter         presenters.Presenter
 	diagnosticService diagnosticService
 }
 
-func NewStagedProducts(tableWriter tableWriter, diagnosticService diagnosticService) StagedProducts {
+func NewStagedProducts(presenter presenters.Presenter, diagnosticService diagnosticService) StagedProducts {
 	return StagedProducts{
-		tableWriter:       tableWriter,
+		presenter:         presenter,
 		diagnosticService: diagnosticService,
 	}
 }
@@ -22,18 +27,12 @@ func (sp StagedProducts) Execute(args []string) error {
 
 	stagedProducts := diagnosticReport.StagedProducts
 
-	sp.tableWriter.SetHeader([]string{"Name", "Version"})
-
-	for _, product := range stagedProducts {
-		sp.tableWriter.Append([]string{product.Name, product.Version})
-	}
-
-	sp.tableWriter.Render()
+	sp.presenter.PresentStagedProducts(stagedProducts)
 	return nil
 }
 
-func (sp StagedProducts) Usage() Usage {
-	return Usage{
+func (sp StagedProducts) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all staged products.",
 		ShortDescription: "lists staged products",
 	}

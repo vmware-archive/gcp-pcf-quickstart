@@ -41,7 +41,7 @@ type EnvConfig struct {
 func DefaultEnvConfig() (*EnvConfig, error) {
 	c := &EnvConfig{
 		DnsZoneName:    "pcf-zone",
-		BaseImageURL:   "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-1.12.11.tar.gz",
+		BaseImageURL:   "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.0-build.236.tar.gz",
 		EnvName:        "pcf",
 		Region:         "us-east1",
 		Zone1:          "us-east1-b",

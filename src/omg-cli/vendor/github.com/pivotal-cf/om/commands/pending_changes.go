@@ -3,12 +3,14 @@ package commands
 import (
 	"fmt"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
+	"github.com/pivotal-cf/om/presenters"
 )
 
 type PendingChanges struct {
-	service     pendingChangesService
-	tableWriter tableWriter
+	service   pendingChangesService
+	presenter presenters.Presenter
 }
 
 //go:generate counterfeiter -o ./fakes/pending_changes_service.go --fake-name PendingChangesService . pendingChangesService
@@ -16,10 +18,10 @@ type pendingChangesService interface {
 	List() (api.PendingChangesOutput, error)
 }
 
-func NewPendingChanges(tableWriter tableWriter, service pendingChangesService) PendingChanges {
+func NewPendingChanges(presenter presenters.Presenter, service pendingChangesService) PendingChanges {
 	return PendingChanges{
-		service:     service,
-		tableWriter: tableWriter,
+		service:   service,
+		presenter: presenter,
 	}
 }
 
@@ -29,27 +31,12 @@ func (pc PendingChanges) Execute(args []string) error {
 		return fmt.Errorf("failed to retrieve pending changes %s", err)
 	}
 
-	pc.tableWriter.SetHeader([]string{"PRODUCT", "ACTION", "ERRANDS"})
-
-	for _, change := range output.ChangeList {
-		if len(change.Errands) == 0 {
-			pc.tableWriter.Append([]string{change.Product, change.Action, ""})
-		}
-		for i, errand := range change.Errands {
-			if i == 0 {
-				pc.tableWriter.Append([]string{change.Product, change.Action, errand.Name})
-			} else {
-				pc.tableWriter.Append([]string{"", "", errand.Name})
-			}
-		}
-	}
-
-	pc.tableWriter.Render()
+	pc.presenter.PresentPendingChanges(output.ChangeList)
 	return nil
 }
 
-func (pc PendingChanges) Usage() Usage {
-	return Usage{
+func (pc PendingChanges) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all pending changes.",
 		ShortDescription: "lists pending changes",
 	}

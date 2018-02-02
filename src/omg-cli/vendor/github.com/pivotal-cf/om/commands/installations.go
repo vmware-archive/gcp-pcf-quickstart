@@ -1,25 +1,25 @@
 package commands
 
 import (
-	"strconv"
-	"time"
-
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
+	"github.com/pivotal-cf/om/models"
+	"github.com/pivotal-cf/om/presenters"
 )
 
 type Installations struct {
-	service     installationsService
-	tableWriter tableWriter
+	service   installationsService
+	presenter presenters.Presenter
 }
 
 func (i Installations) ListInstallations() (api.InstallationsServiceOutput, error) {
 	return api.InstallationsServiceOutput{}, nil
 }
 
-func NewInstallations(incomingService installationsService, tableWriter tableWriter) Installations {
+func NewInstallations(incomingService installationsService, presenter presenters.Presenter) Installations {
 	return Installations{
-		service:     incomingService,
-		tableWriter: tableWriter,
+		service:   incomingService,
+		presenter: presenter,
 	}
 }
 
@@ -29,25 +29,24 @@ func (i Installations) Execute(args []string) error {
 		return err
 	}
 
-	i.tableWriter.SetHeader([]string{"ID", "User", "Status", "Started At", "Finished At"})
-
+	var installations []models.Installation
 	for _, installation := range installationsOutput {
-		finishedTime := ""
-
-		if installation.FinishedAt != nil {
-			finishedTime = installation.FinishedAt.Format(time.RFC3339Nano)
-		}
-
-		i.tableWriter.Append([]string{strconv.Itoa(installation.ID), installation.UserName, installation.Status, installation.StartedAt.Format(time.RFC3339Nano), finishedTime})
+		installations = append(installations, models.Installation{
+			Id:         installation.ID,
+			User:       installation.UserName,
+			Status:     installation.Status,
+			StartedAt:  installation.StartedAt,
+			FinishedAt: installation.FinishedAt,
+		})
 	}
 
-	i.tableWriter.Render()
+	i.presenter.PresentInstallations(installations)
 
 	return nil
 }
 
-func (i Installations) Usage() Usage {
-	return Usage{
+func (i Installations) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all recent installation events.",
 		ShortDescription: "list recent installation events",
 	}

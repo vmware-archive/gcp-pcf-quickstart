@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/go-querystring/query"
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
 )
 
@@ -15,6 +16,7 @@ type RevertStagedChanges struct {
 //go:generate counterfeiter -o ./fakes/dashboard_service.go --fake-name DashboardService . dashboardService
 type dashboardService interface {
 	GetInstallForm() (api.Form, error)
+	GetRevertForm() (api.Form, error)
 	PostInstallForm(api.PostFormInput) error
 }
 
@@ -23,9 +25,13 @@ func NewRevertStagedChanges(s dashboardService, l logger) RevertStagedChanges {
 }
 
 func (c RevertStagedChanges) Execute(args []string) error {
-	form, err := c.service.GetInstallForm()
+	form, err := c.service.GetRevertForm()
 	if err != nil {
 		return fmt.Errorf("could not fetch form: %s", err)
+	}
+
+	if form == (api.Form{}) {
+		return nil
 	}
 
 	var formConfig CommonConfiguration
@@ -48,8 +54,8 @@ func (c RevertStagedChanges) Execute(args []string) error {
 	return nil
 }
 
-func (c RevertStagedChanges) Usage() Usage {
-	return Usage{
+func (c RevertStagedChanges) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "reverts staged changes on the installation dashboard page in the target Ops Manager",
 		ShortDescription: "reverts staged changes on the Ops Manager targeted",
 	}

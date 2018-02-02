@@ -1,18 +1,17 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type UnstageProduct struct {
 	logger                logger
 	stagedProductsService productUnstager
 	Options               struct {
-		Product string `short:"p"  long:"product-name"  description:"name of product"`
+		Product string `long:"product-name" short:"p" required:"true" description:"name of product"`
 	}
 }
 
@@ -29,18 +28,13 @@ func NewUnstageProduct(productUnstager productUnstager, logger logger) UnstagePr
 }
 
 func (up UnstageProduct) Execute(args []string) error {
-	_, err := flags.Parse(&up.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&up.Options, args); err != nil {
 		return fmt.Errorf("could not parse unstage-product flags: %s", err)
-	}
-
-	if up.Options.Product == "" {
-		return errors.New("error: product-name is missing. Please see usage for more information.")
 	}
 
 	up.logger.Printf("unstaging %s", up.Options.Product)
 
-	err = up.stagedProductsService.Unstage(api.UnstageProductInput{
+	err := up.stagedProductsService.Unstage(api.UnstageProductInput{
 		ProductName: up.Options.Product,
 	})
 
@@ -53,8 +47,8 @@ func (up UnstageProduct) Execute(args []string) error {
 	return nil
 }
 
-func (up UnstageProduct) Usage() Usage {
-	return Usage{
+func (up UnstageProduct) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command attempts to unstage a product from the Ops Manager",
 		ShortDescription: "unstages a given product from the Ops Manager targeted",
 		Flags:            up.Options,

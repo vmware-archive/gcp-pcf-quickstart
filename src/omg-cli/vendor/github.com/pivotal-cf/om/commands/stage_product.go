@@ -1,27 +1,32 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 type StageProduct struct {
 	logger                   logger
 	stagedProductsService    productStager
+	deployedProductsService  deployedProductsLister
 	availableProductsService availableProductChecker
 	diagnosticService        diagnosticService
 	Options                  struct {
-		Product string `short:"p"  long:"product-name"  description:"name of product"`
-		Version string `short:"v"  long:"product-version"  description:"version of product"`
+		Product string `long:"product-name"    short:"p" required:"true" description:"name of product"`
+		Version string `long:"product-version" short:"v" required:"true" description:"version of product"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/product_stager.go --fake-name ProductStager . productStager
 type productStager interface {
-	Stage(api.StageProductInput) error
+	Stage(api.StageProductInput, string) error
+}
+
+//go:generate counterfeiter -o ./fakes/deployed_products_lister.go --fake-name DeployedProductsLister . deployedProductsLister
+type deployedProductsLister interface {
+	DeployedProducts() ([]api.DeployedProductOutput, error)
 }
 
 //go:generate counterfeiter -o ./fakes/available_product_checker.go --fake-name AvailableProductChecker . availableProductChecker
@@ -29,30 +34,34 @@ type availableProductChecker interface {
 	CheckProductAvailability(productName string, productVersion string) (bool, error)
 }
 
-func NewStageProduct(productStager productStager, availableProductChecker availableProductChecker, diagnosticService diagnosticService, logger logger) StageProduct {
+func NewStageProduct(productStager productStager, deployedProductsService deployedProductsLister, availableProductChecker availableProductChecker, diagnosticService diagnosticService, logger logger) StageProduct {
 	return StageProduct{
 		logger:                   logger,
 		stagedProductsService:    productStager,
+		deployedProductsService:  deployedProductsService,
 		availableProductsService: availableProductChecker,
 		diagnosticService:        diagnosticService,
 	}
 }
 
 func (sp StageProduct) Execute(args []string) error {
-	_, err := flags.Parse(&sp.Options, args)
-	if err != nil {
+	if _, err := jhanda.Parse(&sp.Options, args); err != nil {
 		return fmt.Errorf("could not parse stage-product flags: %s", err)
 	}
 
-	if sp.Options.Product == "" {
-		return errors.New("error: product-name is missing. Please see usage for more information.")
-	}
-
-	if sp.Options.Version == "" {
-		return errors.New("error: product-version is missing. Please see usage for more information.")
-	}
-
 	diagnosticReport, err := sp.diagnosticService.Report()
+	if err != nil {
+		return fmt.Errorf("failed to stage product: %s", err)
+	}
+
+	deployedProductGUID := ""
+	deployedProducts, err := sp.deployedProductsService.DeployedProducts()
+	for _, deployedProduct := range deployedProducts {
+		if deployedProduct.Type == sp.Options.Product {
+			deployedProductGUID = deployedProduct.GUID
+			break
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("failed to stage product: %s", err)
 	}
@@ -78,7 +87,7 @@ func (sp StageProduct) Execute(args []string) error {
 	err = sp.stagedProductsService.Stage(api.StageProductInput{
 		ProductName:    sp.Options.Product,
 		ProductVersion: sp.Options.Version,
-	})
+	}, deployedProductGUID)
 	if err != nil {
 		return fmt.Errorf("failed to stage product: %s", err)
 	}
@@ -88,8 +97,8 @@ func (sp StageProduct) Execute(args []string) error {
 	return nil
 }
 
-func (sp StageProduct) Usage() Usage {
-	return Usage{
+func (sp StageProduct) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This command attempts to stage a product in the Ops Manager",
 		ShortDescription: "stages a given product in the Ops Manager targeted",
 		Flags:            sp.Options,

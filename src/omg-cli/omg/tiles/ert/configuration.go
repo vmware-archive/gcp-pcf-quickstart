@@ -26,23 +26,20 @@ import (
 
 type Properties struct {
 	// Domains
-	AppsDomain tiles.Value `json:".cloud_controller.apps_domain"`
-	SysDomain  tiles.Value `json:".cloud_controller.system_domain"`
-	// Networking
-	NetworkingPointOfEntry    tiles.Value            `json:".properties.networking_point_of_entry"`
-	TcpRouting                tiles.Value            `json:".properties.tcp_routing"`
-	TcpRoutingReservablePorts tiles.Value            `json:".properties.tcp_routing.enable.reservable_ports"`
-	GoRouterSSLCiphers        tiles.Value            `json:".properties.gorouter_ssl_ciphers"`
-	HAProxySSLCiphers         tiles.Value            `json:".properties.haproxy_ssl_ciphers"`
-	SkipSSLVerification       tiles.BooleanValue     `json:".ha_proxy.skip_cert_verify"`
-	HAProxyForwardTLS         tiles.Value            `json:".properties.haproxy_forward_tls"`
-	IngressCertificates       tiles.CertificateValue `json:".properties.networking_poe_ssl_cert"`
-	// Application Containers
-	ContainerDNSServers tiles.Value `json:".diego_cell.dns_servers"`
+	AppsDomain                tiles.Value              `json:".cloud_controller.apps_domain"`
+	SysDomain                 tiles.Value              `json:".cloud_controller.system_domain"`
+	TcpRouting                tiles.Value              `json:".properties.tcp_routing"`
+	TcpRoutingReservablePorts tiles.Value              `json:".properties.tcp_routing.enable.reservable_ports"`
+	GoRouterSSLCiphers        tiles.Value              `json:".properties.gorouter_ssl_ciphers"`
+	HAProxySSLCiphers         tiles.Value              `json:".properties.haproxy_ssl_ciphers"`
+	SkipSSLVerification       tiles.BooleanValue       `json:".ha_proxy.skip_cert_verify"`
+	HAProxyForwardTLS         tiles.Value              `json:".properties.haproxy_forward_tls"`
+	IngressCertificates       tiles.CertificateValue   `json:".properties.networking_poe_ssl_certs"`
+	CredhubEncryptionKey      tiles.EncryptionKeyValue `json:".properties.credhub_key_encryption_passwords"`
 	// Application Security Groups
 	SecurityAcknowledgement tiles.Value `json:".properties.security_acknowledgement"`
 	// UAA
-	ServiceProviderCredentials tiles.CertificateValue `json:".uaa.service_provider_key_credentials"`
+	ServiceProviderCredentials tiles.OldCertificateValue `json:".uaa.service_provider_key_credentials"`
 
 	UaaDbChoice   tiles.Value        `json:".properties.uaa_database"`
 	UaaDbIp       tiles.Value        `json:".properties.uaa_database.external.host"`
@@ -126,20 +123,9 @@ type SmallFootprintResources struct {
 	Compute     tiles.Resource `json:"compute"`
 	FileStorage tiles.Resource `json:"blobstore"`
 
-	HaProxy                   tiles.Resource `json:"ha_proxy"`
-	BackupPrepare             tiles.Resource `json:"backup-prepare"`
-	MysqlMonitor              tiles.Resource `json:"mysql_monitor"`
-	SmokeTests                tiles.Resource `json:"smoke-tests"`
-	PushAppsManager           tiles.Resource `json:"push-apps-manager"`
-	Notifications             tiles.Resource `json:"notifications"`
-	NotificationsUi           tiles.Resource `json:"notifications-ui"`
-	PushPivotalAccount        tiles.Resource `json:"push-pivotal-account"`
-	PushUsageService          tiles.Resource `json:"push-usage-service"`
-	Autoscaling               tiles.Resource `json:"autoscaling"`
-	AutoscalingRegisterBroker tiles.Resource `json:"autoscaling-register-broker"`
-	Nfsbrokerpush             tiles.Resource `json:"nfsbrokerpush"`
-	Bootstrap                 tiles.Resource `json:"bootstrap"`
-	MysqlRejoinUnsafe         tiles.Resource `json:"mysql-rejoin-unsafe"`
+	HaProxy       tiles.Resource `json:"ha_proxy"`
+	BackupPrepare tiles.Resource `json:"backup-prepare"`
+	MysqlMonitor  tiles.Resource `json:"mysql_monitor"`
 }
 
 func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
@@ -155,19 +141,30 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	}
 
 	properties := Properties{
-		AppsDomain:                 tiles.Value{cfg.AppsDomain},
-		SysDomain:                  tiles.Value{cfg.SysDomain},
-		NetworkingPointOfEntry:     tiles.Value{"external_non_ssl"},
-		ContainerDNSServers:        tiles.Value{"8.8.8.8,8.8.4.4"},
-		SkipSSLVerification:        tiles.BooleanValue{true},
-		HAProxyForwardTLS:          tiles.Value{"disable"},
-		IngressCertificates:        tiles.CertificateValue{tiles.Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
+		AppsDomain:          tiles.Value{cfg.AppsDomain},
+		SysDomain:           tiles.Value{cfg.SysDomain},
+		SkipSSLVerification: tiles.BooleanValue{true},
+		HAProxyForwardTLS:   tiles.Value{"disable"},
+		IngressCertificates: tiles.CertificateValue{[]tiles.CertificateConstruct{
+			{Certificate: tiles.Certificate{cfg.SslCertificate, cfg.SslPrivateKey},
+				Name: "Certificate",
+			},
+		},
+		},
+		CredhubEncryptionKey: tiles.EncryptionKeyValue{[]tiles.EncryptionKey{
+			{
+				Name:    cfg.CredhubKey.Name,
+				Key:     tiles.KeyStruct{Secret: cfg.CredhubKey.Key},
+				Primary: true,
+			},
+		},
+		},
 		TcpRouting:                 tiles.Value{"enable"},
 		TcpRoutingReservablePorts:  tiles.Value{cfg.TcpPortRange},
 		GoRouterSSLCiphers:         tiles.Value{"ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		HAProxySSLCiphers:          tiles.Value{"DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		SecurityAcknowledgement:    tiles.Value{"X"},
-		ServiceProviderCredentials: tiles.CertificateValue{tiles.Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
+		ServiceProviderCredentials: tiles.OldCertificateValue{tiles.Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
 
 		UaaDbChoice:   tiles.Value{"external"},
 		UaaDbIp:       tiles.Value{cfg.ExternalSqlIp},
@@ -231,6 +228,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			},
 			HaProxy:      tiles.Resource{Instances: &zero},
 			MysqlMonitor: tiles.Resource{Instances: &zero},
+			Compute:      tiles.Resource{Instances: &three},
 		}
 		resorucesBytes, err = json.Marshal(&resoruces)
 	} else {

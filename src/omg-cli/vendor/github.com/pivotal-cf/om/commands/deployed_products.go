@@ -1,15 +1,20 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pivotal-cf/jhanda"
+	"github.com/pivotal-cf/om/presenters"
+)
 
 type DeployedProducts struct {
-	tableWriter       tableWriter
+	presenter         presenters.Presenter
 	diagnosticService diagnosticService
 }
 
-func NewDeployedProducts(tableWriter tableWriter, diagnosticService diagnosticService) DeployedProducts {
+func NewDeployedProducts(presenter presenters.Presenter, diagnosticService diagnosticService) DeployedProducts {
 	return DeployedProducts{
-		tableWriter:       tableWriter,
+		presenter:         presenter,
 		diagnosticService: diagnosticService,
 	}
 }
@@ -22,19 +27,13 @@ func (dp DeployedProducts) Execute(args []string) error {
 
 	deployedProducts := diagnosticReport.DeployedProducts
 
-	dp.tableWriter.SetHeader([]string{"Name", "Version"})
-
-	for _, product := range deployedProducts {
-		dp.tableWriter.Append([]string{product.Name, product.Version})
-	}
-
-	dp.tableWriter.Render()
+	dp.presenter.PresentDeployedProducts(deployedProducts)
 
 	return nil
 }
 
-func (dp DeployedProducts) Usage() Usage {
-	return Usage{
+func (dp DeployedProducts) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "This authenticated command lists all deployed products.",
 		ShortDescription: "lists deployed products",
 	}

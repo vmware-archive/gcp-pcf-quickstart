@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/google/go-querystring/query"
+	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/flags"
 )
 
 const (
@@ -55,12 +55,15 @@ func NewConfigureBosh(bs boshFormService, ds diagnosticService, l logger) Config
 }
 
 func (c ConfigureBosh) Execute(args []string) error {
-	_, err := flags.Parse(&c.Options, args)
-	if err != nil {
+	if len(args) == 0 {
+		return errors.New("at least one configuration flag must be provided. Please see usage for more information.")
+	}
+
+	if _, err := jhanda.Parse(&c.Options, args); err != nil {
 		return err
 	}
 
-	if c.Options.IaaSConfiguration != "" {
+	if c.Options.IaaSConfiguration != "" && c.Options.IaaSConfiguration != "{}" {
 		c.logger.Printf("configuring iaas specific options for bosh tile")
 
 		config, err := c.configureForm(c.Options.IaaSConfiguration)
@@ -74,7 +77,7 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 	}
 
-	if c.Options.DirectorConfiguration != "" {
+	if c.Options.DirectorConfiguration != "" && c.Options.DirectorConfiguration != "{}" {
 		c.logger.Printf("configuring director options for bosh tile")
 
 		config, err := c.configureForm(c.Options.DirectorConfiguration)
@@ -88,13 +91,37 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 	}
 
-	if c.Options.IaaSConfiguration == "{}" {
-		return errors.New("empty JSON object provided, please omit the flag instead")
-	}
-
 	report, err := c.diagnosticService.Report()
 	if err != nil {
 		return err
+	}
+
+	if c.Options.SecurityConfiguration != "" && c.Options.SecurityConfiguration != "{}" {
+		c.logger.Printf("configuring security options for bosh tile")
+
+		config, err := c.configureForm(c.Options.SecurityConfiguration)
+		if err != nil {
+			return err
+		}
+
+		err = c.postForm(securityConfigurationPath, config)
+		if err != nil {
+			return err
+		}
+	}
+
+	if c.Options.ResourceConfiguration != "" && c.Options.ResourceConfiguration != "{}" {
+		c.logger.Printf("configuring resources for bosh tile")
+
+		config, err := c.configureForm(c.Options.ResourceConfiguration)
+		if err != nil {
+			return err
+		}
+
+		err = c.postForm(resourceConfigurationPath, config)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, deployedProduct := range report.DeployedProducts {
@@ -104,7 +131,7 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 	}
 
-	if c.Options.AvailabilityZonesConfiguration != "" {
+	if c.Options.AvailabilityZonesConfiguration != "" && c.Options.AvailabilityZonesConfiguration != "{}" {
 		c.logger.Printf("configuring availability zones for bosh tile")
 
 		config, err := c.configureForm(c.Options.AvailabilityZonesConfiguration)
@@ -128,7 +155,7 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 	}
 
-	if c.Options.NetworksConfiguration != "" {
+	if c.Options.NetworksConfiguration != "" && c.Options.NetworksConfiguration != "{}" {
 		c.logger.Printf("configuring network options for bosh tile")
 		if err != nil {
 			panic(err)
@@ -140,7 +167,7 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 	}
 
-	if c.Options.NetworkAssignment != "" {
+	if c.Options.NetworkAssignment != "" && c.Options.NetworkAssignment != "{}" {
 		c.logger.Printf("assigning az and networks for bosh tile")
 
 		config, err := c.configureForm(c.Options.NetworkAssignment)
@@ -171,34 +198,6 @@ func (c ConfigureBosh) Execute(args []string) error {
 		}
 
 		err = c.postForm(networkAssignmentPath, config)
-		if err != nil {
-			return err
-		}
-	}
-
-	if c.Options.SecurityConfiguration != "" {
-		c.logger.Printf("configuring security options for bosh tile")
-
-		config, err := c.configureForm(c.Options.SecurityConfiguration)
-		if err != nil {
-			return err
-		}
-
-		err = c.postForm(securityConfigurationPath, config)
-		if err != nil {
-			return err
-		}
-	}
-
-	if c.Options.ResourceConfiguration != "" {
-		c.logger.Printf("configuring resources for bosh tile")
-
-		config, err := c.configureForm(c.Options.ResourceConfiguration)
-		if err != nil {
-			return err
-		}
-
-		err = c.postForm(resourceConfigurationPath, config)
 		if err != nil {
 			return err
 		}
@@ -291,8 +290,8 @@ func (c ConfigureBosh) configureNetworkForm(path string, configuration string, r
 	return nil
 }
 
-func (c ConfigureBosh) Usage() Usage {
-	return Usage{
+func (c ConfigureBosh) Usage() jhanda.Usage {
+	return jhanda.Usage{
 		Description:      "configures the bosh director that is deployed by the Ops Manager",
 		ShortDescription: "configures Ops Manager deployed bosh director",
 		Flags:            c.Options,

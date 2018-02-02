@@ -109,8 +109,8 @@ func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
 	if envConfig.SmallFootprint {
 		one := 1
 		instanceCount = &one
-		small := "small"
-		instanceType.ID = &small
+		large := "large"
+		instanceType.ID = &large
 	}
 
 	f := false
