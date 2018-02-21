@@ -29,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.api.services.storage.model.StorageObject;
 import com.google.cloud.servicebroker.awwvision.RedditResponse.Listing;
@@ -76,7 +77,7 @@ public class RedditScraper {
         URL url;
         byte[] raw;
         try {
-          url = new URL(img.source.url);
+          url = new URL(HtmlUtils.htmlUnescape(img.source.url));
           raw = download(url);
         } catch (IOException e) {
           logger.warn("Issue in streaming image " + img.source.url, e);
