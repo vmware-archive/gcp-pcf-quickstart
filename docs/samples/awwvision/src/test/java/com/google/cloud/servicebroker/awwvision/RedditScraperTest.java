@@ -86,14 +86,14 @@ public class RedditScraperTest {
 
   @Test
   public void testScrape() throws Exception {
-    Image img1 = new Image(new RedditResponse.Source("http://url1"), "img1");
+    Image img1 = new Image(new RedditResponse.Source("http://url1?foo=bar&amp;baz=foo"), "img1");
     Image img2 = new Image(new RedditResponse.Source("http://url2"), "img2");
     RedditResponse redditResponse = new RedditResponse(new Data(
         new Listing[] {new Listing(new ListingData(new Preview(new Image[] {img1, img2})))}));
 
     scraper.storeAndLabel(redditResponse);
 
-    verify(storageAPI).uploadJpeg("img1.jpg", new URL("http://url1"),
+    verify(storageAPI).uploadJpeg("img1.jpg", new URL("http://url1?foo=bar&baz=foo"),
         ImmutableMap.of("label", "dog"));
     verify(storageAPI).uploadJpeg("img2.jpg", new URL("http://url2"),
         ImmutableMap.of("label", "dog"));
@@ -103,13 +103,13 @@ public class RedditScraperTest {
   public void testSelfPosts() throws Exception {
     Image img1 = new Image(new RedditResponse.Source("http://url1"), "img1");
     RedditResponse redditResponse = new RedditResponse(new Data(
-            new Listing[] {
-                    new Listing(new ListingData(new Preview(new Image[] {img1}))),
-                    new Listing(new ListingData()),
-            }));
+        new Listing[] {
+            new Listing(new ListingData(new Preview(new Image[] {img1}))),
+            new Listing(new ListingData()),
+        }));
 
     scraper.storeAndLabel(redditResponse);
     verify(storageAPI).uploadJpeg("img1.jpg", new URL("http://url1"),
-            ImmutableMap.of("label", "dog"));
+        ImmutableMap.of("label", "dog"));
   }
 }
