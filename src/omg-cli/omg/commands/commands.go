@@ -18,7 +18,6 @@ package commands
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 
 	"omg-cli/omg/tiles"
@@ -99,20 +98,12 @@ func retry(fn step, times int) error {
 	return fmt.Errorf("failed after %d attempts, errors: %v", times, errs)
 }
 
-func rootDir() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Dir(ex)
-}
-
 func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
-	c.Flag("env-dir", "path to environment configuration and state").Default(filepath.Join(rootDir(), "env", "pcf")).StringVar(path)
+	c.Flag("env-dir", "path to environment configuration and state").Default(filepath.Join("env", "pcf")).StringVar(path)
 }
 
 func registerTileCacheFlag(c *kingpin.CmdClause, path *string) {
-	c.Flag("cache-dir", "path to directory used to cache downloads").Default(filepath.Join(rootDir(), "cache")).StringVar(path)
+	c.Flag("cache-dir", "path to directory used to cache downloads").Default("cache").StringVar(path)
 }
 func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
 	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
