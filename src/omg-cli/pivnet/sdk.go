@@ -17,12 +17,10 @@
 package pivnet
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -40,44 +38,31 @@ const (
 )
 
 type Sdk struct {
-	apiToken string
-	logger   *log.Logger
+	logger *log.Logger
+	client gopivnet.Client
 }
 
 func NewSdk(apiToken string, logger *log.Logger) (*Sdk, error) {
-	sdk := &Sdk{apiToken, logger}
+	sdk := &Sdk{logger: logger}
+
+	cfg := gopivnet.ClientConfig{
+		Host:      gopivnet.DefaultHost,
+		Token:     apiToken,
+		UserAgent: version.UserAgent(),
+	}
+	sdk.client = gopivnet.NewClient(cfg, logshim.NewLogShim(logger, logger, false))
 
 	return sdk, sdk.checkCredentials()
 }
 
-func (s *Sdk) authorizedRequest(method, path string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest(method, fmt.Sprintf("https://network.pivotal.io/%s", path), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Token %s", s.apiToken))
-	req.Header.Set("User-Agent", version.UserAgent())
-
-	return req, nil
-}
-
 func (s *Sdk) checkCredentials() error {
-	req, err := s.authorizedRequest("GET", "api/v2/authentication", nil)
-	if err != nil {
-		return err
-	}
+	ok, err := s.client.Auth.Check()
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
+	if ok {
+		return nil
+	} else {
+		return fmt.Errorf("authorizing pivnet credentials: %v", err)
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("authorizing pivnet-api-token, recieved: %s", resp.Status)
-	}
-
-	return nil
 }
 
 // DownloadTile retrieves a given productSlug, releaseId, and fileId from PivNet
@@ -108,14 +93,6 @@ func (s *Sdk) DownloadTileToPath(tile config.PivnetMetadata, path string) (file 
 }
 
 func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, error) {
-	cfg := gopivnet.ClientConfig{
-		Host:      gopivnet.DefaultHost,
-		Token:     s.apiToken,
-		UserAgent: version.UserAgent(),
-	}
-
-	client := gopivnet.NewClient(cfg, logshim.NewLogShim(s.logger, s.logger, false))
-
 	var err error
 	var out *os.File
 	if path == "" {
@@ -137,72 +114,25 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 	releaseId, _ := strconv.Atoi(tile.ReleaseId)
 	fileId, _ := strconv.Atoi(tile.FileId)
 
-	return out, client.ProductFiles.DownloadForRelease(out, tile.Name, releaseId, fileId, os.Stdout)
+	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, releaseId, fileId, os.Stdout)
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
-	req, err := s.authorizedRequest("POST", fmt.Sprintf("/api/v2/products/%s/releases/%s/eula_acceptance", tile.Name, tile.ReleaseId), nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
-	}
-
-	return nil
+	releaseId, _ := strconv.Atoi(tile.ReleaseId)
+	return s.client.EULA.Accept(tile.Name, releaseId)
 }
 
 type Eula struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-	Slug    string `json:"slug"`
-	Links   struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-	} `json:"_links"`
+	Name    string
+	Content string
+	Slug    string
 }
 
 func (s *Sdk) GetEula(eulaSlug string) (*Eula, error) {
-	req, err := s.authorizedRequest("GET", "/api/v2/eulas", nil)
+	eula, err := s.client.EULA.Get(eulaSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("fetching eula: %s, recieved: %s", eulaSlug, resp.Status)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var eulaResponse struct {
-		Eulas []Eula `json:"eulas"`
-	}
-	if err := json.Unmarshal(body, &eulaResponse); err != nil {
-		return nil, fmt.Errorf("unmarshalling pivnet response: %v", err)
-	}
-
-	for _, eula := range eulaResponse.Eulas {
-		if eula.Slug == eulaSlug {
-			return &eula, nil
-		}
-	}
-
-	return nil, fmt.Errorf("EULA not found: %s", eulaSlug)
+	return &Eula{Name: eula.Name, Content: eula.Content, Slug: eula.Slug}, nil
 }

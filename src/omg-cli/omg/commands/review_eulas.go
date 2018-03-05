@@ -78,7 +78,7 @@ func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
 
 	reader := bufio.NewReader(os.Stdin)
 	for _, eula := range eulas {
-		fmt.Printf("EULA: %s\n%s\nURL: %s\n", eula.Name, eula.Content, eula.Links.Self.Href)
+		fmt.Printf("EULA: %s\n%s\n", eula.Name, eula.Content)
 
 		if cmd.acceptAll {
 			fmt.Printf("EULA accepted via command line flag\n")
