@@ -52,7 +52,7 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
 			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
 		}
-	} else {
+	} else if err != nil {
 		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
 	}
 
