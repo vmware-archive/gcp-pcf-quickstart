@@ -17,23 +17,21 @@
 package pivnet
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-
-	"log"
-
-	"omg-cli/config"
-
-	"omg-cli/version"
-
+	"strconv"
 	"time"
 
-	"github.com/pivotal-cf/om/progress"
+	"omg-cli/config"
+	"omg-cli/version"
+
+	gopivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/logshim"
 )
 
 const (
@@ -110,22 +108,15 @@ func (s *Sdk) DownloadTileToPath(tile config.PivnetMetadata, path string) (file 
 }
 
 func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, error) {
-	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.ReleaseId, tile.FileId), nil)
-	if err != nil {
-		return nil, err
+	cfg := gopivnet.ClientConfig{
+		Host:      gopivnet.DefaultHost,
+		Token:     s.apiToken,
+		UserAgent: version.UserAgent(),
 	}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	client := gopivnet.NewClient(cfg, logshim.NewLogShim(s.logger, s.logger, false))
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		return nil, fmt.Errorf("received non-200 %s response from server, body: %q", resp.Status, body)
-	}
-
+	var err error
 	var out *os.File
 	if path == "" {
 		out, err = ioutil.TempFile("", "tile")
@@ -136,39 +127,17 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 		return nil, err
 	}
 
-	// Delete the temp file if we're returning an error
+	// Delete the file if we're returning an error
 	defer func() {
 		if err != nil {
 			os.Remove(out.Name())
 		}
 	}()
 
-	// Stream the download to write the data to file in chunks
-	// and calculate the sha256 the file is being written.
-	//
-	// This is necessary because we will read large (6+ GB) files
-	// with this method.
-	//
-	// resp.body ==> BarReader (bar) ==> TeeReader ==> hasher (sha256)
-	//                                             ==> out (temp file)
-	s.logger.Printf("downloading tile: %s", tile.Name)
-	hasher := sha256.New()
-	bar := progress.NewBar()
-	bar.SetTotal(resp.ContentLength)
-	bar.Kickoff()
-	defer bar.End()
+	releaseId, _ := strconv.Atoi(tile.ReleaseId)
+	fileId, _ := strconv.Atoi(tile.FileId)
 
-	_, err = io.Copy(out, io.TeeReader(bar.NewBarReader(resp.Body), hasher))
-	if err != nil {
-		return nil, err
-	}
-
-	downloadedSha := fmt.Sprintf("%x", hasher.Sum(nil))
-	if downloadedSha != tile.Sha256 {
-		return nil, fmt.Errorf("sha256 of downloaded product does not match expected, got: %s, expected: %s", downloadedSha, tile.Sha256)
-	}
-
-	return out, nil
+	return out, client.ProductFiles.DownloadForRelease(out, tile.Name, releaseId, fileId, os.Stdout)
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
