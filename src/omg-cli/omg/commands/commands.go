@@ -102,7 +102,7 @@ func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
 }
 
 func registerTileCacheFlag(c *kingpin.CmdClause, path *string) {
-	c.Flag("tile-cache", "path to directory used to cache tiles").Default("").StringVar(path)
+	c.Flag("tile-cache", "path to directory used to cache tiles").Default("cache").StringVar(path)
 }
 func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
 	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
