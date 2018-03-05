@@ -23,8 +23,8 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"gcp-service-broker",
-		"24491",
-		"54209",
+		24491,
+		54209,
 		"e192cff35a92e9b78ee8c626bf0a5b59e86946d93111d953a39e211c9fb649b8",
 	},
 	config.OpsManagerMetadata{
@@ -33,8 +33,8 @@ var tile = config.Tile{
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
-			"28003",
-			"58587",
+			28003,
+			58587,
 			"af238d0d9d94b18da32d302512831d83aec00312a18bb528b351144e0f281f0e"},
 		"light-bosh-stemcell-3468.17-google-kvm-ubuntu-trusty-go_agent",
 	},

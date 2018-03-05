@@ -23,8 +23,8 @@ import (
 var fullRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"32638",
-		"63742",
+		32638,
+		63742,
 		"6567cf2d85ed38c0486fc2acbca5c1dd5fe24382f685972a0387dd984976c7d8",
 	},
 	product,
@@ -34,8 +34,8 @@ var fullRuntime = config.Tile{
 var smallRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		"32638",
-		"63747",
+		32638,
+		63747,
 		"c29c848cb6b2019afb2050c2a248f18369a4b7834f34a3ebf50e11b9c4f4358e",
 	},
 	product,
@@ -49,8 +49,8 @@ var product = config.OpsManagerMetadata{
 
 var stemcell = config.StemcellMetadata{
 	config.PivnetMetadata{"stemcells",
-		"28002",
-		"58592",
+		28002,
+		58592,
 		"fa6f3b8fe7e64987b628b17812989524550fea45a297fb7ead469c72d10f3b87"},
 	"light-bosh-stemcell-3445.22-google-kvm-ubuntu-trusty-go_agent",
 }

@@ -24,8 +24,8 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"p-healthwatch",
-		"28580",
-		"59254",
+		28580,
+		59254,
 		"0485a5d896d764a34641c2d3b80325202b843d042021b2cb7cb6c49a8be5297a",
 	},
 	config.OpsManagerMetadata{
@@ -34,8 +34,8 @@ var tile = config.Tile{
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
-			"28004",
-			"58600",
+			28004,
+			58600,
 			"160e6ebc0f34af53543803eed4b7772fb7beaaa25cb3262ab170884e06feb721"},
 		"light-bosh-stemcell-3421.36-google-kvm-ubuntu-trusty-go_agent",
 	},

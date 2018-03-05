@@ -13,7 +13,7 @@ type TileCache struct {
 }
 
 func (tc *TileCache) FileName(tile config.PivnetMetadata) string {
-	return fmt.Sprintf("%s-%s-%s.pivotal", tile.Name, tile.ReleaseId, tile.FileId)
+	return fmt.Sprintf("%s-%d-%d.pivotal", tile.Name, tile.ReleaseId, tile.FileId)
 }
 
 func (tc *TileCache) Open(tile config.PivnetMetadata) (*os.File, error) {

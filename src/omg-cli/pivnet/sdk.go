@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"omg-cli/config"
@@ -111,15 +110,11 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 		}
 	}()
 
-	releaseId, _ := strconv.Atoi(tile.ReleaseId)
-	fileId, _ := strconv.Atoi(tile.FileId)
-
-	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, releaseId, fileId, os.Stdout)
+	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, tile.ReleaseId, tile.FileId, os.Stdout)
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
-	releaseId, _ := strconv.Atoi(tile.ReleaseId)
-	return s.client.EULA.Accept(tile.Name, releaseId)
+	return s.client.EULA.Accept(tile.Name, tile.ReleaseId)
 }
 
 type Eula struct {

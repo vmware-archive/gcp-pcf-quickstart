@@ -24,8 +24,8 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"gcp-stackdriver-nozzle",
-		"6586",
-		"27540",
+		6586,
+		27540,
 		"8aabde09128db9f7ec0d26cd7e05d6e56530fff3aaded0e88d4fbde83b3e55b4",
 	},
 	config.OpsManagerMetadata{
@@ -34,8 +34,8 @@ var tile = config.Tile{
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
-			"28004",
-			"58600",
+			28004,
+			58600,
 			"160e6ebc0f34af53543803eed4b7772fb7beaaa25cb3262ab170884e06feb721"},
 		"light-bosh-stemcell-3421.36-google-kvm-ubuntu-trusty-go_agent",
 	},
