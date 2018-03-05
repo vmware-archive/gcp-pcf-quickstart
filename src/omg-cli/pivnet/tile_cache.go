@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"omg-cli/config"
 )
@@ -30,7 +31,7 @@ func (tc *TileCache) Open(tile config.PivnetMetadata) (*os.File, error) {
 
 	for _, file := range files {
 		if file.Name() == needle {
-			return os.OpenFile(file.Name(), os.O_RDONLY, 0)
+			return os.Open(filepath.Join(tc.Dir, file.Name()))
 		}
 	}
 

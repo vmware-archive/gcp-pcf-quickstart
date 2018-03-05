@@ -104,6 +104,7 @@ func (s *OpsManager) uploadProduct(tile config.PivnetMetadata) error {
 	file, err := s.tileCache.Open(tile)
 
 	if file == nil {
+		s.logger.Printf("tile not found in cache, downloading")
 		file, err = s.pivnet.DownloadTile(tile)
 		defer os.Remove(file.Name())
 	}
