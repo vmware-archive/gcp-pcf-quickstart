@@ -88,8 +88,14 @@ func (s *Sdk) checkCredentials() error {
 //
 // Caller is responsible for deleting the os.File
 func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (file *os.File, err error) {
+	return s.DownloadTileToPath(tile, "")
+}
+
+// DownloadTileToPath is a version of DownloadTile that accepts a path specifying
+// download location of the tile.
+func (s *Sdk) DownloadTileToPath(tile config.PivnetMetadata, path string) (file *os.File, err error) {
 	for i := 0; i < retryAttempts; i++ {
-		file, err = s.downloadTile(tile)
+		file, err = s.downloadTile(tile, path)
 
 		// Success or recoverable error
 		if err == nil || err != io.ErrUnexpectedEOF {
@@ -103,7 +109,7 @@ func (s *Sdk) DownloadTile(tile config.PivnetMetadata) (file *os.File, err error
 	return nil, fmt.Errorf("download tile failed after %d attempts", retryAttempts)
 }
 
-func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
+func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, error) {
 	req, err := s.authorizedRequest("GET", fmt.Sprintf("/api/v2/products/%s/releases/%s/product_files/%s/download", tile.Name, tile.ReleaseId, tile.FileId), nil)
 	if err != nil {
 		return nil, err
@@ -120,10 +126,16 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata) (*os.File, error) {
 		return nil, fmt.Errorf("received non-200 %s response from server, body: %q", resp.Status, body)
 	}
 
-	out, err := ioutil.TempFile("", "tile")
+	var out *os.File
+	if path == "" {
+		out, err = ioutil.TempFile("", "tile")
+	} else {
+		out, err = os.Create(path)
+	}
 	if err != nil {
 		return nil, err
 	}
+
 	// Delete the temp file if we're returning an error
 	defer func() {
 		if err != nil {

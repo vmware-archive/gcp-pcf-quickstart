@@ -3,5 +3,6 @@ bin/*
 .cache
 .idea/*
 env/*
+cache/*
 service_account.json
 .envrc

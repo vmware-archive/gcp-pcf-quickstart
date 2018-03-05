@@ -54,6 +54,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 		&ReviewEulasCommand{logger: logger},
 		&CleanupProjectCommand{logger: logger},
 		&DirectorSSHCommand{logger: logger},
+		&CacheTilesCommand{logger: logger},
 	}
 
 	for _, c := range cmds {
@@ -100,6 +101,9 @@ func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
 	c.Flag("env-dir", "path to environment configuration and state").Default("env/pcf").StringVar(path)
 }
 
+func registerTileCacheFlag(c *kingpin.CmdClause, path *string) {
+	c.Flag("tile-cache", "path to directory used to cache tiles").Default("").StringVar(path)
+}
 func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
 	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
 }

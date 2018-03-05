@@ -31,16 +31,17 @@ import (
 )
 
 type OpsManager struct {
-	cfg    *config.Config
-	envCfg *config.EnvConfig
-	om     *ops_manager.Sdk
-	pivnet *pivnet.Sdk
-	logger *log.Logger
-	tiles  []tiles.TileInstaller
+	cfg       *config.Config
+	envCfg    *config.EnvConfig
+	om        *ops_manager.Sdk
+	pivnet    *pivnet.Sdk
+	logger    *log.Logger
+	tiles     []tiles.TileInstaller
+	tileCache *pivnet.TileCache
 }
 
-func NewService(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller) *OpsManager {
-	return &OpsManager{cfg, envCfg, omSdk, pivnetSdk, logger, tiles}
+func NewService(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller, tileCache *pivnet.TileCache) *OpsManager {
+	return &OpsManager{cfg, envCfg, omSdk, pivnetSdk, logger, tiles, tileCache}
 }
 
 func (s *OpsManager) SetupAuth() error {
@@ -100,11 +101,16 @@ func (s *OpsManager) ensureProductReady(tile config.Tile) error {
 }
 
 func (s *OpsManager) uploadProduct(tile config.PivnetMetadata) error {
-	file, err := s.pivnet.DownloadTile(tile)
+	file, err := s.tileCache.Open(tile)
+
+	if file == nil {
+		file, err = s.pivnet.DownloadTile(tile)
+		defer os.Remove(file.Name())
+	}
+
 	if err != nil {
 		return err
 	}
-	defer os.Remove(file.Name())
 
 	return s.om.UploadProduct(file.Name())
 }

@@ -29,8 +29,9 @@ import (
 )
 
 type PushTilesCommand struct {
-	logger *log.Logger
-	envDir string
+	logger       *log.Logger
+	envDir       string
+	tileCacheDir string
 }
 
 const PushTilesName = "push-tiles"
@@ -38,6 +39,7 @@ const PushTilesName = "push-tiles"
 func (cmd *PushTilesCommand) register(app *kingpin.Application) {
 	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
+	registerTileCacheFlag(c, &cmd.tileCacheDir)
 }
 
 func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
@@ -61,7 +63,9 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, selectedTiles)
+	tileCache := &pivnet.TileCache{Dir: cmd.tileCacheDir}
+
+	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, selectedTiles, tileCache)
 
 	return run([]step{
 		opsMan.PoolTillOnline,

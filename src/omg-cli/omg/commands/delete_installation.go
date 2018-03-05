@@ -55,7 +55,7 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, selectedTiles)
+	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
 
 	steps := []step{
 		opsMan.PoolTillOnline,
