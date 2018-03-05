@@ -19,6 +19,7 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 
 	"omg-cli/config"
@@ -45,6 +46,14 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 	pivnetSdk, err := pivnet.NewSdk(cmd.pivnetApiToken, cmd.logger)
 	if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
+		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
+			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
+		}
+	} else {
+		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
 	}
 
 	tileCache := pivnet.TileCache{cmd.tileCacheDir}
