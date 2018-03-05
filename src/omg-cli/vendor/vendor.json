@@ -333,6 +333,30 @@
 			"revisionTime": "2017-07-16T19:34:46Z"
 		},
 		{
+			"checksumSHA1": "mrG2x1NiDPBn440gD7H6NIkiTw0=",
+			"path": "github.com/pivotal-cf/go-pivnet",
+			"revision": "ef1eaf8cfb531ed28bfa0a8cb617119f541df3e4",
+			"revisionTime": "2017-10-18T20:22:10Z"
+		},
+		{
+			"checksumSHA1": "ut9QjYF1mWdHPDDt+r2EqT/1i+M=",
+			"path": "github.com/pivotal-cf/go-pivnet/download",
+			"revision": "ef1eaf8cfb531ed28bfa0a8cb617119f541df3e4",
+			"revisionTime": "2017-10-18T20:22:10Z"
+		},
+		{
+			"checksumSHA1": "QQRo2arKbcuZ0+rPF33Puh15q4o=",
+			"path": "github.com/pivotal-cf/go-pivnet/logger",
+			"revision": "ef1eaf8cfb531ed28bfa0a8cb617119f541df3e4",
+			"revisionTime": "2017-10-18T20:22:10Z"
+		},
+		{
+			"checksumSHA1": "RkCPFFbF3bzOUP9voMe5Is9/ZIA=",
+			"path": "github.com/pivotal-cf/go-pivnet/logshim",
+			"revision": "ef1eaf8cfb531ed28bfa0a8cb617119f541df3e4",
+			"revisionTime": "2017-10-18T20:22:10Z"
+		},
+		{
 			"checksumSHA1": "Umy1Ru/yEscbQnVcVQHKMc2YJG8=",
 			"path": "github.com/pivotal-cf/om",
 			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
@@ -479,6 +503,12 @@
 			"path": "golang.org/x/oauth2/jwt",
 			"revision": "cce311a261e6fcf29de72ca96827bdb0b7d9c9e6",
 			"revisionTime": "2017-06-29T19:00:38Z"
+		},
+		{
+			"checksumSHA1": "S0DP7Pn7sZUmXc55IzZnNvERu6s=",
+			"path": "golang.org/x/sync/errgroup",
+			"revision": "fd80eb99c8f653c847d294a001bdf2a3a6f768f5",
+			"revisionTime": "2017-11-01T19:49:15Z"
 		},
 		{
 			"checksumSHA1": "GlVnY+OiodlEKgT7cegC3hdzxOo=",
