@@ -160,6 +160,7 @@ output "ert_sql_username" {
 
 output "ert_sql_password" {
   value = "${module.external_database.ert_sql_password}"
+  sensitive = true
 }
 
 output "opsman_sql_username" {
@@ -168,6 +169,7 @@ output "opsman_sql_username" {
 
 output "opsman_sql_password" {
   value = "${module.external_database.opsman_sql_password}"
+  sensitive = true
 }
 
 output "jumpbox_public_ip" {
@@ -180,6 +182,7 @@ output "ssl_cert" {
 
 output "ssl_cert_private_key" {
   value = "${var.ssl_cert_private_key}"
+  sensitive = true
 }
 
 output "tcp_port_range" {
@@ -188,14 +191,17 @@ output "tcp_port_range" {
 
 output "stackdriver_service_account_key_base64" {
   value = "${google_service_account_key.stackdrvier_nozzle.private_key}"
+  sensitive = true
 }
 
 output "service_broker_service_account_key_base64" {
   value = "${google_service_account_key.service_broker.private_key}"
+  sensitive = true
 }
 
 output "ops_manager_service_account_key_base64" {
   value = "${google_service_account_key.ops_manager.private_key}"
+  sensitive = true
 }
 
 output "service_broker_db_ip" {
@@ -208,6 +214,7 @@ output "service_broker_db_username" {
 
 output "service_broker_db_password" {
   value = "${random_id.service_broker_password.b64}"
+  sensitive = true
 }
 
 output "ops_manager_username" {
@@ -216,10 +223,12 @@ output "ops_manager_username" {
 
 output "ops_manager_password" {
   value = "${var.ops_manager_password == "" ? random_id.ops_manager_password_generator.b64 : var.ops_manager_password}"
+  sensitive = true
 }
 
 output "ops_manager_decryption_phrase" {
   value = "${var.ops_manager_decryption_phrase == "" ? random_id.ops_manager_decryption_phrase_generator.b64 : var.ops_manager_decryption_phrase}"
+  sensitive = true
 }
 
 output "ops_manager_skip_ssl_verify" {
@@ -232,4 +241,5 @@ output "credhub_key_name" {
 
 output "credhub_key" {
   value = "${var.credhub_key == "" ? random_id.credhub_key_generator.b64 : var.credhub_key}"
+  sensitive = true
 }
