@@ -45,6 +45,16 @@ Use the `identity` from the previous step as the `Email` and the
    
 The last command will output the URL you can use to access the app.
 
+## Access the Jumpbox
+
+Run the following command from the `gcp-pcf-quickstart` folder on your deployment machine.
+
+  ```bash
+  util/ssh.sh
+  ```
+
+This command will open an SSH session with the jumpbox deployed to your PCF network.
+
 ## What's Next?
 - [Deploy an app using Google Cloud Storage and Vision APIs](./deploy-awwvision.md)
 - [Delete Deployment](./deleting-deployment.md)
