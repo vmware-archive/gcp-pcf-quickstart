@@ -106,6 +106,7 @@ opsman_external_ip = "true"
 opsman_machine_type = "${opsman_machine_type}"
 nat_machine_type="${nat_machine_type}"
 jumpbox_machine_type="${jumpbox_machine_type}"
+ops_manager_password = "${OPSMAN_ADMIN_PASSWORD:-}"
 ops_manager_skip_ssl_verify = "true"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
