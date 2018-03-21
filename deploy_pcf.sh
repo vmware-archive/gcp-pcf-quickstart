@@ -43,7 +43,13 @@ if [ ! -f $env_config ]; then
         exit 1
     fi
 
-    omg-cli generate-config --env-dir="${ENV_DIR}"
+    if [ -z ${GCP_PROJECT+X} ]; then
+        export GCP_PROJECT=$(gcloud config get-value project | xargs echo -n)
+        echo "GCP_PROJECT unset, using: ${GCP_PROJECT}"
+    fi
+
+    omg-cli generate-config --env-dir="${ENV_DIR}" --pivnet-api-token="${PIVNET_API_TOKEN}" --gcp-project="${GCP_PROJECT}"
+
     echo ""
     echo "The following settings are defaults:"
     echo ""

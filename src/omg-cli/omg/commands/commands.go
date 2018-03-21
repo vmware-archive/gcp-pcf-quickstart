@@ -108,3 +108,7 @@ func registerTileCacheFlag(c *kingpin.CmdClause, path *string) {
 func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
 	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
 }
+
+func registerPivnetApiTokenFlag(c *kingpin.CmdClause, token *string) {
+	c.Flag("pivnet-api-token", "API token for network.pivotal.io (see: https://network.pivotal.io/users/dashboard/edit-profile)").Required().StringVar(token)
+}

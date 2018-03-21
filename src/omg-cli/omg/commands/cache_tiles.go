@@ -39,7 +39,7 @@ const CacheTilesName = "cache-tiles"
 func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 	c := app.Command(CacheTilesName, "Cache tile downloads locally").Action(cmd.run)
 	registerTileCacheFlag(c, &cmd.tileCacheDir)
-	c.Flag("pivnet-api-token", "API token for network.pivotal.io (see: https://network.pivotal.io/users/dashboard/edit-profile)").Required().StringVar(&cmd.pivnetApiToken)
+	registerPivnetApiTokenFlag(c, &cmd.pivnetApiToken)
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {

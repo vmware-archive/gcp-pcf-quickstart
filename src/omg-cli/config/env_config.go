@@ -19,10 +19,7 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 type EnvConfig struct {
@@ -49,13 +46,6 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 		Zone3:          "us-east1-d",
 		SmallFootprint: true,
 	}
-
-	projectId, err := exec.Command("gcloud", "config", "get-value", "project").Output()
-	if err != nil {
-		return nil, err
-	}
-	c.ProjectID = strings.TrimSuffix(string(projectId), "\n")
-	c.PivnetApiToken = os.Getenv("PIVNET_API_TOKEN")
 
 	return c, nil
 }
