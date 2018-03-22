@@ -25,5 +25,5 @@ type ZoneResult struct {
 
 func ParseZone(zone string) (*ZoneResult, error) {
 	// TODO: Implement a real version
-	return &ZoneResult{Region: "us-east", Zone1: "us-east1-b", Zone2: "us-east1-c", Zone3: "us-east1-d"}, nil
+	return &ZoneResult{Region: "us-east1", Zone1: "us-east1-b", Zone2: "us-east1-c", Zone3: "us-east1-d"}, nil
 }
