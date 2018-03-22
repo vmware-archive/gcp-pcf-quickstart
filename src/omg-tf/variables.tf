@@ -130,10 +130,9 @@ variable "ops_manager_decryption_phrase" {
 
 variable "ops_manager_skip_ssl_verify" {
   description = "Skip SSL veririfcation for Ops Manager HTTPS endpoint"
-  type    = "string"
-  default = ""
+  type        = "string"
+  default     = ""
 }
-
 
 /*****************************
  * Isolation Segment Options *
