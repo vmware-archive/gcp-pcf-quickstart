@@ -50,7 +50,6 @@ func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNe
 
 	return commands.NetworkConfiguration{
 		Name:           name,
-		ServiceNetwork: &serviceNetwork,
 		Subnets: []commands.Subnet{
 			{
 				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", cfg.NetworkName, name, cfg.Region),
