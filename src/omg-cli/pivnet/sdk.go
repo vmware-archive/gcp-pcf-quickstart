@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -37,12 +38,13 @@ const (
 )
 
 type Sdk struct {
-	logger *log.Logger
-	client gopivnet.Client
+	logger   *log.Logger
+	client   gopivnet.Client
+	apiToken string
 }
 
 func NewSdk(apiToken string, logger *log.Logger) (*Sdk, error) {
-	sdk := &Sdk{logger: logger}
+	sdk := &Sdk{logger: logger, apiToken: apiToken}
 
 	cfg := gopivnet.ClientConfig{
 		Host:      gopivnet.DefaultHost,
@@ -114,7 +116,24 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
-	return s.client.EULA.Accept(tile.Name, tile.ReleaseId)
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://network.pivotal.io/api/v2/products/%s/releases/%d/eula_acceptance", tile.Name, tile.ReleaseId), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Token %s", s.apiToken))
+	req.Header.Set("User-Agent", version.UserAgent())
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
+	}
+
+	return nil
 }
 
 type Eula struct {
