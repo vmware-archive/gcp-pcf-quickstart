@@ -137,6 +137,7 @@ func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota 
 func RequiredAPIs() []google.API {
 	return []google.API{
 		{"bigquery-json.googleapis.com"},
+		{"cloudbuild.googleapis.com"},
 		{"clouddebugger.googleapis.com"},
 		{"cloudresourcemanager.googleapis.com"},
 		{"datastore.googleapis.com"},
