@@ -9,12 +9,13 @@ resource "google_compute_instance" "nat" {
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-8"
-      size = 10
+      size  = 10
     }
   }
 
   network_interface {
     subnetwork = "${google_compute_subnetwork.unmanaged-subnet.name}"
+
     access_config {
       # ephemeral IP
     }
@@ -33,7 +34,7 @@ resource "google_compute_route" "nat-primary" {
   // Explicitly declare dependency on all of the .nat instances.
   // This is needed because we only explicitly reference the first nat instance.
   // We implicitly depend on the others because of the name interpolation.
-  depends_on             = ["google_compute_instance.nat"]
+  depends_on = ["google_compute_instance.nat"]
 
   name                   = "${var.env_name}-nat-primary-${count.index}"
   dest_range             = "0.0.0.0/0"

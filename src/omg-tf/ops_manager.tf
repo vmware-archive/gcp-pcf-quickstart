@@ -23,7 +23,7 @@ resource "google_compute_image" "ops-manager-image" {
 }
 
 resource "google_compute_instance" "ops-manager-internal" {
-  count          = "${var.opsman_external_ip != "" ? 0 : 1}"
+  count = "${var.opsman_external_ip != "" ? 0 : 1}"
 
   name           = "${var.env_name}-ops-manager"
   machine_type   = "${var.opsman_machine_type}"
@@ -51,12 +51,12 @@ resource "google_compute_instance" "ops-manager-internal" {
 }
 
 resource "google_compute_address" "ops-manager-external" {
-  count          = "${var.opsman_external_ip != "" ? 1 : 0}"
-  name           = "${var.env_name}-ops-manager"
+  count = "${var.opsman_external_ip != "" ? 1 : 0}"
+  name  = "${var.env_name}-ops-manager"
 }
 
 resource "google_compute_instance" "ops-manager-external" {
-  count          = "${var.opsman_external_ip != "" ? 1 : 0}"
+  count = "${var.opsman_external_ip != "" ? 1 : 0}"
 
   name           = "${var.env_name}-ops-manager"
   machine_type   = "${var.opsman_machine_type}"
@@ -67,8 +67,8 @@ resource "google_compute_instance" "ops-manager-external" {
   boot_disk {
     initialize_params {
       image = "${var.opsman_image_selflink != "" ? var.opsman_image_selflink : google_compute_image.ops-manager-image.self_link}"
-      size = 250
-      type = "pd-ssd"
+      size  = 250
+      type  = "pd-ssd"
     }
   }
 
@@ -113,4 +113,3 @@ resource "google_project_iam_member" "ops_manager" {
   role    = "roles/owner"
   member  = "serviceAccount:${google_service_account.ops_manager.email}"
 }
-
