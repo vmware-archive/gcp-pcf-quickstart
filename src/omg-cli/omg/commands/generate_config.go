@@ -17,10 +17,12 @@
 package commands
 
 import (
+	"context"
 	"log"
 
 	"omg-cli/config"
 	"omg-cli/google"
+	"omg-cli/version"
 
 	"encoding/json"
 
@@ -28,6 +30,8 @@ import (
 	"io/ioutil"
 
 	"github.com/alecthomas/kingpin"
+	googleauth "golang.org/x/oauth2/google"
+	compute "google.golang.org/api/compute/v1"
 )
 
 type GenerateConfigCommand struct {
@@ -56,9 +60,19 @@ func (cmd *GenerateConfigCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	zoneResult, err := google.ParseZone(cmd.baseZone)
+	gcpClient, err := googleauth.DefaultClient(context.Background(), compute.CloudPlatformScope)
 	if err != nil {
-		return fmt.Errorf("parsing zone %s: %v", cmd.baseZone, zoneResult)
+		cmd.logger.Fatalf("loading application default credentials: %v.\nHave you ran `gcloud auth application-default login`?", err)
+	}
+	computeService, err := compute.New(gcpClient)
+	if err != nil {
+		cmd.logger.Fatalf("creating new compute client: %v", err)
+	}
+	computeService.UserAgent = version.UserAgent()
+
+	zoneResult, err := google.ParseZone(cmd.projectId, cmd.baseZone, computeService)
+	if err != nil {
+		return fmt.Errorf("parsing zone %s: %v", cmd.baseZone, err)
 	}
 	cfg.Region = zoneResult.Region
 	cfg.Zone1 = zoneResult.Zone1
