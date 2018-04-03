@@ -24,13 +24,13 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"gcp-stackdriver-nozzle",
-		6586,
-		27540,
-		"8aabde09128db9f7ec0d26cd7e05d6e56530fff3aaded0e88d4fbde83b3e55b4",
+		53596,
+		89124,
+		"80e137622ca76868693b406114a2c7c1fdf6ce5db91c77a8d848d558d288fe5c",
 	},
 	config.OpsManagerMetadata{
 		"stackdriver-nozzle",
-		"1.0.5",
+		"2.0.1",
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
