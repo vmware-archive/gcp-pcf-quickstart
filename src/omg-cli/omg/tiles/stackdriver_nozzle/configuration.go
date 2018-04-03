@@ -64,16 +64,13 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	vmType := ""
-	vmCount := 2
 	if envConfig.SmallFootprint {
 		vmType = "micro"
-		vmCount = 1
 	}
 	resoruces := Resources{
 		StackdriverNozzle: tiles.Resource{
 			InternetConnected: false,
 			VmTypeId:          vmType,
-			Instances:         &vmCount,
 		},
 	}
 	resorucesBytes, err := json.Marshal(&resoruces)
