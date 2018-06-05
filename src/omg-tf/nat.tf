@@ -27,6 +27,7 @@ resource "google_compute_instance" "nat" {
 #!/bin/bash
 sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sed -i= 's/^[# ]*net.ipv4.ip_forward=[[:digit:]]/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 EOF
 }
 
