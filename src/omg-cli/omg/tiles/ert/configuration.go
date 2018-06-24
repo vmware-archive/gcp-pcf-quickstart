@@ -195,13 +195,13 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		return err
 	}
 
-	resorucesBytes := []byte{}
+	resourcesBytes := []byte{}
 
 	zero := 0
 	one := 1
 	three := 3
 	if envConfig.SmallFootprint {
-		resoruces := SmallFootprintResources{
+		resources := SmallFootprintResources{
 			TcpRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 				InternetConnected: false,
@@ -218,9 +218,15 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			HaProxy:      tiles.Resource{Instances: &zero},
 			MysqlMonitor: tiles.Resource{Instances: &zero},
 		}
-		resorucesBytes, err = json.Marshal(&resoruces)
+		// Healthwatch pushes quite a few apps, make sure we have enough compute
+		if envConfig.IncludeHealthwatch {
+			resources.Compute = tiles.Resource{
+				Instances: &three,
+			}
+		}
+		resourcesBytes, err = json.Marshal(&resources)
 	} else {
-		resoruces := LargeFootprintResources{
+		resources := LargeFootprintResources{
 			TcpRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
 				InternetConnected: false,
@@ -239,11 +245,11 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			Mysql:        tiles.Resource{Instances: &zero},
 			MysqlMonitor: tiles.Resource{Instances: &zero},
 		}
-		resorucesBytes, err = json.Marshal(&resoruces)
+		resourcesBytes, err = json.Marshal(&resources)
 	}
 
 	if err != nil {
 		return err
 	}
-	return om.ConfigureProduct(product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
+	return om.ConfigureProduct(product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
 }
