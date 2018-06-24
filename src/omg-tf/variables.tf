@@ -20,7 +20,7 @@ variable "zones" {
 variable "opsman_image_url" {
   type        = "string"
   description = "location of ops manager image on google cloud storage"
-  default     = "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.1-build.204.tar.gz"
+  default     = "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.1-build.326.tar.gz"
 }
 
 variable "opsman_image_selflink" {
