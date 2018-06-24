@@ -23,28 +23,30 @@ import (
 )
 
 type EnvConfig struct {
-	DnsZoneName    string
-	ProjectID      string
-	BaseImageURL   string
-	EnvName        string
-	Region         string
-	PivnetApiToken string
-	Zone1          string
-	Zone2          string
-	Zone3          string
-	SmallFootprint bool
+	DnsZoneName        string
+	ProjectID          string
+	BaseImageURL       string
+	EnvName            string
+	Region             string
+	PivnetApiToken     string
+	Zone1              string
+	Zone2              string
+	Zone3              string
+	SmallFootprint     bool
+	IncludeHealthwatch bool
 }
 
 func DefaultEnvConfig() (*EnvConfig, error) {
 	c := &EnvConfig{
-		DnsZoneName:    "pcf-zone",
-		BaseImageURL:   "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.1-build.326.tar.gz",
-		EnvName:        "pcf",
-		Region:         "us-east1",
-		Zone1:          "us-east1-b",
-		Zone2:          "us-east1-c",
-		Zone3:          "us-east1-d",
-		SmallFootprint: true,
+		DnsZoneName:        "pcf-zone",
+		BaseImageURL:       "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.1-build.326.tar.gz",
+		EnvName:            "pcf",
+		Region:             "us-east1",
+		Zone1:              "us-east1-b",
+		Zone2:              "us-east1-c",
+		Zone3:              "us-east1-d",
+		SmallFootprint:     true,
+		IncludeHealthwatch: false,
 	}
 
 	return c, nil

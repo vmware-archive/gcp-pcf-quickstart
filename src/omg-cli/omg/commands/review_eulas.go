@@ -97,7 +97,8 @@ func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
 
 func (cmd *ReviewEulasCommand) acceptEulas() error {
 	var tileData []config.PivnetMetadata
-	for _, installer := range selectedTiles {
+	tiles := selectedTiles(cmd.logger, cmd.envConfig)
+	for _, installer := range tiles {
 		if installer.BuiltIn() {
 			continue
 		}

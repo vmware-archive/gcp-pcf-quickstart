@@ -57,7 +57,8 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, selectedTiles, nil)
+	tiles := selectedTiles(cmd.logger, envCfg)
+	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, tiles, nil)
 
 	steps := []step{
 		opsMan.PoolTillOnline,
