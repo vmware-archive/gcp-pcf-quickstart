@@ -12,7 +12,7 @@ type AuthService struct {
 }
 
 type UAATokenResponse struct {
-	Token string `json:"token"`
+	Token string `json:"access_token"`
 }
 
 // Check returns:
@@ -47,7 +47,7 @@ func (e AuthService) Check() (bool, error) {
 }
 
 func (e AuthService) FetchUAAToken(refresh_token string) (UAATokenResponse, error) {
-	url := "/authentication"
+	url := "/authentication/access_tokens"
 
 	body := AuthBody{RefreshToken: refresh_token}
 	b, err := json.Marshal(body)

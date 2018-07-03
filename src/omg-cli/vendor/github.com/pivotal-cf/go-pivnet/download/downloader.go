@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"github.com/shirou/gopsutil/disk"
 )
 
 //go:generate counterfeiter -o ./fakes/ranger.go --fake-name Ranger . ranger
@@ -58,6 +59,8 @@ func (c Client) Get(
 		return fmt.Errorf("failed to construct HEAD request: %s", err)
 	}
 
+	req.Header.Add("Referer","https://go-pivnet.network.pivotal.io")
+
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to make HEAD request: %s", err)
@@ -68,6 +71,15 @@ func (c Client) Get(
 	ranges, err := c.Ranger.BuildRange(resp.ContentLength)
 	if err != nil {
 		return fmt.Errorf("failed to construct range: %s", err)
+	}
+
+	diskStats, err := disk.Usage(location.Name())
+	if err != nil {
+		return fmt.Errorf("failed to get disk free space: %s", err)
+	}
+
+	if diskStats.Free < uint64(resp.ContentLength) {
+		return fmt.Errorf("file is too big to fit on this drive")
 	}
 
 	c.Bar.SetOutput(progressWriter)
@@ -122,6 +134,7 @@ Retry:
 		return err
 	}
 
+	rangeHeader.Add("Referer", "https://go-pivnet.network.pivotal.io")
 	req.Header = rangeHeader
 
 	resp, err := c.HTTPClient.Do(req)
