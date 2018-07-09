@@ -35,8 +35,8 @@ var tile = config.Tile{
 	&config.StemcellMetadata{
 		config.PivnetMetadata{
 			"stemcells",
-			121368,
-			121368,
+			129476,
+			161610,
 			"1c35a0d9b8ae5899423bc5b1160600e9608e85bdf5ade9543c954bf3880bbb9b"},
 		"light-bosh-stemcell-3468.51-google-kvm-ubuntu-trusty-go_agent",
 	},
