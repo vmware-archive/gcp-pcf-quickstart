@@ -29,7 +29,7 @@ const (
 )
 
 type Properties struct {
-	OpsManagerURL     tiles.Value `json:".healthwatch-forwarder.opsmanager_url"`
+	OpsManagerURL     tiles.Value `json:".properties.opsman.enable.url"`
 	BoshHealthCheckAZ tiles.Value `json:".healthwatch-forwarder.health_check_az"`
 }
 
