@@ -120,7 +120,11 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Token %s", s.apiToken))
+	response, err := s.client.Auth.FetchUAAToken(s.apiToken)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", response.Token))
 	req.Header.Set("User-Agent", version.UserAgent())
 
 	resp, err := http.DefaultClient.Do(req)
@@ -130,7 +134,7 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %s, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
+		return fmt.Errorf("accepting eula for %s, %d, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
 	}
 
 	return nil
