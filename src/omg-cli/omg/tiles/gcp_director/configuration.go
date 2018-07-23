@@ -49,7 +49,7 @@ func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNe
 	upperIp[3] = 20
 
 	return commands.NetworkConfiguration{
-		Name:           name,
+		Name: name,
 		Subnets: []commands.Subnet{
 			{
 				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", cfg.NetworkName, name, cfg.Region),
@@ -111,6 +111,13 @@ func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
 
 		medium := "medium.mem"
 		compilation.ID = &medium
+	}
+
+	// Healthwatch includes a C++ package that requires a large
+	// ephemeral disk for compilation.
+	if envConfig.IncludeHealthwatch {
+		large := "large.disk"
+		compilation.ID = &large
 	}
 
 	f := false

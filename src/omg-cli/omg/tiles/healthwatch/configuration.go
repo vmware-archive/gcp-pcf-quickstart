@@ -29,7 +29,7 @@ const (
 )
 
 type Properties struct {
-	OpsManagerURL     tiles.Value `json:".healthwatch-forwarder.opsmanager_url"`
+	OpsManagerURL     tiles.Value `json:".properties.opsman.enable.url"`
 	BoshHealthCheckAZ tiles.Value `json:".healthwatch-forwarder.health_check_az"`
 }
 
@@ -58,11 +58,11 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	resoruces := Resources{}
-	resorucesBytes, err := json.Marshal(&resoruces)
+	resources := Resources{}
+	resourcesBytes, err := json.Marshal(&resources)
 	if err != nil {
 		return err
 	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
+	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
 }

@@ -64,8 +64,8 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	tileCache := &pivnet.TileCache{Dir: cmd.tileCacheDir}
-
-	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, selectedTiles, tileCache)
+	tiles := selectedTiles(cmd.logger, envCfg)
+	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, tiles, tileCache)
 
 	return run([]step{
 		opsMan.PoolTillOnline,
