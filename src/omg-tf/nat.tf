@@ -8,7 +8,7 @@ resource "google_compute_instance" "nat" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-8"
+      image = "debian-cloud/debian-9"
       size  = 10
     }
   }
