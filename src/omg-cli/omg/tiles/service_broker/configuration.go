@@ -151,7 +151,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 				DisplayName: "MySQL 2 CPU, 7.5 GB Memory",
 				Description: "Instance with 2 dedicated CPUs, 7.5 GB of Memory",
 				Service:     mySqlService,
-				Tier: "db-n1-standard-2	",
+				Tier: "db-n1-standard-2",
 				MaxDiskSize: "10000",
 				PricingPlan: "PACKAGE",
 			},
