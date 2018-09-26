@@ -24,21 +24,21 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"p-healthwatch",
-		106732,
-		145945,
-		"b5d01673c5c911e022a2a725fc27bc2085bc422155277e422ff65d5a5469ad55",
+		161272,
+		194184,
+		"75a17ff1c6044de391b327275b944ffb524650e6b40bc2d4f68c219940c37107",
 	},
 	config.OpsManagerMetadata{
 		"p-healthwatch",
-		"1.2.2-build.10",
+		"1.3.2-build.9",
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{
 			"stemcells",
-			129476,
-			161610,
-			"1c35a0d9b8ae5899423bc5b1160600e9608e85bdf5ade9543c954bf3880bbb9b"},
-		"light-bosh-stemcell-3468.51-google-kvm-ubuntu-trusty-go_agent",
+			183845,
+			214158,
+			"ddbc94297017292640acea15e2c5d71e8a592545b75af6f42013079ae099e982"},
+		"light-bosh-stemcell-3541.48-google-kvm-ubuntu-trusty-go_agent",
 	},
 }
 

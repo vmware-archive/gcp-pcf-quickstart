@@ -23,9 +23,9 @@ import (
 var fullRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		118424,
-		158939,
-		"214da7e21a57cf851fd7c842542157af0f26fc3173ca8746377d3c890ec64243",
+		188503,
+		218723,
+		"20906dcb6352e69b2e0fc056fdeefcd6f2b6ac45f7dca6204abf0aea87c35e2f",
 	},
 	product,
 	&stemcell,
@@ -34,9 +34,9 @@ var fullRuntime = config.Tile{
 var smallRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
-		118424,
-		158946,
-		"ec5c879be1ca3349aef003e877083a66add34dfd3a86e6dca1dbe99f445cb2b9",
+		188503,
+		218738,
+		"aabe0a5b6297ce4375db39559bb631a551917f11f93fb5f1b8756112a05a0858",
 	},
 	product,
 	&stemcell,
@@ -44,16 +44,16 @@ var smallRuntime = config.Tile{
 
 var product = config.OpsManagerMetadata{
 	"cf",
-	"2.1.7",
+	"2.3.0",
 }
 
 var stemcell = config.StemcellMetadata{
 	config.PivnetMetadata{
-		"stemcells",
-		106151,
-		145286,
-		"31f0b81919c58f71ba3427b29bdc02099808da378f938ed3d930ff5623c7d0d6"},
-	"light-bosh-stemcell-3541.30-google-kvm-ubuntu-trusty-go_agent",
+		"stemcells-ubuntu-xenial",
+		194743,
+		225464,
+		"c47d062781073c64c3b978262331e6e3d45bd7074a57d437c50e7b99930c4581"},
+	"light-bosh-stemcell-97.18-google-kvm-ubuntu-xenial-go_agent",
 }
 
 type Tile struct{}
