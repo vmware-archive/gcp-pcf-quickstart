@@ -134,7 +134,7 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %v, recieved: %s", tile.Name, tile.ReleaseId, resp.Status)
+		return fmt.Errorf("accepting eula for %s, %v, received: %s", tile.Name, tile.ReleaseId, resp.Status)
 	}
 
 	return nil
