@@ -21,7 +21,7 @@ Follow this guide to prepare you Google Cloud Project and deployment machine.
 
 ### Option 1: Using Cloud Shell
 
-Cloud Shell already includes many of the dependencies and is an excellent way to get started. 
+Cloud Shell already includes many of the dependencies and is an excellent way to get started.
 
 1. Open the [Google Cloud Console](https://console.cloud.google.com)
 1. Ensure your project is active (See the Project Info section)
@@ -39,7 +39,7 @@ Cloud Shell already includes many of the dependencies and is an excellent way to
    cd
 
    ```
-   
+
 The machine that hosts your Cloud Shell session is ephemeral but your user directory will be restored for future sessions.
 
 
@@ -54,7 +54,7 @@ A Linux or Mac machine is required with the following dependencies installed:
 - dig
   - Debian/Ubuntu: `sudo apt-get install dnsutils`
   - OSX: preinstalled
-- [go](https://golang.org/doc/install) (v1.8+)
+- [go](https://golang.org/doc/install) (v1.11+)
 - [cf](https://github.com/cloudfoundry/cli#installers-and-compressed-binaries)
 - [git](https://git-scm.com/downloads)
 

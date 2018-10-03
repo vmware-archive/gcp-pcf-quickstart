@@ -18,6 +18,7 @@
 
 set -eu
 cd "$(dirname "$0")/../"
+root=$(pwd)
 
 if [ -z ${PROJECT_ID+x} ]; then
     export PROJECT_ID=${PROJECT_ID-`gcloud config get-value project  2> /dev/null`}
@@ -62,9 +63,10 @@ pushd src/omg-tf
 popd
 
 # Hydrate Ops Manager
-export GOPATH=`pwd`
-export PATH=$PATH:$GOPATH/bin
-go install omg-cli
+pushd src/omg-cli
+go build -o $root/bin/omg-cli
+popd
+export PATH=$root/bin:$PATH
 omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
 
 # Capture image

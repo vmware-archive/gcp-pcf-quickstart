@@ -7,9 +7,11 @@ my_dir="$( cd $(dirname $0) && pwd )"
 pushd ${my_dir} > /dev/null
 	source utils.sh
 	set_resource_dirs
+	build_go
 	extract_env
 popd > /dev/null
 
-go install omg-cli
-omg-cli review-eulas --env-dir="${env_dir}" --accept-all
-omg-cli remote --env-dir="${env_dir}" "push-tiles"
+pushd ${release_dir}
+  omg-cli review-eulas --env-dir="${env_dir}" --accept-all
+  omg-cli remote --env-dir="${env_dir}" "push-tiles"
+popd

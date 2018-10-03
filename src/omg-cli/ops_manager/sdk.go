@@ -18,18 +18,16 @@ package ops_manager
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-
-	"io"
-	"io/ioutil"
 
 	"omg-cli/config"
 	"omg-cli/version"
@@ -44,189 +42,158 @@ import (
 )
 
 const (
+	connectTimeout     = 5
 	requestTimeout     = 1800
-	poolingIntervalSec = 10
+	pollingIntervalSec = 10
 )
 
 type Sdk struct {
-	target                string
-	creds                 config.OpsManagerCredentials
-	logger                *log.Logger
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
-	httpClient            *http.Client
+	api                   api.Api
+	creds                 config.OpsManagerCredentials
+	logger                *log.Logger
 }
 
 // NewSdk creates an authenticated session and object to interact with Ops Manager
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
-	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
+	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "",
+		creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second, time.Duration(connectTimeout)*time.Second)
+	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
+		time.Duration(requestTimeout)*time.Second,
+		time.Duration(connectTimeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: creds.SkipSSLVerification},
-	}
+	live := uilive.New()
+	live.Out = os.Stderr
 
-	return &Sdk{target: target,
-		creds:                 creds,
-		logger:                &logger,
-		unauthenticatedClient: network.NewUnauthenticatedClient(target, creds.SkipSSLVerification, time.Duration(requestTimeout)*time.Second),
+	sdk := &Sdk{
 		client:                client,
-		httpClient:            &http.Client{Transport: tr},
-	}, nil
+		unauthenticatedClient: unauthenticatedClient,
+		api: api.New(api.ApiInput{
+			Client:                 client,
+			UnauthedClient:         unauthenticatedClient,
+			ProgressClient:         network.NewProgressClient(client, progress.NewBar(), live),
+			UnauthedProgressClient: network.NewProgressClient(unauthenticatedClient, progress.NewBar(), live),
+			Logger:                 &logger,
+		}),
+		creds:  creds,
+		logger: &logger,
+	}
+	return sdk, nil
 }
 
 // SetupAuth configures the initial username, password, and decryptionPhrase
 func (om *Sdk) SetupAuth() error {
-	setupService := api.NewSetupService(om.unauthenticatedClient)
+	availability, err := om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
+	if err != nil {
+		return fmt.Errorf("could not determine initial auth configuration status: %v", err)
+	}
 
-	cmd := commands.NewConfigureAuthentication(setupService, om.logger)
-	return cmd.Execute([]string{
-		"--username", om.creds.Username,
-		"--password", om.creds.Password,
-		"--decryption-passphrase", om.creds.DecryptionPhrase})
+	if availability.Status == api.EnsureAvailabilityStatusUnknown {
+		return errors.New("could not determine initial auth configuration status: unexpected status")
+	}
+	if availability.Status != api.EnsureAvailabilityStatusUnstarted {
+		om.logger.Printf("configuration previously completed, skipping configuration")
+		return nil
+	}
+	om.logger.Println("configuring internal userstore...")
+	_, err = om.api.Setup(api.SetupInput{
+		IdentityProvider:                 "internal",
+		AdminUserName:                    om.creds.Username,
+		AdminPassword:                    om.creds.Password,
+		AdminPasswordConfirmation:        om.creds.Password,
+		DecryptionPassphrase:             om.creds.DecryptionPhrase,
+		DecryptionPassphraseConfirmation: om.creds.DecryptionPhrase,
+		EULAAccepted:                     "true",
+	})
+	if err != nil {
+		return fmt.Errorf("could not configure auth: %v", err)
+	}
+	for availability.Status != api.EnsureAvailabilityStatusComplete {
+		availability, err = om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
+		if err != nil {
+			return fmt.Errorf("could not determine final auth configuration status: %v", err)
+		}
+	}
+	om.logger.Println("auth configuration complete")
+	return nil
 }
 
 // Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
 // This task runs asynchronously. Query the status by invoking ReadyForAuth.
 func (om *Sdk) Unlock() error {
 	om.logger.Println("decrypting Ops Manager")
+
 	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
 	body, err := json.Marshal(&unlockReq)
 
-	req, err := om.newRequest("PUT", fmt.Sprintf("%s/api/v0/unlock", om.target), bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
+	_, err = om.api.Curl(api.RequestServiceCurlInput{
+		Path:   "/api/v0/unlock",
+		Method: "PUT",
+		Data:   bytes.NewReader(body),
+	})
 
-	req.Header.Add("Content-Type", "application/json")
-	resp, err := om.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
+	return err
 }
 
 // ReadyForAuth checks if the Ops Manager authentication system is ready
 func (om *Sdk) ReadyForAuth() bool {
-	req, err := om.newRequest("GET", fmt.Sprintf("%s/login/ensure_availability", om.target), nil)
-	if err != nil {
-		return false
-	}
-	resp, err := om.httpClient.Do(req)
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
-
-	// When OpsMan is online/decrypted it redirects its auth system. UAA is expected for OMG.
-	return resp.StatusCode == 200 && strings.Contains(resp.Request.URL.Path, "/uaa/login")
+	resp, err := om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
+	return err == nil && resp.Status == api.EnsureAvailabilityStatusComplete
 }
 
 // SetupBosh applies the provided configuration to the BOSH director tile
-func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment, resources commands.ResourceConfiguration) error {
-	boshService := api.NewBoshFormService(om.client)
-	diagnosticService := api.NewDiagnosticService(om.client)
-	cmd := commands.NewConfigureBosh(boshService, diagnosticService, om.logger)
-
-	iaasBytes, err := json.Marshal(iaas)
+func (om *Sdk) SetupBosh(configYML []byte) error {
+	f, err := ioutil.TempFile("", "director-config")
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot create temp file for director configuration: %v", err)
 	}
-
-	directorBytes, err := json.Marshal(director)
+	defer os.Remove(f.Name())
+	_, err = f.Write(configYML)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot write to director yaml file: %v", err)
 	}
+	f.Close()
 
-	azBytes, err := json.Marshal(azs)
-	if err != nil {
-		return err
-	}
-
-	networksBytes, err := json.Marshal(networks)
-	if err != nil {
-		return err
-	}
-
-	networkAssignmentBytes, err := json.Marshal(networkAssignment)
-	if err != nil {
-		return err
-	}
-
-	resourceBytes, err := json.Marshal(resources)
-	if err != nil {
-		return err
-	}
-
-	return cmd.Execute([]string{
-		"--iaas-configuration", string(iaasBytes),
-		"--director-configuration", string(directorBytes),
-		"--az-configuration", string(azBytes),
-		"--networks-configuration", string(networksBytes),
-		"--network-assignment", string(networkAssignmentBytes),
-		"--resource-configuration", string(resourceBytes)})
+	cmd := commands.NewConfigureDirector(os.Environ, om.api, om.logger)
+	return cmd.Execute([]string{"--config", f.Name()})
 }
 
 // ApplyChanges deploys pending changes to Ops Manager
 func (om *Sdk) ApplyChanges() error {
-	installationsService := api.NewInstallationsService(om.client)
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
-
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute(nil)
 }
 
 func (om *Sdk) ApplyDirector() error {
-	installationsService := api.NewInstallationsService(om.client)
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute([]string{"--skip-deploy-products"})
 }
 
 // UploadProduct pushes a given file located locally at path to the target
 func (om *Sdk) UploadProduct(path string) error {
-	liveWriter := uilive.New()
-	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), liveWriter)
-
-	form, err := formcontent.NewForm()
-	if err != nil {
-		return err
-	}
-
-	cmd := commands.NewUploadProduct(form, extractor.ProductUnzipper{}, availableProductsService, om.logger)
-
-	return cmd.Execute([]string{
-		"--product", path})
+	form := formcontent.NewForm()
+	cmd := commands.NewUploadProduct(form, extractor.MetadataExtractor{}, om.api, om.logger)
+	return cmd.Execute([]string{"--product", path})
 }
 
 // UploadStemcell pushes a given stemcell located locally at path to the target
 func (om *Sdk) UploadStemcell(path string) error {
-	diagnosticService := api.NewDiagnosticService(om.client)
-	form, err := formcontent.NewForm()
-	if err != nil {
-		return err
-	}
-
-	uploadStemcellService := api.NewUploadStemcellService(om.client, progress.NewBar())
-	cmd := commands.NewUploadStemcell(form, uploadStemcellService, diagnosticService, om.logger)
-
-	return cmd.Execute([]string{
-		"--stemcell", path})
+	form := formcontent.NewForm()
+	cmd := commands.NewUploadStemcell(form, om.api, om.logger)
+	return cmd.Execute([]string{"--stemcell", path})
 }
 
 // StageProduct moves a given name, version to the list of tiles that will be deployed
 func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
-	diagnosticService := api.NewDiagnosticService(om.client)
-	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
-	stagedProductsService := api.NewStagedProductsService(om.client)
-	deployedProductsService := api.NewDeployedProductsService(om.client)
-	cmd := commands.NewStageProduct(stagedProductsService, deployedProductsService, availableProductsService, diagnosticService, om.logger)
+	cmd := commands.NewStageProduct(om.api, om.logger)
 	return cmd.Execute([]string{
 		"--product-name", tile.Name,
 		"--product-version", tile.Version,
@@ -235,36 +202,28 @@ func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
 
 // Online checks if Ops Manager is running on the target.
 func (om *Sdk) Online() bool {
-	req, err := om.newRequest("GET", om.target, nil)
+	req, _ := http.NewRequest(http.MethodGet, "/", nil)
+	resp, err := om.unauthenticatedClient.Do(req)
 	if err != nil {
 		return false
 	}
-	resp, err := om.httpClient.Do(req)
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
-
+	resp.Body.Close()
 	return resp.StatusCode < 500
 }
 
 // AvaliableProducts lists products that are uploaded to Ops Manager.
 func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
-	service := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
-	out, err := service.List()
+	products, err := om.api.ListAvailableProducts()
 	if err != nil {
 		return nil, err
 	}
 
-	return out.ProductsList, nil
+	return products.ProductsList, nil
 }
 
 // ConfigureProduct sets up the settings for a given tile by name
 func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
-	stagedProductsService := api.NewStagedProductsService(om.client)
-	jobsService := api.NewJobsService(om.client)
-	cmd := commands.NewConfigureProduct(stagedProductsService, jobsService, om.logger)
-
+	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.logger)
 	return cmd.Execute([]string{
 		"--product-name", name,
 		"--product-network", networks,
@@ -280,36 +239,28 @@ func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
 		return nil, err
 	}
 
-	resp, err := om.curl(fmt.Sprintf("api/v0/staged/products/%s/properties", productGuid), "GET", nil)
+	props, err := om.api.GetStagedProductProperties(productGuid)
 	if err != nil {
 		return nil, err
 	}
 
-	var prop ProductProperties
-	if err := json.Unmarshal(resp, &prop); err != nil {
-		return nil, err
-	}
-
-	return &prop, nil
+	return &ProductProperties{
+		Properties: props,
+	}, nil
 }
 
 // GetDirector fetches settings for the BOSH director
-func (om *Sdk) GetDirector() (*DirectorProperties, error) {
-	resp, err := om.curl("/api/v0/staged/director/properties", "GET", nil)
+func (om *Sdk) GetDirector() (map[string]map[string]interface{}, error) {
+	props, err := om.api.GetStagedDirectorProperties()
 	if err != nil {
 		return nil, err
 	}
 
-	var prop DirectorProperties
-	if err := json.Unmarshal(resp, &prop); err != nil {
-		return nil, err
-	}
-
-	return &prop, nil
+	return props, nil
 }
 
 // GetResource fetches resource settings for a specific job of a tile
-func (om *Sdk) GetResource(tileName, jobName string) (*Resource, error) {
+func (om *Sdk) GetResource(tileName, jobName string) (*api.JobProperties, error) {
 	productGuid, err := om.productGuidByType(tileName)
 	if err != nil {
 		return nil, err
@@ -320,58 +271,15 @@ func (om *Sdk) GetResource(tileName, jobName string) (*Resource, error) {
 		return nil, err
 	}
 
-	resp, err := om.curl(fmt.Sprintf("/api/v0/staged/products/%s/jobs/%s/resource_config", productGuid, jobGuid), "GET", nil)
+	props, err := om.api.GetStagedProductJobResourceConfig(productGuid, jobGuid)
 	if err != nil {
 		return nil, err
 	}
-
-	var prop Resource
-	if err := json.Unmarshal(resp, &prop); err != nil {
-		return nil, err
-	}
-
-	return &prop, nil
+	return &props, nil
 }
 
-func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
-	req, err := om.newRequest(method, fmt.Sprintf("%s/%s", om.target, path), data)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := om.client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the OpsMan API returned an error
-	errResp := ErrorResponse{make(map[string][]string)}
-	if err := json.Unmarshal(body, &errResp); err == nil {
-		if len(errResp.Errors) != 0 {
-			return nil, fmt.Errorf("error from Ops Manager API requesting %s: %v", path, errResp.Errors)
-		}
-	}
-
-	return body, nil
-}
-
-func (om *Sdk) getProducts() ([]Product, error) {
-	body, err := om.curl("api/v0/deployed/products", http.MethodGet, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []Product
-	if err := json.Unmarshal(body, &resp); err != nil {
-		return nil, fmt.Errorf("malformed products response: %s", string(body))
-	}
-
-	return resp, nil
+func (om *Sdk) getProducts() ([]api.DeployedProductOutput, error) {
+	return om.api.ListDeployedProducts()
 }
 
 func (om *Sdk) productGuidByType(product string) (string, error) {
@@ -383,7 +291,7 @@ func (om *Sdk) productGuidByType(product string) (string, error) {
 	appGuid := ""
 	for _, p := range products {
 		if p.Type == product {
-			appGuid = p.Guid
+			appGuid = p.GUID
 			break
 		}
 	}
@@ -396,24 +304,12 @@ func (om *Sdk) productGuidByType(product string) (string, error) {
 }
 
 func (om *Sdk) jobGuidByName(productGuid, jobName string) (string, error) {
-	resp, err := om.curl(fmt.Sprintf("/api/v0/staged/products/%s/jobs", productGuid), "GET", nil)
+	jobs, err := om.api.ListStagedProductJobs(productGuid)
 	if err != nil {
 		return "", err
 	}
 
-	var jobResp JobsResponse
-	if err := json.Unmarshal(resp, &jobResp); err != nil {
-		return "", err
-	}
-
-	jobGuid := ""
-	for _, j := range jobResp.Jobs {
-		if j.Name == jobName {
-			jobGuid = j.Guid
-			break
-		}
-	}
-
+	jobGuid := jobs[jobName]
 	if jobGuid == "" {
 		return "", fmt.Errorf("job %s not found for product %s", jobName, productGuid)
 	}
@@ -426,7 +322,17 @@ func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error
 	if err != nil {
 		return nil, err
 	}
-	return om.getCredential(fmt.Sprintf("api/v0/deployed/products/%s/credentials/%s", productGuid, credential))
+	out, err := om.api.GetDeployedProductCredential(api.GetDeployedProductCredentialInput{
+		DeployedGUID:        productGuid,
+		CredentialReference: credential,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &SimpleCredential{
+		Identity: out.Credential.Value["identity"],
+		Password: out.Credential.Value["password"],
+	}, nil
 }
 
 func (om *Sdk) GetDirectorCredentials(credential string) (*SimpleCredential, error) {
@@ -434,12 +340,19 @@ func (om *Sdk) GetDirectorCredentials(credential string) (*SimpleCredential, err
 }
 
 func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
-	body, err := om.curl(path, http.MethodGet, nil)
+	out, err := om.api.Curl(api.RequestServiceCurlInput{
+		Path:   path,
+		Method: http.MethodGet,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	var resp CredentialResponse
+	body, err := ioutil.ReadAll(out.Body)
+	if err != nil {
+		return nil, err
+	}
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, fmt.Errorf("malformed credentials response: %s", string(body))
 	}
@@ -456,10 +369,15 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	body, err := om.curl(fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGuid), http.MethodGet, nil)
+	out, err := om.api.Curl(api.RequestServiceCurlInput{
+		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGuid),
+		Method: http.MethodGet,
+	})
+	body, err := ioutil.ReadAll(out.Body)
 	if err != nil {
 		return "", err
 	}
+
 	var boshIPs []StaticIP
 	if err := json.Unmarshal(body, &boshIPs); err != nil {
 		return "", fmt.Errorf("malformed static_ips response: %s", string(body))
@@ -474,10 +392,7 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 
 func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	deleteInstallationService := api.NewInstallationAssetService(om.client, nil, nil)
-	installationsService := api.NewInstallationsService(om.client)
-	cmd := commands.NewDeleteInstallation(deleteInstallationService, installationsService, logWriter, om.logger, poolingIntervalSec)
-
+	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)
 	return cmd.Execute(nil)
 }
 

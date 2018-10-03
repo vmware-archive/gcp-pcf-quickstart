@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export GO111MODULE=on # manually active module mode
+
 check_param() {
   local name=$1
   local value=$(eval echo '$'$name)
@@ -54,6 +56,17 @@ set_gcloud_config() {
 	gcloud auth activate-service-account --key-file=${key}
 }
 
+build_go() {
+  my_dir=$(dirname "$(readlink -f "$0")")
+  release_dir="$( cd ${my_dir} && cd ../.. && pwd )"
+  omg_dir="${release_dir}/src/omg-cli"
+
+  pushd ${omg_dir}
+  go build -o $release_dir/bin/omg-cli
+  export PATH=$release_dir/bin:$PATH
+  popd
+}
+
 set_resource_dirs() {
     my_dir=$(dirname "$(readlink -f "$0")")
 
@@ -67,9 +80,6 @@ set_resource_dirs() {
     export terraform_output="${env_dir}/terraform_output.json"
     export terraform_config="${env_dir}/terraform.tfvars"
     export terraform_state="${env_dir}/terraform.tfstate"
-
-    export GOPATH=${release_dir}
-    export PATH=${GOPATH}/bin:${PATH}
 }
 
 extract_env() {
