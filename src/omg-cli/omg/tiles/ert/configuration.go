@@ -88,7 +88,7 @@ type LargeFootprintResources struct {
 	NfsServer                    tiles.Resource `json:"nfs_server"`
 	MysqlProxy                   tiles.Resource `json:"mysql_proxy"`
 	Mysql                        tiles.Resource `json:"mysql"`
-	BackupPrepare                tiles.Resource `json:"backup-prepare"`
+	BackupPrepare                tiles.Resource `json:"backup_restore"`
 	DiegoDatabase                tiles.Resource `json:"diego_database"`
 	Uaa                          tiles.Resource `json:"uaa"`
 	CloudController              tiles.Resource `json:"cloud_controller"`
@@ -113,7 +113,7 @@ type SmallFootprintResources struct {
 	FileStorage tiles.Resource `json:"blobstore"`
 
 	HaProxy       tiles.Resource `json:"ha_proxy"`
-	BackupPrepare tiles.Resource `json:"backup-prepare"`
+	BackupPrepare tiles.Resource `json:"backup_restore"`
 	MysqlMonitor  tiles.Resource `json:"mysql_monitor"`
 }
 
