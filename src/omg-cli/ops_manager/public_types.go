@@ -1,5 +1,7 @@
 package ops_manager
 
+import "github.com/pivotal-cf/om/api"
+
 /*
  * Copyright 2017 Google Inc.
  *
@@ -24,7 +26,7 @@ type SimpleCredential struct {
 }
 
 type ProductProperties struct {
-	Properties map[string]Property `json:"properties"`
+	Properties map[string]api.ResponseProperty `json:"properties"`
 }
 
 type Property struct {
@@ -35,22 +37,9 @@ type Property struct {
 	Optional     bool        `json:"optional"`
 }
 
-type DirectorProperties struct {
-	IAAS     map[string]interface{} `json:"iaas_configuration"`
-	Director map[string]interface{} `json:"director_configuration"`
-	Security map[string]interface{} `json:"security_configuration"`
-	Syslog   map[string]interface{} `json:"syslog_configuration"`
-}
-
 type Job struct {
 	Name string `json:"name"`
 	Guid string `json:"guid"`
-}
-
-type Resource struct {
-	RouterNames       []string    `json:"elb_names,omitempty"`
-	Instances         interface{} `json:"instances,omitempty"`
-	InternetConnected bool        `json:"internet_connected"`
 }
 
 type StaticIP struct {

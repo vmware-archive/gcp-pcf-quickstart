@@ -41,7 +41,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	network := tiles.NetworkODBConfig(cfg.ServicesSubnetName, cfg, cfg.DynamicServicesSubnetName)
+	network := tiles.NetworkODBConfig(cfg.ErtSubnetName, cfg, cfg.ServicesSubnetName)
 
 	networkBytes, err := json.Marshal(&network)
 	if err != nil {
