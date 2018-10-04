@@ -29,8 +29,9 @@ const (
 )
 
 type Properties struct {
-	OpsManagerURL     tiles.Value `json:".properties.opsman.enable.url"`
-	BoshHealthCheckAZ tiles.Value `json:".healthwatch-forwarder.health_check_az"`
+	OpsManagerURL           tiles.Value `json:".properties.opsman.enable.url"`
+	BoshHealthCheckAZ       tiles.Value `json:".healthwatch-forwarder.health_check_az"`
+	EnableDeploymentChecker tiles.Value `json:".properties.boshtasks"`
 }
 
 type Resources struct {
@@ -49,8 +50,9 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	properties := &Properties{
-		OpsManagerURL:     tiles.Value{fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
-		BoshHealthCheckAZ: tiles.Value{cfg.Zone1},
+		OpsManagerURL:           tiles.Value{fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
+		BoshHealthCheckAZ:       tiles.Value{cfg.Zone1},
+		EnableDeploymentChecker: tiles.Value{"disable"},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
