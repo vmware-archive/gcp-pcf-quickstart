@@ -18,6 +18,7 @@
 
 set -u
 cd "$(dirname "$0")/../"
+root=$(pwd)
 
 if [ -z ${ENV_DIR+X} ]; then
     export ENV_DIR="${PWD}/env/pcf"
@@ -25,15 +26,12 @@ if [ -z ${ENV_DIR+X} ]; then
 fi
 
 if ! [ -x "$(command -v ginkgo)" ]; then
-    echo "Error: ginkgo missing, try: go install github.com/onsi/ginkgo"
+    echo "Error: ginkgo missing, try: go install github.com/onsi/ginkgo/ginkgo"
     exit 1
 fi
 
 # Ensure absolute path
 export ENV_DIR=$(readlink -f ${ENV_DIR})
-
-export GOPATH=`pwd`
-export PATH=$PATH:$GOPATH/bin
 
 pushd src/omg-cli/certification
     ginkgo -r .

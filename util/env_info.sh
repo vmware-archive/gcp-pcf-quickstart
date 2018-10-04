@@ -17,6 +17,7 @@
 #
 set -u
 cd "$(dirname "$0")/../"
+root=$(pwd)
 
 if [ -z ${ENV_DIR+X} ]; then
     export ENV_DIR="${PWD}/env/pcf"
@@ -30,10 +31,12 @@ if [ -z ${1+X} ] || [ "${1}" == "opsman" ]; then
 fi
 
 if [ -z ${1+X} ] || [ "${1}" == "cf" ]; then
+    pushd src/omg-cli
+    go build -o $root/bin/omg-cli
+    popd
+    export PATH=$root/bin:$PATH
+
     echo "Cloud Foundry API Credentials ========================= "
     echo "URL: https://api.$(util/terraform_output.sh sys_domain)"
-    export GOPATH=`pwd`
-    export PATH=$PATH:$GOPATH/bin
-    go install omg-cli
     omg-cli remote --quiet --env-dir=${ENV_DIR} "get-credential --app-name=cf --credential=.uaa.admin_credentials"
 fi
