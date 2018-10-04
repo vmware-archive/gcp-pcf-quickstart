@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"net"
+	"strings"
 	"text/template"
 
 	"omg-cli/config"
@@ -40,7 +41,7 @@ director-configuration:
   blobstore_type: gcs
   gcs_blobstore_options:
     bucket_name: {{.DirectorBucket}}
-    service_account_key: {{.OpsManagerServiceAccountKey}}
+    service_account_key: '{{.OpsManagerServiceAccountKey}}'
   database_type: external
   external_database_options:
     host: {{.ExternalSqlIp}}
@@ -50,7 +51,7 @@ director-configuration:
     port: {{.ExternalSqlPort}}
 iaas-configuration:
   project: {{.ProjectName}}
-  auth_json: {{.OpsManagerServiceAccountKey}}
+  auth_json: '{{.OpsManagerServiceAccountKey}}'
   default_deployment_tag: {{.DeploymentTargetTag}}
 network-assignment:
   singleton_availability_zone:
@@ -149,10 +150,13 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		dc.CompilationInstanceType = "large.disk"
 	}
 
+	// strip newlines, as we're putting a JSON service account key inside YAML
+	dc.OpsManagerServiceAccountKey = strings.Replace(dc.OpsManagerServiceAccountKey, "\n", "", -1)
+
 	b := &bytes.Buffer{}
 	err := tmpl.Execute(b, dc)
 	if err != nil {
-		return fmt.Errorf("cannot generate director YML: %v", err)
+		return fmt.Errorf("cannot generate director YAML: %v", err)
 	}
 
 	return om.SetupBosh(b.Bytes())
