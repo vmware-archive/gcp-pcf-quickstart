@@ -42,6 +42,7 @@ director-configuration:
   gcs_blobstore_options:
     bucket_name: {{.DirectorBucket}}
     service_account_key: '{{.OpsManagerServiceAccountKey}}'
+    storage_class: MULTI_REGIONAL
   database_type: external
   external_database_options:
     host: {{.ExternalSqlIp}}
