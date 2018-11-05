@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export GO111MODULE=on # manually active module mode
+
 check_param() {
   local name=$1
   local value=$(eval echo '$'$name)
