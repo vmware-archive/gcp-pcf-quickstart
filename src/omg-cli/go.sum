@@ -75,8 +75,6 @@ github.com/pivotal-cf/jhanda v0.0.0-20180729001700-f015b8a01b03 h1:p/8aXNkB4S8ic
 github.com/pivotal-cf/jhanda v0.0.0-20180729001700-f015b8a01b03/go.mod h1:GNr2RBRX0Gs2FaJRi4KUrfQV32EhnjQ3Fj+nw87cx08=
 github.com/pivotal-cf/kiln v0.0.0-20180926152015-0240e73df945 h1:XF1hrJb/dV2EwUzSiGHZhPyIagFUgwD4iukPgTUUaAQ=
 github.com/pivotal-cf/kiln v0.0.0-20180926152015-0240e73df945/go.mod h1:dtX102okHXUUdK9XmlK5WYl2lR0VP0OLaYCiIowB17M=
-github.com/pivotal-cf/om v0.0.0-20180703174805-9ba75a5f9062 h1:dbOjU2JuqFqHdcvTB4vl04ICVapu3syOsi8yKchDRIY=
-github.com/pivotal-cf/om v0.0.0-20180703174805-9ba75a5f9062/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pivotal-cf/om v0.0.0-20180927224821-136ab991b5d7 h1:Pt7UMiNF8oH6uvDOU65VA0iZeiTbUbz2+XaIvonSE4E=
 github.com/pivotal-cf/om v0.0.0-20180927224821-136ab991b5d7/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -110,7 +108,5 @@ gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/cheggaaa/pb.v1 v1.0.18 h1:h5Qflf8N54NDtm3lWfBuCD4rslDjkXDoGkEMZCH4R80=
 gopkg.in/cheggaaa/pb.v1 v1.0.18/go.mod h1:V/YB90LKu/1FcN3WVnfiiE5oMCibMjukxqG/qStrOgw=
-gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e h1:o/mfNjxpTLivuKEfxzzwrJ8PmulH2wEp7t713uMwKAA=
-gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e/go.mod h1:JAlM8MvJe8wmxCU4Bli9HhUf9+ttbYbLASfIpnQbh74=
 gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
