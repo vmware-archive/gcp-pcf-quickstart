@@ -59,7 +59,7 @@ build_go() {
   release_dir="$( cd ${my_dir} && cd ../.. && pwd )"
   omg_dir="${release_dir}/src/omg-cli"
 
-  pushd omg_dir
+  pushd ${omg_dir}
   go build -o $release_dir/bin/omg-cli
   export PATH=$release_dir/bin:$PATH
   popd
