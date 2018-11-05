@@ -21,7 +21,7 @@ jobs:
       image_resource:
         type: docker-image
         source:
-          repository: {{docker_hub_test_repo}}
+          repository: ((docker_hub_test_repo))
       inputs:
       - name: omg-src-in
       run:
@@ -43,25 +43,22 @@ resources:
   - name: omg-src-in
     type: git
     source: 
-      uri:         {{source_uri}}
-      branch:      {{source_branch}}
-      username:    {{source_username}}
-      password:    {{source_password}}
-      private_key: {{source_private_key}}
+      uri:         ((source_uri))
+      branch:      ((source_branch))
       paths:       [ci/docker-image]
 
   - name: docker-image-test
     type: docker-image
     source:
-      email:      {{docker_hub_email}}
-      username:   {{docker_hub_username}}
-      password:   {{docker_hub_password}}
-      repository: {{docker_hub_test_repo}}
+      email:      ((docker_hub_email))
+      username:   ((docker_hub_username))
+      password:   ((docker_hub_password))
+      repository: ((docker_hub_test_repo))
 
   - name: docker-image
     type: docker-image
     source:
-      email:      {{docker_hub_email}}
-      username:   {{docker_hub_username}}
-      password:   {{docker_hub_password}}
-      repository: {{docker_hub_repo}}
+      email:      ((docker_hub_email))
+      username:   ((docker_hub_username))
+      password:   ((docker_hub_password))
+      repository: ((docker_hub_repo))
