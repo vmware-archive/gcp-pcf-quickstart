@@ -11,5 +11,7 @@ pushd ${my_dir} > /dev/null
 	extract_env
 popd > /dev/null
 
-omg-cli review-eulas --env-dir="${env_dir}" --accept-all
-omg-cli remote --env-dir="${env_dir}" "push-tiles"
+pushd ${release_dir}
+  omg-cli review-eulas --env-dir="${env_dir}" --accept-all
+  omg-cli remote --env-dir="${env_dir}" "push-tiles"
+popd

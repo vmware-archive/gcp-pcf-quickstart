@@ -10,4 +10,6 @@ pushd ${my_dir} > /dev/null
     extract_env
 popd > /dev/null
 
-omg-cli remote --env-dir="${env_dir}" "deploy"
+pushd ${release_dir}
+  omg-cli remote --env-dir="${env_dir}" "deploy"
+popd
