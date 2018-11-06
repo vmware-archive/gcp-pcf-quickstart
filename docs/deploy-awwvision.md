@@ -1,5 +1,9 @@
 # Exercise: AwwVision
 
+[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https%3A%2F%2Fgithub.com%2Fcf-platform-eng%2Fgcp-pcf-quickstart&page=shell&working_dir=docs%2Fsamples%2Fawwvision&tutorial=..%2F..%2Fdeploy-awwvision.md)
+
+## Introduction
+
 Now that you've [deployed PCF](./quick-deployment.md) and
 [logged in to Cloud Foundry](./login-to-pcf.md#cfapi) it's time to explore
 the platform and Google Cloud.
