@@ -75,12 +75,16 @@ func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileIns
 	return result
 }
 
-type step func() error
+type step struct {
+	function func() error
+	name string
+}
 
 func run(steps []step) error {
 	for _, v := range steps {
-		if err := v(); err != nil {
-			return err
+		fmt.Println("Running step:", v.name)
+		if err := v.function(); err != nil {
+			return fmt.Errorf("failed running step %s, error: %v", v.name, err)
 		}
 	}
 	return nil
@@ -90,14 +94,15 @@ func retry(fn step, times int) error {
 	errs := []error{}
 
 	for i := 0; i < times; i++ {
-		if err := fn(); err != nil {
+		fmt.Println("Running step:", fn.name, ". Attempt", i)
+		if err := fn.function(); err != nil {
 			errs = append(errs, err)
 		} else {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("failed after %d attempts, errors: %v", times, errs)
+	return fmt.Errorf("failed running step %s after %d attempts, errors: %v", fn.name, times, errs)
 }
 
 func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {

@@ -63,10 +63,10 @@ func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	return run([]step{
-		jb.PoolTillStarted,
-		jb.UploadDependencies,
-		func() error {
+		{jb.PoolTillStarted, "PoolTillStarted"},
+		{jb.UploadDependencies, "UploadDependencies"},
+		{func() error {
 			return jb.RunOmg(bc.command)
-		},
+		}, "RunOmg"},
 	})
 }
