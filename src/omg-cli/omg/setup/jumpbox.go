@@ -97,7 +97,8 @@ func (jb *Jumpbox) UploadDependencies() error {
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	if err := build.Run(); err != nil {
-		return fmt.Errorf("rebuilding go: %v\n\n%v", err, build.Env)
+		dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+		return fmt.Errorf("rebuilding go: %v\n\n%v\n\n%v", err, build.Env, dir)
 	}
 
 	type plan struct {
