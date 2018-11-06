@@ -75,10 +75,10 @@ func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
 	cmd.parseArgs()
 
 	steps := []step{
-		cmd.deleteUpgradedOpsManagers,
-		cmd.deleteDirectorVM,
-		cmd.deleteErtVMs,
-		cmd.deleteServicesVMs,
+		{cmd.deleteUpgradedOpsManagers, "deleteUpgradedOpsManagers"},
+		{cmd.deleteDirectorVM, "deleteDirectorVM"},
+		{cmd.deleteErtVMs, "deleteErtVMs"},
+		{cmd.deleteServicesVMs, "deleteServicesVMs"},
 	}
 
 	return runAsync(steps)
@@ -93,9 +93,10 @@ func runAsync(steps []step) error {
 	for _, step := range steps {
 		step := step
 		wg.Add(1)
+		fmt.Println("running step ", step.name, "asynchronously")
 		go func() {
-			if err := step(); err != nil {
-				fmt.Printf("error running step: %v", err)
+			if err := step.function(); err != nil {
+				fmt.Printf("error running step %s: %v", step.name, err)
 
 				errsMu.Lock()
 				errors = append(errors, err)
