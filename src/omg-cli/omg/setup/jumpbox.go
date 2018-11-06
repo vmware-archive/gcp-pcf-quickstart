@@ -92,6 +92,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 	defer os.Remove(rebuilt.Name())
 	build := exec.Command("go", "build", "-o", rebuilt.Name())
 	build.Env = append(os.Environ(), "GOOS=linux", "GOARCH=amd64")
+	build.Dir = filepath.Join(".", "src", "omg-cli")
 
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
