@@ -41,3 +41,12 @@ env_file_name: env.tgz
 
 # Configuration for omg config.json. Generate a sample with `omg-cli generate-config`.
 env_config: replace-me
+
+# Dockerhub username to pull CI image
+docker_hub_username: replace-me
+
+# Dockerhub password to pull CI image
+docker_hub_password: replace-me
+
+# Dockerhub repo to pull CI image from
+docker_hub_repo: replace-me

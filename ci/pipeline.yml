@@ -20,7 +20,9 @@ jobs:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
+          - get: ci-image
       - task: unit-tests
+        image: ci-image
         file: omg-src-in/ci/tasks/run-unit.yml
 
   - name: prepare-project
@@ -29,8 +31,10 @@ jobs:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
+          - get: ci-image
 
       - task: prepare-project
+        image: ci-image
         file: omg-src-in/ci/tasks/prepare-project.yml
         params:
           google_project: ((google_project))
@@ -45,9 +49,11 @@ jobs:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
+          - get: ci-image
 
       - aggregate:
         task: generate-env
+        image: ci-image
         file: omg-src-in/ci/tasks/generate-env.yml
         params:
           google_project: ((google_project))
@@ -73,8 +79,10 @@ jobs:
             passed: [generate-env]
             get: omg-env
             resource: omg-env
+          - get: ci-image
       - aggregate:
         task: create-infrastructure
+        image: ci-image
         file: omg-src-in/ci/tasks/create-infrastructure.yml
         params:
           google_project: ((google_project))
@@ -97,19 +105,23 @@ jobs:
             passed: [create-infrastructure]
             get: omg-env
             resource: omg-env
+          - get: ci-image
       - do:
           - task: push-tiles
+            image: ci-image
             file: omg-src-in/ci/tasks/push-tiles.yml
             params:
               env_file_name: ((env_file_name))
             on_failure: &destroy_infrastructure
               task: destroy-infrastructure
+              image: ci-image
               file: omg-src-in/ci/tasks/destroy-infrastructure.yml
               params:
                 google_project: ((google_project))
                 google_json_key_data: ((google_json_key_data))
                 env_file_name: ((env_file_name))
           - task: deploy-pcf
+            image: ci-image
             file: omg-src-in/ci/tasks/deploy-pcf.yml
             params:
               env_file_name: ((env_file_name))
@@ -117,6 +129,7 @@ jobs:
               do:
                 - &destroy_pcf
                   task: destroy-pcf
+                  image: ci-image
                   file: omg-src-in/ci/tasks/destroy-pcf.yml
                   params:
                     google_project: ((google_project))
@@ -137,8 +150,10 @@ jobs:
             passed: [deploy-pcf]
             get: omg-env
             resource: omg-env
+          - get: ci-image
       - aggregate:
         task: run-certification
+        image: ci-image
         file: omg-src-in/ci/tasks/run-certification.yml
         params:
           env_file_name: ((env_file_name))
@@ -160,6 +175,7 @@ jobs:
             passed: [run-certification]
             get: omg-env
             resource: omg-env
+          - get: ci-image
       - do: *destroy_all
         on_failure:
           do: *destroy_all
@@ -176,8 +192,10 @@ jobs:
             get: release-version-semver
             params:
               bump: major
+          - get: ci-image
       - do: &promote_candidate
           - task: promote
+            image: ci-image
             file: omg-src-in/ci/tasks/promote-candidate.yml
           - put: release-version-semver
             params:
@@ -201,6 +219,7 @@ jobs:
             get: release-version-semver
             params:
               bump: minor
+          - get: ci-image
       - do: *promote_candidate
 
   - name: promote-candidate-patch
@@ -215,6 +234,7 @@ jobs:
             get: release-version-semver
             params:
               bump: patch
+          - get: ci-image
       - do: *promote_candidate
 
 resources:
@@ -242,6 +262,13 @@ resources:
       key: release-current-version
       bucket: ((ci_bucket_name))
       json_key: ((ci_json_key_date))
+
+  - name: ci-image
+    type: docker-image
+    source:
+      username: ((docker_hub_username))
+      password: ((docker_hub_password))
+      repository: ((docker_hub_repo))
 
 resource_types:
   - name: gcs-resource
