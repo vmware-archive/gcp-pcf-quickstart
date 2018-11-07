@@ -39,7 +39,7 @@
 
 [[constraint]]
   name = "github.com/pivotal-cf/go-pivnet"
-  version = "0.0.48"
+  version = "0.0.50"
 
 [[constraint]]
   branch = "master"

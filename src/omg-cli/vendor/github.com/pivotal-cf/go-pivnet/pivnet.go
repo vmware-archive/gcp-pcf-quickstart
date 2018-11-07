@@ -14,6 +14,7 @@ import (
 
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
+	"log"
 )
 
 const (
@@ -36,6 +37,7 @@ type Client struct {
 	Auth                  *AuthService
 	EULA                  *EULAsService
 	ProductFiles          *ProductFilesService
+	FederationToken		  *FederationTokenService
 	FileGroups            *FileGroupsService
 	Releases              *ReleasesService
 	Products              *ProductsService
@@ -52,7 +54,6 @@ type ClientConfig struct {
 	Token             string
 	UserAgent         string
 	SkipSSLValidation bool
-	UsingUAAToken 	  bool
 }
 
 func NewClient(
@@ -86,13 +87,13 @@ func NewClient(
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
 		Logger:     logger,
+		Timeout: 5*time.Second,
 	}
 
 	client := Client{
 		baseURL:    baseURL,
 		token:      config.Token,
 		userAgent:  config.UserAgent,
-		usingUAAToken: config.UsingUAAToken,
 		logger:     logger,
 		downloader: downloader,
 		HTTP:       httpClient,
@@ -101,6 +102,7 @@ func NewClient(
 	client.Auth = &AuthService{client: client}
 	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
+	client.FederationToken = &FederationTokenService{client: client}
 	client.FileGroups = &FileGroupsService{client: client}
 	client.Releases = &ReleasesService{client: client, l: logger}
 	client.Products = &ProductsService{client: client, l: logger}
@@ -133,11 +135,20 @@ func (c Client) CreateRequest(
 		return nil, err
 	}
 
-	if c.usingUAAToken {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
+	const legacyAPITokenLength = 20
+	if len(c.token) > legacyAPITokenLength {
+		tokenFetcher := NewTokenFetcher(c.baseURL, c.token)
+		var err error
+		accessToken, err := tokenFetcher.GetToken()
+
+		if err != nil {
+			log.Fatalf("Exiting with error: %s", err)
+		}
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 	} else {
 		req.Header.Add("Authorization", fmt.Sprintf("Token %s", c.token))
 	}
+
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", c.userAgent)
 

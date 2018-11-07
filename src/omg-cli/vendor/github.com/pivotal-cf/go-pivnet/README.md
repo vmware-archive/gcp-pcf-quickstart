@@ -2,7 +2,7 @@
 
 A golang library for [Pivotal Network](https://network.pivotal.io).
 
-See also the [pivnet-cli](https://github.com/pivotal-cf/pivnet-cli)
+See also: the [pivnet-cli](https://github.com/pivotal-cf/pivnet-cli)
 and the [pivnet-resource](https://github.com/pivotal-cf/pivnet-resource).
 
 ## Usage
@@ -58,6 +58,9 @@ API_TOKEN=my-token \
 HOST='https://pivnet-integration.cfapps.io' \
 ./bin/test_all
 ```
+
+**NOTE**
+ - If dependencies are not correct, the tests may not run correctly. You will have to run `GO111MODULE=on go mod vendor` first in this case.
 
 ### Contributing
 
