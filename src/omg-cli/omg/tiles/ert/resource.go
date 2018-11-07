@@ -35,7 +35,7 @@ var smallRuntime = config.Tile{
 	config.PivnetMetadata{
 		"elastic-runtime",
 		220833,
-		258538,
+		254473,
 		"1ab242bff8f95598193b0c742b7d6a520628ebeb682fd949d18da5ef6c8e5c7a",
 	},
 	product,
