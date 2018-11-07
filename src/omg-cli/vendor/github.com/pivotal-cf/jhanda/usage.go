@@ -7,12 +7,17 @@ import (
 	"strings"
 )
 
+// Usage provides all of the details describing a Command, including a
+// description, a shorter description (used when display a list of commands),
+// and the flag options offered by the Command.
 type Usage struct {
 	Description      string
 	ShortDescription string
 	Flags            interface{}
 }
 
+// PrintUsage will return a string representation of the options provided by a
+// Command flag set.
 func PrintUsage(receiver interface{}) (string, error) {
 	v := reflect.ValueOf(receiver)
 	t := v.Type()
@@ -28,25 +33,33 @@ func PrintUsage(receiver interface{}) (string, error) {
 	var usage []string
 	var length int
 	for _, field := range fields {
-		var longShort string
+		var longShortEnv string
 		long, ok := field.Tag.Lookup("long")
 		if ok {
-			longShort += fmt.Sprintf("--%s", long)
+			longShortEnv += fmt.Sprintf("--%s", long)
 		}
 
 		short, ok := field.Tag.Lookup("short")
 		if ok {
-			if longShort != "" {
-				longShort += ", "
+			if longShortEnv != "" {
+				longShortEnv += ", "
 			}
-			longShort += fmt.Sprintf("-%s", short)
+			longShortEnv += fmt.Sprintf("-%s", short)
 		}
 
-		if len(longShort) > length {
-			length = len(longShort)
+		env, ok := field.Tag.Lookup("env")
+		if ok {
+			if longShortEnv != "" {
+				longShortEnv += ", "
+			}
+			longShortEnv += fmt.Sprintf("%s", env)
 		}
 
-		usage = append(usage, longShort)
+		if len(longShortEnv) > length {
+			length = len(longShortEnv)
+		}
+
+		usage = append(usage, longShortEnv)
 	}
 
 	for i, line := range usage {
@@ -85,6 +98,14 @@ func PrintUsage(receiver interface{}) (string, error) {
 	for i, field := range fields {
 		description, ok := field.Tag.Lookup("description")
 		if ok {
+			if _, ok := field.Tag.Lookup("deprecated"); ok {
+				description = fmt.Sprintf("**DEPRECATED** %s", description)
+			}
+
+			if _, ok := field.Tag.Lookup("experimental"); ok {
+				description = fmt.Sprintf("**EXPERIMENTAL** %s", description)
+			}
+
 			usage[i] = fmt.Sprintf("%s  %s", usage[i], description)
 		}
 	}

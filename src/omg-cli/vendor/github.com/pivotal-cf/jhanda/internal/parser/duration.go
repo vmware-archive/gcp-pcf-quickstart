@@ -3,7 +3,9 @@ package parser
 import (
 	"flag"
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -31,6 +33,32 @@ func NewDuration(set *flag.FlagSet, field reflect.Value, tags reflect.StructTag)
 		set.DurationVar(field.Addr().Interface().(*time.Duration), long, defaultValue, "")
 		f.flags = append(f.flags, set.Lookup(long))
 		f.name = fmt.Sprintf("--%s", long)
+	}
+
+	alias, ok := tags.Lookup("alias")
+	if ok {
+		set.DurationVar(field.Addr().Interface().(*time.Duration), alias, defaultValue, "")
+		f.flags = append(f.flags, set.Lookup(alias))
+		f.name = fmt.Sprintf("--%s", alias)
+	}
+
+	env, ok := tags.Lookup("env")
+	if ok {
+		envOpts := strings.Split(env, ",")
+
+		for _, envOpt := range envOpts {
+			envStr := os.Getenv(envOpt)
+			if envStr != "" {
+				envValue, err := time.ParseDuration(envStr)
+				if err != nil {
+					return &Flag{}, fmt.Errorf("could not parse duration environment variable %s value %q: %s", envOpt, envStr, err)
+				}
+
+				field.SetInt(int64(envValue))
+				f.set = true
+				break
+			}
+		}
 	}
 
 	_, f.required = tags.Lookup("required")

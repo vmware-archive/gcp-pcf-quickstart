@@ -29,12 +29,13 @@ import (
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
+	client "code.cloudfoundry.org/uaa-go-client"
 	uaa "code.cloudfoundry.org/uaa-go-client/config"
 )
 
 type Sdk struct {
 	logger     *log.Logger
-	uaaClient  uaa_go_client.Client
+	uaaClient  client.Client
 	httpClient *http.Client
 	endpoint   string
 }
