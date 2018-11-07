@@ -5,36 +5,41 @@ import (
 
 	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
+	"github.com/pivotal-cf/om/extractor"
+	"github.com/pivotal-cf/om/validator"
 )
 
 type UploadProduct struct {
-	multipart       multipart
-	logger          logger
-	productsService productUploader
-	Options         struct {
-		Product         string `long:"product"          short:"p"  required:"true" description:"path to product"`
-		PollingInterval int    `long:"polling-interval" short:"pi"                 description:"interval (in seconds) at which to print status" default:"1"`
+	multipart multipart
+	logger    logger
+	service   uploadProductService
+	Options   struct {
+		ConfigFile      string `long:"config"           short:"c"   description:"path to yml file for configuration (keys must match the following command line flags)"`
+		Product         string `long:"product"          short:"p"   description:"path to product" required:"true"`
+		PollingInterval int    `long:"polling-interval" short:"pi"  description:"interval (in seconds) at which to print status" default:"1"`
+		Sha256          string `long:"sha256"                       description:"sha256 of the provided product file to be used for validation"`
+		Version         string `long:"product-version"                      description:"version of the provided product file to be used for validation"`
 	}
-	extractor extractor
+	metadataExtractor metadataExtractor
 }
 
-//go:generate counterfeiter -o ./fakes/product_uploader.go --fake-name ProductUploader . productUploader
-type productUploader interface {
-	Upload(api.UploadProductInput) (api.UploadProductOutput, error)
+//go:generate counterfeiter -o ./fakes/upload_product_service.go --fake-name UploadProductService . uploadProductService
+type uploadProductService interface {
+	UploadAvailableProduct(api.UploadAvailableProductInput) (api.UploadAvailableProductOutput, error)
 	CheckProductAvailability(string, string) (bool, error)
 }
 
-//go:generate counterfeiter -o ./fakes/extractor.go --fake-name Extractor . extractor
-type extractor interface {
-	ExtractMetadata(string) (string, string, error)
+//go:generate counterfeiter -o ./fakes/metadata_extractor.go --fake-name MetadataExtractor . metadataExtractor
+type metadataExtractor interface {
+	ExtractMetadata(string) (extractor.Metadata, error)
 }
 
-func NewUploadProduct(multipart multipart, extractor extractor, productUploader productUploader, logger logger) UploadProduct {
+func NewUploadProduct(multipart multipart, metadataExtractor metadataExtractor, service uploadProductService, logger logger) UploadProduct {
 	return UploadProduct{
-		multipart:       multipart,
-		logger:          logger,
-		productsService: productUploader,
-		extractor:       extractor,
+		multipart:         multipart,
+		metadataExtractor: metadataExtractor,
+		logger:            logger,
+		service:           service,
 	}
 }
 
@@ -47,22 +52,45 @@ func (up UploadProduct) Usage() jhanda.Usage {
 }
 
 func (up UploadProduct) Execute(args []string) error {
-	if _, err := jhanda.Parse(&up.Options, args); err != nil {
+	err := loadConfigFile(args, &up.Options, nil)
+	if err != nil {
 		return fmt.Errorf("could not parse upload-product flags: %s", err)
 	}
 
-	productName, productVersion, err := up.extractor.ExtractMetadata(up.Options.Product)
+	if up.Options.Sha256 != "" {
+		shaValidator := validator.NewSHA256Calculator()
+		shasum, err := shaValidator.Checksum(up.Options.Product)
+
+		if err != nil {
+			return err
+		}
+
+		if shasum != up.Options.Sha256 {
+			return fmt.Errorf("expected shasum %s does not match file shasum %s", up.Options.Sha256, shasum)
+		}
+
+		up.logger.Printf("expected shasum matches product shasum.")
+	}
+
+	metadata, err := up.metadataExtractor.ExtractMetadata(up.Options.Product)
 	if err != nil {
 		return fmt.Errorf("failed to extract product metadata: %s", err)
 	}
 
-	prodAvailable, err := up.productsService.CheckProductAvailability(productName, productVersion)
+	if up.Options.Version != "" {
+		if up.Options.Version != metadata.Version {
+			return fmt.Errorf("expected version %s does not match product version %s", up.Options.Version, metadata.Version)
+		}
+		up.logger.Printf("expected version matches product version.")
+	}
+
+	prodAvailable, err := up.service.CheckProductAvailability(metadata.Name, metadata.Version)
 	if err != nil {
 		return fmt.Errorf("failed to check product availability: %s", err)
 	}
 
 	if prodAvailable {
-		up.logger.Printf("product %s %s is already uploaded, nothing to be done.", productName, productVersion)
+		up.logger.Printf("product %s %s is already uploaded, nothing to be done.", metadata.Name, metadata.Version)
 		return nil
 	}
 
@@ -72,17 +100,17 @@ func (up UploadProduct) Execute(args []string) error {
 		return fmt.Errorf("failed to load product: %s", err)
 	}
 
-	submission, err := up.multipart.Finalize()
+	submission := up.multipart.Finalize()
 	if err != nil {
 		return fmt.Errorf("failed to create multipart form: %s", err)
 	}
 
 	up.logger.Printf("beginning product upload to Ops Manager")
 
-	_, err = up.productsService.Upload(api.UploadProductInput{
-		ContentLength:   submission.Length,
+	_, err = up.service.UploadAvailableProduct(api.UploadAvailableProductInput{
 		Product:         submission.Content,
 		ContentType:     submission.ContentType,
+		ContentLength:   submission.ContentLength,
 		PollingInterval: up.Options.PollingInterval,
 	})
 	if err != nil {

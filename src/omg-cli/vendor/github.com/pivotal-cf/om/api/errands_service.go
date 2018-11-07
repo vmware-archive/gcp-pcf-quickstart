@@ -20,20 +20,12 @@ type ErrandsListOutput struct {
 	Errands []Errand `json:"errands"`
 }
 
-type ErrandsService struct {
-	Client httpClient
-}
-
-func NewErrandsService(client httpClient) ErrandsService {
-	return ErrandsService{Client: client}
-}
-
-func (es ErrandsService) SetState(productID string, errandName string, postDeployState interface{}, preDeleteState interface{}) error {
+func (a Api) UpdateStagedProductErrands(productID string, errandName string, postDeployState interface{}, preDeleteState interface{}) error {
 	path := fmt.Sprintf("/api/v0/staged/products/%s/errands", productID)
 
 	errandsListOutput := ErrandsListOutput{
 		Errands: []Errand{
-			Errand{
+			{
 				Name:       errandName,
 				PostDeploy: postDeployState,
 				PreDelete:  preDeleteState,
@@ -53,12 +45,12 @@ func (es ErrandsService) SetState(productID string, errandName string, postDeplo
 
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := es.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if err = validateStatusOK(resp); err != nil {
 		rawBody, err := readAll(resp.Body)
 		if err != nil {
 			return err
@@ -70,7 +62,7 @@ func (es ErrandsService) SetState(productID string, errandName string, postDeplo
 	return nil
 }
 
-func (es ErrandsService) List(productID string) (ErrandsListOutput, error) {
+func (a Api) ListStagedProductErrands(productID string) (ErrandsListOutput, error) {
 	var errandsListOutput ErrandsListOutput
 
 	path := fmt.Sprintf("/api/v0/staged/products/%s/errands", productID)
@@ -79,9 +71,17 @@ func (es ErrandsService) List(productID string) (ErrandsListOutput, error) {
 		return errandsListOutput, err
 	}
 
-	resp, err := es.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return errandsListOutput, err
+	}
+
+	if err = validateStatusOK(resp); err != nil {
+		rawBody, err := readAll(resp.Body)
+		if err != nil {
+			return errandsListOutput, err
+		}
+		return errandsListOutput, fmt.Errorf("failed to list errands: %d %s", resp.StatusCode, rawBody)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&errandsListOutput)

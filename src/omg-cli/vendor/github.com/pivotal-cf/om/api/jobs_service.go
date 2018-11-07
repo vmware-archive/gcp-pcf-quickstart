@@ -8,34 +8,32 @@ import (
 	"net/http"
 )
 
-type JobsService struct {
-	client httpClient
-}
-
+// TODO: add omitempty everywhere
 type JobProperties struct {
-	Instances         interface{}  `json:"instances"`
-	PersistentDisk    *Disk        `json:"persistent_disk,omitempty"`
-	InstanceType      InstanceType `json:"instance_type"`
-	InternetConnected *bool        `json:"internet_connected,omitempty"`
-	LBNames           []string     `json:"elb_names"`
-	NSXSecurityGroups []string     `json:"nsx_security_groups,omitempty"`
-	NSXLBS            []NSXLB      `json:"nsx_lbs,omitempty"`
-	FloatingIPs       string       `json:"floating_ips,omitempty"`
+	Instances              interface{}  `json:"instances" yaml:"instances"`
+	PersistentDisk         *Disk        `json:"persistent_disk,omitempty" yaml:"persistent_disk,omitempty"`
+	InstanceType           InstanceType `json:"instance_type" yaml:"instance_type"`
+	InternetConnected      *bool        `json:"internet_connected,omitempty" yaml:"internet_connected,omitempty"`
+	LBNames                []string     `json:"elb_names" yaml:"elb_names,omitempty"`
+	NSXSecurityGroups      []string     `json:"nsx_security_groups,omitempty" yaml:"nsx_security_groups,omitempty"`
+	NSXLBS                 []NSXLB      `json:"nsx_lbs,omitempty" yaml:"nsx_lbs,omitempty"`
+	FloatingIPs            string       `json:"floating_ips,omitempty" yaml:"floating_ips,omitempty"`
+	AdditionalVMExtensions []string     `json:"additional_vm_extensions,omitempty" yaml:"additional_vm_extensions,omitempty"`
 }
 
 type NSXLB struct {
-	EdgeName      string `json:"edge_name"`
-	PoolName      string `json:"pool_name"`
-	SecurityGroup string `json:"security_group"`
-	Port          string `json:"port"`
+	EdgeName      string `json:"edge_name" yaml:"edge_name"`
+	PoolName      string `json:"pool_name" yaml:"pool_name"`
+	SecurityGroup string `json:"security_group" yaml:"security_group"`
+	Port          string `json:"port" yaml:"port"`
 }
 
 type Disk struct {
-	Size string `json:"size_mb"`
+	Size string `json:"size_mb" yaml:"size_mb"`
 }
 
 type InstanceType struct {
-	ID string `json:"id"`
+	ID string `json:"id" yaml:"id"`
 }
 
 type Job struct {
@@ -43,26 +41,20 @@ type Job struct {
 	Name string
 }
 
-func NewJobsService(client httpClient) JobsService {
-	return JobsService{
-		client: client,
-	}
-}
-
-func (j JobsService) Jobs(productGUID string) (map[string]string, error) {
+func (a Api) ListStagedProductJobs(productGUID string) (map[string]string, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("/api/v0/staged/products/%s/jobs", productGUID), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := j.client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not make api request to jobs endpoint: %s", err)
 	}
 
 	defer resp.Body.Close()
 
-	if err = ValidateStatusOK(resp); err != nil {
+	if err = validateStatusOK(resp); err != nil {
 		return nil, err
 	}
 
@@ -83,20 +75,20 @@ func (j JobsService) Jobs(productGUID string) (map[string]string, error) {
 	return jobGUIDMap, nil
 }
 
-func (j JobsService) GetExistingJobConfig(productGUID, jobGUID string) (JobProperties, error) {
+func (a Api) GetStagedProductJobResourceConfig(productGUID, jobGUID string) (JobProperties, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("/api/v0/staged/products/%s/jobs/%s/resource_config", productGUID, jobGUID), nil)
 	if err != nil {
 		return JobProperties{}, err
 	}
 
-	resp, err := j.client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return JobProperties{}, fmt.Errorf("could not make api request to resource_config endpoint: %s", err)
 	}
 
 	defer resp.Body.Close()
 
-	if err = ValidateStatusOK(resp); err != nil {
+	if err = validateStatusOK(resp); err != nil {
 		return JobProperties{}, err
 	}
 
@@ -114,7 +106,7 @@ func (j JobsService) GetExistingJobConfig(productGUID, jobGUID string) (JobPrope
 	return existingConfig, nil
 }
 
-func (j JobsService) ConfigureJob(productGUID, jobGUID string, jobProperties JobProperties) error {
+func (a Api) UpdateStagedProductJobResourceConfig(productGUID, jobGUID string, jobProperties JobProperties) error {
 	bodyBytes := bytes.NewBuffer([]byte{})
 	err := json.NewEncoder(bodyBytes).Encode(jobProperties)
 	if err != nil {
@@ -128,14 +120,14 @@ func (j JobsService) ConfigureJob(productGUID, jobGUID string, jobProperties Job
 
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := j.client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("could not make api request to jobs resource_config endpoint: %s", err)
 	}
 
 	defer resp.Body.Close()
 
-	if err = ValidateStatusOK(resp); err != nil {
+	if err = validateStatusOK(resp); err != nil {
 		return err
 	}
 

@@ -12,14 +12,6 @@ type Range struct {
 	HTTPHeader http.Header
 }
 
-func NewRange(lower int64, upper int64, httpHeader http.Header) (Range){
-	return Range {
-		 lower,
-		 upper,
-		httpHeader,
-	}
-}
-
 type Ranger struct {
 	numHunks int
 }

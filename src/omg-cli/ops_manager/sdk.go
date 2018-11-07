@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -29,7 +30,6 @@ import (
 	"time"
 
 	"io"
-	"io/ioutil"
 
 	"omg-cli/config"
 	"omg-cli/version"
@@ -49,20 +49,35 @@ const (
 )
 
 type Sdk struct {
-	target                string
-	creds                 config.OpsManagerCredentials
-	logger                *log.Logger
-	unauthenticatedClient network.UnauthenticatedClient
-	client                network.OAuthClient
-	httpClient            *http.Client
+	target     string
+	creds      config.OpsManagerCredentials
+	logger     *log.Logger
+	api        api.Api
+	httpClient *http.Client
 }
 
 // NewSdk creates an authenticated session and object to interact with Ops Manager
 func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
-	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second)
+	timeout := time.Duration(requestTimeout) * time.Second
+	authedClient, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "", creds.SkipSSLVerification, true, timeout, timeout)
 	if err != nil {
 		return nil, err
 	}
+
+	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification, timeout, timeout)
+
+	liveWriter := uilive.New()
+	liveWriter.Out = os.Stderr
+	authedProgressClient := network.NewProgressClient(authedClient, progress.NewBar(), liveWriter)
+	unauthenticatedProgressClient := network.NewProgressClient(unauthenticatedClient, progress.NewBar(), liveWriter)
+
+	api := api.New(api.ApiInput{
+		Client:                 authedClient,
+		UnauthedClient:         unauthenticatedClient,
+		ProgressClient:         authedProgressClient,
+		UnauthedProgressClient: unauthenticatedProgressClient,
+		Logger:                 &logger,
+	})
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
@@ -71,19 +86,17 @@ func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger
 	}
 
 	return &Sdk{target: target,
-		creds:                 creds,
-		logger:                &logger,
-		unauthenticatedClient: network.NewUnauthenticatedClient(target, creds.SkipSSLVerification, time.Duration(requestTimeout)*time.Second),
-		client:                client,
-		httpClient:            &http.Client{Transport: tr},
+		creds:  creds,
+		logger: &logger,
+
+		api:        api,
+		httpClient: &http.Client{Transport: tr},
 	}, nil
 }
 
 // SetupAuth configures the initial username, password, and decryptionPhrase
 func (om *Sdk) SetupAuth() error {
-	setupService := api.NewSetupService(om.unauthenticatedClient)
-
-	cmd := commands.NewConfigureAuthentication(setupService, om.logger)
+	cmd := commands.NewConfigureAuthentication(om.api, om.logger)
 	return cmd.Execute([]string{
 		"--username", om.creds.Username,
 		"--password", om.creds.Password,
@@ -130,9 +143,8 @@ func (om *Sdk) ReadyForAuth() bool {
 
 // SetupBosh applies the provided configuration to the BOSH director tile
 func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.DirectorConfiguration, azs commands.AvailabilityZonesConfiguration, networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment, resources commands.ResourceConfiguration) error {
-	boshService := api.NewBoshFormService(om.client)
-	diagnosticService := api.NewDiagnosticService(om.client)
-	cmd := commands.NewConfigureBosh(boshService, diagnosticService, om.logger)
+
+	cmd := commands.NewConfigureDirector(os.Environ, om.api, om.logger)
 
 	iaasBytes, err := json.Marshal(iaas)
 	if err != nil {
@@ -175,31 +187,22 @@ func (om *Sdk) SetupBosh(iaas commands.GCPIaaSConfiguration, director commands.D
 
 // ApplyChanges deploys pending changes to Ops Manager
 func (om *Sdk) ApplyChanges() error {
-	installationsService := api.NewInstallationsService(om.client)
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, poolingIntervalSec)
 
 	return cmd.Execute(nil)
 }
 
 func (om *Sdk) ApplyDirector() error {
-	installationsService := api.NewInstallationsService(om.client)
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(installationsService, logWriter, om.logger, poolingIntervalSec)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, poolingIntervalSec)
 	return cmd.Execute([]string{"--skip-deploy-products"})
 }
 
 // UploadProduct pushes a given file located locally at path to the target
 func (om *Sdk) UploadProduct(path string) error {
-	liveWriter := uilive.New()
-	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), liveWriter)
-
-	form, err := formcontent.NewForm()
-	if err != nil {
-		return err
-	}
-
-	cmd := commands.NewUploadProduct(form, extractor.ProductUnzipper{}, availableProductsService, om.logger)
+	form := formcontent.NewForm()
+	cmd := commands.NewUploadProduct(form, extractor.MetadataExtractor{}, om.api, om.logger)
 
 	return cmd.Execute([]string{
 		"--product", path})
@@ -207,14 +210,8 @@ func (om *Sdk) UploadProduct(path string) error {
 
 // UploadStemcell pushes a given stemcell located locally at path to the target
 func (om *Sdk) UploadStemcell(path string) error {
-	diagnosticService := api.NewDiagnosticService(om.client)
-	form, err := formcontent.NewForm()
-	if err != nil {
-		return err
-	}
-
-	uploadStemcellService := api.NewUploadStemcellService(om.client, progress.NewBar())
-	cmd := commands.NewUploadStemcell(form, uploadStemcellService, diagnosticService, om.logger)
+	form := formcontent.NewForm()
+	cmd := commands.NewUploadStemcell(form, om.api, om.logger)
 
 	return cmd.Execute([]string{
 		"--stemcell", path})
@@ -222,11 +219,7 @@ func (om *Sdk) UploadStemcell(path string) error {
 
 // StageProduct moves a given name, version to the list of tiles that will be deployed
 func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
-	diagnosticService := api.NewDiagnosticService(om.client)
-	availableProductsService := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
-	stagedProductsService := api.NewStagedProductsService(om.client)
-	deployedProductsService := api.NewDeployedProductsService(om.client)
-	cmd := commands.NewStageProduct(stagedProductsService, deployedProductsService, availableProductsService, diagnosticService, om.logger)
+	cmd := commands.NewStageProduct(om.api, om.logger)
 	return cmd.Execute([]string{
 		"--product-name", tile.Name,
 		"--product-version", tile.Version,
@@ -250,8 +243,7 @@ func (om *Sdk) Online() bool {
 
 // AvaliableProducts lists products that are uploaded to Ops Manager.
 func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
-	service := api.NewAvailableProductsService(om.client, progress.NewBar(), uilive.New())
-	out, err := service.List()
+	out, err := om.api.ListAvailableProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -261,9 +253,7 @@ func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
 
 // ConfigureProduct sets up the settings for a given tile by name
 func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
-	stagedProductsService := api.NewStagedProductsService(om.client)
-	jobsService := api.NewJobsService(om.client)
-	cmd := commands.NewConfigureProduct(stagedProductsService, jobsService, om.logger)
+	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.logger)
 
 	return cmd.Execute([]string{
 		"--product-name", name,
@@ -334,11 +324,11 @@ func (om *Sdk) GetResource(tileName, jobName string) (*Resource, error) {
 }
 
 func (om *Sdk) curl(path, method string, data io.Reader) ([]byte, error) {
-	req, err := om.newRequest(method, fmt.Sprintf("%s/%s", om.target, path), data)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := om.client.Do(req)
+	resp, err := om.api.Curl(api.RequestServiceCurlInput{
+		Path:   path,
+		Method: method,
+		Data:   data,
+	})
 
 	if err != nil {
 		return nil, err
@@ -474,9 +464,7 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 
 func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	deleteInstallationService := api.NewInstallationAssetService(om.client, nil, nil)
-	installationsService := api.NewInstallationsService(om.client)
-	cmd := commands.NewDeleteInstallation(deleteInstallationService, installationsService, logWriter, om.logger, poolingIntervalSec)
+	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, poolingIntervalSec)
 
 	return cmd.Execute(nil)
 }

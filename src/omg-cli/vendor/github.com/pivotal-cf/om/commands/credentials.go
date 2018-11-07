@@ -10,23 +10,24 @@ import (
 
 type Credentials struct {
 	service   credentialsService
-	lister    deployedProductsLister
-	presenter presenters.Presenter
+	presenter presenters.FormattedPresenter
 	logger    logger
 	Options   struct {
 		Product             string `long:"product-name"         short:"p" required:"true" description:"name of deployed product"`
 		CredentialReference string `long:"credential-reference" short:"c" required:"true" description:"name of credential reference"`
 		CredentialField     string `long:"credential-field"     short:"f"                 description:"single credential field to output"`
+		Format              string `long:"format"               short:"t" default:"table" description:"Format to print as (options: table,json)"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/credentials_service.go --fake-name CredentialsService . credentialsService
 type credentialsService interface {
-	Fetch(deployedProductGUID, credentialReference string) (api.CredentialOutput, error)
+	GetDeployedProductCredential(api.GetDeployedProductCredentialInput) (api.GetDeployedProductCredentialOutput, error)
+	ListDeployedProducts() ([]api.DeployedProductOutput, error)
 }
 
-func NewCredentials(csService credentialsService, dpLister deployedProductsLister, presenter presenters.Presenter, logger logger) Credentials {
-	return Credentials{service: csService, lister: dpLister, presenter: presenter, logger: logger}
+func NewCredentials(csService credentialsService, presenter presenters.FormattedPresenter, logger logger) Credentials {
+	return Credentials{service: csService, presenter: presenter, logger: logger}
 }
 
 func (cs Credentials) Execute(args []string) error {
@@ -35,7 +36,7 @@ func (cs Credentials) Execute(args []string) error {
 	}
 
 	deployedProductGUID := ""
-	deployedProducts, err := cs.lister.DeployedProducts()
+	deployedProducts, err := cs.service.ListDeployedProducts()
 	if err != nil {
 		return fmt.Errorf("failed to fetch credential: %s", err)
 	}
@@ -50,7 +51,10 @@ func (cs Credentials) Execute(args []string) error {
 		return fmt.Errorf("failed to fetch credential: %q is not deployed", cs.Options.Product)
 	}
 
-	output, err := cs.service.Fetch(deployedProductGUID, cs.Options.CredentialReference)
+	output, err := cs.service.GetDeployedProductCredential(api.GetDeployedProductCredentialInput{
+		DeployedGUID:        deployedProductGUID,
+		CredentialReference: cs.Options.CredentialReference,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to fetch credential for %q: %s", cs.Options.CredentialReference, err)
 	}
@@ -60,6 +64,7 @@ func (cs Credentials) Execute(args []string) error {
 	}
 
 	if cs.Options.CredentialField == "" {
+		cs.presenter.SetFormat(cs.Options.Format)
 		cs.presenter.PresentCredentials(output.Credential.Value)
 	} else {
 		if value, ok := output.Credential.Value[cs.Options.CredentialField]; ok {

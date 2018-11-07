@@ -26,7 +26,7 @@ type OAuthClient struct {
 	timeout       time.Duration
 }
 
-func NewOAuthClient(target, username, password string, clientID, clientSecret string, insecureSkipVerify bool, includeCookies bool, requestTimeout time.Duration) (OAuthClient, error) {
+func NewOAuthClient(target, username, password string, clientID, clientSecret string, insecureSkipVerify bool, includeCookies bool, requestTimeout time.Duration, connectTimeout time.Duration) (OAuthClient, error) {
 	conf := &oauth2.Config{
 		ClientID:     "opsman",
 		ClientSecret: "",
@@ -45,7 +45,7 @@ func NewOAuthClient(target, username, password string, clientID, clientSecret st
 				InsecureSkipVerify: insecureSkipVerify,
 			},
 			Dial: (&net.Dialer{
-				Timeout:   5 * time.Second,
+				Timeout:   connectTimeout,
 				KeepAlive: 30 * time.Second,
 			}).Dial,
 		},
@@ -105,7 +105,7 @@ func (oc OAuthClient) Do(request *http.Request) (*http.Response, error) {
 	if oc.oauthConfigCC.ClientID != "" {
 		client = oc.oauthConfigCC.Client(oc.context)
 	} else {
-		token, err := retrieveTokenWithRetry(oc.oauthConfig, oc.context, oc.username, oc.password)
+		token, err := retrieveTokenWithRetry(oc.oauthConfig, oc.context, oc.username, oc.password, oc.timeout)
 		if err != nil {
 			return nil, err
 		}
@@ -130,10 +130,12 @@ func (oc OAuthClient) Do(request *http.Request) (*http.Response, error) {
 	return client.Do(request)
 }
 
-func retrieveTokenWithRetry(config *oauth2.Config, ctx context.Context, username, password string) (*oauth2.Token, error) {
+func retrieveTokenWithRetry(config *oauth2.Config, ctx context.Context, username, password string, timeout time.Duration) (*oauth2.Token, error) {
+	currTime := time.Now()
+	expiryTime := currTime.Add(timeout)
 retry:
 	token, err := config.PasswordCredentialsToken(ctx, username, password)
-	if canRetry(err) {
+	if time.Now().Before(expiryTime) && canRetry(err) {
 		goto retry
 	}
 

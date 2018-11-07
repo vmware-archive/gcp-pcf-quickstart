@@ -9,20 +9,21 @@ import (
 )
 
 type CreateCertificateAuthority struct {
-	service   certificateAuthorityCreator
-	presenter presenters.Presenter
+	service   createCertificateAuthorityService
+	presenter presenters.FormattedPresenter
 	Options   struct {
 		CertPem    string `long:"certificate-pem" required:"true" description:"certificate"`
 		PrivateKey string `long:"private-key-pem" required:"true" description:"private key"`
+		Format     string `long:"format" short:"f" default:"table" description:"Format to print as (options: table,json)"`
 	}
 }
 
-//go:generate counterfeiter -o ./fakes/certificate_authority_creator.go --fake-name CertificateAuthorityCreator . certificateAuthorityCreator
-type certificateAuthorityCreator interface {
-	Create(api.CertificateAuthorityInput) (api.CA, error)
+//go:generate counterfeiter -o ./fakes/create_certificate_authority_service.go --fake-name CreateCertificateAuthorityService . createCertificateAuthorityService
+type createCertificateAuthorityService interface {
+	CreateCertificateAuthority(api.CertificateAuthorityInput) (api.CA, error)
 }
 
-func NewCreateCertificateAuthority(service certificateAuthorityCreator, presenter presenters.Presenter) CreateCertificateAuthority {
+func NewCreateCertificateAuthority(service createCertificateAuthorityService, presenter presenters.FormattedPresenter) CreateCertificateAuthority {
 	return CreateCertificateAuthority{service: service, presenter: presenter}
 }
 
@@ -31,7 +32,7 @@ func (c CreateCertificateAuthority) Execute(args []string) error {
 		return fmt.Errorf("could not parse create-certificate-authority flags: %s", err)
 	}
 
-	ca, err := c.service.Create(api.CertificateAuthorityInput{
+	ca, err := c.service.CreateCertificateAuthority(api.CertificateAuthorityInput{
 		CertPem:       c.Options.CertPem,
 		PrivateKeyPem: c.Options.PrivateKey,
 	})
@@ -39,6 +40,7 @@ func (c CreateCertificateAuthority) Execute(args []string) error {
 		return err
 	}
 
+	c.presenter.SetFormat(c.Options.Format)
 	c.presenter.PresentCertificateAuthority(ca)
 
 	return nil

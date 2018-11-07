@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"log"
-
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
 )
@@ -25,10 +23,10 @@ const (
 )
 
 type Client struct {
-	baseURL       string
-	token         string
-	userAgent     string
-	logger        logger.Logger
+	baseURL   string
+	token     string
+	userAgent string
+	logger    logger.Logger
 	usingUAAToken bool
 
 	HTTP *http.Client
@@ -54,6 +52,7 @@ type ClientConfig struct {
 	Token             string
 	UserAgent         string
 	SkipSSLValidation bool
+	UsingUAAToken 	  bool
 }
 
 func NewClient(
@@ -93,6 +92,7 @@ func NewClient(
 		baseURL:    baseURL,
 		token:      config.Token,
 		userAgent:  config.UserAgent,
+		usingUAAToken: config.UsingUAAToken,
 		logger:     logger,
 		downloader: downloader,
 		HTTP:       httpClient,
@@ -133,20 +133,11 @@ func (c Client) CreateRequest(
 		return nil, err
 	}
 
-	const legacyAPITokenLength = 20
-	if len(c.token) > legacyAPITokenLength {
-		tokenFetcher := NewTokenFetcher(c.baseURL, c.token)
-		var err error
-		accessToken, err := tokenFetcher.GetToken()
-
-		if err != nil {
-			log.Fatalf("Exiting with error: %s", err)
-		}
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	if c.usingUAAToken {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	} else {
 		req.Header.Add("Authorization", fmt.Sprintf("Token %s", c.token))
 	}
-
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", c.userAgent)
 

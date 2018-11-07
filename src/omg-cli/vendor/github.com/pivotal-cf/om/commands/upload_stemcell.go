@@ -7,42 +7,41 @@ import (
 	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/formcontent"
+	"github.com/pivotal-cf/om/validator"
+
+	"strconv"
 )
 
 type UploadStemcell struct {
-	multipart         multipart
-	logger            logger
-	stemcellService   stemcellService
-	diagnosticService diagnosticService
-	Options           struct {
+	multipart multipart
+	logger    logger
+	service   uploadStemcellService
+	Options   struct {
 		Stemcell string `long:"stemcell" short:"s" required:"true" description:"path to stemcell"`
 		Force    bool   `long:"force"    short:"f"                 description:"upload stemcell even if it already exists on the target Ops Manager"`
+		Floating bool   `long:"floating" default:"true"            description:"assigns the stemcell to all compatible products "`
+		Shasum   string `long:"shasum" short:"sha" description:"shasum of the provided stemcell file to be used for validation"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/multipart.go --fake-name Multipart . multipart
 type multipart interface {
-	Finalize() (formcontent.ContentSubmission, error)
+	Finalize() formcontent.ContentSubmission
 	AddFile(key, path string) error
 	AddField(key, value string) error
 }
 
-//go:generate counterfeiter -o ./fakes/stemcell_service.go --fake-name StemcellService . stemcellService
-type stemcellService interface {
-	Upload(api.StemcellUploadInput) (api.StemcellUploadOutput, error)
+//go:generate counterfeiter -o ./fakes/upload_stemcell_service.go --fake-name UploadStemcellService . uploadStemcellService
+type uploadStemcellService interface {
+	UploadStemcell(api.StemcellUploadInput) (api.StemcellUploadOutput, error)
+	GetDiagnosticReport() (api.DiagnosticReport, error)
 }
 
-//go:generate counterfeiter -o ./fakes/diagnostic_service.go --fake-name DiagnosticService . diagnosticService
-type diagnosticService interface {
-	Report() (api.DiagnosticReport, error)
-}
-
-func NewUploadStemcell(multipart multipart, stemcellService stemcellService, diagnosticService diagnosticService, logger logger) UploadStemcell {
+func NewUploadStemcell(multipart multipart, service uploadStemcellService, logger logger) UploadStemcell {
 	return UploadStemcell{
-		multipart:         multipart,
-		logger:            logger,
-		stemcellService:   stemcellService,
-		diagnosticService: diagnosticService,
+		multipart: multipart,
+		logger:    logger,
+		service:   service,
 	}
 }
 
@@ -59,9 +58,24 @@ func (us UploadStemcell) Execute(args []string) error {
 		return fmt.Errorf("could not parse upload-stemcell flags: %s", err)
 	}
 
+	if us.Options.Shasum != "" {
+		shaValidator := validator.NewSHA256Calculator()
+		shasum, err := shaValidator.Checksum(us.Options.Stemcell)
+
+		if err != nil {
+			return err
+		}
+
+		if shasum != us.Options.Shasum {
+			return fmt.Errorf("expected shasum %s does not match file shasum %s", us.Options.Shasum, shasum)
+		}
+
+		us.logger.Printf("expected shasum matches stemcell shasum.")
+	}
+
 	if !us.Options.Force {
 		us.logger.Printf("processing stemcell")
-		report, err := us.diagnosticService.Report()
+		report, err := us.service.GetDiagnosticReport()
 		if err != nil {
 			switch err.(type) {
 			case api.DiagnosticReportUnavailable:
@@ -84,17 +98,22 @@ func (us UploadStemcell) Execute(args []string) error {
 		return fmt.Errorf("failed to load stemcell: %s", err)
 	}
 
-	submission, err := us.multipart.Finalize()
+	err = us.multipart.AddField("stemcell[floating]", strconv.FormatBool(us.Options.Floating))
+	if err != nil {
+		return fmt.Errorf("failed to load stemcell: %s", err)
+	}
+
+	submission := us.multipart.Finalize()
 	if err != nil {
 		return fmt.Errorf("failed to create multipart form: %s", err)
 	}
 
 	us.logger.Printf("beginning stemcell upload to Ops Manager")
 
-	_, err = us.stemcellService.Upload(api.StemcellUploadInput{
-		ContentLength: submission.Length,
+	_, err = us.service.UploadStemcell(api.StemcellUploadInput{
 		Stemcell:      submission.Content,
 		ContentType:   submission.ContentType,
+		ContentLength: submission.ContentLength,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload stemcell: %s", err)

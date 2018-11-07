@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/models"
@@ -9,22 +11,29 @@ import (
 
 type AvailableProducts struct {
 	service   availableProductsService
-	presenter presenters.Presenter
+	presenter presenters.FormattedPresenter
 	logger    logger
+	Options   struct {
+		Format string `long:"format" short:"f" default:"table" description:"Format to print as (options: table,json)"`
+	}
 }
 
 //go:generate counterfeiter -o ./fakes/available_products_service.go --fake-name AvailableProductsService . availableProductsService
 
 type availableProductsService interface {
-	List() (api.AvailableProductsOutput, error)
+	ListAvailableProducts() (api.AvailableProductsOutput, error)
 }
 
-func NewAvailableProducts(apService availableProductsService, presenter presenters.Presenter, logger logger) AvailableProducts {
+func NewAvailableProducts(apService availableProductsService, presenter presenters.FormattedPresenter, logger logger) AvailableProducts {
 	return AvailableProducts{service: apService, presenter: presenter, logger: logger}
 }
 
 func (ap AvailableProducts) Execute(args []string) error {
-	output, err := ap.service.List()
+	if _, err := jhanda.Parse(&ap.Options, args); err != nil {
+		return fmt.Errorf("could not parse available-products flags: %s", err)
+	}
+
+	output, err := ap.service.ListAvailableProducts()
 	if err != nil {
 		return err
 	}
@@ -42,6 +51,7 @@ func (ap AvailableProducts) Execute(args []string) error {
 		})
 	}
 
+	ap.presenter.SetFormat(ap.Options.Format)
 	ap.presenter.PresentAvailableProducts(products)
 
 	return nil
@@ -51,5 +61,6 @@ func (ap AvailableProducts) Usage() jhanda.Usage {
 	return jhanda.Usage{
 		Description:      "This authenticated command lists all available products.",
 		ShortDescription: "list available products",
+		Flags:            ap.Options,
 	}
 }

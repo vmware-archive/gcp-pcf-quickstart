@@ -11,21 +11,22 @@ import (
 
 type CredentialReferences struct {
 	service   credentialReferencesService
-	lister    deployedProductsLister
-	presenter presenters.Presenter
+	presenter presenters.FormattedPresenter
 	logger    logger
 	Options   struct {
 		Product string `long:"product-name" short:"p" required:"true" description:"name of deployed product"`
+		Format  string `long:"format" short:"f" default:"table" description:"Format to print as (options: table,json)"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/credential_references_service.go --fake-name CredentialReferencesService . credentialReferencesService
 type credentialReferencesService interface {
-	List(deployedProductGUID string) (api.CredentialReferencesOutput, error)
+	ListDeployedProductCredentials(deployedProductGUID string) (api.CredentialReferencesOutput, error)
+	ListDeployedProducts() ([]api.DeployedProductOutput, error)
 }
 
-func NewCredentialReferences(crService credentialReferencesService, dpLister deployedProductsLister, presenter presenters.Presenter, logger logger) CredentialReferences {
-	return CredentialReferences{service: crService, lister: dpLister, presenter: presenter, logger: logger}
+func NewCredentialReferences(crService credentialReferencesService, presenter presenters.FormattedPresenter, logger logger) CredentialReferences {
+	return CredentialReferences{service: crService, presenter: presenter, logger: logger}
 }
 
 func (cr CredentialReferences) Execute(args []string) error {
@@ -34,7 +35,7 @@ func (cr CredentialReferences) Execute(args []string) error {
 	}
 
 	deployedProductGUID := ""
-	deployedProducts, err := cr.lister.DeployedProducts()
+	deployedProducts, err := cr.service.ListDeployedProducts()
 	if err != nil {
 		return fmt.Errorf("failed to list credential references: %s", err)
 	}
@@ -49,7 +50,7 @@ func (cr CredentialReferences) Execute(args []string) error {
 		return fmt.Errorf("failed to list credential references: %s is not deployed", cr.Options.Product)
 	}
 
-	output, err := cr.service.List(deployedProductGUID)
+	output, err := cr.service.ListDeployedProductCredentials(deployedProductGUID)
 	sort.Strings(output.Credentials)
 	if err != nil {
 		return fmt.Errorf("failed to list credential references: %s", err)
@@ -60,6 +61,7 @@ func (cr CredentialReferences) Execute(args []string) error {
 		return nil
 	}
 
+	cr.presenter.SetFormat(cr.Options.Format)
 	cr.presenter.PresentCredentialReferences(output.Credentials)
 
 	return nil

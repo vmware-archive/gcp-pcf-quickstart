@@ -8,19 +8,19 @@ import (
 )
 
 type ActivateCertificateAuthority struct {
-	service certificateAuthorityActivator
+	service activateCertificateAuthorityService
 	logger  logger
 	Options struct {
 		Id string `long:"id" required:"true" description:"certificate authority id"`
 	}
 }
 
-//go:generate counterfeiter -o ./fakes/certificate_authority_activator.go --fake-name CertificateAuthorityActivator . certificateAuthorityActivator
-type certificateAuthorityActivator interface {
-	Activate(api.ActivateCertificateAuthorityInput) error
+//go:generate counterfeiter -o ./fakes/activate_certificate_authority_service.go --fake-name ActivateCertificateAuthorityService . activateCertificateAuthorityService
+type activateCertificateAuthorityService interface {
+	ActivateCertificateAuthority(api.ActivateCertificateAuthorityInput) error
 }
 
-func NewActivateCertificateAuthority(service certificateAuthorityActivator, logger logger) ActivateCertificateAuthority {
+func NewActivateCertificateAuthority(service activateCertificateAuthorityService, logger logger) ActivateCertificateAuthority {
 	return ActivateCertificateAuthority{service: service, logger: logger}
 }
 
@@ -29,7 +29,7 @@ func (a ActivateCertificateAuthority) Execute(args []string) error {
 		return fmt.Errorf("could not parse activate-certificate-authority flags: %s", err)
 	}
 
-	err := a.service.Activate(api.ActivateCertificateAuthorityInput{
+	err := a.service.ActivateCertificateAuthority(api.ActivateCertificateAuthorityInput{
 		GUID: a.Options.Id,
 	})
 

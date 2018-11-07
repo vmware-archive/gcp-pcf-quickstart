@@ -6,8 +6,8 @@ _is a mantra, or vibration, that is traditionally chanted_
 
 ## What is it?
 
-Magical tool that helps you configure and deploy tiles to an Ops-Manager 1.8+ . 
-Currently being developed by RelEng, backlog link is [here](https://www.pivotaltracker.com/epic/show/2982497).
+Magical tool that helps you configure and deploy tiles to an Ops-Manager 1.8+.
+Currently being developed by RelEng, backlog link is [here](https://www.pivotaltracker.com/n/projects/2145041).
 
 ## Documentation
 
@@ -37,17 +37,19 @@ apt-get install om
 om helps you interact with an Ops Manager
 
 Usage: om [options] <command> [<args>]
-  --client-id, -c            string  Client ID for the Ops Manager VM (not required for unauthenticated commands)
-  --client-secret, -s        string  Client Secret for the Ops Manager VM (not required for unauthenticated commands)
-  --format, -f               string  Format to print as (options: table,json) (default: table)
-  --help, -h                 bool    prints this usage information (default: false)
-  --password, -p             string  admin password for the Ops Manager VM (not required for unauthenticated commands)
-  --request-timeout, -r      int     timeout in seconds for HTTP requests to Ops Manager (default: 1800)
-  --skip-ssl-validation, -k  bool    skip ssl certificate validation during http requests (default: false)
-  --target, -t               string  location of the Ops Manager VM
-  --trace, -tr               bool    prints HTTP requests and response payloads
-  --username, -u             string  admin username for the Ops Manager VM (not required for unauthenticated commands)
-  --version, -v              bool    prints the om release version (default: false)
+  --client-id, -c, OM_CLIENT_ID                          string  Client ID for the Ops Manager VM (not required for unauthenticated commands)
+  --client-secret, -s, OM_CLIENT_SECRET                  string  Client Secret for the Ops Manager VM (not required for unauthenticated commands)
+  --connect-timeout, -o                                  int     timeout in seconds to make TCP connections (default: 5)
+  --decryption-passphrase, -d, OM_DECRYPTION_PASSPHRASE  string  Passphrase to decrypt the installation if the Ops Manager VM has been rebooted (optional for most commands)
+  --env, -e                                              string  env file with login credentials
+  --help, -h                                             bool    prints this usage information (default: false)
+  --password, -p, OM_PASSWORD                            string  admin password for the Ops Manager VM (not required for unauthenticated commands)
+  --request-timeout, -r                                  int     timeout in seconds for HTTP requests to Ops Manager (default: 1800)
+  --skip-ssl-validation, -k                              bool    skip ssl certificate validation during http requests (default: false)
+  --target, -t, OM_TARGET                                string  location of the Ops Manager VM
+  --trace, -tr                                           bool    prints HTTP requests and response payloads
+  --username, -u, OM_USERNAME                            string  admin username for the Ops Manager VM (not required for unauthenticated commands)
+  --version, -v                                          bool    prints the om release version (default: false)
 
 Commands:
   activate-certificate-authority  activates a certificate authority on the Ops Manager
@@ -55,11 +57,13 @@ Commands:
   available-products              list available products
   certificate-authorities         lists certificates managed by Ops Manager
   certificate-authority           prints requested certificate authority
+  config-template                 **EXPERIMENTAL** generates a config template for the product
   configure-authentication        configures Ops Manager with an internal userstore and admin user account
-  configure-bosh                  configures Ops Manager deployed bosh director
   configure-director              configures the director
   configure-product               configures a staged product
+  configure-saml-authentication   configures Ops Manager with SAML authentication
   create-certificate-authority    creates a certificate authority on the Ops Manager
+  create-vm-extension             creates/updates a VM extension
   credential-references           list credential references for a deployed product
   credentials                     fetch credentials for a deployed product
   curl                            issues an authenticated API request
@@ -67,7 +71,9 @@ Commands:
   delete-installation             deletes all the products on the Ops Manager targeted
   delete-product                  deletes a product from the Ops Manager
   delete-unused-products          deletes unused products on the Ops Manager targeted
+  deployed-manifest               prints the deployed manifest for a product
   deployed-products               lists deployed products
+  download-product                downloads a specified product file from Pivotal Network
   errands                         list errands for a product
   export-installation             exports the installation of the target Ops Manager
   generate-certificate            generates a new certificate signed by Ops Manager's root CA
@@ -76,12 +82,16 @@ Commands:
   import-installation             imports a given installation to the Ops Manager targeted
   installation-log                output installation logs
   installations                   list recent installation events
+  interpolate                     Interpolates variables into a manifest
   pending-changes                 lists pending changes
-  regenerate-certificates         regenerates a certificate authority on the Opsman
+  regenerate-certificates         deletes all non-configurable certificates in Ops Manager so they will automatically be regenerated on the next apply-changes
   revert-staged-changes           reverts staged changes on the Ops Manager targeted
-  set-errand-state                sets state for a product's errand
   stage-product                   stages a given product in the Ops Manager targeted
+  staged-config                   **EXPERIMENTAL** generates a config from a staged product
+  staged-director-config          **EXPERIMENTAL** generates a config from a staged director
+  staged-manifest                 prints the staged manifest for a product
   staged-products                 lists staged products
+  tile-metadata                   prints tile metadata
   unstage-product                 unstages a given product from the Ops Manager targeted
   upload-product                  uploads a given product to the Ops Manager targeted
   upload-stemcell                 uploads a given stemcell to the Ops Manager targeted

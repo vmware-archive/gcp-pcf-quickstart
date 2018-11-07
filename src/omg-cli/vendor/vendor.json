@@ -87,6 +87,18 @@
 			"revisionTime": "2016-12-24T14:14:13Z"
 		},
 		{
+			"checksumSHA1": "ugh6ajWUB0BtY27oc2UdgxyLUkU=",
+			"path": "github.com/bmatcuk/doublestar",
+			"revision": "85a78806aa1b4707d1dbace9be592cf1ece91ab3",
+			"revisionTime": "2018-08-11T13:50:57Z"
+		},
+		{
+			"checksumSHA1": "TNDMHCARKW4X2p4lc0PjO9v65p4=",
+			"path": "github.com/charlievieth/fs",
+			"revision": "7dc373669fa10ddf827c37c595dee30a2f001be9",
+			"revisionTime": "2017-06-13T21:55:19Z"
+		},
+		{
 			"checksumSHA1": "t8CsjyFayB7tH16Th46OH2zL09I=",
 			"path": "github.com/cheggaaa/pb",
 			"revision": "f6ccf2184de4dd34495277e38dc19b6e7fbe0ea2",
@@ -99,10 +111,46 @@
 			"revisionTime": "2017-07-21T21:11:52Z"
 		},
 		{
+			"checksumSHA1": "V3wTdk8OgGokwxyWD+lMCrgbkPc=",
+			"path": "github.com/cloudfoundry/bosh-cli/director/template",
+			"revision": "8366c6fd5cd98b7c9051dc9481f67c88fb8606f9",
+			"revisionTime": "2018-09-22T10:02:26Z"
+		},
+		{
+			"checksumSHA1": "FnR1zvUvK6aui2XELTqvuhY/T4g=",
+			"path": "github.com/cloudfoundry/bosh-utils/errors",
+			"revision": "dca6ab8856b90716dd07719bf954826a100b2afa",
+			"revisionTime": "2018-11-05T20:26:52Z"
+		},
+		{
+			"checksumSHA1": "zpRW4kVs54WBTl8qsy9b46E1n2Y=",
+			"path": "github.com/cloudfoundry/bosh-utils/logger",
+			"revision": "dca6ab8856b90716dd07719bf954826a100b2afa",
+			"revisionTime": "2018-11-05T20:26:52Z"
+		},
+		{
+			"checksumSHA1": "aBj/YcSei3fv3nuDvrlF4FawzOc=",
+			"path": "github.com/cloudfoundry/bosh-utils/system",
+			"revision": "dca6ab8856b90716dd07719bf954826a100b2afa",
+			"revisionTime": "2018-11-05T20:26:52Z"
+		},
+		{
+			"checksumSHA1": "88tYYpN5dlZMB08agTWCcgTko5w=",
+			"path": "github.com/cppforlife/go-patch/patch",
+			"revision": "250da0e0e68ce3367b4302f34218f6c064eb9559",
+			"revisionTime": "2017-10-06T21:35:18Z"
+		},
+		{
 			"checksumSHA1": "hKEzxF3LpDkQK//6n5rx/8b+DGM=",
 			"path": "github.com/dgrijalva/jwt-go",
 			"revision": "f62f64ea222e5e6d6d86421b5507b0862a3ebf7f",
 			"revisionTime": "2015-09-23T20:28:32Z"
+		},
+		{
+			"checksumSHA1": "nlMa0NX11OCS5UHuJszVGTBboWU=",
+			"path": "github.com/ghodss/yaml",
+			"revision": "c7ce16629ff4cd059ed96ed06419dd3856fd3577",
+			"revisionTime": "2018-08-20T08:47:58Z"
 		},
 		{
 			"checksumSHA1": "qlPUeFabwF4RKAOF1H+yBFU1Veg=",
@@ -357,32 +405,50 @@
 			"revisionTime": "2017-10-18T20:22:10Z"
 		},
 		{
-			"checksumSHA1": "Umy1Ru/yEscbQnVcVQHKMc2YJG8=",
+			"checksumSHA1": "qoOnXKogFmSBoEk0ljBSBVFcFh8=",
+			"path": "github.com/pivotal-cf/kiln/proofing",
+			"revision": "0240e73df945c01b5d6432000d83719363261165",
+			"revisionTime": "2018-09-26T15:20:15Z"
+		},
+		{
+			"checksumSHA1": "1NmFCNFUKyUx9zMOgL7Hoc2fPos=",
 			"path": "github.com/pivotal-cf/om",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "d18d96fc8cffa945a4db42051830fc899c87b9a2",
+			"revisionTime": "2018-11-05T16:27:34Z"
 		},
 		{
 			"path": "github.com/pivotal-cf/om.git",
 			"revision": ""
 		},
 		{
-			"checksumSHA1": "E6LBQn5K7Hv/7qVa0ohrh6fuqLA=",
+			"checksumSHA1": "vhC1/pdTdWMB/PnVzux111eyTzs=",
 			"path": "github.com/pivotal-cf/om/api",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
 		},
 		{
-			"checksumSHA1": "s3Xf/g2+hHUy3saFerW2CGyaYRM=",
+			"checksumSHA1": "C4Hd5jKyi9ptrO61hDAnKYoA7fI=",
 			"path": "github.com/pivotal-cf/om/commands",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
 		},
 		{
-			"checksumSHA1": "BMDdjTM2fwrBfy5HUDcKxEldibQ=",
+			"checksumSHA1": "9UYpsGOqE7DFNFW0qX1lU2AlYcY=",
+			"path": "github.com/pivotal-cf/om/config",
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
+		},
+		{
+			"checksumSHA1": "kAjQ/bD5hF37gaKr7NzpGgduS+c=",
+			"path": "github.com/pivotal-cf/om/configparser",
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
+		},
+		{
+			"checksumSHA1": "rHw64GbPwSuA+SYPvoP11qdcMRk=",
 			"path": "github.com/pivotal-cf/om/extractor",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
 		},
 		{
 			"checksumSHA1": "KaL0rVKARYatLGhL7QT4lOmfvdw=",
@@ -391,22 +457,52 @@
 			"revisionTime": "2017-06-23T19:08:13Z"
 		},
 		{
-			"checksumSHA1": "jiuAcMPvAKFKvT77Gyz7d5tyosM=",
+			"checksumSHA1": "H2I1qymmsxne+aJ3PGDQozdCkRo=",
 			"path": "github.com/pivotal-cf/om/formcontent",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
 		},
 		{
-			"checksumSHA1": "P6bkbj5OB3rnGFMmS86zpJYR93k=",
+			"checksumSHA1": "T6CPIKi6wEgIS7n1t/a40KKmcy4=",
 			"path": "github.com/pivotal-cf/om/network",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
 		},
 		{
-			"checksumSHA1": "kOQzV8TWWJB5KMQQv1qKP6099Gs=",
+			"checksumSHA1": "8Pf8zCen3VFwDSSLjIZUPXxlLrY=",
+			"path": "github.com/pivotal-cf/om/presenters",
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
+		},
+		{
+			"checksumSHA1": "WdI/OB3WwhX7ljU2WVhky3ip4KE=",
 			"path": "github.com/pivotal-cf/om/progress",
-			"revision": "b284b0597a719ba5b9e4ef1a34b958bc941a63e8",
-			"revisionTime": "2017-06-23T19:08:13Z"
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
+		},
+		{
+			"checksumSHA1": "yFZEXWT1IsEIjeEXkisQBTgSS7Y=",
+			"path": "github.com/pivotal-cf/om/ui",
+			"revision": "d18d96fc8cffa945a4db42051830fc899c87b9a2",
+			"revisionTime": "2018-11-05T16:27:34Z"
+		},
+		{
+			"checksumSHA1": "hCLqlSpt9BYfLUv8lenijd/hIYE=",
+			"path": "github.com/pivotal-cf/om/validator",
+			"revision": "94ed30932eda04f922e2834666c3c3d1c6ede8c0",
+			"revisionTime": "2018-11-07T00:43:16Z"
+		},
+		{
+			"checksumSHA1": "yVxJOizCTFyOovYkmEU7zCG0ahQ=",
+			"path": "github.com/pivotal-cf/pivnet-cli/filter",
+			"revision": "b3e19855bf444717c9cfeaf8f871b599ba40caae",
+			"revisionTime": "2018-10-25T14:49:01Z"
+		},
+		{
+			"checksumSHA1": "ma07nwThw1nEkdSN4bgIlxhB7uU=",
+			"path": "github.com/pivotal-cf/pivnet-cli/gp",
+			"revision": "b3e19855bf444717c9cfeaf8f871b599ba40caae",
+			"revisionTime": "2018-10-25T14:49:01Z"
 		},
 		{
 			"checksumSHA1": "gIeNIlamabiqMwbOGClpM9NqL3s=",
@@ -727,10 +823,10 @@
 			"revisionTime": "2017-05-22T22:48:38Z"
 		},
 		{
-			"checksumSHA1": "fALlQNY1fM99NesfLJ50KguWsio=",
+			"checksumSHA1": "ZSWoOPUNRr5+3dhkLK3C4cZAQPk=",
 			"path": "gopkg.in/yaml.v2",
-			"revision": "cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b",
-			"revisionTime": "2017-04-07T17:21:22Z"
+			"revision": "5420a8b6744d3b0345ab293f6fcba19c978f1183",
+			"revisionTime": "2018-03-28T19:50:20Z"
 		}
 	],
 	"rootPath": "omg-cli"
