@@ -31,6 +31,7 @@ var tile = config.Tile{
 	config.OpsManagerMetadata{
 		"p-healthwatch",
 		"1.2.2-build.10",
+		true,
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{

@@ -165,10 +165,10 @@ func (om *Sdk) SetupBosh(configYML []byte) error {
 }
 
 // ApplyChanges deploys pending changes to Ops Manager
-func (om *Sdk) ApplyChanges() error {
+func (om *Sdk) ApplyChanges(args []string) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
-	return cmd.Execute(nil)
+	return cmd.Execute(args)
 }
 
 func (om *Sdk) ApplyDirector() error {
