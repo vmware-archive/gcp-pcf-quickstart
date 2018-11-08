@@ -30,6 +30,7 @@ var tile = config.Tile{
 	config.OpsManagerMetadata{
 		"gcp-service-broker",
 		"3.6.0",
+		true,
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",

@@ -70,8 +70,19 @@ func (s *OpsManager) Unlock() error {
 	}
 }
 
-func (s *OpsManager) ApplyChanges() error {
-	return s.om.ApplyChanges()
+func (s *OpsManager) ApplyChangesPAS() error {
+	var args []string
+	for _, tile := range s.tiles {
+		if !tile.Definition(s.envCfg).Product.DependsOnPAS {
+			name := tile.Definition(s.envCfg).Product.Name
+			args = append(args, fmt.Sprintf("--product-name=%s", name))
+		}
+	}
+	return s.om.ApplyChanges(args)
+}
+
+func (s *OpsManager) ApplyChangesSkipUnchanged() error {
+	return s.om.ApplyChanges([]string{"--skip-unchanged-products"})
 }
 
 func (s *OpsManager) ApplyDirector() error {

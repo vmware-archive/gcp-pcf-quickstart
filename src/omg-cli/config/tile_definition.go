@@ -29,8 +29,9 @@ type StemcellMetadata struct {
 }
 
 type OpsManagerMetadata struct {
-	Name    string
-	Version string
+	Name         string
+	Version      string
+	DependsOnPAS bool // tiles which depend on PAS but don't specify so in their metadata
 }
 
 type Tile struct {
