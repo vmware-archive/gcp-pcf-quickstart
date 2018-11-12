@@ -1,5 +1,5 @@
 ---
-jobs:  
+jobs:
 - name: build-test-image
   public: true
   serial: true
@@ -39,7 +39,7 @@ jobs:
     params:
       build: omg-src-in/ci/docker-image
 
-resources:  
+resources:
   - name: omg-src-in
     type: git
     source: 

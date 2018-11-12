@@ -9,11 +9,21 @@ The installation requires a child zone to be hosted on [Cloud DNS](https://cloud
 
 ## Create a Cloud DNS Zone
 
+### Using the UI
+
 1. Open [Cloud DNS](https://console.cloud.google.com/net-services/dns/zones) for your GCP Project
 1. Click 'Create Zone' and populate the following fields
    - **Zone Name**: `pcf-zone`
    - **DNS Name**: `pcf.<your-domain-name.com>`
 1. Click 'Create'
+
+### Or Using `gcloud`
+
+Run the following, replacing `<your-domain-name.com>`:
+
+```bash
+gcloud dns managed-zones create pcf-zone --description="PCF Zone" --dns-name="pcf.<your-domain-name.com>"
+```
 
 ## Setup NS records
 
