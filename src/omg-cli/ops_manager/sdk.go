@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,16 +29,14 @@ import (
 	"strings"
 	"time"
 
-	"io"
-
 	"omg-cli/config"
 	"omg-cli/version"
 
-	"github.com/fredwangwang/formcontent"
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
 	"github.com/pivotal-cf/om/extractor"
+	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/progress"
 )
@@ -168,13 +167,13 @@ func (om *Sdk) SetupBosh(configYML []byte) error {
 // ApplyChanges deploys pending changes to Ops Manager
 func (om *Sdk) ApplyChanges(args []string) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, logWriter, om.logger, 10)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute(args)
 }
 
 func (om *Sdk) ApplyDirector() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, logWriter, om.logger, 10)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute([]string{"--skip-deploy-products"})
 }
 
