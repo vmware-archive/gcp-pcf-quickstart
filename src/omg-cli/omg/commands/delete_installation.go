@@ -58,10 +58,10 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
 
 	steps := []step{
-		{opsMan.PoolTillOnline, "PoolTillOnline"},
-		{opsMan.Unlock, "Unlock"},
-		{opsMan.DeleteInstallation, "DeleteInstallation"},
+		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
+		{function: opsMan.Unlock, name: "Unlock"},
+		{function: opsMan.DeleteInstallation, name: "DeleteInstallation"},
 	}
 
-	return run(steps)
+	return run(steps, cmd.logger)
 }

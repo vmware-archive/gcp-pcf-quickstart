@@ -60,9 +60,9 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	return run([]step{
-		{cmd.fetchAndPrompt, "fetchAndPrompt"},
-		{cmd.acceptEulas, "acceptEulas"},
-	})
+		{function: cmd.fetchAndPrompt, name: "fetchAndPrompt"},
+		{function: cmd.acceptEulas, name: "acceptEulas"},
+	}, cmd.logger)
 }
 
 func (cmd *ReviewEulasCommand) fetchAndPrompt() error {

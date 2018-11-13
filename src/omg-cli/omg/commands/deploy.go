@@ -61,15 +61,15 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, tiles, nil)
 
 	steps := []step{
-		{opsMan.PoolTillOnline, "PoolTillOnline"},
-		{opsMan.Unlock, "Unlock"},
-		{opsMan.ConfigureTiles, "ConfigureTiles"},
+		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
+		{function: opsMan.Unlock, name: "Unlock"},
+		{function: opsMan.ConfigureTiles, name: "ConfigureTiles"},
 	}
 
 	if cmd.applyChanges {
-		steps = append(steps, step{opsMan.ApplyDirector, "ApplyDirector"})
-		steps = append(steps, step{opsMan.ApplyChanges, "ApplyChanges"})
+		steps = append(steps, step{function: opsMan.ApplyDirector, name: "ApplyDirector"})
+		steps = append(steps, step{function: opsMan.ApplyChanges, name: "ApplyChanges"})
 	}
 
-	return run(steps)
+	return run(steps, cmd.logger)
 }
