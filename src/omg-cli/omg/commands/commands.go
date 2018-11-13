@@ -90,21 +90,6 @@ func run(steps []step, logger *log.Logger) error {
 	return nil
 }
 
-func retry(fn step, times int) error {
-	errs := []error{}
-
-	for i := 0; i < times; i++ {
-		fmt.Println("Running step:", fn.name, ". Attempt", i)
-		if err := fn.function(); err != nil {
-			errs = append(errs, err)
-		} else {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("failed running step %s after %d attempts, errors: %v", fn.name, times, errs)
-}
-
 func registerEnvConfigFlag(c *kingpin.CmdClause, path *string) {
 	c.Flag("env-dir", "path to environment configuration and state").Default(filepath.Join("env", "pcf")).StringVar(path)
 }
