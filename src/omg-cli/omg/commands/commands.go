@@ -80,9 +80,9 @@ type step struct {
 	name string
 }
 
-func run(steps []step) error {
+func run(steps []step, logger *log.Logger) error {
 	for _, v := range steps {
-		fmt.Println("Running step:", v.name)
+		logger.Printf("running step: %s", v.name)
 		if err := v.function(); err != nil {
 			return fmt.Errorf("failed running step %s, error: %v", v.name, err)
 		}

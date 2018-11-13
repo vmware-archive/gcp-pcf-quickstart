@@ -75,16 +75,16 @@ func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
 	cmd.parseArgs()
 
 	steps := []step{
-		{cmd.deleteUpgradedOpsManagers, "deleteUpgradedOpsManagers"},
-		{cmd.deleteDirectorVM, "deleteDirectorVM"},
-		{cmd.deleteErtVMs, "deleteErtVMs"},
-		{cmd.deleteServicesVMs, "deleteServicesVMs"},
+		{function: cmd.deleteUpgradedOpsManagers, name: "deleteUpgradedOpsManagers"},
+		{function: cmd.deleteDirectorVM, name: "deleteDirectorVM"},
+		{function: cmd.deleteErtVMs, name: "deleteErtVMs"},
+		{function: cmd.deleteServicesVMs, name: "deleteServicesVMs"},
 	}
 
-	return runAsync(steps)
+	return runAsync(steps, cmd.logger)
 }
 
-func runAsync(steps []step) error {
+func runAsync(steps []step, logger *log.Logger) error {
 	wg := sync.WaitGroup{}
 
 	var errors []error
@@ -93,10 +93,10 @@ func runAsync(steps []step) error {
 	for _, step := range steps {
 		step := step
 		wg.Add(1)
-		fmt.Println("running step ", step.name, "asynchronously")
+		logger.Printf("running step %s asynchronously", step.name)
 		go func() {
 			if err := step.function(); err != nil {
-				fmt.Printf("error running step %s: %v", step.name, err)
+				logger.Printf("error running step %s: %v", step.name, err)
 
 				errsMu.Lock()
 				errors = append(errors, err)

@@ -68,8 +68,8 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, tiles, tileCache)
 
 	return run([]step{
-		{opsMan.PoolTillOnline, "PoolTillOnline"},
-		{opsMan.SetupAuth, "SetupAuth"},
-		{opsMan.UploadTiles, "UploadTiles"},
-	})
+		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
+		{function: opsMan.SetupAuth, name: "SetupAuth"},
+		{function: opsMan.UploadTiles, name: "UploadTiles"},
+	}, cmd.logger)
 }
