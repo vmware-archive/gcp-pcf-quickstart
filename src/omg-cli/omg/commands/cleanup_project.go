@@ -91,7 +91,7 @@ func runAsync(steps []step, logger *log.Logger) error {
 	var errsMu sync.Mutex
 
 	for _, step := range steps {
-		step := step
+
 		wg.Add(1)
 		logger.Printf("running step %s asynchronously", step.name)
 		go func() {
