@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
 )
 
 type TerraformConfigSchema struct {
@@ -34,14 +33,9 @@ type TerraformConfigSchema struct {
 
 	OpsManagerServiceAccountKey string
 
-	ExternalSqlIp         string `json:"sql_db_ip"`
-	ExternalSqlPort       int
 	OpsManagerSqlDbName   string `json:"opsman_sql_db_name"`
 	OpsManagerSqlUsername string `json:"opsman_sql_username"`
 	OpsManagerSqlPassword string `json:"opsman_sql_password"`
-	ERTSqlDbName          string `json:"ert_sql_db_name"`
-	ERTSqlUsername        string `json:"ert_sql_username"`
-	ERTSqlPassword        string `json:"ert_sql_password"`
 
 	MgmtSubnetName    string `json:"management_subnet_name"`
 	MgmtSubnetGateway string `json:"management_subnet_gateway"`
@@ -133,14 +127,6 @@ func fromTerraform(filename string) (*Config, error) {
 
 	if flattened["ops_manager_skip_ssl_verify"] == "true" {
 		hydratedCfg.OpsManager.SkipSSLVerification = true
-	}
-
-	if val := flattened["sql_db_port"]; val != "" {
-		parsed, err := strconv.ParseInt(val, 10, 0)
-		if err != nil {
-			return nil, err
-		}
-		hydratedCfg.ExternalSqlPort = int(parsed)
 	}
 
 	hydratedCfg.OpsManagerServiceAccountKey = decode(flattened["ops_manager_service_account_key_base64"])

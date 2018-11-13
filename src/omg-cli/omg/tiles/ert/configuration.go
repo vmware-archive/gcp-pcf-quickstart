@@ -41,42 +41,16 @@ type Properties struct {
 	// UAA
 	ServiceProviderCredentials tiles.OldCertificateValue `json:".uaa.service_provider_key_credentials"`
 
-	UaaDbChoice   tiles.Value        `json:".properties.uaa_database"`
-	UaaDbIp       tiles.Value        `json:".properties.uaa_database.external.host"`
-	UaaDbPort     tiles.IntegerValue `json:".properties.uaa_database.external.port"`
-	UaaDbUsername tiles.Value        `json:".properties.uaa_database.external.uaa_username"`
-	UaaDbPassword tiles.SecretValue  `json:".properties.uaa_database.external.uaa_password"`
+	UaaDbChoice tiles.Value `json:".properties.uaa_database"`
 
 	// Databases
-	ErtDbChoice tiles.Value        `json:".properties.system_database"`
-	ErtDbIp     tiles.Value        `json:".properties.system_database.external.host"`
-	ErtDbPort   tiles.IntegerValue `json:".properties.system_database.external.port"`
-
-	ErtDbAppUsageUsername            tiles.Value       `json:".properties.system_database.external.app_usage_service_username"`
-	ErtDbAppUsagePassword            tiles.SecretValue `json:".properties.system_database.external.app_usage_service_password"`
-	ErtDbAutoscaleUsername           tiles.Value       `json:".properties.system_database.external.autoscale_username"`
-	ErtDbAutoscalePassword           tiles.SecretValue `json:".properties.system_database.external.autoscale_password"`
-	ErtDbCloudControllerUsername     tiles.Value       `json:".properties.system_database.external.ccdb_username"`
-	ErtDbCloudControllerPassword     tiles.SecretValue `json:".properties.system_database.external.ccdb_password"`
-	ErtDbDiegoUsername               tiles.Value       `json:".properties.system_database.external.diego_username"`
-	ErtDbDiegoPassword               tiles.SecretValue `json:".properties.system_database.external.diego_password"`
-	ErtDbLocketUsername              tiles.Value       `json:".properties.system_database.external.locket_username"`
-	ErtDbLocketPassword              tiles.SecretValue `json:".properties.system_database.external.locket_password"`
-	ErtDbNetworkPolicyServerUsername tiles.Value       `json:".properties.system_database.external.networkpolicyserver_username"`
-	ErtDbNetworkPolicyServerPassword tiles.SecretValue `json:".properties.system_database.external.networkpolicyserver_password"`
-	ErtDbNfsUsername                 tiles.Value       `json:".properties.system_database.external.nfsvolume_username"`
-	ErtDbNfsPassword                 tiles.SecretValue `json:".properties.system_database.external.nfsvolume_password"`
-	ErtDbNotificationsUsername       tiles.Value       `json:".properties.system_database.external.notifications_username"`
-	ErtDbNotificationsPassword       tiles.SecretValue `json:".properties.system_database.external.notifications_password"`
-	ErtDbAccountUsername             tiles.Value       `json:".properties.system_database.external.account_username"`
-	ErtDbAccountPassword             tiles.SecretValue `json:".properties.system_database.external.account_password"`
-	ErtDbRoutingUsername             tiles.Value       `json:".properties.system_database.external.routing_username"`
-	ErtDbRoutingPassword             tiles.SecretValue `json:".properties.system_database.external.routing_password"`
-	ErtDbSilkUsername                tiles.Value       `json:".properties.system_database.external.silk_username"`
-	ErtDbSilkPassword                tiles.SecretValue `json:".properties.system_database.external.silk_password"`
+	ErtDbChoice tiles.Value `json:".properties.system_database"`
 
 	// MySQL
 	MySqlMonitorRecipientEmail tiles.Value `json:".mysql_monitor.recipient_email"`
+
+	// Credhub
+	CredhubDbChoice tiles.Value `json:".properties.credhub_database"`
 }
 
 type LargeFootprintResources struct {
@@ -155,37 +129,9 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		SecurityAcknowledgement:    tiles.Value{"X"},
 		ServiceProviderCredentials: tiles.OldCertificateValue{tiles.Certificate{cfg.SslCertificate, cfg.SslPrivateKey}},
 
-		UaaDbChoice:   tiles.Value{"external"},
-		UaaDbIp:       tiles.Value{cfg.ExternalSqlIp},
-		UaaDbPort:     tiles.IntegerValue{cfg.ExternalSqlPort},
-		UaaDbUsername: tiles.Value{cfg.ERTSqlUsername},
-		UaaDbPassword: tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-
-		ErtDbChoice:                      tiles.Value{"external"},
-		ErtDbIp:                          tiles.Value{cfg.ExternalSqlIp},
-		ErtDbPort:                        tiles.IntegerValue{cfg.ExternalSqlPort},
-		ErtDbAppUsageUsername:            tiles.Value{cfg.ERTSqlUsername},
-		ErtDbAppUsagePassword:            tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbAutoscaleUsername:           tiles.Value{cfg.ERTSqlUsername},
-		ErtDbAutoscalePassword:           tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbCloudControllerUsername:     tiles.Value{cfg.ERTSqlUsername},
-		ErtDbCloudControllerPassword:     tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbDiegoUsername:               tiles.Value{cfg.ERTSqlUsername},
-		ErtDbDiegoPassword:               tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbLocketUsername:              tiles.Value{cfg.ERTSqlUsername},
-		ErtDbLocketPassword:              tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbNetworkPolicyServerUsername: tiles.Value{cfg.ERTSqlUsername},
-		ErtDbNetworkPolicyServerPassword: tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbNfsUsername:                 tiles.Value{cfg.ERTSqlUsername},
-		ErtDbNfsPassword:                 tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbNotificationsUsername:       tiles.Value{cfg.ERTSqlUsername},
-		ErtDbNotificationsPassword:       tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbAccountUsername:             tiles.Value{cfg.ERTSqlUsername},
-		ErtDbAccountPassword:             tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbRoutingUsername:             tiles.Value{cfg.ERTSqlUsername},
-		ErtDbRoutingPassword:             tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
-		ErtDbSilkUsername:                tiles.Value{cfg.ERTSqlUsername},
-		ErtDbSilkPassword:                tiles.SecretValue{tiles.Secret{cfg.ERTSqlPassword}},
+		UaaDbChoice:     tiles.Value{"internal_mysql"},
+		ErtDbChoice:     tiles.Value{"internal_pxc"},
+		CredhubDbChoice: tiles.Value{"internal_mysql"},
 
 		MySqlMonitorRecipientEmail: tiles.Value{"admin@example.org"},
 	}
@@ -216,7 +162,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 				InternetConnected: false,
 			},
 			HaProxy:      tiles.Resource{Instances: &zero},
-			MysqlMonitor: tiles.Resource{Instances: &zero},
+			MysqlMonitor: tiles.Resource{Instances: &one},
 		}
 		// Healthwatch pushes quite a few apps, make sure we have enough compute
 		if envConfig.IncludeHealthwatch {
@@ -241,9 +187,9 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 				InternetConnected: false,
 			},
 			HaProxy:      tiles.Resource{Instances: &zero},
-			MysqlProxy:   tiles.Resource{Instances: &zero},
-			Mysql:        tiles.Resource{Instances: &zero},
-			MysqlMonitor: tiles.Resource{Instances: &zero},
+			MysqlProxy:   tiles.Resource{Instances: &one},
+			Mysql:        tiles.Resource{Instances: &one},
+			MysqlMonitor: tiles.Resource{Instances: &one},
 		}
 		resourcesBytes, err = json.Marshal(&resources)
 	}

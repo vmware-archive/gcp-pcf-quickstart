@@ -54,14 +54,6 @@ output "network_name" {
   value = "${google_compute_network.pcf-network.name}"
 }
 
-output "sql_db_ip" {
-  value = "${module.external_database.ip}"
-}
-
-output "sql_db_port" {
-  value = "${module.external_database.sql_db_port}"
-}
-
 output "management_subnet_gateway" {
   value = "${google_compute_subnetwork.management-subnet.gateway_address}"
 }
@@ -152,15 +144,6 @@ output "resources_bucket" {
 
 output "director_blobstore_bucket" {
   value = "${google_storage_bucket.director.name}"
-}
-
-output "ert_sql_username" {
-  value = "${module.external_database.ert_sql_username}"
-}
-
-output "ert_sql_password" {
-  value     = "${module.external_database.ert_sql_password}"
-  sensitive = true
 }
 
 output "opsman_sql_username" {
