@@ -2,7 +2,11 @@ resource "google_compute_instance" "jumpbox" {
   name           = "${var.env_name}-jumpbox"
   machine_type   = "${var.jumpbox_machine_type}"
   zone           = "${element(var.zones, 1)}"
-  create_timeout = 10
+
+  timeouts {
+    create = "10m"
+  }
+
   tags           = ["${var.env_name}-jumpbox-external"]
 
   boot_disk {

@@ -2,7 +2,11 @@ resource "google_compute_instance" "nat" {
   name           = "${var.env_name}-nat-${count.index}"
   machine_type   = "${var.nat_machine_type}"
   zone           = "${element(var.zones, (count.index % length(var.zones)))}"
-  create_timeout = 10
+
+  timeouts {
+    create = "10m"
+  }
+
   tags           = ["${var.env_name}-nat-external"]
   count          = "${var.nat_instance_count}"
 
