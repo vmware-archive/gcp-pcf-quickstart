@@ -19,6 +19,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd
+	github.com/imdario/mergo v0.3.6
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.1 // indirect
 	github.com/onsi/ginkgo v1.6.0

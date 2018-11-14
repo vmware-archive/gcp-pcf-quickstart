@@ -65,11 +65,13 @@ nat_instance_count=3
 nat_machine_type="n1-standard-1"
 opsman_machine_type="n1-standard-2"
 jumpbox_machine_type="n1-standard-1"
+external_database="true"
 if [ "${SMALL_FOOTPRINT}" == "true" ]; then
   nat_instance_count=1
   nat_machine_type="g1-small"
   opsman_machine_type="n1-standard-1"
   jumpbox_machine_type="g1-small"
+  external_database="false"
 fi
 
 set -e
@@ -110,7 +112,7 @@ ops_manager_password = "${OPSMAN_ADMIN_PASSWORD:-}"
 ops_manager_skip_ssl_verify = "true"
 region = "${REGION}"
 zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
-external_database = "true"
+external_database = "${external_database}"
 
 ssl_cert = <<SSL_CERT
 $(cat keys/server.crt)
