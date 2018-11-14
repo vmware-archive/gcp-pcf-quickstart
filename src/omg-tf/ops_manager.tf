@@ -15,7 +15,10 @@ resource "google_compute_firewall" "ops-manager-external" {
 resource "google_compute_image" "ops-manager-image" {
   count          = "${var.opsman_image_selflink != "" ? 0 : 1}"
   name           = "${var.env_name}-ops-manager-image"
-  create_timeout = 20
+
+  timeouts {
+    create = "20m"
+  }
 
   raw_disk {
     source = "${var.opsman_image_url}"
@@ -28,7 +31,11 @@ resource "google_compute_instance" "ops-manager-internal" {
   name           = "${var.env_name}-ops-manager"
   machine_type   = "${var.opsman_machine_type}"
   zone           = "${element(var.zones, 1)}"
-  create_timeout = 10
+
+  timeouts {
+    create = "10m"
+  }
+
   tags           = ["${var.env_name}-ops-manager", "${var.no_ip_instance_tag}"]
 
   boot_disk {
@@ -41,7 +48,7 @@ resource "google_compute_instance" "ops-manager-internal" {
 
   network_interface {
     subnetwork = "${google_compute_subnetwork.management-subnet.name}"
-    address    = "10.0.0.6"
+    network_ip = "10.0.0.6"
   }
 
   metadata = {
@@ -61,7 +68,11 @@ resource "google_compute_instance" "ops-manager-external" {
   name           = "${var.env_name}-ops-manager"
   machine_type   = "${var.opsman_machine_type}"
   zone           = "${element(var.zones, 1)}"
-  create_timeout = 10
+
+  timeouts {
+    create = "10m"
+  }
+
   tags           = ["${var.env_name}-ops-manager", "${var.env_name}-ops-manager-external"]
 
   boot_disk {
@@ -74,7 +85,7 @@ resource "google_compute_instance" "ops-manager-external" {
 
   network_interface {
     subnetwork = "${google_compute_subnetwork.management-subnet.name}"
-    address    = "10.0.0.6"
+    network_ip = "10.0.0.6"
 
     access_config {
       nat_ip = "${google_compute_address.ops-manager-external.address}"
