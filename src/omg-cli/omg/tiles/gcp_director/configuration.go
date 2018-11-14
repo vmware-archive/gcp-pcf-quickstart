@@ -43,13 +43,15 @@ director-configuration:
     bucket_name: {{.DirectorBucket}}
     service_account_key: '{{.OpsManagerServiceAccountKey}}'
     storage_class: MULTI_REGIONAL
-  database_type: external
+  database_type: {{.DatabaseType}}
+{{if eq .DatabaseType "external"}}
   external_database_options:
     host: {{.ExternalSqlIp}}
     database: {{.OpsManagerSqlDbName}}
     user: {{.OpsManagerSqlUsername}}
     password: {{.OpsManagerSqlPassword}}
     port: {{.ExternalSqlPort}}
+{{end}}
 iaas-configuration:
   project: {{.ProjectName}}
   auth_json: '{{.OpsManagerServiceAccountKey}}'
@@ -135,15 +137,18 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		config.Config
 		CompilationInstances    int
 		CompilationInstanceType string
+		DatabaseType            string
 	}{
 		Config: *cfg,
 	}
 	if envConfig.SmallFootprint {
 		dc.CompilationInstances = 1
 		dc.CompilationInstanceType = "medium.mem"
+		dc.DatabaseType = "internal"
 	} else {
 		dc.CompilationInstances = 4
 		dc.CompilationInstanceType = "large.cpu"
+		dc.DatabaseType = "external"
 	}
 	// Healthwatch includes a C++ package that requires a large
 	// ephemeral disk for compilation.
