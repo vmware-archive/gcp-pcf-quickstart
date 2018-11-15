@@ -55,7 +55,7 @@ output "network_name" {
 }
 
 output "sql_db_ip" {
-  value = "${module.external_database.ip}"
+  value = "${module.external_database.sql_db_ip}"
 }
 
 output "sql_db_port" {
