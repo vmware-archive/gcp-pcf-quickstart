@@ -75,7 +75,7 @@ func (s *OpsManager) ApplyChangesPAS() error {
 	for _, tile := range s.tiles {
 		if !tile.Definition(s.envCfg).Product.DependsOnPAS {
 			name := tile.Definition(s.envCfg).Product.Name
-			args = append(args, fmt.Sprintf("--product-name=%s", name))
+			args = append(args, fmt.Sprintf("--product-name=%q", name))
 		}
 	}
 	return s.om.ApplyChanges(args)

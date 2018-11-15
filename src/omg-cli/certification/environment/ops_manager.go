@@ -23,6 +23,8 @@ import (
 	"github.com/pivotal-cf/om/api"
 )
 
+type DirectorProperties map[string]map[string]interface{}
+
 type OpsManagerQuery interface {
 	// Tile returns a TileQuery interface if a tile is installed
 	// or an error if it's not found
@@ -32,7 +34,7 @@ type OpsManagerQuery interface {
 	MustGetTile(name string) TileQuery
 
 	// Director returns information about the deployed BOSH director
-	Director() map[string]map[string]interface{}
+	Director() DirectorProperties
 }
 
 type TileQuery interface {

@@ -34,6 +34,7 @@ type TerraformConfigSchema struct {
 
 	OpsManagerServiceAccountKey string
 
+	// External database properties are omitted if internal database is chosen.
 	ExternalSqlIp         string `json:"sql_db_ip,omitempty"`
 	ExternalSqlPort       int
 	OpsManagerSqlDbName   string `json:"opsman_sql_db_name,omitempty"`

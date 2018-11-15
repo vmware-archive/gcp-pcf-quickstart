@@ -68,7 +68,7 @@ func (jb *Jumpbox) PoolTillStarted() error {
 	for {
 		select {
 		case <-timeout:
-			return errors.New("Timeout waiting for Jumpbox to start")
+			return errors.New("timeout waiting for Jumpbox to start")
 		case <-timer:
 			if err := jb.session.EnsureConnected(); err == nil {
 				return nil
@@ -97,7 +97,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	if err := build.Run(); err != nil {
-		return fmt.Errorf("rebuilding go: %v\n\n%v", err, build.Env)
+		return fmt.Errorf("rebuilding go: %v - environment: %v", err, build.Env)
 	}
 
 	type plan struct {
