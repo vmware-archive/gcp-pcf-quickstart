@@ -7,7 +7,7 @@ pushd ${my_dir} > /dev/null
 	source utils.sh
 	set_resource_dirs
 	build_go
-    extract_env
+  extract_env
 popd > /dev/null
 
 pushd ${release_dir}
