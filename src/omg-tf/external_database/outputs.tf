@@ -3,7 +3,7 @@ output "sql_db_port" {
 }
 
 output "sql_db_ip" {
-  value = "${ join(" ", google_sql_database_instance.master.*.ip_address.0.ip_address) }"
+  value = "${ join(" ", google_sql_database_instance.master.*.first_ip_address) }"
 }
 
 output "opsman_sql_db_name" {
@@ -26,8 +26,4 @@ output "ert_sql_username" {
 output "ert_sql_password" {
   sensitive = true
   value = "${ join(" ", random_id.ert_db_password.*.b64) }"
-}
-
-output "ip" {
-  value = "${ join(" ", google_sql_database_instance.master.*.ip_address.0.ip_address) }"
 }
