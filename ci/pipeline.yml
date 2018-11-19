@@ -88,6 +88,7 @@ jobs:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
           env_file_name: ((env_file_name))
+          terraform_state_bucket: ((ci_bucket_name))
       - put: omg-env
         params:
           file: omg-env/*.tgz
@@ -135,6 +136,7 @@ jobs:
                     google_project: ((google_project))
                     google_json_key_data: ((google_json_key_data))
                     env_file_name: ((env_file_name))
+                    terraform_state_bucket: ((ci_bucket_name))
                 - *destroy_infrastructure
 
   - name: run-certification

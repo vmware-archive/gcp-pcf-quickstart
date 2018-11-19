@@ -14,15 +14,15 @@ trap save_terraform_state EXIT
 
 function rollback {
 	pushd "${release_dir}/src/omg-tf"
-		yes "yes" | terraform destroy --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
+		yes "yes" | terraform destroy --parallelism=100 -var-file=${terraform_config}
 	popd
 }
 trap rollback ERR
 
 pushd "${release_dir}/src/omg-tf"
+        configure_terraform_backend
 	terraform init
 	terraform get
-	terraform apply --auto-approve --parallelism=100 -state=${terraform_state} -var-file=${terraform_config}
-	terraform output -json -state=${terraform_state} > ${terraform_output}
+	terraform apply --auto-approve --parallelism=100 -var-file=${terraform_config}
+	terraform output -json > ${terraform_output}
 popd
-
