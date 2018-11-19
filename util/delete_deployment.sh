@@ -18,6 +18,12 @@
 
 set -u
 cd "$(dirname "$0")/../"
+root=$(pwd)
+
+pushd src/omg-cli
+go build -o $root/bin/omg-cli
+popd
+export PATH=$root/bin:$PATH
 
 if [ -z ${ENV_DIR+X} ]; then
     export ENV_DIR="${PWD}/env/pcf"
@@ -34,11 +40,7 @@ terraform_output="${ENV_DIR}/terraform_output.json"
 terraform_config="${ENV_DIR}/terraform.tfvars"
 terraform_state="${ENV_DIR}/terraform.tfstate"
 
-export GOPATH=`pwd`
-export PATH=$PATH:$GOPATH/bin
-go install omg-cli
-
-if [ -z ${OMG_SKIP_DELETE+X} ]; then 
+if [ -z ${OMG_SKIP_DELETE+X} ]; then
     omg-cli remote --env-dir ${ENV_DIR} "delete-installation"
 fi
 omg-cli cleanup-project --env-dir ${ENV_DIR} --no-dry-run

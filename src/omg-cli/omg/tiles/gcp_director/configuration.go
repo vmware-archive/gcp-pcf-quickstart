@@ -17,29 +17,110 @@
 package gcp_director
 
 import (
+	"bytes"
 	"fmt"
 	"net"
+	"strings"
+	"text/template"
 
 	"omg-cli/config"
 
 	"omg-cli/ops_manager"
-
-	"github.com/pivotal-cf/om/commands"
 )
 
-const (
-	metadataService = "169.254.169.254"
-)
+const directorTemplateYAML = `---
+az-configuration:
+- name: "{{.Zone1}}"
+- name: "{{.Zone2}}"
+- name: "{{.Zone3}}"
+director-configuration:
+  ntp_servers_string: 169.254.169.254
+  retry_bosh_deploys: true
+  resurrector_enabled: true
+  max_threads: 5
+  blobstore_type: gcs
+  gcs_blobstore_options:
+    bucket_name: "{{.DirectorBucket}}"
+    service_account_key: '{{.OpsManagerServiceAccountKey}}'
+    storage_class: MULTI_REGIONAL
+  database_type: "{{.DatabaseType}}"
+{{if eq .DatabaseType "external"}}
+  external_database_options:
+    host: "{{.ExternalSqlIp}}"
+    database: "{{.OpsManagerSqlDbName}}"
+    user: "{{.OpsManagerSqlUsername}}"
+    password: "{{.OpsManagerSqlPassword}}"
+    port: {{.ExternalSqlPort}}
+{{end}}
+iaas-configuration:
+  project: "{{.ProjectName}}"
+  auth_json: '{{.OpsManagerServiceAccountKey}}'
+  default_deployment_tag: "{{.DeploymentTargetTag}}"
+network-assignment:
+  singleton_availability_zone:
+    name: "{{.Zone1}}"
+  network:
+    name: "{{.MgmtSubnetName}}"
+networks-configuration:
+  icmp: false
+  networks:
+  - name: "{{.MgmtSubnetName}}"
+    subnets:
+    - iaas_identifier: "{{.NetworkName}}/{{.MgmtSubnetName}}/{{.Region}}"
+      cidr: "{{.MgmtSubnetCIDR}}"
+      gateway: "{{.MgmtSubnetGateway}}"
+      reserved_ip_ranges: "{{reservedIPs .MgmtSubnetCIDR}}"
+      dns: 169.254.169.254
+      availability_zone_names:
+      - "{{.Zone1}}"
+      - "{{.Zone2}}"
+      - "{{.Zone3}}"
+  - name: "{{.ServicesSubnetName}}"
+    subnets:
+    - iaas_identifier: "{{.NetworkName}}/{{.ServicesSubnetName}}/{{.Region}}"
+      cidr: "{{.ServicesSubnetCIDR}}"
+      reserved_ip_ranges: "{{reservedIPs .ServicesSubnetCIDR}}"
+      gateway: "{{.ServicesSubnetGateway}}"
+      dns: 169.254.169.254
+      availability_zone_names:
+      - "{{.Zone1}}"
+      - "{{.Zone2}}"
+      - "{{.Zone3}}"
+  - name: "{{.ErtSubnetName}}"
+    subnets:
+    - iaas_identifier: "{{.NetworkName}}/{{.ErtSubnetName}}/{{.Region}}"
+      cidr: "{{.ErtSubnetCIDR}}"
+      reserved_ip_ranges: "{{reservedIPs .ErtSubnetCIDR}}"
+      gateway: "{{.ErtSubnetGateway}}"
+      dns: 169.254.169.254
+      availability_zone_names:
+      - "{{.Zone1}}"
+      - "{{.Zone2}}"
+      - "{{.Zone3}}"
+resource-configuration:
+  compilation:
+    instances: {{.CompilationInstances}}
+    instance_type:
+      id: "{{.CompilationInstanceType}}"
+  director:
+    instances: automatic
+    persistent_disk:
+      size_mb: automatic
+    instance_type:
+      id: automatic
+    internet_connected: false
+`
 
-func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
-	networks, networkAssignment := networkCfg(cfg)
-
-	return om.SetupBosh(gcp(cfg), director(cfg), avalibilityZones(cfg), networks, networkAssignment, resources(envConfig))
+var funcMap = template.FuncMap{
+	// The name "title" is what the function will be called in the template text.
+	"reservedIPs": reservedIPs,
 }
 
-func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNetwork bool) commands.NetworkConfiguration {
+var tmpl = template.Must(template.New("director").Funcs(funcMap).Parse(directorTemplateYAML))
+
+func reservedIPs(cidr string) string {
 	// Reserve .1-.20
-	lowerIp, _, err := net.ParseCIDR(cidrRange)
+	lowerIp, _, err := net.ParseCIDR(cidr)
 	lowerIp = lowerIp.To4()
 	if err != nil {
 		panic(err)
@@ -48,105 +129,41 @@ func buildNetwork(cfg *config.Config, name, cidrRange, gateway string, serviceNe
 	copy(upperIp, lowerIp)
 	upperIp[3] = 20
 
-	return commands.NetworkConfiguration{
-		Name: name,
-		Subnets: []commands.Subnet{
-			{
-				IAASIdentifier:    fmt.Sprintf("%s/%s/%s", cfg.NetworkName, name, cfg.Region),
-				CIDR:              cidrRange,
-				Gateway:           gateway,
-				ReservedIPRanges:  fmt.Sprintf("%s-%s", lowerIp.String(), upperIp.String()),
-				AvailabilityZones: []string{cfg.Zone1, cfg.Zone2, cfg.Zone3},
-				DNS:               metadataService,
-			},
-		},
-	}
+	return fmt.Sprintf("%s-%s", lowerIp, upperIp)
 }
 
-func networkCfg(cfg *config.Config) (networks commands.NetworksConfiguration, networkAssignment commands.NetworkAssignment) {
-	networks = commands.NetworksConfiguration{
-		ICMP: false,
-		Networks: []commands.NetworkConfiguration{
-			buildNetwork(cfg, cfg.MgmtSubnetName, cfg.MgmtSubnetCIDR, cfg.MgmtSubnetGateway, false),
-			buildNetwork(cfg, cfg.ServicesSubnetName, cfg.ServicesSubnetCIDR, cfg.ServicesSubnetGateway, false),
-			buildNetwork(cfg, cfg.DynamicServicesSubnetName, cfg.DynamicServicesSubnetCIDR, cfg.DynamicServicesSubnetGateway, true),
-			buildNetwork(cfg, cfg.ErtSubnetName, cfg.ErtSubnetCIDR, cfg.ErtSubnetGateway, false),
-		},
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
+	dc := struct {
+		config.Config
+		CompilationInstances    int
+		CompilationInstanceType string
+		DatabaseType            string
+	}{
+		Config: *cfg,
 	}
-
-	networkAssignment = commands.NetworkAssignment{
-		UserProvidedNetworkName: cfg.MgmtSubnetName,
-		UserProvidedAZName:      cfg.Zone1,
-	}
-
-	return
-}
-
-func director(cfg *config.Config) (director commands.DirectorConfiguration) {
-	t := true
-	director = commands.DirectorConfiguration{
-		NTPServers:                metadataService, // gcp metadata service
-		EnableBoshDeployRetries:   &t,
-		EnableVMResurrectorPlugin: &t,
-		DatabaseType:              "external",
-		ExternalDatabaseOptions: commands.ExternalDatabaseOptions{
-			Host:     cfg.ExternalSqlIp,
-			Database: cfg.OpsManagerSqlDbName,
-			Username: cfg.OpsManagerSqlUsername,
-			Password: cfg.OpsManagerSqlPassword,
-			Port:     &cfg.ExternalSqlPort,
-		},
-	}
-
-	return
-}
-
-func resources(envConfig *config.EnvConfig) commands.ResourceConfiguration {
-	var instanceCount *int
-	var compilation commands.CompilationInstanceType
-
 	if envConfig.SmallFootprint {
-		one := 1
-		instanceCount = &one
-
-		medium := "medium.mem"
-		compilation.ID = &medium
+		dc.CompilationInstances = 1
+		dc.CompilationInstanceType = "medium.mem"
+		dc.DatabaseType = "internal"
+	} else {
+		dc.CompilationInstances = 4
+		dc.CompilationInstanceType = "large.cpu"
+		dc.DatabaseType = "external"
 	}
-
 	// Healthwatch includes a C++ package that requires a large
 	// ephemeral disk for compilation.
 	if envConfig.IncludeHealthwatch {
-		large := "large.disk"
-		compilation.ID = &large
+		dc.CompilationInstanceType = "large.disk"
 	}
 
-	f := false
-	return commands.ResourceConfiguration{
-		DirectorResourceConfiguration: commands.DirectorResourceConfiguration{
-			InternetConnected: &f,
-		},
-		CompilationResourceConfiguration: commands.CompilationResourceConfiguration{
-			Instances:               instanceCount,
-			CompilationInstanceType: compilation,
-			InternetConnected:       &f,
-		},
-	}
-}
+	// strip newlines, as we're putting a JSON service account key inside YAML
+	dc.OpsManagerServiceAccountKey = strings.Replace(dc.OpsManagerServiceAccountKey, "\n", "", -1)
 
-func gcp(cfg *config.Config) commands.GCPIaaSConfiguration {
-	return commands.GCPIaaSConfiguration{
-		Project:              cfg.ProjectName,
-		DefaultDeploymentTag: cfg.DeploymentTargetTag,
-		AuthJSON:             cfg.OpsManagerServiceAccountKey,
+	b := &bytes.Buffer{}
+	err := tmpl.Execute(b, dc)
+	if err != nil {
+		return fmt.Errorf("cannot generate director YAML: %v", err)
 	}
-}
 
-func avalibilityZones(cfg *config.Config) commands.AvailabilityZonesConfiguration {
-	return commands.AvailabilityZonesConfiguration{
-		AvailabilityZones: []commands.AvailabilityZone{
-			{Name: cfg.Zone1},
-			{Name: cfg.Zone2},
-			{Name: cfg.Zone3},
-		},
-	}
+	return om.SetupBosh(b.Bytes())
 }

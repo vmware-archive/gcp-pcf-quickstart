@@ -17,11 +17,13 @@
 #
 
 set -ue
-cd "$(dirname "$0")"
+cd "$(dirname $0)"
+root=$(pwd)
 
-export GOPATH=`pwd`
-export PATH=$PATH:$GOPATH/bin
-go install omg-cli
+pushd src/omg-cli
+go build -o $root/bin/omg-cli
+popd
+export PATH=$root/bin:$PATH
 
 if [ -z ${ENV_DIR+X} ]; then
     export ENV_DIR="$PWD/env/pcf"

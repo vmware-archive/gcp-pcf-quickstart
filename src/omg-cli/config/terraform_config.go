@@ -34,14 +34,15 @@ type TerraformConfigSchema struct {
 
 	OpsManagerServiceAccountKey string
 
-	ExternalSqlIp         string `json:"sql_db_ip"`
+	// External database properties are omitted if internal database is chosen.
+	ExternalSqlIp         string `json:"sql_db_ip,omitempty"`
 	ExternalSqlPort       int
-	OpsManagerSqlDbName   string `json:"opsman_sql_db_name"`
-	OpsManagerSqlUsername string `json:"opsman_sql_username"`
-	OpsManagerSqlPassword string `json:"opsman_sql_password"`
-	ERTSqlDbName          string `json:"ert_sql_db_name"`
-	ERTSqlUsername        string `json:"ert_sql_username"`
-	ERTSqlPassword        string `json:"ert_sql_password"`
+	OpsManagerSqlDbName   string `json:"opsman_sql_db_name,omitempty"`
+	OpsManagerSqlUsername string `json:"opsman_sql_username,omitempty"`
+	OpsManagerSqlPassword string `json:"opsman_sql_password,omitempty"`
+	ERTSqlDbName          string `json:"ert_sql_db_name,omitempty"`
+	ERTSqlUsername        string `json:"ert_sql_username,omitempty"`
+	ERTSqlPassword        string `json:"ert_sql_password,omitempty"`
 
 	MgmtSubnetName    string `json:"management_subnet_name"`
 	MgmtSubnetGateway string `json:"management_subnet_gateway"`

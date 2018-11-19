@@ -68,7 +68,7 @@ func (jb *Jumpbox) PoolTillStarted() error {
 	for {
 		select {
 		case <-timeout:
-			return errors.New("Timeout waiting for Jumpbox to start")
+			return errors.New("timeout waiting for Jumpbox to start")
 		case <-timer:
 			if err := jb.session.EnsureConnected(); err == nil {
 				return nil
@@ -90,12 +90,14 @@ func (jb *Jumpbox) UploadDependencies() error {
 		return err
 	}
 	defer os.Remove(rebuilt.Name())
-	build := exec.Command("go", "build", "-o", rebuilt.Name(), packageName)
-	build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64", fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH")))
+	build := exec.Command("go", "build", "-o", rebuilt.Name())
+	build.Env = append(os.Environ(), "GOOS=linux", "GOARCH=amd64")
+	build.Dir = filepath.Join(".", "src", "omg-cli")
+
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	if err := build.Run(); err != nil {
-		return fmt.Errorf("rebuilding go: %v", err)
+		return fmt.Errorf("rebuilding go: %v - environment: %v", err, build.Env)
 	}
 
 	type plan struct {

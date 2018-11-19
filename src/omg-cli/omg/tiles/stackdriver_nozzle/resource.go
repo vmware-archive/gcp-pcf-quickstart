@@ -31,13 +31,16 @@ var tile = config.Tile{
 	config.OpsManagerMetadata{
 		"stackdriver-nozzle",
 		"2.0.1",
+		true,
 	},
 	&config.StemcellMetadata{
-		config.PivnetMetadata{"stemcells",
-			28004,
-			58600,
-			"160e6ebc0f34af53543803eed4b7772fb7beaaa25cb3262ab170884e06feb721"},
-		"light-bosh-stemcell-3421.36-google-kvm-ubuntu-trusty-go_agent",
+		config.PivnetMetadata{
+			"stemcells",
+			214323,
+			247292,
+			"8c6caeae37711aaf12b4fefba06c348cde5631e872e8892553ddb26514a3953a",
+		},
+		"light-bosh-stemcell-3468.78-google-kvm-ubuntu-trusty-go_agent",
 	},
 }
 

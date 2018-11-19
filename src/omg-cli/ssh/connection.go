@@ -18,6 +18,7 @@ package ssh
 
 import (
 	"log"
+	"os"
 
 	"net"
 
@@ -83,6 +84,10 @@ func (c *Connection) UploadFile(path, destName string) error {
 	if err != nil {
 		return fmt.Errorf("uploading file: %v", err)
 	}
+
+	ses.Stdout = os.Stdout
+	ses.Stderr = os.Stderr
+
 	defer ses.Close()
 
 	c.logger.Printf("uploading file %s as %s", path, destName)

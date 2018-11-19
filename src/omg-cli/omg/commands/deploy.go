@@ -68,7 +68,8 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 
 	if cmd.applyChanges {
 		steps = append(steps, step{function: opsMan.ApplyDirector, name: "ApplyDirector"})
-		steps = append(steps, step{function: opsMan.ApplyChanges, name: "ApplyChanges"})
+		steps = append(steps, step{function: opsMan.ApplyChangesPAS, name: "ApplyChangesPAS"})
+		steps = append(steps, step{function: opsMan.ApplyChangesSkipUnchanged, name: "ApplyChangesSkipUnchanged"})
 	}
 
 	return run(steps, cmd.logger)

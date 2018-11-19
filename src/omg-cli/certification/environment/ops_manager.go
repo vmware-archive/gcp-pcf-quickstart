@@ -19,7 +19,11 @@ package environment
 import (
 	"fmt"
 	"omg-cli/ops_manager"
+
+	"github.com/pivotal-cf/om/api"
 )
+
+type DirectorProperties map[string]map[string]interface{}
 
 type OpsManagerQuery interface {
 	// Tile returns a TileQuery interface if a tile is installed
@@ -30,15 +34,15 @@ type OpsManagerQuery interface {
 	MustGetTile(name string) TileQuery
 
 	// Director returns information about the deployed BOSH director
-	Director() *ops_manager.DirectorProperties
+	Director() DirectorProperties
 }
 
 type TileQuery interface {
 	// Property returns the value of the given property set on the tile
-	Property(name string) ops_manager.Property
+	Property(name string) api.ResponseProperty
 
 	// Resource returns information about a given resource for a job declared by the tile
-	Resource(name string) ops_manager.Resource
+	Resource(name string) api.JobProperties
 }
 
 type liveOpsManager struct {
@@ -63,7 +67,7 @@ func (lom *liveOpsManager) MustGetTile(name string) TileQuery {
 	return tile
 }
 
-func (lom *liveOpsManager) Director() *ops_manager.DirectorProperties {
+func (lom *liveOpsManager) Director() map[string]map[string]interface{} {
 	prop, err := lom.sdk.GetDirector()
 	if err != nil {
 		panic(fmt.Errorf("retreving director: %v", err))
@@ -78,11 +82,11 @@ type liveTileQuery struct {
 	sdk   *ops_manager.Sdk
 }
 
-func (ltq *liveTileQuery) Property(name string) ops_manager.Property {
+func (ltq *liveTileQuery) Property(name string) api.ResponseProperty {
 	return ltq.props.Properties[name]
 }
 
-func (ltq *liveTileQuery) Resource(jobId string) ops_manager.Resource {
+func (ltq *liveTileQuery) Resource(jobId string) api.JobProperties {
 	resource, err := ltq.sdk.GetResource(ltq.name, jobId)
 	if err != nil {
 		panic(err)
