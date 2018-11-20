@@ -57,12 +57,13 @@ type Sdk struct {
 func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "",
 		creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second, time.Duration(connectTimeout)*time.Second)
-	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
-		time.Duration(requestTimeout)*time.Second,
-		time.Duration(connectTimeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
+
+	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
+		time.Duration(requestTimeout)*time.Second,
+		time.Duration(connectTimeout)*time.Second)
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 

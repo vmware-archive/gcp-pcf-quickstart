@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -53,7 +54,12 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 }
 
 func FromEnvDirectory(path string) (*EnvConfig, error) {
-	return fromEnvironment(filepath.Join(path, EnvConfigFile))
+	config, err := fromEnvironment(filepath.Join(path, EnvConfigFile))
+	if err != nil {
+		return nil, fmt.Errorf("creating environment from directory %s: %v", path, err)
+	}
+
+	return config, nil
 }
 
 func fromEnvironment(filename string) (*EnvConfig, error) {

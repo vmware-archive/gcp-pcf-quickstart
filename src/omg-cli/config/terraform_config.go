@@ -99,7 +99,12 @@ type TerraformConfigSchema struct {
 }
 
 func TerraformFromEnvDirectory(path string) (*Config, error) {
-	return fromTerraform(filepath.Join(path, TerraformOutputFile))
+	config, err := fromTerraform(filepath.Join(path, TerraformOutputFile))
+	if err != nil {
+		return nil, fmt.Errorf("creating Terraform config from directory %s: %v", path, err)
+	}
+
+	return config, nil
 }
 
 func decode(input string) string {
