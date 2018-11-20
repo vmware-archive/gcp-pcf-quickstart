@@ -125,7 +125,7 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 		return err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", response.Token))
-	req.Header.Set("User-Agent", "PCF-Ecosystem-GCP-client")
+	req.Header.Set("User-Agent", version.UserAgent())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
