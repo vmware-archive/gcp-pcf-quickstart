@@ -31,7 +31,7 @@ import (
 
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 type GenerateConfigCommand struct {

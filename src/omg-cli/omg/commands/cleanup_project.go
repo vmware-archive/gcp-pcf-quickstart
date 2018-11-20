@@ -28,7 +28,7 @@ import (
 
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 type CleanupProjectCommand struct {
@@ -109,7 +109,7 @@ func runAsync(steps []step, logger *log.Logger) error {
 	if len(errors) != 0 {
 		return fmt.Errorf("errors running steps: %v", errors)
 	}
-	
+
 	return nil
 }
 

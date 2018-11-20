@@ -65,7 +65,7 @@ func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
 	return run([]step{
 		{function: jb.PoolTillStarted, name: "PoolTillStarted"},
 		{function: jb.UploadDependencies, name: "UploadDependencies"},
-		{function:func() error {
+		{function: func() error {
 			return jb.RunOmg(bc.command)
 		}, name: "RunOmg"},
 	}, bc.logger)

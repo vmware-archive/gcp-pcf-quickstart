@@ -35,7 +35,7 @@ type FakeAPIService struct {
 		result1 []google.API
 		result2 error
 	}
-	invocations      map[string][][]interface{}
+	invocations map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 

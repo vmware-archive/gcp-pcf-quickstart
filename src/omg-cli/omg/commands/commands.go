@@ -73,7 +73,7 @@ func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileIns
 
 type step struct {
 	function func() error
-	name string
+	name     string
 }
 
 func run(steps []step, logger *log.Logger) error {

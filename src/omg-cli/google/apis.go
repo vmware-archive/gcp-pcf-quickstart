@@ -27,7 +27,7 @@ import (
 
 	"omg-cli/version"
 
-	servicemanagement "google.golang.org/api/servicemanagement/v1"
+	"google.golang.org/api/servicemanagement/v1"
 )
 
 type API struct {
