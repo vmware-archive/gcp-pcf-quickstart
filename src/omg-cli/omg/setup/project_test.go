@@ -17,18 +17,14 @@ package setup_test
  */
 
 import (
-	. "omg-cli/omg/setup"
-
-	"omg-cli/google"
-	"omg-cli/google/googlefakes"
-
+	"errors"
 	"log"
-
 	"os"
 
-	"errors"
-
 	"omg-cli/config"
+	"omg-cli/google"
+	"omg-cli/google/googlefakes"
+	. "omg-cli/omg/setup"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

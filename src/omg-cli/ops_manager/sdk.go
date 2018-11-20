@@ -28,6 +28,8 @@ import (
 	"strings"
 	"time"
 
+	"omg-cli/config"
+
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
@@ -35,7 +37,6 @@ import (
 	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/progress"
-	"omg-cli/config"
 )
 
 const (

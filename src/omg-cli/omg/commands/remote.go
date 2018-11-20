@@ -19,13 +19,11 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"omg-cli/config"
 	"omg-cli/omg/setup"
-
-	"path/filepath"
-
-	"os"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -57,7 +55,7 @@ func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("load terraform config: %v", err)
 	}
 
-	jb, err := setup.NewJumpbox(os.Stdout, cfg.JumpboxIP, Username, sshKeyPath, bc.envDir, bc.quiet)
+	jb, err := setup.NewJumpbox(bc.logger, os.Stdout, cfg.JumpboxIP, Username, sshKeyPath, bc.envDir, bc.quiet)
 	if err != nil {
 		return fmt.Errorf("connect to jumpbox: %v", err)
 	}

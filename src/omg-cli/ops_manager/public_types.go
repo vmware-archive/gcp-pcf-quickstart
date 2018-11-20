@@ -1,7 +1,3 @@
-package ops_manager
-
-import "github.com/pivotal-cf/om/api"
-
 /*
  * Copyright 2017 Google Inc.
  *
@@ -19,6 +15,10 @@ import "github.com/pivotal-cf/om/api"
  */
 
 // This file contains types used in responses from the ops_manager.Sdk
+
+package ops_manager
+
+import "github.com/pivotal-cf/om/api"
 
 type SimpleCredential struct {
 	Identity string `json:"identity"`

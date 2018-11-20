@@ -20,11 +20,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"omg-cli/config"
 	"omg-cli/google"
-
-	"sync"
 
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"

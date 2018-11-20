@@ -17,19 +17,17 @@
 package uaa
 
 import (
-	"code.cloudfoundry.org/uaa-go-client"
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
-	"bytes"
-	"io/ioutil"
-
-	"crypto/tls"
-
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/uaa-go-client"
 	uaa "code.cloudfoundry.org/uaa-go-client/config"
 )
 

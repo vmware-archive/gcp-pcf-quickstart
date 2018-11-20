@@ -18,11 +18,9 @@ package google
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
-
-	"fmt"
-
 	"time"
 
 	"omg-cli/version"

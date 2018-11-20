@@ -17,10 +17,6 @@
 package setup
 
 import (
-	"omg-cli/config"
-	"omg-cli/ops_manager"
-	"omg-cli/pivnet"
-
 	"errors"
 	"fmt"
 	"log"
@@ -28,6 +24,10 @@ import (
 	"os"
 	"path"
 	"time"
+
+	"omg-cli/config"
+	"omg-cli/ops_manager"
+	"omg-cli/pivnet"
 )
 
 type OpsManager struct {

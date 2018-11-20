@@ -17,10 +17,10 @@
 package bosh_director_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
 )
 
 func TestBoshDirector(t *testing.T) {

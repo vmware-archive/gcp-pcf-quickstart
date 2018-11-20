@@ -20,13 +20,16 @@ type Name struct {
 	FamilyName string `json:"familyName"`
 	GivenName  string `json:"givenName"`
 }
+
 type PhoneNumber struct {
 	Value string `json:"value"`
 }
+
 type Email struct {
 	Value   string `json:"value"`
 	Primary bool   `json:"primary"`
 }
+
 type User struct {
 	ID           string        `json:"id"`
 	Username     string        `json:"userName"`

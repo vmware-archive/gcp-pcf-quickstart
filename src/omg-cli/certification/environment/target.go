@@ -17,18 +17,14 @@
 package environment
 
 import (
+	"fmt"
+	"log"
 	"net/http"
-
+	"os"
 	"sync"
 
-	"fmt"
-	"os"
-
 	"omg-cli/config"
-
 	"omg-cli/ops_manager"
-
-	"log"
 
 	"github.com/onsi/ginkgo"
 )

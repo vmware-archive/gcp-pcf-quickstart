@@ -17,10 +17,10 @@ package setup_test
  */
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
 )
 
 func TestSetup(t *testing.T) {

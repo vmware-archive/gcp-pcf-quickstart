@@ -18,6 +18,7 @@ package healthwatch
 
 import (
 	"log"
+
 	"omg-cli/config"
 )
 

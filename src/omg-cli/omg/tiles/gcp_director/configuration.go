@@ -24,7 +24,6 @@ import (
 	"text/template"
 
 	"omg-cli/config"
-
 	"omg-cli/ops_manager"
 )
 

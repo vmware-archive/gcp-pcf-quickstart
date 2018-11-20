@@ -17,14 +17,11 @@
 package ssh
 
 import (
-	"log"
-	"os"
-
-	"net"
-
 	"fmt"
-
 	"io"
+	"log"
+	"net"
+	"os"
 
 	"github.com/tmc/scp"
 	"golang.org/x/crypto/ssh"

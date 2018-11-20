@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 
@@ -27,8 +28,6 @@ import (
 	"omg-cli/omg/tiles/healthwatch"
 	"omg-cli/omg/tiles/service_broker"
 	"omg-cli/omg/tiles/stackdriver_nozzle"
-
-	"fmt"
 
 	"github.com/alecthomas/kingpin"
 )

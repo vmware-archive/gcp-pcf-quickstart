@@ -17,14 +17,12 @@
 package commands
 
 import (
+	"encoding/json"
 	"log"
 	"regexp"
+	"strings"
 
 	"omg-cli/config"
-
-	"encoding/json"
-
-	"strings"
 
 	"github.com/alecthomas/kingpin"
 )

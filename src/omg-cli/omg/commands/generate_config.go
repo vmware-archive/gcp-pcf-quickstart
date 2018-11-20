@@ -18,16 +18,14 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 
 	"omg-cli/config"
 	"omg-cli/google"
 	"omg-cli/version"
-
-	"encoding/json"
-
-	"fmt"
-	"io/ioutil"
 
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
