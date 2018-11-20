@@ -24,10 +24,6 @@ import (
 	"omg-cli/ops_manager"
 )
 
-const (
-	skipSSLValidation = "true"
-)
-
 type Properties struct {
 	OpsManagerURL           tiles.Value `json:".properties.opsman.enable.url"`
 	BoshHealthCheckAZ       tiles.Value `json:".healthwatch-forwarder.health_check_az"`

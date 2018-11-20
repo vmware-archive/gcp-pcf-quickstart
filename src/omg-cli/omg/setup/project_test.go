@@ -133,7 +133,7 @@ var _ = Describe("GcpProject", func() {
 			project, err := NewProjectValidator(logger, nil, service, []google.Quota{}, map[string][]google.Quota{}, requiredApis)
 			Expect(err).NotTo(HaveOccurred())
 
-			project.EnableAPIs()
+			Expect(project.EnableAPIs()).To(BeNil())
 
 			Expect(service.EnableCallCount()).To(Equal(1))
 			Expect(service.EnableArgsForCall(0)).To(Equal(requiredApis))

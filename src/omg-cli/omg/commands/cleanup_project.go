@@ -68,7 +68,6 @@ func (cmd *CleanupProjectCommand) parseArgs() {
 	if err != nil {
 		cmd.logger.Fatalf("creating CleanupService: %v", err)
 	}
-	return
 }
 
 func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
@@ -90,20 +89,20 @@ func runAsync(steps []step, logger *log.Logger) error {
 	var errors []error
 	var errsMu sync.Mutex
 
-	for _, step := range steps {
+	for _, s := range steps {
 
 		wg.Add(1)
-		logger.Printf("running step %s asynchronously", step.name)
-		go func() {
-			if err := step.function(); err != nil {
-				logger.Printf("error running step %s: %v", step.name, err)
+		logger.Printf("running step %s asynchronously", s.name)
+		go func(s step) {
+			if err := s.function(); err != nil {
+				logger.Printf("error running step %s: %v", s.name, err)
 
 				errsMu.Lock()
 				errors = append(errors, err)
 				errsMu.Unlock()
 			}
 			wg.Done()
-		}()
+		}(s)
 	}
 	wg.Wait()
 

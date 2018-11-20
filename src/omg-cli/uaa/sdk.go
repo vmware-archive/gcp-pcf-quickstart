@@ -17,6 +17,7 @@
 package uaa
 
 import (
+	"code.cloudfoundry.org/uaa-go-client"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -78,9 +79,12 @@ func (s *Sdk) doRequest(reqType, path string, data *bytes.Buffer) (map[string]in
 		return nil, fmt.Errorf("fetch UAA token: %v", err)
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

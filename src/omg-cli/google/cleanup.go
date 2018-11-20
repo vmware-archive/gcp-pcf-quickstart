@@ -149,7 +149,7 @@ func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
 						}
 					}
 
-					if foundSubnet == false {
+					if !foundSubnet {
 						continue
 					}
 				}

@@ -21,16 +21,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-
-	"omg-cli/config"
-	"omg-cli/version"
 
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
@@ -39,6 +35,7 @@ import (
 	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/progress"
+	"omg-cli/config"
 )
 
 const (
@@ -56,7 +53,7 @@ type Sdk struct {
 }
 
 // NewSdk creates an authenticated session and object to interact with Ops Manager
-func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
+func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "",
 		creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second, time.Duration(connectTimeout)*time.Second)
 	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
@@ -79,10 +76,10 @@ func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger
 			UnauthedClient:         unauthenticatedClient,
 			ProgressClient:         network.NewProgressClient(client, progress.NewBar(), live),
 			UnauthedProgressClient: network.NewProgressClient(unauthenticatedClient, progress.NewBar(), live),
-			Logger:                 &logger,
+			Logger:                 logger,
 		}),
 		creds:  creds,
-		logger: &logger,
+		logger: logger,
 	}
 	return sdk, nil
 }
@@ -131,6 +128,9 @@ func (om *Sdk) Unlock() error {
 
 	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
 	body, err := json.Marshal(&unlockReq)
+	if err != nil {
+		return err
+	}
 
 	_, err = om.api.Curl(api.RequestServiceCurlInput{
 		Path:   "/api/v0/unlock",
@@ -211,8 +211,8 @@ func (om *Sdk) Online() bool {
 	return resp.StatusCode < 500
 }
 
-// AvaliableProducts lists products that are uploaded to Ops Manager.
-func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
+// AvailableProducts lists products that are uploaded to Ops Manager.
+func (om *Sdk) AvailableProducts() ([]api.ProductInfo, error) {
 	products, err := om.api.ListAvailableProducts()
 	if err != nil {
 		return nil, err
@@ -373,6 +373,10 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGUID),
 		Method: http.MethodGet,
 	})
+	if err != nil {
+		return "", err
+	}
+
 	body, err := ioutil.ReadAll(out.Body)
 	if err != nil {
 		return "", err
@@ -394,12 +398,4 @@ func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)
 	return cmd.Execute(nil)
-}
-
-func (om *Sdk) newRequest(method, url string, body io.Reader) (req *http.Request, err error) {
-	req, err = http.NewRequest(method, url, body)
-	if req != nil {
-		req.Header.Set("User-Agent", version.UserAgent())
-	}
-	return
 }

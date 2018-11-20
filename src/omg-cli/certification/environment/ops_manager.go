@@ -67,7 +67,7 @@ func (lom *liveOpsManager) MustGetTile(name string) TileQuery {
 	return tile
 }
 
-func (lom *liveOpsManager) Director() map[string]map[string]interface{} {
+func (lom *liveOpsManager) Director() DirectorProperties {
 	prop, err := lom.sdk.GetDirector()
 	if err != nil {
 		panic(fmt.Errorf("retreving director: %v", err))

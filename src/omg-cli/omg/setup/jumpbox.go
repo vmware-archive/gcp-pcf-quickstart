@@ -39,12 +39,11 @@ type Jumpbox struct {
 
 const packageName = "omg-cli"
 
-func NewJumpbox(cmdLogger *log.Logger, output io.Writer, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
+func NewJumpbox(output io.Writer, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
 	var logger *log.Logger
 	if !quiet {
 		// Duplicate the logger so we can modify the prefix
-		logger = &*cmdLogger
-		logger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", logger.Prefix()))
+		logger = log.New(output, fmt.Sprintf("%s[jumpbox] ", logger.Prefix()), 0)
 	} else {
 		logger = log.New(ioutil.Discard, "", 0)
 	}

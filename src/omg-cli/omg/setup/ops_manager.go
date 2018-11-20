@@ -90,7 +90,7 @@ func (s *OpsManager) ApplyDirector() error {
 }
 
 func (s *OpsManager) productInstalled(product config.OpsManagerMetadata) (bool, error) {
-	products, err := s.om.AvaliableProducts()
+	products, err := s.om.AvailableProducts()
 	if err != nil {
 		return false, err
 	}
@@ -104,7 +104,7 @@ func (s *OpsManager) productInstalled(product config.OpsManagerMetadata) (bool, 
 }
 
 func (s *OpsManager) ensureProductReady(tile config.Tile) error {
-	if i, err := s.productInstalled(tile.Product); i == true || err != nil {
+	if i, err := s.productInstalled(tile.Product); i || err != nil {
 		return err
 	}
 

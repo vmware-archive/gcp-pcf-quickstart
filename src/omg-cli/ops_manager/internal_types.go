@@ -36,7 +36,7 @@ type Product struct {
 }
 
 type ErrorResponse struct {
-	Errors map[string][]string `json:errors`
+	Errors map[string][]string `json:"errors"`
 }
 
 type JobsResponse struct {

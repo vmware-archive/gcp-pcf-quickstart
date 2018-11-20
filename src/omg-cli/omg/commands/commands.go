@@ -33,10 +33,6 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
-const (
-	defaultSkipSSLVerify = "true"
-)
-
 type register interface {
 	register(app *kingpin.Application)
 }

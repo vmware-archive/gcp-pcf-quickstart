@@ -161,11 +161,13 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	}
 
 	if envConfig.SmallFootprint {
-		mergo.Merge(&properties, Properties{
+		if err := mergo.Merge(&properties, Properties{
 			ErtDbChoice: tiles.Value{Value: "internal_pxc"},
-		})
+		}); err != nil {
+			return err
+		}
 	} else {
-		mergo.Merge(&properties, Properties{
+		if err := mergo.Merge(&properties, Properties{
 			UaaDbChoice:   &tiles.Value{Value: "external"},
 			UaaDbIP:       &tiles.Value{Value: cfg.ExternalSQLIP},
 			UaaDbPort:     &tiles.IntegerValue{Value: cfg.ExternalSQLPort},
@@ -197,7 +199,9 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			ErtDbRoutingPassword:             &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
 			ErtDbSilkUsername:                &tiles.Value{Value: cfg.ERTSQLUsername},
 			ErtDbSilkPassword:                &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
-		})
+		}); err != nil {
+			return err
+		}
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
@@ -205,7 +209,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		return err
 	}
 
-	resourcesBytes := []byte{}
+	var resourcesBytes []byte
 
 	zero := 0
 	one := 1
