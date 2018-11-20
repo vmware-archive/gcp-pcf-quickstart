@@ -16,12 +16,10 @@
 
 package version
 
-import "fmt"
-
 const (
 	productName = "PCF-Ecosystem-GCP-client"
 )
 
 func UserAgent() string {
-	return fmt.Sprintf("%s/%s", productName, Semver())
+	return productName
 }
