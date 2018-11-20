@@ -21,25 +21,25 @@ import (
 )
 
 var tile = config.Tile{
-	config.PivnetMetadata{
-		"gcp-service-broker",
-		221375,
-		255029,
-		"beb501dd345b322123d0d608bc4c00dbd8343e066249b87a625e9c3cbc15059e",
+	Pivnet: config.PivnetMetadata{
+		Name:      "gcp-service-broker",
+		ReleaseId: 221375,
+		FileId:    255029,
+		Sha256:    "beb501dd345b322123d0d608bc4c00dbd8343e066249b87a625e9c3cbc15059e",
 	},
-	config.OpsManagerMetadata{
-		"gcp-service-broker",
-		"4.1.0",
-		true,
+	Product: config.OpsManagerMetadata{
+		Name:         "gcp-service-broker",
+		Version:      "4.1.0",
+		DependsOnPAS: true,
 	},
-	&config.StemcellMetadata{
-		config.PivnetMetadata{
-			"stemcells",
-			232700,
-			266558,
-			"5d9a7325c05576b0dffa3dcbb7fd02c78a30c56a465cd0ebf39cbfb52f5ca566",
+	Stemcell: &config.StemcellMetadata{
+		PivnetMetadata: config.PivnetMetadata{
+			Name:      "stemcells",
+			ReleaseId: 232700,
+			FileId:    266558,
+			Sha256:    "5d9a7325c05576b0dffa3dcbb7fd02c78a30c56a465cd0ebf39cbfb52f5ca566",
 		},
-		"light-bosh-stemcell-3586.56-google-kvm-ubuntu-trusty-go_agent",
+		StemcellName: "light-bosh-stemcell-3586.56-google-kvm-ubuntu-trusty-go_agent",
 	},
 }
 

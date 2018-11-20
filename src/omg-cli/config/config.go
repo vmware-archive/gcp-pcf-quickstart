@@ -35,4 +35,4 @@ const (
 	EnvConfigFile       = "config.json"
 )
 
-var ConfigFiles = []string{TerraformOutputFile, EnvConfigFile}
+var Files = []string{TerraformOutputFile, EnvConfigFile}

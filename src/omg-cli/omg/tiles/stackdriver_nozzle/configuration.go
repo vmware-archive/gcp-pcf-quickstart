@@ -52,10 +52,10 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	properties := &Properties{
-		Endpoint:          tiles.Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
-		SkipSSLValidation: tiles.Value{skipSSLValidation},
-		ServiceAccount:    tiles.Value{cfg.StackdriverNozzleServiceAccountKey},
-		ProjectID:         tiles.Value{cfg.ProjectName},
+		Endpoint:          tiles.Value{Value: fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
+		SkipSSLValidation: tiles.Value{Value: skipSSLValidation},
+		ServiceAccount:    tiles.Value{Value: cfg.StackdriverNozzleServiceAccountKey},
+		ProjectID:         tiles.Value{Value: cfg.ProjectName},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)

@@ -45,7 +45,7 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}

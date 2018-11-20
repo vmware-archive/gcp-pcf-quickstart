@@ -50,7 +50,7 @@ func (cmd *CleanupProjectCommand) register(app *kingpin.Application) {
 
 func (cmd *CleanupProjectCommand) parseArgs() {
 	var err error
-	cmd.envCfg, err = config.ConfigFromEnvDirectory(cmd.envDir)
+	cmd.envCfg, err = config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}

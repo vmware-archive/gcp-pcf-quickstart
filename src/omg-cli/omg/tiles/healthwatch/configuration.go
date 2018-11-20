@@ -50,9 +50,9 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	properties := &Properties{
-		OpsManagerURL:           tiles.Value{fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
-		BoshHealthCheckAZ:       tiles.Value{cfg.Zone1},
-		EnableDeploymentChecker: tiles.Value{"disable"},
+		OpsManagerURL:           tiles.Value{Value: fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
+		BoshHealthCheckAZ:       tiles.Value{Value: cfg.Zone1},
+		EnableDeploymentChecker: tiles.Value{Value: "disable"},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)

@@ -110,7 +110,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 		{filepath.Join(jb.envDir, "keys", "jumpbox_ssh.pub"), "keys/jumpbox_ssh.pub"},
 	}
 
-	for _, f := range config.ConfigFiles {
+	for _, f := range config.Files {
 		files = append(files, plan{filepath.Join(jb.envDir, f), f})
 	}
 

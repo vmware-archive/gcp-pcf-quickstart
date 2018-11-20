@@ -52,7 +52,7 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 	return c, nil
 }
 
-func ConfigFromEnvDirectory(path string) (*EnvConfig, error) {
+func FromEnvDirectory(path string) (*EnvConfig, error) {
 	return fromEnvironment(filepath.Join(path, EnvConfigFile))
 }
 

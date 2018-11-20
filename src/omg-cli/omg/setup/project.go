@@ -38,7 +38,7 @@ type QuotaError struct {
 	Region string
 }
 
-var UnsatisfiedQuotaErr = errors.New("Compute Engine quota is unsatisfied, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
+var UnsatisfiedQuotaErr = errors.New("unsatisfied quota for Compute Engine, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
 
 func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
@@ -126,9 +126,9 @@ func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota 
 	}
 
 	if cfg.SmallFootprint {
-		quotas = append(quotas, google.Quota{"CPUS", 24.0})
+		quotas = append(quotas, google.Quota{Name: "CPUS", Limit: 24.0})
 	} else {
-		quotas = append(quotas, google.Quota{"CPUS", 200.0})
+		quotas = append(quotas, google.Quota{Name: "CPUS", Limit: 200.0})
 	}
 
 	return map[string][]google.Quota{cfg.Region: quotas}

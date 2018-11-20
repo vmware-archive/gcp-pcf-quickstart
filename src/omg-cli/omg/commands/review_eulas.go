@@ -49,7 +49,7 @@ func (cmd *ReviewEulasCommand) register(app *kingpin.Application) {
 
 func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 	var err error
-	cmd.envConfig, err = config.ConfigFromEnvDirectory(cmd.envDir)
+	cmd.envConfig, err = config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}

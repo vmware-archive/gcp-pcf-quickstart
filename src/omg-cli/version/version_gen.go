@@ -18,4 +18,3 @@
 package version
 
 const semver = "2.1.0"
-const revision = "8cf5c3d"

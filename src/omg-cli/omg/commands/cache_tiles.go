@@ -50,7 +50,7 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
 	}
 
-	tileCache := pivnet.TileCache{cmd.tileCacheDir}
+	tileCache := pivnet.TileCache{Dir: cmd.tileCacheDir}
 	tiles := selectedTiles(cmd.logger, envCfg)
 	for _, tile := range tiles {
 		if tile.BuiltIn() {

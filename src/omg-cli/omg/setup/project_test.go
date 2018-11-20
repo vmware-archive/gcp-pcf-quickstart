@@ -44,7 +44,7 @@ var _ = Describe("GcpProject", func() {
 	Describe("AdequateQuota", func() {
 		It("handles errors", func() {
 			service := &googlefakes.FakeQuotaService{ProjectStub: func() (map[string]google.Quota, error) {
-				return nil, errors.New("My Error")
+				return nil, errors.New("my error")
 			}}
 			project, err := NewProjectValidator(logger, service, nil, []google.Quota{}, map[string][]google.Quota{}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
@@ -69,7 +69,7 @@ var _ = Describe("GcpProject", func() {
 			quotaErrors, satisfied, err := project.ValidateQuotas()
 			Expect(err).To(Equal(UnsatisfiedQuotaErr))
 			Expect(quotaErrors).ToNot(BeNil())
-			Expect(quotaErrors).To(ContainElement(QuotaError{quotaRequirement, 0.0, "global"}))
+			Expect(quotaErrors).To(ContainElement(QuotaError{Quota: quotaRequirement, Region: "global"}))
 			Expect(satisfied).To(BeEmpty())
 		})
 
@@ -107,7 +107,7 @@ var _ = Describe("GcpProject", func() {
 
 			errors, satisfied, err := project.ValidateQuotas()
 			Expect(err).To(Equal(UnsatisfiedQuotaErr))
-			Expect(errors).To(ContainElement(QuotaError{quotaRequirement, 10.0, "us-east1"}))
+			Expect(errors).To(ContainElement(QuotaError{Quota: quotaRequirement, Actual: 10.0, Region: "us-east1"}))
 			Expect(satisfied).To(BeEmpty())
 		})
 	})

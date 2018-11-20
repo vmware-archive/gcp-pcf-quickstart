@@ -59,7 +59,7 @@ func (s *OpsManager) Unlock() error {
 	for {
 		select {
 		case <-timeout:
-			return errors.New("Timeout waiting for Ops Manager to unlock")
+			return errors.New("timeout waiting for Ops Manager to unlock")
 		case <-timer:
 			if s.om.ReadyForAuth() {
 				return nil
@@ -149,7 +149,7 @@ func (s *OpsManager) PoolTillOnline() error {
 	for {
 		select {
 		case <-timeout:
-			return errors.New("Timeout waiting for Ops Manager to start")
+			return errors.New("timeout waiting for Ops Manager to start")
 		case <-timer:
 			if s.om.Online() {
 				return nil

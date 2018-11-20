@@ -73,7 +73,7 @@ func (svc *apiService) Enable(apis []API) ([]API, error) {
 		pendingOperations[api] = operation
 	}
 
-	apisEnabled := []API{}
+	var apisEnabled []API
 
 	for len(pendingOperations) != 0 {
 		svc.logger.Printf("waiting for %d service enable operation(s) to complete", len(pendingOperations))
