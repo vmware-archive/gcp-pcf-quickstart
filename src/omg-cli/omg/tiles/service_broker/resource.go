@@ -23,21 +23,21 @@ import (
 var tile = config.Tile{
 	config.PivnetMetadata{
 		"gcp-service-broker",
-		24491,
-		54209,
-		"e192cff35a92e9b78ee8c626bf0a5b59e86946d93111d953a39e211c9fb649b8",
+		191048,
+		221334,
+		"38b7eea0437af30901803f2ed147e0a167df54e3f4e43096eea11112505efc35",
 	},
 	config.OpsManagerMetadata{
 		"gcp-service-broker",
-		"3.6.0",
+		"4.0.0",
 		true,
 	},
 	&config.StemcellMetadata{
 		config.PivnetMetadata{"stemcells",
-			28003,
-			58587,
-			"af238d0d9d94b18da32d302512831d83aec00312a18bb528b351144e0f281f0e"},
-		"light-bosh-stemcell-3468.17-google-kvm-ubuntu-trusty-go_agent",
+			183841,
+			214146,
+			"93fe455d2ab111cdb5f6902cf8f8552e406e6665f4b46bba5fca37ac47aa0ecd"},
+		"light-bosh-stemcell-3586.42-google-kvm-ubuntu-trusty-go_agent",
 	},
 }
 
