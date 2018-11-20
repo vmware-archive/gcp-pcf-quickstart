@@ -59,11 +59,11 @@ func NewSdk(apiToken string, logger *log.Logger) (*Sdk, error) {
 func (s *Sdk) checkCredentials() error {
 	ok, err := s.client.Auth.Check()
 
-	if ok {
-		return nil
-	} else {
+	if !ok {
 		return fmt.Errorf("authorizing pivnet credentials: %v", err)
 	}
+
+	return nil
 }
 
 // DownloadTile retrieves a given productSlug, releaseId, and fileId from PivNet
@@ -112,11 +112,11 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 		}
 	}()
 
-	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, tile.ReleaseId, tile.FileId, os.Stdout)
+	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, tile.ReleaseID, tile.FileID, os.Stdout)
 }
 
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("https://network.pivotal.io/api/v2/products/%s/releases/%d/eula_acceptance", tile.Name, tile.ReleaseId), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://network.pivotal.io/api/v2/products/%s/releases/%d/eula_acceptance", tile.Name, tile.ReleaseID), nil)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("accepting eula for %s, %v, received: %s", tile.Name, tile.ReleaseId, resp.Status)
+		return fmt.Errorf("accepting eula for %s, %v, received: %s", tile.Name, tile.ReleaseID, resp.Status)
 	}
 
 	return nil

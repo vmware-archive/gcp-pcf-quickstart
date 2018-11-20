@@ -93,6 +93,7 @@ type OldCertificateValue struct {
 type KeyStruct struct {
 	Secret string `json:"secret"`
 }
+
 type EncryptionKey struct {
 	Name    string    `json:"name"`
 	Key     KeyStruct `json:"key"`
@@ -106,5 +107,5 @@ type Resource struct {
 	RouterNames       []string `json:"elb_names,omitempty"`
 	Instances         *int     `json:"instances,omitempty"`
 	InternetConnected bool     `json:"internet_connected"`
-	VmTypeId          string   `json:"vm_type_id,omitempty"`
+	VMTypeID          string   `json:"vm_type_id,omitempty"`
 }

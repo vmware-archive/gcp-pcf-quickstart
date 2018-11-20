@@ -41,7 +41,7 @@ type QuotaService interface {
 
 type quotaService struct {
 	logger         *log.Logger
-	projectId      string
+	projectID      string
 	computeService *compute.Service
 }
 
@@ -55,7 +55,7 @@ func transformQuotas(computeQuotas []*compute.Quota) map[string]Quota {
 }
 
 func (ps *quotaService) Project() (map[string]Quota, error) {
-	project, err := ps.computeService.Projects.Get(ps.projectId).Context(context.Background()).Do()
+	project, err := ps.computeService.Projects.Get(ps.projectID).Context(context.Background()).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (ps *quotaService) Project() (map[string]Quota, error) {
 }
 
 func (ps *quotaService) Region(region string) (map[string]Quota, error) {
-	regionResponse, err := ps.computeService.Regions.Get(ps.projectId, region).Context(context.Background()).Do()
+	regionResponse, err := ps.computeService.Regions.Get(ps.projectID, region).Context(context.Background()).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (ps *quotaService) Region(region string) (map[string]Quota, error) {
 	return transformQuotas(regionResponse.Quotas), nil
 }
 
-func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) (QuotaService, error) {
+func NewQuotaService(logger *log.Logger, projectID string, client *http.Client) (QuotaService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
@@ -83,5 +83,5 @@ func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) 
 	}
 	computeService.UserAgent = version.UserAgent()
 
-	return &quotaService{logger, projectId, computeService}, nil
+	return &quotaService{logger, projectID, computeService}, nil
 }

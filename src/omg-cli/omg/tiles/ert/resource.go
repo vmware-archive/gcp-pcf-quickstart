@@ -23,8 +23,8 @@ import (
 var fullRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
-		ReleaseId: 220833,
-		FileId:    254457,
+		ReleaseID: 220833,
+		FileID:    254457,
 		Sha256:    "5540900a3626b092bffdb01b530791a116cf5f1022fd1b048edaeea4424318fd",
 	},
 	Product:  product,
@@ -34,8 +34,8 @@ var fullRuntime = config.Tile{
 var smallRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
-		ReleaseId: 220833,
-		FileId:    254473,
+		ReleaseID: 220833,
+		FileID:    254473,
 		Sha256:    "1ab242bff8f95598193b0c742b7d6a520628ebeb682fd949d18da5ef6c8e5c7a",
 	},
 	Product:  product,
@@ -50,8 +50,8 @@ var product = config.OpsManagerMetadata{
 var stemcell = config.StemcellMetadata{
 	PivnetMetadata: config.PivnetMetadata{
 		Name:      "stemcells-ubuntu-xenial",
-		ReleaseId: 226360,
-		FileId:    260592,
+		ReleaseID: 226360,
+		FileID:    260592,
 		Sha256:    "a23bd96427043afd34a62223f11aebf3177c7f8f0c2c46006c2168120effa099",
 	},
 	StemcellName: "light-bosh-stemcell-97.32-google-kvm-ubuntu-xenial-go_agent",
@@ -62,9 +62,9 @@ type Tile struct{}
 func (*Tile) Definition(envConfig *config.EnvConfig) config.Tile {
 	if envConfig.SmallFootprint {
 		return smallRuntime
-	} else {
-		return fullRuntime
 	}
+
+	return fullRuntime
 }
 
 func (*Tile) BuiltIn() bool {

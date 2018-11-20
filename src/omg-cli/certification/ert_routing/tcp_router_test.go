@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("TcpRouter", func() {
+var _ = Describe("TCPRouter", func() {
 	var (
 		ert TileQuery
 	)

@@ -23,8 +23,8 @@ import (
 var tile = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "gcp-service-broker",
-		ReleaseId: 221375,
-		FileId:    255029,
+		ReleaseID: 221375,
+		FileID:    255029,
 		Sha256:    "beb501dd345b322123d0d608bc4c00dbd8343e066249b87a625e9c3cbc15059e",
 	},
 	Product: config.OpsManagerMetadata{
@@ -35,8 +35,8 @@ var tile = config.Tile{
 	Stemcell: &config.StemcellMetadata{
 		PivnetMetadata: config.PivnetMetadata{
 			Name:      "stemcells",
-			ReleaseId: 232700,
-			FileId:    266558,
+			ReleaseID: 232700,
+			FileID:    266558,
 			Sha256:    "5d9a7325c05576b0dffa3dcbb7fd02c78a30c56a465cd0ebf39cbfb52f5ca566",
 		},
 		StemcellName: "light-bosh-stemcell-3586.56-google-kvm-ubuntu-trusty-go_agent",

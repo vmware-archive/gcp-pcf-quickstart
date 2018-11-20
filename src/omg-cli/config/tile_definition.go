@@ -18,8 +18,8 @@ package config
 
 type PivnetMetadata struct {
 	Name      string
-	ReleaseId int
-	FileId    int
+	ReleaseID int
+	FileID    int
 	Sha256    string
 }
 

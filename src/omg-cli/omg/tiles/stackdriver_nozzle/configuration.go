@@ -52,7 +52,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	properties := &Properties{
-		Endpoint:          tiles.Value{Value: fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
+		Endpoint:          tiles.Value{Value: fmt.Sprintf("https://api.sys.%s", cfg.DNSSuffix)},
 		SkipSSLValidation: tiles.Value{Value: skipSSLValidation},
 		ServiceAccount:    tiles.Value{Value: cfg.StackdriverNozzleServiceAccountKey},
 		ProjectID:         tiles.Value{Value: cfg.ProjectName},
@@ -70,7 +70,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	resoruces := Resources{
 		StackdriverNozzle: tiles.Resource{
 			InternetConnected: false,
-			VmTypeId:          vmType,
+			VMTypeID:          vmType,
 		},
 	}
 	resorucesBytes, err := json.Marshal(&resoruces)

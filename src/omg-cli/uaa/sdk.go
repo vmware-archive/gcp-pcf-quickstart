@@ -107,10 +107,10 @@ func (s *Sdk) CreateUser(user *User) error {
 	}
 
 	if id, idOk := resp["id"]; idOk {
-		user.Id = id.(string)
+		user.ID = id.(string)
 	} else {
 		if resp["error"] == "scim_resource_already_exists" {
-			user.Id = resp["user_id"].(string)
+			user.ID = resp["user_id"].(string)
 		} else {
 			return fmt.Errorf("unknown response: %#v", resp)
 		}

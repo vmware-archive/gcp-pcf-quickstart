@@ -39,7 +39,7 @@ type Property struct {
 
 type Job struct {
 	Name string `json:"name"`
-	Guid string `json:"guid"`
+	GUID string `json:"guid"`
 }
 
 type StaticIP struct {

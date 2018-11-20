@@ -38,7 +38,7 @@ type QuotaError struct {
 	Region string
 }
 
-var UnsatisfiedQuotaErr = errors.New("unsatisfied quota for Compute Engine, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
+var ErrUnsatisfiedQuota = errors.New("unsatisfied quota for Compute Engine, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
 
 func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
@@ -63,7 +63,7 @@ func (pv *ProjectValidator) ValidateQuotas() (errors []QuotaError, satisfied []g
 	}
 
 	if len(errors) != 0 {
-		err = UnsatisfiedQuotaErr
+		err = ErrUnsatisfiedQuota
 	}
 	return errors, satisfied, err
 }

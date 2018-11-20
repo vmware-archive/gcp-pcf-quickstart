@@ -32,7 +32,7 @@ type CacheTilesCommand struct {
 	logger         *log.Logger
 	envDir         string
 	tileCacheDir   string
-	pivnetApiToken string
+	pivnetAPIToken string
 }
 
 const CacheTilesName = "cache-tiles"
@@ -41,11 +41,11 @@ func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 	c := app.Command(CacheTilesName, "Cache tile downloads locally").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	registerTileCacheFlag(c, &cmd.tileCacheDir)
-	registerPivnetApiTokenFlag(c, &cmd.pivnetApiToken)
+	registerPivnetAPITokenFlag(c, &cmd.pivnetAPIToken)
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
-	pivnetSdk, err := pivnet.NewSdk(cmd.pivnetApiToken, cmd.logger)
+	pivnetSdk, err := pivnet.NewSdk(cmd.pivnetAPIToken, cmd.logger)
 	if err != nil {
 		return err
 	}

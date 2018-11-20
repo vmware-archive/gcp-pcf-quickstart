@@ -44,7 +44,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 
 	properties := Properties{
 		ServiceAccountKey: tiles.Value{Value: cfg.ServiceBrokerServiceAccountKey},
-		DatabaseHost:      tiles.Value{Value: cfg.ServiceBrokerDbIp},
+		DatabaseHost:      tiles.Value{Value: cfg.ServiceBrokerDbIP},
 		DatabaseUsername:  tiles.Value{Value: cfg.ServiceBrokerDbUsername},
 		DatabasePassword:  tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ServiceBrokerDbPassword}},
 	}

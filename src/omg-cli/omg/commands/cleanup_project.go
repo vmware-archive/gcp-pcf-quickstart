@@ -109,9 +109,9 @@ func runAsync(steps []step, logger *log.Logger) error {
 
 	if len(errors) != 0 {
 		return fmt.Errorf("errors running steps: %v", errors)
-	} else {
-		return nil
 	}
+	
+	return nil
 }
 
 // Delete Ops Manager VMs created by the C0 Pipeline

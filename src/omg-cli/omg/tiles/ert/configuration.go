@@ -30,8 +30,8 @@ type Properties struct {
 	// Domains
 	AppsDomain                tiles.Value              `json:".cloud_controller.apps_domain"`
 	SysDomain                 tiles.Value              `json:".cloud_controller.system_domain"`
-	TcpRouting                tiles.Value              `json:".properties.tcp_routing"`
-	TcpRoutingReservablePorts tiles.Value              `json:".properties.tcp_routing.enable.reservable_ports"`
+	TCPRouting                tiles.Value              `json:".properties.tcp_routing"`
+	TCPRoutingReservablePorts tiles.Value              `json:".properties.tcp_routing.enable.reservable_ports"`
 	GoRouterSSLCiphers        tiles.Value              `json:".properties.gorouter_ssl_ciphers"`
 	HAProxySSLCiphers         tiles.Value              `json:".properties.haproxy_ssl_ciphers"`
 	SkipSSLVerification       tiles.BooleanValue       `json:".ha_proxy.skip_cert_verify"`
@@ -44,14 +44,14 @@ type Properties struct {
 	ServiceProviderCredentials tiles.OldCertificateValue `json:".uaa.service_provider_key_credentials"`
 
 	UaaDbChoice   *tiles.Value        `json:".properties.uaa_database,omitempty"`
-	UaaDbIp       *tiles.Value        `json:".properties.uaa_database.external.host,omitempty"`
+	UaaDbIP       *tiles.Value        `json:".properties.uaa_database.external.host,omitempty"`
 	UaaDbPort     *tiles.IntegerValue `json:".properties.uaa_database.external.port,omitempty"`
 	UaaDbUsername *tiles.Value        `json:".properties.uaa_database.external.uaa_username,omitempty"`
 	UaaDbPassword *tiles.SecretValue  `json:".properties.uaa_database.external.uaa_password,omitempty"`
 
 	// Databases
 	ErtDbChoice tiles.Value         `json:".properties.system_database"`
-	ErtDbIp     *tiles.Value        `json:".properties.system_database.external.host,omitempty"`
+	ErtDbIP     *tiles.Value        `json:".properties.system_database.external.host,omitempty"`
 	ErtDbPort   *tiles.IntegerValue `json:".properties.system_database.external.port,omitempty"`
 
 	ErtDbAppUsageUsername            *tiles.Value       `json:".properties.system_database.external.app_usage_service_username,omitempty"`
@@ -78,11 +78,11 @@ type Properties struct {
 	ErtDbSilkPassword                *tiles.SecretValue `json:".properties.system_database.external.silk_password,omitempty"`
 
 	// MySQL
-	MySqlMonitorRecipientEmail tiles.Value `json:".mysql_monitor.recipient_email"`
+	MySQLMonitorRecipientEmail tiles.Value `json:".mysql_monitor.recipient_email"`
 }
 
 type LargeFootprintResources struct {
-	TcpRouter                    tiles.Resource `json:"tcp_router"`
+	TCPRouter                    tiles.Resource `json:"tcp_router"`
 	Router                       tiles.Resource `json:"router"`
 	DiegoBrain                   tiles.Resource `json:"diego_brain"`
 	ConsulServer                 tiles.Resource `json:"consul_server"`
@@ -106,7 +106,7 @@ type LargeFootprintResources struct {
 }
 
 type SmallFootprintResources struct {
-	TcpRouter tiles.Resource `json:"tcp_router"`
+	TCPRouter tiles.Resource `json:"tcp_router"`
 	Router    tiles.Resource `json:"router"`
 
 	Database    tiles.Resource `json:"database"`
@@ -137,7 +137,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		SkipSSLVerification: tiles.BooleanValue{Value: true},
 		HAProxyForwardTLS:   tiles.Value{Value: "disable"},
 		IngressCertificates: tiles.CertificateValue{Value: []tiles.CertificateConstruct{
-			{Certificate: tiles.Certificate{PublicKey: cfg.SslCertificate, PrivateKey: cfg.SslPrivateKey},
+			{Certificate: tiles.Certificate{PublicKey: cfg.SSLCertificate, PrivateKey: cfg.SSLPrivateKey},
 				Name: "Certificate",
 			},
 		},
@@ -150,14 +150,14 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 			},
 		},
 		},
-		TcpRouting:                 tiles.Value{Value: "enable"},
-		TcpRoutingReservablePorts:  tiles.Value{Value: cfg.TcpPortRange},
+		TCPRouting:                 tiles.Value{Value: "enable"},
+		TCPRoutingReservablePorts:  tiles.Value{Value: cfg.TCPPortRange},
 		GoRouterSSLCiphers:         tiles.Value{Value: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		HAProxySSLCiphers:          tiles.Value{Value: "DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"},
 		SecurityAcknowledgement:    tiles.Value{Value: "X"},
-		ServiceProviderCredentials: tiles.OldCertificateValue{Value: tiles.Certificate{PublicKey: cfg.SslCertificate, PrivateKey: cfg.SslPrivateKey}},
+		ServiceProviderCredentials: tiles.OldCertificateValue{Value: tiles.Certificate{PublicKey: cfg.SSLCertificate, PrivateKey: cfg.SSLPrivateKey}},
 
-		MySqlMonitorRecipientEmail: tiles.Value{Value: "admin@example.org"},
+		MySQLMonitorRecipientEmail: tiles.Value{Value: "admin@example.org"},
 	}
 
 	if envConfig.SmallFootprint {
@@ -167,36 +167,36 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	} else {
 		mergo.Merge(&properties, Properties{
 			UaaDbChoice:   &tiles.Value{Value: "external"},
-			UaaDbIp:       &tiles.Value{Value: cfg.ExternalSqlIp},
-			UaaDbPort:     &tiles.IntegerValue{Value: cfg.ExternalSqlPort},
-			UaaDbUsername: &tiles.Value{Value: cfg.ERTSqlUsername},
-			UaaDbPassword: &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
+			UaaDbIP:       &tiles.Value{Value: cfg.ExternalSQLIP},
+			UaaDbPort:     &tiles.IntegerValue{Value: cfg.ExternalSQLPort},
+			UaaDbUsername: &tiles.Value{Value: cfg.ERTSQLUsername},
+			UaaDbPassword: &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
 
 			ErtDbChoice:                      tiles.Value{Value: "external"},
-			ErtDbIp:                          &tiles.Value{Value: cfg.ExternalSqlIp},
-			ErtDbPort:                        &tiles.IntegerValue{Value: cfg.ExternalSqlPort},
-			ErtDbAppUsageUsername:            &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbAppUsagePassword:            &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbAutoscaleUsername:           &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbAutoscalePassword:           &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbCloudControllerUsername:     &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbCloudControllerPassword:     &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbDiegoUsername:               &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbDiegoPassword:               &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbLocketUsername:              &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbLocketPassword:              &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbNetworkPolicyServerUsername: &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbNetworkPolicyServerPassword: &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbNfsUsername:                 &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbNfsPassword:                 &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbNotificationsUsername:       &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbNotificationsPassword:       &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbAccountUsername:             &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbAccountPassword:             &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbRoutingUsername:             &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbRoutingPassword:             &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
-			ErtDbSilkUsername:                &tiles.Value{Value: cfg.ERTSqlUsername},
-			ErtDbSilkPassword:                &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSqlPassword}},
+			ErtDbIP:                          &tiles.Value{Value: cfg.ExternalSQLIP},
+			ErtDbPort:                        &tiles.IntegerValue{Value: cfg.ExternalSQLPort},
+			ErtDbAppUsageUsername:            &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbAppUsagePassword:            &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbAutoscaleUsername:           &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbAutoscalePassword:           &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbCloudControllerUsername:     &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbCloudControllerPassword:     &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbDiegoUsername:               &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbDiegoPassword:               &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbLocketUsername:              &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbLocketPassword:              &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbNetworkPolicyServerUsername: &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbNetworkPolicyServerPassword: &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbNfsUsername:                 &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbNfsPassword:                 &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbNotificationsUsername:       &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbNotificationsPassword:       &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbAccountUsername:             &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbAccountPassword:             &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbRoutingUsername:             &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbRoutingPassword:             &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
+			ErtDbSilkUsername:                &tiles.Value{Value: cfg.ERTSQLUsername},
+			ErtDbSilkPassword:                &tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ERTSQLPassword}},
 		})
 	}
 
@@ -212,17 +212,17 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	three := 3
 	if envConfig.SmallFootprint {
 		resources := SmallFootprintResources{
-			TcpRouter: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
+			TCPRouter: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TCPTargetPoolName)},
 				InternetConnected: false,
 				Instances:         &one,
 			},
 			Router: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WSSTargetPoolName), fmt.Sprintf("http:%s", cfg.HTTPBackendServiceName)},
 				InternetConnected: false,
 			},
 			Control: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SSHTargetPoolName)},
 				InternetConnected: false,
 			},
 			HaProxy:      tiles.Resource{Instances: &zero},
@@ -237,17 +237,17 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		resourcesBytes, err = json.Marshal(&resources)
 	} else {
 		resources := LargeFootprintResources{
-			TcpRouter: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TcpTargetPoolName)},
+			TCPRouter: tiles.Resource{
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TCPTargetPoolName)},
 				InternetConnected: false,
 				Instances:         &three,
 			},
 			Router: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WssTargetPoolName), fmt.Sprintf("http:%s", cfg.HttpBackendServiceName)},
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.WSSTargetPoolName), fmt.Sprintf("http:%s", cfg.HTTPBackendServiceName)},
 				InternetConnected: false,
 			},
 			DiegoBrain: tiles.Resource{
-				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SshTargetPoolName)},
+				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.SSHTargetPoolName)},
 				InternetConnected: false,
 			},
 			HaProxy:      tiles.Resource{Instances: &zero},

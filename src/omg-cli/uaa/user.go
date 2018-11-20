@@ -28,7 +28,7 @@ type Email struct {
 	Primary bool   `json:"primary"`
 }
 type User struct {
-	Id           string        `json:"id"`
+	ID           string        `json:"id"`
 	Username     string        `json:"userName"`
 	Password     string        `json:"password"`
 	Name         Name          `json:"name"`

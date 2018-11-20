@@ -24,8 +24,8 @@ import (
 var tile = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "p-healthwatch",
-		ReleaseId: 161272,
-		FileId:    194184,
+		ReleaseID: 161272,
+		FileID:    194184,
 		Sha256:    "75a17ff1c6044de391b327275b944ffb524650e6b40bc2d4f68c219940c37107",
 	},
 	Product: config.OpsManagerMetadata{
@@ -36,8 +36,8 @@ var tile = config.Tile{
 	Stemcell: &config.StemcellMetadata{
 		PivnetMetadata: config.PivnetMetadata{
 			Name:      "stemcells",
-			ReleaseId: 224700,
-			FileId:    258680,
+			ReleaseID: 224700,
+			FileID:    258680,
 			Sha256:    "c4a3be0d143e25e921b090e256ce669f990b10b5ba4181ccacd49338b5200881"},
 		StemcellName: "light-bosh-stemcell-3541.59-google-kvm-ubuntu-trusty-go_agent",
 	},

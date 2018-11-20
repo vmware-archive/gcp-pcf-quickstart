@@ -27,22 +27,22 @@ import (
 
 type TerraformConfigSchema struct {
 	OpsManagerHostname  string `json:"ops_manager_dns"`
-	OpsManagerIp        string `json:"ops_manager_private_ip"`
-	JumpboxIp           string `json:"jumpbox_public_ip"`
+	OpsManagerIP        string `json:"ops_manager_private_ip"`
+	JumpboxIP           string `json:"jumpbox_public_ip"`
 	NetworkName         string `json:"network_name"`
 	DeploymentTargetTag string `json:"vm_tag"`
 
 	OpsManagerServiceAccountKey string
 
 	// External database properties are omitted if internal database is chosen.
-	ExternalSqlIp         string `json:"sql_db_ip,omitempty"`
-	ExternalSqlPort       int
-	OpsManagerSqlDbName   string `json:"opsman_sql_db_name,omitempty"`
-	OpsManagerSqlUsername string `json:"opsman_sql_username,omitempty"`
-	OpsManagerSqlPassword string `json:"opsman_sql_password,omitempty"`
-	ERTSqlDbName          string `json:"ert_sql_db_name,omitempty"`
-	ERTSqlUsername        string `json:"ert_sql_username,omitempty"`
-	ERTSqlPassword        string `json:"ert_sql_password,omitempty"`
+	ExternalSQLIP         string `json:"sql_db_ip,omitempty"`
+	ExternalSQLPort       int
+	OpsManagerSQLDbName   string `json:"opsman_sql_db_name,omitempty"`
+	OpsManagerSQLUsername string `json:"opsman_sql_username,omitempty"`
+	OpsManagerSQLPassword string `json:"opsman_sql_password,omitempty"`
+	ERTSQLDbName          string `json:"ert_sql_db_name,omitempty"`
+	ERTSQLUsername        string `json:"ert_sql_username,omitempty"`
+	ERTSQLPassword        string `json:"ert_sql_password,omitempty"`
 
 	MgmtSubnetName    string `json:"management_subnet_name"`
 	MgmtSubnetGateway string `json:"management_subnet_gateway"`
@@ -60,11 +60,11 @@ type TerraformConfigSchema struct {
 	ErtSubnetGateway string `json:"ert_subnet_gateway"`
 	ErtSubnetCIDR    string `json:"ert_subnet_cidrs_0"`
 
-	HttpBackendServiceName string `json:"http_lb_backend_name"`
-	SshTargetPoolName      string `json:"ssh_router_pool"`
-	WssTargetPoolName      string `json:"wss_router_pool"`
-	TcpTargetPoolName      string `json:"tcp_router_pool"`
-	TcpPortRange           string `json:"tcp_port_range"`
+	HTTPBackendServiceName string `json:"http_lb_backend_name"`
+	SSHTargetPoolName      string `json:"ssh_router_pool"`
+	WSSTargetPoolName      string `json:"wss_router_pool"`
+	TCPTargetPoolName      string `json:"tcp_router_pool"`
+	TCPPortRange           string `json:"tcp_port_range"`
 
 	BuildpacksBucket string `json:"buildpacks_bucket"`
 	DropletsBucket   string `json:"droplets_bucket"`
@@ -72,19 +72,19 @@ type TerraformConfigSchema struct {
 	ResourcesBucket  string `json:"resources_bucket"`
 	DirectorBucket   string `json:"director_blobstore_bucket"`
 
-	DnsSuffix         string `json:"dns_suffix"`
+	DNSSuffix         string `json:"dns_suffix"`
 	AppsDomain        string `json:"apps_domain"`
 	SysDomain         string `json:"sys_domain"`
 	DopplerDomain     string `json:"doppler_domain"`
 	LoggregatorDomain string `json:"loggregator_domain"`
 
-	SslCertificate string `json:"ssl_cert"`
-	SslPrivateKey  string `json:"ssl_cert_private_key"`
+	SSLCertificate string `json:"ssl_cert"`
+	SSLPrivateKey  string `json:"ssl_cert_private_key"`
 
 	StackdriverNozzleServiceAccountKey string
 
 	ServiceBrokerServiceAccountKey string
-	ServiceBrokerDbIp              string `json:"service_broker_db_ip"`
+	ServiceBrokerDbIP              string `json:"service_broker_db_ip"`
 	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
 	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
 
@@ -141,7 +141,7 @@ func fromTerraform(filename string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
-		hydratedCfg.ExternalSqlPort = int(parsed)
+		hydratedCfg.ExternalSQLPort = int(parsed)
 	}
 
 	hydratedCfg.OpsManagerServiceAccountKey = decode(flattened["ops_manager_service_account_key_base64"])

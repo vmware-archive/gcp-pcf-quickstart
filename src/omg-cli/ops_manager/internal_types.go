@@ -31,7 +31,7 @@ type CredentialWrapper struct {
 
 type Product struct {
 	InstallationName string `json:"installation_name"`
-	Guid             string `json:"guid"`
+	GUID             string `json:"guid"`
 	Type             string `json:"type"`
 }
 

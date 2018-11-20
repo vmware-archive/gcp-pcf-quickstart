@@ -50,7 +50,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	}
 
 	properties := &Properties{
-		OpsManagerURL:           tiles.Value{Value: fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
+		OpsManagerURL:           tiles.Value{Value: fmt.Sprintf("https://opsman.%s", cfg.DNSSuffix)},
 		BoshHealthCheckAZ:       tiles.Value{Value: cfg.Zone1},
 		EnableDeploymentChecker: tiles.Value{Value: "disable"},
 	}

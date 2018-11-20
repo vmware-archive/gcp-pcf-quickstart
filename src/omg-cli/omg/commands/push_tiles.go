@@ -58,7 +58,7 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetApiToken, cmd.logger)
+	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetAPIToken, cmd.logger)
 	if err != nil {
 		return err
 	}

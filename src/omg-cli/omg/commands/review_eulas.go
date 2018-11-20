@@ -54,7 +54,7 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}
 
-	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetApiToken, cmd.logger)
+	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetAPIToken, cmd.logger)
 	if err != nil {
 		return err
 	}

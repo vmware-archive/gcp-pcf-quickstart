@@ -67,7 +67,7 @@ var _ = Describe("GcpProject", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			quotaErrors, satisfied, err := project.ValidateQuotas()
-			Expect(err).To(Equal(UnsatisfiedQuotaErr))
+			Expect(err).To(Equal(ErrUnsatisfiedQuota))
 			Expect(quotaErrors).ToNot(BeNil())
 			Expect(quotaErrors).To(ContainElement(QuotaError{Quota: quotaRequirement, Region: "global"}))
 			Expect(satisfied).To(BeEmpty())
@@ -106,7 +106,7 @@ var _ = Describe("GcpProject", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			errors, satisfied, err := project.ValidateQuotas()
-			Expect(err).To(Equal(UnsatisfiedQuotaErr))
+			Expect(err).To(Equal(ErrUnsatisfiedQuota))
 			Expect(errors).To(ContainElement(QuotaError{Quota: quotaRequirement, Actual: 10.0, Region: "us-east1"}))
 			Expect(satisfied).To(BeEmpty())
 		})

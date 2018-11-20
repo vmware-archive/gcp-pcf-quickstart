@@ -234,12 +234,12 @@ func (om *Sdk) ConfigureProduct(name, networks, properties string, resources str
 
 // GetProduct fetches settings for a given tile by name
 func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
-	productGuid, err := om.productGuidByType(name)
+	productGUID, err := om.productGUIDByType(name)
 	if err != nil {
 		return nil, err
 	}
 
-	props, err := om.api.GetStagedProductProperties(productGuid)
+	props, err := om.api.GetStagedProductProperties(productGUID)
 	if err != nil {
 		return nil, err
 	}
@@ -261,17 +261,17 @@ func (om *Sdk) GetDirector() (map[string]map[string]interface{}, error) {
 
 // GetResource fetches resource settings for a specific job of a tile
 func (om *Sdk) GetResource(tileName, jobName string) (*api.JobProperties, error) {
-	productGuid, err := om.productGuidByType(tileName)
+	productGUID, err := om.productGUIDByType(tileName)
 	if err != nil {
 		return nil, err
 	}
 
-	jobGuid, err := om.jobGuidByName(productGuid, jobName)
+	jobGUID, err := om.jobGUIDByName(productGUID, jobName)
 	if err != nil {
 		return nil, err
 	}
 
-	props, err := om.api.GetStagedProductJobResourceConfig(productGuid, jobGuid)
+	props, err := om.api.GetStagedProductJobResourceConfig(productGUID, jobGUID)
 	if err != nil {
 		return nil, err
 	}
@@ -282,48 +282,48 @@ func (om *Sdk) getProducts() ([]api.DeployedProductOutput, error) {
 	return om.api.ListDeployedProducts()
 }
 
-func (om *Sdk) productGuidByType(product string) (string, error) {
+func (om *Sdk) productGUIDByType(product string) (string, error) {
 	products, err := om.getProducts()
 	if err != nil {
 		return "", err
 	}
 
-	appGuid := ""
+	appGUID := ""
 	for _, p := range products {
 		if p.Type == product {
-			appGuid = p.GUID
+			appGUID = p.GUID
 			break
 		}
 	}
 
-	if appGuid == "" {
+	if appGUID == "" {
 		return "", fmt.Errorf("could not find installed application by name: %s", product)
 	}
 
-	return appGuid, nil
+	return appGUID, nil
 }
 
-func (om *Sdk) jobGuidByName(productGuid, jobName string) (string, error) {
-	jobs, err := om.api.ListStagedProductJobs(productGuid)
+func (om *Sdk) jobGUIDByName(productGUID, jobName string) (string, error) {
+	jobs, err := om.api.ListStagedProductJobs(productGUID)
 	if err != nil {
 		return "", err
 	}
 
-	jobGuid := jobs[jobName]
-	if jobGuid == "" {
-		return "", fmt.Errorf("job %s not found for product %s", jobName, productGuid)
+	jobGUID := jobs[jobName]
+	if jobGUID == "" {
+		return "", fmt.Errorf("job %s not found for product %s", jobName, productGUID)
 	}
 
-	return jobGuid, nil
+	return jobGUID, nil
 }
 
 func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error) {
-	productGuid, err := om.productGuidByType(name)
+	productGUID, err := om.productGUIDByType(name)
 	if err != nil {
 		return nil, err
 	}
 	out, err := om.api.GetDeployedProductCredential(api.GetDeployedProductCredentialInput{
-		DeployedGUID:        productGuid,
+		DeployedGUID:        productGUID,
 		CredentialReference: credential,
 	})
 	if err != nil {
@@ -365,12 +365,12 @@ func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
 }
 
 func (om *Sdk) GetDirectorIP() (string, error) {
-	boshGuid, err := om.productGuidByType("p-bosh")
+	boshGUID, err := om.productGUIDByType("p-bosh")
 	if err != nil {
 		return "", err
 	}
 	out, err := om.api.Curl(api.RequestServiceCurlInput{
-		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGuid),
+		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGUID),
 		Method: http.MethodGet,
 	})
 	body, err := ioutil.ReadAll(out.Body)

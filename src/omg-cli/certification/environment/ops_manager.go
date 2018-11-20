@@ -86,8 +86,8 @@ func (ltq *liveTileQuery) Property(name string) api.ResponseProperty {
 	return ltq.props.Properties[name]
 }
 
-func (ltq *liveTileQuery) Resource(jobId string) api.JobProperties {
-	resource, err := ltq.sdk.GetResource(ltq.name, jobId)
+func (ltq *liveTileQuery) Resource(jobID string) api.JobProperties {
+	resource, err := ltq.sdk.GetResource(ltq.name, jobID)
 	if err != nil {
 		panic(err)
 	}

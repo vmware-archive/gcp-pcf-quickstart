@@ -41,11 +41,11 @@ type APIService interface {
 
 type apiService struct {
 	logger                   *log.Logger
-	projectId                string
+	projectID                string
 	servicemanagementService *servicemanagement.APIService
 }
 
-func NewAPIService(logger *log.Logger, projectId string, client *http.Client) (APIService, error) {
+func NewAPIService(logger *log.Logger, projectID string, client *http.Client) (APIService, error) {
 	if logger == nil {
 		return nil, errors.New("logger blank")
 	}
@@ -56,7 +56,7 @@ func NewAPIService(logger *log.Logger, projectId string, client *http.Client) (A
 	}
 	servicemanagementService.UserAgent = version.UserAgent()
 
-	return &apiService{logger, projectId, servicemanagementService}, nil
+	return &apiService{logger, projectID, servicemanagementService}, nil
 }
 
 func (svc *apiService) Enable(apis []API) ([]API, error) {
@@ -94,7 +94,7 @@ func (svc *apiService) Enable(apis []API) ([]API, error) {
 
 func (svc *apiService) enableOne(api API) (operation string, err error) {
 	req := &servicemanagement.EnableServiceRequest{
-		ConsumerId: fmt.Sprintf("project:%s", svc.projectId),
+		ConsumerId: fmt.Sprintf("project:%s", svc.projectID),
 	}
 	oper, err := svc.servicemanagementService.Services.Enable(api.Name, req).Do()
 	if err != nil {

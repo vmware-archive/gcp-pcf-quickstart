@@ -99,7 +99,7 @@ func (cmd *DirectorSSHCommand) run(c *kingpin.ParseContext) error {
 	body, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Got %s from metron agent. Response body:\n%s\n", resp.Status, body)
+		return fmt.Errorf("got %s from metron agent, response body: %s", resp.Status, body)
 	}
 	return nil
 }
