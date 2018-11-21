@@ -19,7 +19,7 @@ package environment
 import (
 	"fmt"
 
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 
 	"github.com/pivotal-cf/om/api"
 )
@@ -50,7 +50,7 @@ type TileQuery interface {
 }
 
 type liveOpsManager struct {
-	sdk *ops_manager.Sdk
+	sdk *opsman.Sdk
 }
 
 func (lom *liveOpsManager) Tile(name string) (TileQuery, error) {
@@ -82,8 +82,8 @@ func (lom *liveOpsManager) Director() DirectorProperties {
 
 type liveTileQuery struct {
 	name  string
-	props *ops_manager.ProductProperties
-	sdk   *ops_manager.Sdk
+	props *opsman.ProductProperties
+	sdk   *opsman.Sdk
 }
 
 func (ltq *liveTileQuery) Property(name string) api.ResponseProperty {

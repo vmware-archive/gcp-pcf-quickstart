@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// This file contains types used in responses from the ops_manager.Sdk
+// This file contains types used in responses from the opsman.Sdk
 
-package ops_manager
+package opsman
 
 import "github.com/pivotal-cf/om/api"
 

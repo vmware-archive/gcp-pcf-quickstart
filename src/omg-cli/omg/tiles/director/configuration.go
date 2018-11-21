@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package gcp_director
+package director
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ import (
 	"text/template"
 
 	"omg-cli/config"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 )
 
 const directorTemplateYAML = `---
@@ -132,7 +132,7 @@ func reservedIPs(cidr string) string {
 }
 
 // Configure satisfies TileInstaller interface.
-func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsman.Sdk) error {
 	dc := struct {
 		config.Config
 		CompilationInstances    int

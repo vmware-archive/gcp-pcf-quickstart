@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"omg-cli/config"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 
 	"github.com/onsi/ginkgo"
 )
@@ -68,7 +68,7 @@ type liveTarget struct {
 
 func (lt *liveTarget) OpsManager() OpsManagerQuery {
 	logger := log.New(os.Stdout, "TODO(jrjohnson): test logger", 0)
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", lt.cfg.OpsManagerHostname), lt.cfg.OpsManager, logger)
+	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", lt.cfg.OpsManagerHostname), lt.cfg.OpsManager, logger)
 	if err != nil {
 		ginkgo.Fail(fmt.Sprintf("creating ops manager sdk: %v", err))
 	}

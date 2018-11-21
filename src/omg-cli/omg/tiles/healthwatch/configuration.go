@@ -22,7 +22,7 @@ import (
 
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 )
 
 type properties struct {
@@ -35,7 +35,7 @@ type resources struct {
 }
 
 // Configure satisfies TileInstaller interface.
-func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
+func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsman.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
 	}

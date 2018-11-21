@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package service_broker
+package servicebroker
 
 import (
 	"omg-cli/config"

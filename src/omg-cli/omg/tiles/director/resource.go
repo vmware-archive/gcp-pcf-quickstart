@@ -14,41 +14,20 @@
  * limitations under the License.
  */
 
-package stackdriver_nozzle
+package director
 
 import (
-	"log"
-
 	"omg-cli/config"
 )
 
 var tile = config.Tile{
-	Pivnet: config.PivnetMetadata{
-		Name:      "gcp-stackdriver-nozzle",
-		ReleaseID: 53596,
-		FileID:    89124,
-		Sha256:    "80e137622ca76868693b406114a2c7c1fdf6ce5db91c77a8d848d558d288fe5c",
-	},
 	Product: config.OpsManagerMetadata{
-		Name:         "stackdriver-nozzle",
-		Version:      "2.0.1",
-		DependsOnPAS: true,
-	},
-	Stemcell: &config.StemcellMetadata{
-		PivnetMetadata: config.PivnetMetadata{
-			Name:      "stemcells",
-			ReleaseID: 214323,
-			FileID:    247292,
-			Sha256:    "8c6caeae37711aaf12b4fefba06c348cde5631e872e8892553ddb26514a3953a",
-		},
-		StemcellName: "light-bosh-stemcell-3468.78-google-kvm-ubuntu-trusty-go_agent",
+		Name: "BOSH Director",
 	},
 }
 
-// Tile is the tile for the Stackdriver Nozzle.
-type Tile struct {
-	Logger *log.Logger
-}
+// Tile is the tile for the BOSH Director.
+type Tile struct{}
 
 // Definition satisfies TileInstaller interface.
 func (*Tile) Definition(*config.EnvConfig) config.Tile {
@@ -57,5 +36,5 @@ func (*Tile) Definition(*config.EnvConfig) config.Tile {
 
 // BuiltIn satisfies TileInstaller interface.
 func (*Tile) BuiltIn() bool {
-	return false
+	return true
 }

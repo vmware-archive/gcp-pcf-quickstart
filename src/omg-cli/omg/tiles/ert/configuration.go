@@ -22,7 +22,7 @@ import (
 
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 
 	"github.com/imdario/mergo"
 )
@@ -121,7 +121,7 @@ type smallFootprintResources struct {
 }
 
 // Configure satisfies TileInstaller interface.
-func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
+func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsman.Sdk) error {
 	if err := om.StageProduct(product); err != nil {
 		return err
 	}

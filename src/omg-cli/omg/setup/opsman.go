@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"omg-cli/config"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 	"omg-cli/pivnet"
 )
 
@@ -34,7 +34,7 @@ import (
 type OpsManager struct {
 	cfg       *config.Config
 	envCfg    *config.EnvConfig
-	om        *ops_manager.Sdk
+	om        *opsman.Sdk
 	pivnet    *pivnet.Sdk
 	logger    *log.Logger
 	tiles     []tiles.TileInstaller
@@ -42,7 +42,7 @@ type OpsManager struct {
 }
 
 // NewOpsManager creates a new OpsManager for setup purposes.
-func NewOpsManager(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller, tileCache *pivnet.TileCache) *OpsManager {
+func NewOpsManager(cfg *config.Config, envCfg *config.EnvConfig, omSdk *opsman.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller, tileCache *pivnet.TileCache) *OpsManager {
 	return &OpsManager{cfg, envCfg, omSdk, pivnetSdk, logger, tiles, tileCache}
 }
 

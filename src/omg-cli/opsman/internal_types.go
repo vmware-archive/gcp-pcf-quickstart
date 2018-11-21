@@ -1,4 +1,4 @@
-package ops_manager
+package opsman
 
 /*
  * Copyright 2017 Google Inc.
