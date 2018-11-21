@@ -29,10 +29,12 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// CleanupService cleans up leftover infrastructure from a quickstart installation.
 type CleanupService interface {
 	DeleteVM(...VMFilter) (int, error)
 }
 
+// VMFilter is a function to filter VMs.
 type VMFilter func(*vmFilter)
 
 type vmFilter struct {
@@ -42,18 +44,21 @@ type vmFilter struct {
 	labels     map[string]string
 }
 
+// WithTag creates a VMFilter for VMs with a given tag.
 func WithTag(tag string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.tag = tag
 	}
 }
 
+// WithNameRegex creates a VMFilter for VMs with names which match a regex.
 func WithNameRegex(prefix string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.namePrefix = prefix
 	}
 }
 
+// WithLabel creates a VMFilter for VMs with a label.
 func WithLabel(key, value string) VMFilter {
 	return func(opt *vmFilter) {
 		if opt.labels == nil {
@@ -63,6 +68,7 @@ func WithLabel(key, value string) VMFilter {
 	}
 }
 
+// WithSubNetwork creates a VMFilter for VMs within a subnet.
 func WithSubNetwork(subnet string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.subnet = subnet
@@ -76,6 +82,7 @@ type cleanupService struct {
 	dryRun         bool
 }
 
+// NewCleanupService creates a new CleanupService.
 func NewCleanupService(logger *log.Logger, projectID string, client *http.Client, dryRun bool) (CleanupService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")

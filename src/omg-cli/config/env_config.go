@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 )
 
+// EnvConfig is the config needed to install the quickstart.
 type EnvConfig struct {
 	DNSZoneName        string
 	ProjectID          string
@@ -37,6 +38,7 @@ type EnvConfig struct {
 	IncludeHealthwatch bool
 }
 
+// DefaultEnvConfig creates a default quickstart configuration.
 func DefaultEnvConfig() (*EnvConfig, error) {
 	c := &EnvConfig{
 		DNSZoneName:        "pcf-zone",
@@ -53,6 +55,7 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 	return c, nil
 }
 
+// FromEnvDirectory creates a quickstart config from a given directory.
 func FromEnvDirectory(path string) (*EnvConfig, error) {
 	config, err := fromEnvironment(filepath.Join(path, EnvConfigFile))
 	if err != nil {

@@ -25,6 +25,7 @@ import (
 	"strconv"
 )
 
+// TerraformConfigSchema is the quickstart's Terraform schema as a struct.
 type TerraformConfigSchema struct {
 	OpsManagerHostname  string `json:"ops_manager_dns"`
 	OpsManagerIP        string `json:"ops_manager_private_ip"`
@@ -98,6 +99,7 @@ type TerraformConfigSchema struct {
 	CredhubKey CredhubEncryptionKey
 }
 
+// TerraformFromEnvDirectory creates a Terraform config from a directory.
 func TerraformFromEnvDirectory(path string) (*Config, error) {
 	config, err := fromTerraform(filepath.Join(path, TerraformOutputFile))
 	if err != nil {
@@ -171,14 +173,14 @@ func fromTerraform(filename string) (*Config, error) {
  * {"foo": "bar", "baz_0": "pizza", "baz_1": "thebest"}
  */
 
-type TerraformValue struct {
+type terraformValue struct {
 	Value interface{} `json:"value"`
 }
 
 func flattenTerraform(contents []byte) (map[string]string, error) {
 	res := map[string]string{}
 
-	tf := map[string]TerraformValue{}
+	tf := map[string]terraformValue{}
 
 	err := json.Unmarshal(contents, &tf)
 	if err != nil {

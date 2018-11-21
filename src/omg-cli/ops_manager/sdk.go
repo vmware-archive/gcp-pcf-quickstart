@@ -45,6 +45,7 @@ const (
 	pollingIntervalSec = 10
 )
 
+// Sdk interacts with the Ops Manager's API.
 type Sdk struct {
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
@@ -166,13 +167,14 @@ func (om *Sdk) SetupBosh(configYML []byte) error {
 	return cmd.Execute([]string{"--config", f.Name()})
 }
 
-// ApplyChanges deploys pending changes to Ops Manager
+// ApplyChanges deploys pending changes for a list of given tiles to the Ops Manager
 func (om *Sdk) ApplyChanges(args []string) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute(args)
 }
 
+// ApplyDirector deploys the BOSH Director to the Ops Manager
 func (om *Sdk) ApplyDirector() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
@@ -313,12 +315,13 @@ func (om *Sdk) jobGUIDByName(productGUID, jobName string) (string, error) {
 
 	jobGUID := jobs[jobName]
 	if jobGUID == "" {
-		return "", fmt.Errorf("job %s not found for product %s", jobName, productGUID)
+		return "", fmt.Errorf("Job %s not found for product %s", jobName, productGUID)
 	}
 
 	return jobGUID, nil
 }
 
+// GetCredentials returns a credential by name.
 func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error) {
 	productGUID, err := om.productGUIDByType(name)
 	if err != nil {
@@ -337,6 +340,7 @@ func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error
 	}, nil
 }
 
+// GetDirectorCredentials returns the BOSH Director's credentials.
 func (om *Sdk) GetDirectorCredentials(credential string) (*SimpleCredential, error) {
 	return om.getCredential(fmt.Sprintf("api/v0/deployed/director/credentials/%s", credential))
 }
@@ -366,6 +370,7 @@ func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
 	return &resp.Credential.Value, nil
 }
 
+// GetDirectorIP returns the IP address of the BOSH Director.
 func (om *Sdk) GetDirectorIP() (string, error) {
 	boshGUID, err := om.productGUIDByType("p-bosh")
 	if err != nil {
@@ -393,9 +398,10 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 			return ip.IPs[0], nil
 		}
 	}
-	return "", errors.New("static_ips response had no director job")
+	return "", errors.New("static_ips response had no director Job")
 }
 
+// DeleteInstallation runs the om cli DeleteInstallation command.
 func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)

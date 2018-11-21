@@ -28,6 +28,7 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// CacheTilesCommand caches tiles to the given tileCacheDir.
 type CacheTilesCommand struct {
 	logger         *log.Logger
 	envDir         string
@@ -35,10 +36,10 @@ type CacheTilesCommand struct {
 	pivnetAPIToken string
 }
 
-const CacheTilesName = "cache-tiles"
+const cacheTilesName = "cache-tiles"
 
 func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
-	c := app.Command(CacheTilesName, "Cache tile downloads locally").Action(cmd.run)
+	c := app.Command(cacheTilesName, "Cache tile downloads locally").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	registerTileCacheFlag(c, &cmd.tileCacheDir)
 	registerPivnetAPITokenFlag(c, &cmd.pivnetAPIToken)

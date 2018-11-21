@@ -23,6 +23,7 @@ import (
 	"omg-cli/google"
 )
 
+// ProjectValidator validates a Google Cloud project is capable of launching the quickstart.
 type ProjectValidator struct {
 	logger              *log.Logger
 	quotaService        google.QuotaService
@@ -32,14 +33,17 @@ type ProjectValidator struct {
 	apiRequirements     []google.API
 }
 
+// QuotaError represents when a quota cannot be met.
 type QuotaError struct {
 	google.Quota
 	Actual float64
 	Region string
 }
 
+// ErrUnsatisfiedQuota is thrown when a quota is not met.
 var ErrUnsatisfiedQuota = errors.New("unsatisfied quota for Compute Engine, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
 
+// NewProjectValidator creates a new project validator.
 func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
@@ -47,6 +51,7 @@ func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, a
 	return &ProjectValidator{logger, quotaService, apiService, projectRequirements, regionRequirements, apiRequirements}, nil
 }
 
+// ValidateQuotas ensures all required quotas are high enough for the quickstart.
 func (pv *ProjectValidator) ValidateQuotas() (errors []QuotaError, satisfied []google.Quota, err error) {
 	quotas, err := pv.quotaService.Project()
 	if err != nil {
@@ -88,6 +93,7 @@ func validateQuotas(requirements []google.Quota, quotas map[string]google.Quota,
 	return
 }
 
+// EnableAPIs enables the required Google Cloud APIs.
 func (pv *ProjectValidator) EnableAPIs() ([]google.API, error) {
 	enabled, err := pv.apiService.Enable(pv.apiRequirements)
 	if err != nil {
@@ -96,6 +102,7 @@ func (pv *ProjectValidator) EnableAPIs() ([]google.API, error) {
 	return enabled, nil
 }
 
+// ProjectQuotaRequirements are quota requirements for a Google Cloud project.
 func ProjectQuotaRequirements() []google.Quota {
 	return []google.Quota{
 		{Name: "NETWORKS", Limit: 2.0},
@@ -116,6 +123,7 @@ func ProjectQuotaRequirements() []google.Quota {
 	}
 }
 
+// RegionalQuotaRequirements are quotas requirements for the deployment Google Cloud region.
 func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota {
 	quotas := []google.Quota{
 		{Name: "DISKS_TOTAL_GB", Limit: 2000.0},
@@ -134,6 +142,7 @@ func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota 
 	return map[string][]google.Quota{cfg.Region: quotas}
 }
 
+// RequiredAPIs is the set of Google Cloud APIs which must be enabled.
 func RequiredAPIs() []google.API {
 	return []google.API{
 		{Name: "bigquery-json.googleapis.com"},

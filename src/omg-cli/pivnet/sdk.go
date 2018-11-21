@@ -37,12 +37,15 @@ const (
 	retryDelay    = 5 // How long wait in between download retries
 )
 
+// Sdk interacts with the Pivotal Network API.
 type Sdk struct {
 	logger   *log.Logger
 	client   gopivnet.Client
 	apiToken string
 }
 
+// NewSdk creates a new Pivotal Network Sdk.
+// It validates that the given apiToken is valid.
 func NewSdk(apiToken string, logger *log.Logger) (*Sdk, error) {
 	sdk := &Sdk{logger: logger, apiToken: apiToken}
 
@@ -115,6 +118,7 @@ func (s *Sdk) downloadTile(tile config.PivnetMetadata, path string) (*os.File, e
 	return out, s.client.ProductFiles.DownloadForRelease(out, tile.Name, tile.ReleaseID, tile.FileID, os.Stdout)
 }
 
+// AcceptEula accepts the PCF EULA.
 func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	req, err := http.NewRequest("POST", fmt.Sprintf("https://network.pivotal.io/api/v2/products/%s/releases/%d/eula_acceptance", tile.Name, tile.ReleaseID), nil)
 	if err != nil {
@@ -140,12 +144,14 @@ func (s *Sdk) AcceptEula(tile config.PivnetMetadata) error {
 	return nil
 }
 
+// Eula is the End User License Agreement for PCF.
 type Eula struct {
 	Name    string
 	Content string
 	Slug    string
 }
 
+// GetEula returns the PCF EULA.
 func (s *Sdk) GetEula(eulaSlug string) (*Eula, error) {
 	eula, err := s.client.EULA.Get(eulaSlug)
 	if err != nil {

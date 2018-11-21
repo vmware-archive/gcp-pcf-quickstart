@@ -20,15 +20,18 @@ package ops_manager
 
 import "github.com/pivotal-cf/om/api"
 
+// SimpleCredential according to the Ops Manager's API.
 type SimpleCredential struct {
 	Identity string `json:"identity"`
 	Password string `json:"password"`
 }
 
+// ProductProperties according to the Ops Manager's API.
 type ProductProperties struct {
 	Properties map[string]api.ResponseProperty `json:"properties"`
 }
 
+// Property according to the Ops Manager's API.
 type Property struct {
 	Type         string      `json:"type"`
 	Configurable bool        `json:"configurable"`
@@ -37,11 +40,13 @@ type Property struct {
 	Optional     bool        `json:"optional"`
 }
 
+// Job according to the Ops Manager's API.
 type Job struct {
 	Name string `json:"name"`
 	GUID string `json:"guid"`
 }
 
+// StaticIP according to the Ops Manager's API.
 type StaticIP struct {
 	Name string   `json:"name"`
 	IPs  []string `json:"ips"`

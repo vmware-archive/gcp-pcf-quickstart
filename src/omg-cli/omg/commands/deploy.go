@@ -27,16 +27,17 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// DeployCommand deploys the quickstart.
 type DeployCommand struct {
 	logger       *log.Logger
 	envDir       string
 	applyChanges bool
 }
 
-const DeployName = "deploy"
+const deployName = "deploy"
 
 func (cmd *DeployCommand) register(app *kingpin.Application) {
-	c := app.Command(DeployName, "Deploy tiles to a freshly deployed Ops Manager").Action(cmd.run)
+	c := app.Command(deployName, "Deploy tiles to a freshly deployed Ops Manager").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&cmd.applyChanges)
 }
@@ -58,7 +59,7 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	tiles := selectedTiles(cmd.logger, envCfg)
-	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, tiles, nil)
+	opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, nil, cmd.logger, tiles, nil)
 
 	steps := []step{
 		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},

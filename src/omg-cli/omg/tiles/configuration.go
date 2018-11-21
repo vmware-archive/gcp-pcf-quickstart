@@ -20,7 +20,7 @@ import (
 	"omg-cli/config"
 )
 
-type AvalibilityZone struct {
+type AvailabilityZone struct {
 	Name string `json:"name"`
 }
 
@@ -29,26 +29,26 @@ type NetworkName struct {
 }
 
 type Network struct {
-	SingletonAvalibilityZone AvalibilityZone   `json:"singleton_availability_zone"`
-	OtherAvailabilityZones   []AvalibilityZone `json:"other_availability_zones"`
-	Network                  NetworkName       `json:"network"`
-	ODBNetwork               NetworkName       `json:"service_network"`
+	SingletonAvailabilityZone AvailabilityZone   `json:"singleton_availability_zone"`
+	OtherAvailabilityZones    []AvailabilityZone `json:"other_availability_zones"`
+	Network                   NetworkName        `json:"network"`
+	ODBNetwork                NetworkName        `json:"service_network"`
 }
 
 func NetworkConfig(subnetName string, cfg *config.Config) Network {
 	return Network{
-		SingletonAvalibilityZone: AvalibilityZone{cfg.Zone1},
-		OtherAvailabilityZones:   []AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
-		Network:                  NetworkName{subnetName},
+		SingletonAvailabilityZone: AvailabilityZone{cfg.Zone1},
+		OtherAvailabilityZones:    []AvailabilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
+		Network:                   NetworkName{subnetName},
 	}
 }
 
 func NetworkODBConfig(subnetName string, cfg *config.Config, odbNetworkName string) Network {
 	return Network{
-		SingletonAvalibilityZone: AvalibilityZone{cfg.Zone1},
-		OtherAvailabilityZones:   []AvalibilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
-		Network:                  NetworkName{subnetName},
-		ODBNetwork:               NetworkName{odbNetworkName},
+		SingletonAvailabilityZone: AvailabilityZone{cfg.Zone1},
+		OtherAvailabilityZones:    []AvailabilityZone{{cfg.Zone1}, {cfg.Zone2}, {cfg.Zone3}},
+		Network:                   NetworkName{subnetName},
+		ODBNetwork:                NetworkName{odbNetworkName},
 	}
 }
 

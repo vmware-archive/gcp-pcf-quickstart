@@ -27,6 +27,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// Connection is the details necessary for creating SSH connections to a target host.
 type Connection struct {
 	logger       *log.Logger
 	output       io.Writer
@@ -36,8 +37,11 @@ type Connection struct {
 	clientConfig *ssh.ClientConfig
 }
 
+// Port is the default SSH port.
 const Port = 22
 
+// NewConnection creates a new Connection.
+// It does not actually SSH to anything.
 func NewConnection(logger *log.Logger, output io.Writer, hostname string, port int, username string, key []byte) (*Connection, error) {
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
@@ -60,6 +64,7 @@ func NewConnection(logger *log.Logger, output io.Writer, hostname string, port i
 	return c, nil
 }
 
+// EnsureConnected performs a test SSH session to ensure the connection is valid.
 func (c *Connection) EnsureConnected() error {
 	if c.client == nil {
 		var err error
@@ -76,6 +81,7 @@ func (c *Connection) EnsureConnected() error {
 	return ses.Run("exit 0")
 }
 
+// UploadFile uploads a file to the ssh target host.
 func (c *Connection) UploadFile(path, destName string) error {
 	ses, err := c.client.NewSession()
 	if err != nil {
@@ -91,6 +97,7 @@ func (c *Connection) UploadFile(path, destName string) error {
 	return scp.CopyPath(path, fmt.Sprintf("~/%s", destName), ses)
 }
 
+// Mkdir makes a directory on the ssh target host.
 func (c *Connection) Mkdir(path string) error {
 	ses, err := c.client.NewSession()
 	if err != nil {
@@ -102,6 +109,7 @@ func (c *Connection) Mkdir(path string) error {
 	return ses.Run(fmt.Sprintf("mkdir -p ~/%q", path))
 }
 
+// RunCommand executes a command on the ssh target host.
 func (c *Connection) RunCommand(cmd string) error {
 	ses, err := c.client.NewSession()
 	if err != nil {
@@ -120,6 +128,7 @@ func (c *Connection) RunCommand(cmd string) error {
 	return nil
 }
 
+// Close closes the ssh connection.
 func (c *Connection) Close() {
 	c.client.Close()
 }

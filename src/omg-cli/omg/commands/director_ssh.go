@@ -32,12 +32,13 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// DirectorSSHCommand SSHes into the BOSH Director.
 type DirectorSSHCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const DirectorSSHName = "director-ssh"
+const directorSSHName = "director-ssh"
 
 const jsonTemplate = `{
 	"method": "ssh",
@@ -45,7 +46,7 @@ const jsonTemplate = `{
 }`
 
 func (cmd *DirectorSSHCommand) register(app *kingpin.Application) {
-	c := app.Command(DirectorSSHName, "Add the 'jumpbox' user and credentials to the BOSH director VM.").Action(cmd.run)
+	c := app.Command(directorSSHName, "Add the 'jumpbox' user and credentials to the BOSH director VM.").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 

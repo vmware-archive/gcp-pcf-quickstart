@@ -27,11 +27,13 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// Quota represents a Google Cloud quota.
 type Quota struct {
 	Name  string
 	Limit float64
 }
 
+// QuotaService returns quotas.
 //go:generate counterfeiter ./ QuotaService
 type QuotaService interface {
 	Project() (map[string]Quota, error)
@@ -53,6 +55,7 @@ func transformQuotas(computeQuotas []*compute.Quota) map[string]Quota {
 	return quotas
 }
 
+// Region returns project-level quotas.
 func (ps *quotaService) Project() (map[string]Quota, error) {
 	project, err := ps.computeService.Projects.Get(ps.projectID).Context(context.Background()).Do()
 	if err != nil {
@@ -62,6 +65,7 @@ func (ps *quotaService) Project() (map[string]Quota, error) {
 	return transformQuotas(project.Quotas), nil
 }
 
+// Region returns quota from a given region.
 func (ps *quotaService) Region(region string) (map[string]Quota, error) {
 	regionResponse, err := ps.computeService.Regions.Get(ps.projectID, region).Context(context.Background()).Do()
 	if err != nil {
@@ -71,6 +75,7 @@ func (ps *quotaService) Region(region string) (map[string]Quota, error) {
 	return transformQuotas(regionResponse.Quotas), nil
 }
 
+// NewQuotaService creates a new QuotaService.
 func NewQuotaService(logger *log.Logger, projectID string, client *http.Client) (QuotaService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")

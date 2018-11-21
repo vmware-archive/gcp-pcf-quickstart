@@ -28,10 +28,12 @@ import (
 	"google.golang.org/api/servicemanagement/v1"
 )
 
+// API represents a Google Cloud API.
 type API struct {
 	Name string
 }
 
+// APIService can enable APIs.
 //go:generate counterfeiter ./ APIService
 type APIService interface {
 	Enable([]API) ([]API, error)
@@ -43,6 +45,7 @@ type apiService struct {
 	servicemanagementService *servicemanagement.APIService
 }
 
+// NewAPIService creates a new APIService.
 func NewAPIService(logger *log.Logger, projectID string, client *http.Client) (APIService, error) {
 	if logger == nil {
 		return nil, errors.New("logger blank")

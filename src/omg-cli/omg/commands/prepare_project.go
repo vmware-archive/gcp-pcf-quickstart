@@ -30,15 +30,16 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// PrepareProjectCommand ensures a Google Cloud project is ready to install the quickstart.
 type PrepareProjectCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const PrepareProjectName = "prepare-project"
+const prepareProjectName = "prepare-project"
 
 func (cmd *PrepareProjectCommand) register(app *kingpin.Application) {
-	c := app.Command(PrepareProjectName, "Prepare the GCP Project").Action(cmd.run)
+	c := app.Command(prepareProjectName, "Prepare the GCP Project").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 

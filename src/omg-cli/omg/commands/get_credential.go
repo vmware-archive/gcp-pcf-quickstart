@@ -26,6 +26,7 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// GetCredentialCommand prints credentials.
 type GetCredentialCommand struct {
 	logger     *log.Logger
 	envDir     string
@@ -33,10 +34,10 @@ type GetCredentialCommand struct {
 	credential string
 }
 
-const GetCredentialName = "get-credential"
+const getCredentialName = "get-credential"
 
 func (cmd *GetCredentialCommand) register(app *kingpin.Application) {
-	c := app.Command(GetCredentialName, "Fetch a credential for a tile").Action(cmd.run)
+	c := app.Command(getCredentialName, "Fetch a credential for a tile").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 
 	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&cmd.appName)

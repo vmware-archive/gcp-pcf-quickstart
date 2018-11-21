@@ -20,6 +20,7 @@ const (
 	productName = "PCF-Ecosystem-GCP-client"
 )
 
+// UserAgent is an identifier used by Pivotal to track the usage of the quickstart.
 func UserAgent() string {
 	return productName
 }

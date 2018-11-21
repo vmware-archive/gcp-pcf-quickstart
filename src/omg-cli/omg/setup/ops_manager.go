@@ -30,6 +30,7 @@ import (
 	"omg-cli/pivnet"
 )
 
+// OpsManager is used for setting up a real Ops Manager.
 type OpsManager struct {
 	cfg       *config.Config
 	envCfg    *config.EnvConfig
@@ -40,14 +41,18 @@ type OpsManager struct {
 	tileCache *pivnet.TileCache
 }
 
-func NewService(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller, tileCache *pivnet.TileCache) *OpsManager {
+// NewOpsManager creates a new OpsManager for setup purposes.
+func NewOpsManager(cfg *config.Config, envCfg *config.EnvConfig, omSdk *ops_manager.Sdk, pivnetSdk *pivnet.Sdk, logger *log.Logger, tiles []tiles.TileInstaller, tileCache *pivnet.TileCache) *OpsManager {
 	return &OpsManager{cfg, envCfg, omSdk, pivnetSdk, logger, tiles, tileCache}
 }
 
+// SetupAuth configures the initial username, password, and decryptionPhrase
 func (s *OpsManager) SetupAuth() error {
 	return s.om.SetupAuth()
 }
 
+// Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
+// This task runs asynchronously. Query the status by invoking ReadyForAuth.
 func (s *OpsManager) Unlock() error {
 	err := s.om.Unlock()
 	if err != nil {
@@ -70,6 +75,7 @@ func (s *OpsManager) Unlock() error {
 	}
 }
 
+// ApplyChangesPAS runs apply_changes on all tiles except for ones which depend on the PAS.
 func (s *OpsManager) ApplyChangesPAS() error {
 	var args []string
 	for _, tile := range s.tiles {
@@ -81,10 +87,12 @@ func (s *OpsManager) ApplyChangesPAS() error {
 	return s.om.ApplyChanges(args)
 }
 
+// ApplyChangesSkipUnchanged runs apply_changes on any tiles which are not up to date.
 func (s *OpsManager) ApplyChangesSkipUnchanged() error {
 	return s.om.ApplyChanges([]string{"--skip-unchanged-products"})
 }
 
+// ApplyDirector runs apply_changes on the BOSH Director.
 func (s *OpsManager) ApplyDirector() error {
 	return s.om.ApplyDirector()
 }
@@ -143,6 +151,7 @@ func (s *OpsManager) uploadStemcell(tile config.StemcellMetadata) error {
 	return s.om.UploadStemcell(newPath)
 }
 
+// PoolTillOnline waits for the Ops Manager's API to be available.
 func (s *OpsManager) PoolTillOnline() error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(time.Duration(240 * time.Second))
@@ -160,6 +169,7 @@ func (s *OpsManager) PoolTillOnline() error {
 	}
 }
 
+// ConfigureTiles configures each tile.
 func (s *OpsManager) ConfigureTiles() error {
 	for _, t := range s.tiles {
 		s.logger.Printf("configuring tile: %s", t.Definition(s.envCfg).Product.Name)
@@ -171,6 +181,7 @@ func (s *OpsManager) ConfigureTiles() error {
 	return nil
 }
 
+// UploadTiles uploads the tiles and their stemcells to the Ops Manager.
 func (s *OpsManager) UploadTiles() error {
 	for _, t := range s.tiles {
 		if t.BuiltIn() {
@@ -191,6 +202,7 @@ func (s *OpsManager) UploadTiles() error {
 	return nil
 }
 
+// DeleteInstallation deletes an installation.
 func (s *OpsManager) DeleteInstallation() error {
 	return s.om.DeleteInstallation()
 }

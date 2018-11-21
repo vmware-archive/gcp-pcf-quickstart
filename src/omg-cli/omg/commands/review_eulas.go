@@ -29,6 +29,7 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// ReviewEulasCommand reviews and accepts Pivotal's EULAs.
 type ReviewEulasCommand struct {
 	logger    *log.Logger
 	envDir    string
@@ -37,12 +38,12 @@ type ReviewEulasCommand struct {
 	pivnetSdk *pivnet.Sdk
 }
 
-const ReviewEulasName = "review-eulas"
+const reviewEulasName = "review-eulas"
 
 var eulaSlugs = []string{"pivotal_software_eula"}
 
 func (cmd *ReviewEulasCommand) register(app *kingpin.Application) {
-	c := app.Command(ReviewEulasName, "View product EULAs and interactively accept/deny").Action(cmd.run)
+	c := app.Command(reviewEulasName, "View product EULAs and interactively accept/deny").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	c.Flag("accept-all", "Accept all EULAs non-interactively").Default("false").BoolVar(&cmd.acceptAll)
 }

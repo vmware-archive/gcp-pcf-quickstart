@@ -16,8 +16,10 @@
 
 package config
 
+// Config contains the infrastructure details.
 type Config TerraformConfigSchema
 
+// OpsManagerCredentials are the credentials for the Ops Manager API.
 type OpsManagerCredentials struct {
 	Username            string
 	Password            string
@@ -25,14 +27,17 @@ type OpsManagerCredentials struct {
 	SkipSSLVerification bool
 }
 
+// CredhubEncryptionKey is the key for Credhub.
 type CredhubEncryptionKey struct {
 	Name string
 	Key  string
 }
 
+// Filenames for configs.
 const (
 	TerraformOutputFile = "terraform_output.json"
 	EnvConfigFile       = "config.json"
 )
 
+// Files are necessary files to upload.
 var Files = []string{TerraformOutputFile, EnvConfigFile}

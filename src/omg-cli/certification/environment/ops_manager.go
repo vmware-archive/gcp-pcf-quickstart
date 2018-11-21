@@ -24,8 +24,10 @@ import (
 	"github.com/pivotal-cf/om/api"
 )
 
+// DirectorProperties are the properties set on the BOSH Director.
 type DirectorProperties map[string]map[string]interface{}
 
+// OpsManagerQuery validates various pieces of a quickstart's installation.
 type OpsManagerQuery interface {
 	// Tile returns a TileQuery interface if a tile is installed
 	// or an error if it's not found
@@ -38,6 +40,7 @@ type OpsManagerQuery interface {
 	Director() DirectorProperties
 }
 
+// TileQuery validates various details of a specific tile.
 type TileQuery interface {
 	// Property returns the value of the given property set on the tile
 	Property(name string) api.ResponseProperty

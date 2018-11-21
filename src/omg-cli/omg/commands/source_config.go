@@ -27,15 +27,16 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// SourceConfigCommand outputs the quickstart's config.
 type SourceConfigCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const SourceConfigCommandName = "source-config"
+const sourceConfigCommandName = "source-config"
 
 func (cmd *SourceConfigCommand) register(app *kingpin.Application) {
-	c := app.Command(SourceConfigCommandName, "Output environment config as environment variables").Action(cmd.run)
+	c := app.Command(sourceConfigCommandName, "Output environment config as environment variables").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 

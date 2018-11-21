@@ -20,29 +20,35 @@ package ops_manager
 // These types are public so they are visible to the `json` package. They should
 // not be consumed by other packages.
 
+// CredentialResponse according to the Ops Manager's API.
 type CredentialResponse struct {
 	Credential CredentialWrapper `json:"credential"`
 }
 
+// CredentialWrapper according to the Ops Manager's API.
 type CredentialWrapper struct {
 	Type  string           `json:"type"`
 	Value SimpleCredential `json:"value"`
 }
 
+// Product according to the Ops Manager's API.
 type Product struct {
 	InstallationName string `json:"installation_name"`
 	GUID             string `json:"guid"`
 	Type             string `json:"type"`
 }
 
+// ErrorResponse according to the Ops Manager's API.
 type ErrorResponse struct {
 	Errors map[string][]string `json:"errors"`
 }
 
+// JobsResponse according to the Ops Manager's API.
 type JobsResponse struct {
 	Jobs []Job `json:"jobs"`
 }
 
+// UnlockRequest according to the Ops Manager's API.
 type UnlockRequest struct {
 	Passphrase string `json:"passphrase"`
 }

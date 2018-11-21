@@ -30,6 +30,7 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// CleanupProjectCommand cleans up leftover infrastructure from a quickstart installation.
 type CleanupProjectCommand struct {
 	logger         *log.Logger
 	envDir         string
@@ -39,10 +40,10 @@ type CleanupProjectCommand struct {
 	dryRun         bool
 }
 
-const CleanupProjectName = "cleanup-project"
+const cleanupProjectName = "cleanup-project"
 
 func (cmd *CleanupProjectCommand) register(app *kingpin.Application) {
-	c := app.Command(CleanupProjectName, "Delete VMs created by Ops Manager upgrades and abandoned by BOSH").Action(cmd.run)
+	c := app.Command(cleanupProjectName, "Delete VMs created by Ops Manager upgrades and abandoned by BOSH").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	c.Flag("dry-run", "view deletion plan, don't perform it").Default("true").BoolVar(&cmd.dryRun)
 }

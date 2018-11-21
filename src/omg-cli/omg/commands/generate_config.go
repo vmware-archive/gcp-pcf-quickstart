@@ -32,6 +32,7 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// GenerateConfigCommand generates a quickstart config file.
 type GenerateConfigCommand struct {
 	logger         *log.Logger
 	envDir         string
@@ -41,10 +42,10 @@ type GenerateConfigCommand struct {
 	projectID      string
 }
 
-const GenerateConfigCommandName = "generate-config"
+const generateConfigCommandName = "generate-config"
 
 func (cmd *GenerateConfigCommand) register(app *kingpin.Application) {
-	c := app.Command(GenerateConfigCommandName, "Generate default environment configuration").Action(cmd.run)
+	c := app.Command(generateConfigCommandName, "Generate default environment configuration").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	registerPivnetAPITokenFlag(c, &cmd.pivnetAPIToken)
 	c.Flag("gcp-project", "Google Cloud Project ID for deployment").Required().StringVar(&cmd.projectID)
