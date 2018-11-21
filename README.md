@@ -1,5 +1,7 @@
 # Pivotal Cloud Foundry on Google Cloud Platform Quickstart 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/cf-platform-eng/gcp-pcf-quickstart)](https://goreportcard.com/report/github.com/cf-platform-eng/gcp-pcf-quickstart)
+
 This repository contains tools and instructions for deploying Pivotal Cloud Foundry (PCF) on Google Cloud Platform (GCP).
 The installation includes [PCF 2.0](https://pivotal.io/platform) (Full size or [Small Footprint](https://docs.pivotal.io/pivotalcf/1-12/customizing/small-footprint.html)), [GCP Service Broker](https://docs.pivotal.io/partners/gcp-sb/index.html),
 and the [Stackdriver Nozzle](https://docs.pivotal.io/partners/gcp-sdn/index.html).
