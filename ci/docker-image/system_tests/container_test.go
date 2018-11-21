@@ -27,13 +27,13 @@ import (
 
 var _ = Describe("Docker Image", func() {
 	commands := map[string][]string{
-		"gcloud":    []string{"--version"},
-		"gsutil":    []string{"--version"},
-		"jq":        []string{"--version"},
-		"ginkgo":    []string{"help"},
-		"go":        []string{"version"},
-		"dig":       []string{"-h"},
-		"terraform": []string{"version"},
+		"gcloud":    {"--version"},
+		"gsutil":    {"--version"},
+		"jq":        {"--version"},
+		"ginkgo":    {"help"},
+		"go":        {"version"},
+		"dig":       {"-h"},
+		"terraform": {"version"},
 	}
 
 	for executable, args := range commands {
