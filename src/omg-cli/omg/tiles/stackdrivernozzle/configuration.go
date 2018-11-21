@@ -69,16 +69,16 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	if envConfig.SmallFootprint {
 		vmType = "micro"
 	}
-	resoruces := resources{
+	resources := resources{
 		StackdriverNozzle: tiles.Resource{
 			InternetConnected: false,
 			VMTypeID:          vmType,
 		},
 	}
-	resorucesBytes, err := json.Marshal(&resoruces)
+	resourcesBytes, err := json.Marshal(&resources)
 	if err != nil {
 		return err
 	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resorucesBytes))
+	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
 }

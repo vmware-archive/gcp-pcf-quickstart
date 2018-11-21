@@ -56,7 +56,7 @@ type liveOpsManager struct {
 func (lom *liveOpsManager) Tile(name string) (TileQuery, error) {
 	props, err := lom.sdk.GetProduct(name)
 	if err != nil {
-		return nil, fmt.Errorf("getting product propeties: %v", err)
+		return nil, fmt.Errorf("getting product properties: %v", err)
 	}
 
 	return &liveTileQuery{name, props, lom.sdk}, nil
