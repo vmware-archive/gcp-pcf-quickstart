@@ -21,7 +21,7 @@ import (
 	"log"
 
 	"omg-cli/config"
-	"omg-cli/ops_manager"
+	"omg-cli/opsman"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -50,7 +50,7 @@ func (cmd *GetCredentialCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
+	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
 	if err != nil {
 		return err
 	}

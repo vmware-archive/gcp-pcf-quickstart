@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ops_manager
+package opsman
 
 import (
 	"bytes"

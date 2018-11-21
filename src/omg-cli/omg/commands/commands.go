@@ -23,11 +23,11 @@ import (
 
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
+	"omg-cli/omg/tiles/director"
 	"omg-cli/omg/tiles/ert"
-	"omg-cli/omg/tiles/gcp_director"
 	"omg-cli/omg/tiles/healthwatch"
-	"omg-cli/omg/tiles/service_broker"
-	"omg-cli/omg/tiles/stackdriver_nozzle"
+	"omg-cli/omg/tiles/servicebroker"
+	"omg-cli/omg/tiles/stackdrivernozzle"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -60,10 +60,10 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 
 func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileInstaller {
 	result := []tiles.TileInstaller{
-		&gcp_director.Tile{},
+		&director.Tile{},
 		&ert.Tile{},
-		&stackdriver_nozzle.Tile{Logger: logger},
-		&service_broker.Tile{},
+		&stackdrivernozzle.Tile{Logger: logger},
+		&servicebroker.Tile{},
 	}
 	if config.IncludeHealthwatch {
 		result = append(result, &healthwatch.Tile{})
