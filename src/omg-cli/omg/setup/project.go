@@ -41,7 +41,7 @@ type QuotaError struct {
 }
 
 // ErrUnsatisfiedQuota is thrown when a quota is not met.
-var ErrUnsatisfiedQuota = errors.New("unsatisfied quota for Compute Engine, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
+var ErrUnsatisfiedQuota = errors.New("unsatisfied quota, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
 
 // NewProjectValidator creates a new project validator.
 func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
