@@ -70,7 +70,7 @@ func (s *Sdk) checkCredentials() error {
 }
 
 // DownloadTile retrieves a given productSlug, releaseId, and fileId from PivNet
-// If a os.File is return it is guarenteed to match the fileSha256
+// If a os.File is return it is guaranteed to match the fileSha256
 // If an error is returned no os.File will be returned
 //
 // Caller is responsible for deleting the os.File

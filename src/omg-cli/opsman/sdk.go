@@ -364,7 +364,7 @@ func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
 	}
 
 	if resp.Credential.Value.Password == "" || resp.Credential.Value.Identity == "" {
-		return nil, fmt.Errorf("recieved an empty credential: %s", string(body))
+		return nil, fmt.Errorf("received an empty credential: %s", string(body))
 	}
 
 	return &resp.Credential.Value, nil
