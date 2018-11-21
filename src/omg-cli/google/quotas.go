@@ -20,19 +20,20 @@ import (
 	"context"
 	"errors"
 	"log"
-
 	"net/http"
 
 	"omg-cli/version"
 
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
+// Quota represents a Google Cloud quota.
 type Quota struct {
 	Name  string
 	Limit float64
 }
 
+// QuotaService returns quotas.
 //go:generate counterfeiter ./ QuotaService
 type QuotaService interface {
 	Project() (map[string]Quota, error)
@@ -41,7 +42,7 @@ type QuotaService interface {
 
 type quotaService struct {
 	logger         *log.Logger
-	projectId      string
+	projectID      string
 	computeService *compute.Service
 }
 
@@ -54,8 +55,9 @@ func transformQuotas(computeQuotas []*compute.Quota) map[string]Quota {
 	return quotas
 }
 
+// Region returns project-level quotas.
 func (ps *quotaService) Project() (map[string]Quota, error) {
-	project, err := ps.computeService.Projects.Get(ps.projectId).Context(context.Background()).Do()
+	project, err := ps.computeService.Projects.Get(ps.projectID).Context(context.Background()).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +65,9 @@ func (ps *quotaService) Project() (map[string]Quota, error) {
 	return transformQuotas(project.Quotas), nil
 }
 
+// Region returns quota from a given region.
 func (ps *quotaService) Region(region string) (map[string]Quota, error) {
-	regionResponse, err := ps.computeService.Regions.Get(ps.projectId, region).Context(context.Background()).Do()
+	regionResponse, err := ps.computeService.Regions.Get(ps.projectID, region).Context(context.Background()).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +75,8 @@ func (ps *quotaService) Region(region string) (map[string]Quota, error) {
 	return transformQuotas(regionResponse.Quotas), nil
 }
 
-func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) (QuotaService, error) {
+// NewQuotaService creates a new QuotaService.
+func NewQuotaService(logger *log.Logger, projectID string, client *http.Client) (QuotaService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
@@ -83,5 +87,5 @@ func NewQuotaService(logger *log.Logger, projectId string, client *http.Client) 
 	}
 	computeService.UserAgent = version.UserAgent()
 
-	return &quotaService{logger, projectId, computeService}, nil
+	return &quotaService{logger, projectID, computeService}, nil
 }

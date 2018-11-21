@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,7 +29,6 @@ import (
 	"time"
 
 	"omg-cli/config"
-	"omg-cli/version"
 
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
@@ -47,6 +45,7 @@ const (
 	pollingIntervalSec = 10
 )
 
+// Sdk interacts with the Ops Manager's API.
 type Sdk struct {
 	unauthenticatedClient network.UnauthenticatedClient
 	client                network.OAuthClient
@@ -56,15 +55,16 @@ type Sdk struct {
 }
 
 // NewSdk creates an authenticated session and object to interact with Ops Manager
-func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger) (*Sdk, error) {
+func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "",
 		creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second, time.Duration(connectTimeout)*time.Second)
-	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
-		time.Duration(requestTimeout)*time.Second,
-		time.Duration(connectTimeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
+
+	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
+		time.Duration(requestTimeout)*time.Second,
+		time.Duration(connectTimeout)*time.Second)
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
@@ -79,10 +79,10 @@ func NewSdk(target string, creds config.OpsManagerCredentials, logger log.Logger
 			UnauthedClient:         unauthenticatedClient,
 			ProgressClient:         network.NewProgressClient(client, progress.NewBar(), live),
 			UnauthedProgressClient: network.NewProgressClient(unauthenticatedClient, progress.NewBar(), live),
-			Logger:                 &logger,
+			Logger:                 logger,
 		}),
 		creds:  creds,
-		logger: &logger,
+		logger: logger,
 	}
 	return sdk, nil
 }
@@ -131,6 +131,9 @@ func (om *Sdk) Unlock() error {
 
 	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
 	body, err := json.Marshal(&unlockReq)
+	if err != nil {
+		return err
+	}
 
 	_, err = om.api.Curl(api.RequestServiceCurlInput{
 		Path:   "/api/v0/unlock",
@@ -164,13 +167,14 @@ func (om *Sdk) SetupBosh(configYML []byte) error {
 	return cmd.Execute([]string{"--config", f.Name()})
 }
 
-// ApplyChanges deploys pending changes to Ops Manager
+// ApplyChanges deploys pending changes for a list of given tiles to the Ops Manager
 func (om *Sdk) ApplyChanges(args []string) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
 	return cmd.Execute(args)
 }
 
+// ApplyDirector deploys the BOSH Director to the Ops Manager
 func (om *Sdk) ApplyDirector() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
@@ -211,8 +215,8 @@ func (om *Sdk) Online() bool {
 	return resp.StatusCode < 500
 }
 
-// AvaliableProducts lists products that are uploaded to Ops Manager.
-func (om *Sdk) AvaliableProducts() ([]api.ProductInfo, error) {
+// AvailableProducts lists products that are uploaded to Ops Manager.
+func (om *Sdk) AvailableProducts() ([]api.ProductInfo, error) {
 	products, err := om.api.ListAvailableProducts()
 	if err != nil {
 		return nil, err
@@ -234,12 +238,12 @@ func (om *Sdk) ConfigureProduct(name, networks, properties string, resources str
 
 // GetProduct fetches settings for a given tile by name
 func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
-	productGuid, err := om.productGuidByType(name)
+	productGUID, err := om.productGUIDByType(name)
 	if err != nil {
 		return nil, err
 	}
 
-	props, err := om.api.GetStagedProductProperties(productGuid)
+	props, err := om.api.GetStagedProductProperties(productGUID)
 	if err != nil {
 		return nil, err
 	}
@@ -261,17 +265,17 @@ func (om *Sdk) GetDirector() (map[string]map[string]interface{}, error) {
 
 // GetResource fetches resource settings for a specific job of a tile
 func (om *Sdk) GetResource(tileName, jobName string) (*api.JobProperties, error) {
-	productGuid, err := om.productGuidByType(tileName)
+	productGUID, err := om.productGUIDByType(tileName)
 	if err != nil {
 		return nil, err
 	}
 
-	jobGuid, err := om.jobGuidByName(productGuid, jobName)
+	jobGUID, err := om.jobGUIDByName(productGUID, jobName)
 	if err != nil {
 		return nil, err
 	}
 
-	props, err := om.api.GetStagedProductJobResourceConfig(productGuid, jobGuid)
+	props, err := om.api.GetStagedProductJobResourceConfig(productGUID, jobGUID)
 	if err != nil {
 		return nil, err
 	}
@@ -282,48 +286,49 @@ func (om *Sdk) getProducts() ([]api.DeployedProductOutput, error) {
 	return om.api.ListDeployedProducts()
 }
 
-func (om *Sdk) productGuidByType(product string) (string, error) {
+func (om *Sdk) productGUIDByType(product string) (string, error) {
 	products, err := om.getProducts()
 	if err != nil {
 		return "", err
 	}
 
-	appGuid := ""
+	appGUID := ""
 	for _, p := range products {
 		if p.Type == product {
-			appGuid = p.GUID
+			appGUID = p.GUID
 			break
 		}
 	}
 
-	if appGuid == "" {
+	if appGUID == "" {
 		return "", fmt.Errorf("could not find installed application by name: %s", product)
 	}
 
-	return appGuid, nil
+	return appGUID, nil
 }
 
-func (om *Sdk) jobGuidByName(productGuid, jobName string) (string, error) {
-	jobs, err := om.api.ListStagedProductJobs(productGuid)
+func (om *Sdk) jobGUIDByName(productGUID, jobName string) (string, error) {
+	jobs, err := om.api.ListStagedProductJobs(productGUID)
 	if err != nil {
 		return "", err
 	}
 
-	jobGuid := jobs[jobName]
-	if jobGuid == "" {
-		return "", fmt.Errorf("job %s not found for product %s", jobName, productGuid)
+	jobGUID := jobs[jobName]
+	if jobGUID == "" {
+		return "", fmt.Errorf("Job %s not found for product %s", jobName, productGUID)
 	}
 
-	return jobGuid, nil
+	return jobGUID, nil
 }
 
+// GetCredentials returns a credential by name.
 func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error) {
-	productGuid, err := om.productGuidByType(name)
+	productGUID, err := om.productGUIDByType(name)
 	if err != nil {
 		return nil, err
 	}
 	out, err := om.api.GetDeployedProductCredential(api.GetDeployedProductCredentialInput{
-		DeployedGUID:        productGuid,
+		DeployedGUID:        productGUID,
 		CredentialReference: credential,
 	})
 	if err != nil {
@@ -335,6 +340,7 @@ func (om *Sdk) GetCredentials(name, credential string) (*SimpleCredential, error
 	}, nil
 }
 
+// GetDirectorCredentials returns the BOSH Director's credentials.
 func (om *Sdk) GetDirectorCredentials(credential string) (*SimpleCredential, error) {
 	return om.getCredential(fmt.Sprintf("api/v0/deployed/director/credentials/%s", credential))
 }
@@ -364,15 +370,20 @@ func (om *Sdk) getCredential(path string) (*SimpleCredential, error) {
 	return &resp.Credential.Value, nil
 }
 
+// GetDirectorIP returns the IP address of the BOSH Director.
 func (om *Sdk) GetDirectorIP() (string, error) {
-	boshGuid, err := om.productGuidByType("p-bosh")
+	boshGUID, err := om.productGUIDByType("p-bosh")
 	if err != nil {
 		return "", err
 	}
 	out, err := om.api.Curl(api.RequestServiceCurlInput{
-		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGuid),
+		Path:   fmt.Sprintf("api/v0/deployed/products/%s/static_ips", boshGUID),
 		Method: http.MethodGet,
 	})
+	if err != nil {
+		return "", err
+	}
+
 	body, err := ioutil.ReadAll(out.Body)
 	if err != nil {
 		return "", err
@@ -387,19 +398,12 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 			return ip.IPs[0], nil
 		}
 	}
-	return "", errors.New("static_ips response had no director job")
+	return "", errors.New("static_ips response had no director Job")
 }
 
+// DeleteInstallation runs the om cli DeleteInstallation command.
 func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)
 	return cmd.Execute(nil)
-}
-
-func (om *Sdk) newRequest(method, url string, body io.Reader) (req *http.Request, err error) {
-	req, err = http.NewRequest(method, url, body)
-	if req != nil {
-		req.Header.Set("User-Agent", version.UserAgent())
-	}
-	return
 }

@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 
@@ -28,19 +29,14 @@ import (
 	"omg-cli/omg/tiles/service_broker"
 	"omg-cli/omg/tiles/stackdriver_nozzle"
 
-	"fmt"
-
 	"github.com/alecthomas/kingpin"
-)
-
-const (
-	defaultSkipSSLVerify = "true"
 )
 
 type register interface {
 	register(app *kingpin.Application)
 }
 
+// Configure sets up the kingpin commands for the omg-cli.
 func Configure(logger *log.Logger, app *kingpin.Application) {
 	cmds := []register{
 		&PushTilesCommand{logger: logger},
@@ -77,7 +73,7 @@ func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileIns
 
 type step struct {
 	function func() error
-	name string
+	name     string
 }
 
 func run(steps []step, logger *log.Logger) error {
@@ -101,6 +97,6 @@ func registerQuietFlag(c *kingpin.CmdClause, quiet *bool) {
 	c.Flag("quiet", "quiet output, no non-essential information").Default("false").BoolVar(quiet)
 }
 
-func registerPivnetApiTokenFlag(c *kingpin.CmdClause, token *string) {
+func registerPivnetAPITokenFlag(c *kingpin.CmdClause, token *string) {
 	c.Flag("pivnet-api-token", "API token for network.pivotal.io (see: https://network.pivotal.io/users/dashboard/edit-profile)").Required().StringVar(token)
 }

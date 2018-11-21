@@ -18,13 +18,16 @@ package environment
 
 import (
 	"fmt"
+
 	"omg-cli/ops_manager"
 
 	"github.com/pivotal-cf/om/api"
 )
 
+// DirectorProperties are the properties set on the BOSH Director.
 type DirectorProperties map[string]map[string]interface{}
 
+// OpsManagerQuery validates various pieces of a quickstart's installation.
 type OpsManagerQuery interface {
 	// Tile returns a TileQuery interface if a tile is installed
 	// or an error if it's not found
@@ -37,6 +40,7 @@ type OpsManagerQuery interface {
 	Director() DirectorProperties
 }
 
+// TileQuery validates various details of a specific tile.
 type TileQuery interface {
 	// Property returns the value of the given property set on the tile
 	Property(name string) api.ResponseProperty
@@ -67,7 +71,7 @@ func (lom *liveOpsManager) MustGetTile(name string) TileQuery {
 	return tile
 }
 
-func (lom *liveOpsManager) Director() map[string]map[string]interface{} {
+func (lom *liveOpsManager) Director() DirectorProperties {
 	prop, err := lom.sdk.GetDirector()
 	if err != nil {
 		panic(fmt.Errorf("retreving director: %v", err))
@@ -86,8 +90,8 @@ func (ltq *liveTileQuery) Property(name string) api.ResponseProperty {
 	return ltq.props.Properties[name]
 }
 
-func (ltq *liveTileQuery) Resource(jobId string) api.JobProperties {
-	resource, err := ltq.sdk.GetResource(ltq.name, jobId)
+func (ltq *liveTileQuery) Resource(jobID string) api.JobProperties {
+	resource, err := ltq.sdk.GetResource(ltq.name, jobID)
 	if err != nil {
 		panic(err)
 	}

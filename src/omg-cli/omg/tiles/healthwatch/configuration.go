@@ -19,24 +19,22 @@ package healthwatch
 import (
 	"encoding/json"
 	"fmt"
+
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
 	"omg-cli/ops_manager"
 )
 
-const (
-	skipSSLValidation = "true"
-)
-
-type Properties struct {
+type properties struct {
 	OpsManagerURL           tiles.Value `json:".properties.opsman.enable.url"`
 	BoshHealthCheckAZ       tiles.Value `json:".healthwatch-forwarder.health_check_az"`
 	EnableDeploymentChecker tiles.Value `json:".properties.boshtasks"`
 }
 
-type Resources struct {
+type resources struct {
 }
 
+// Configure satisfies TileInstaller interface.
 func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
@@ -49,10 +47,10 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	properties := &Properties{
-		OpsManagerURL:           tiles.Value{fmt.Sprintf("https://opsman.%s", cfg.DnsSuffix)},
-		BoshHealthCheckAZ:       tiles.Value{cfg.Zone1},
-		EnableDeploymentChecker: tiles.Value{"disable"},
+	properties := &properties{
+		OpsManagerURL:           tiles.Value{Value: fmt.Sprintf("https://opsman.%s", cfg.DNSSuffix)},
+		BoshHealthCheckAZ:       tiles.Value{Value: cfg.Zone1},
+		EnableDeploymentChecker: tiles.Value{Value: "disable"},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
@@ -60,7 +58,7 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	resources := Resources{}
+	resources := resources{}
 	resourcesBytes, err := json.Marshal(&resources)
 	if err != nil {
 		return err

@@ -1,0 +1,14 @@
+language: go
+
+before_install:
+  - cd src/omg-cli
+
+install:
+  - go get -v ./...
+  - go get -u github.com/onsi/ginkgo/ginkgo
+  - go get -u github.com/onsi/gomega/...
+  - go get -u golang.org/x/lint/golint
+
+script:
+  - golint -set_exit_status ./...
+  - ginkgo -skipPackage=certification -r .

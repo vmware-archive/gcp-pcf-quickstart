@@ -1,10 +1,10 @@
 package ert_routing_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
 )
 
 func TestErtRouting(t *testing.T) {

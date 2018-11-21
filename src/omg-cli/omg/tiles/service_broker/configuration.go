@@ -18,18 +18,20 @@ package service_broker
 
 import (
 	"encoding/json"
+
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
 	"omg-cli/ops_manager"
 )
 
-type Properties struct {
+type properties struct {
 	ServiceAccountKey tiles.Value       `json:".properties.root_service_account_json"`
 	DatabaseHost      tiles.Value       `json:".properties.db_host"`
 	DatabaseUsername  tiles.Value       `json:".properties.db_username"`
 	DatabasePassword  tiles.SecretValue `json:".properties.db_password"`
 }
 
+// Configure satisfies TileInstaller interface.
 func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
@@ -42,11 +44,11 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		return err
 	}
 
-	properties := Properties{
-		ServiceAccountKey: tiles.Value{cfg.ServiceBrokerServiceAccountKey},
-		DatabaseHost:      tiles.Value{cfg.ServiceBrokerDbIp},
-		DatabaseUsername:  tiles.Value{cfg.ServiceBrokerDbUsername},
-		DatabasePassword:  tiles.SecretValue{tiles.Secret{cfg.ServiceBrokerDbPassword}},
+	properties := properties{
+		ServiceAccountKey: tiles.Value{Value: cfg.ServiceBrokerServiceAccountKey},
+		DatabaseHost:      tiles.Value{Value: cfg.ServiceBrokerDbIP},
+		DatabaseUsername:  tiles.Value{Value: cfg.ServiceBrokerDbUsername},
+		DatabasePassword:  tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ServiceBrokerDbPassword}},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
@@ -54,7 +56,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		return err
 	}
 
-	resoruces := "{}"
+	resources := "{}"
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), resoruces)
+	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), resources)
 }

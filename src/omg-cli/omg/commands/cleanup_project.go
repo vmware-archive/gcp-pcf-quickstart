@@ -20,17 +20,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"omg-cli/config"
 	"omg-cli/google"
 
-	"sync"
-
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
+// CleanupProjectCommand cleans up leftover infrastructure from a quickstart installation.
 type CleanupProjectCommand struct {
 	logger         *log.Logger
 	envDir         string
@@ -40,17 +40,17 @@ type CleanupProjectCommand struct {
 	dryRun         bool
 }
 
-const CleanupProjectName = "cleanup-project"
+const cleanupProjectName = "cleanup-project"
 
 func (cmd *CleanupProjectCommand) register(app *kingpin.Application) {
-	c := app.Command(CleanupProjectName, "Delete VMs created by Ops Manager upgrades and abandoned by BOSH").Action(cmd.run)
+	c := app.Command(cleanupProjectName, "Delete VMs created by Ops Manager upgrades and abandoned by BOSH").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	c.Flag("dry-run", "view deletion plan, don't perform it").Default("true").BoolVar(&cmd.dryRun)
 }
 
 func (cmd *CleanupProjectCommand) parseArgs() {
 	var err error
-	cmd.envCfg, err = config.ConfigFromEnvDirectory(cmd.envDir)
+	cmd.envCfg, err = config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}
@@ -68,7 +68,6 @@ func (cmd *CleanupProjectCommand) parseArgs() {
 	if err != nil {
 		cmd.logger.Fatalf("creating CleanupService: %v", err)
 	}
-	return
 }
 
 func (cmd *CleanupProjectCommand) run(c *kingpin.ParseContext) error {
@@ -90,28 +89,28 @@ func runAsync(steps []step, logger *log.Logger) error {
 	var errors []error
 	var errsMu sync.Mutex
 
-	for _, step := range steps {
+	for _, s := range steps {
 
 		wg.Add(1)
-		logger.Printf("running step %s asynchronously", step.name)
-		go func() {
-			if err := step.function(); err != nil {
-				logger.Printf("error running step %s: %v", step.name, err)
+		logger.Printf("running step %s asynchronously", s.name)
+		go func(s step) {
+			if err := s.function(); err != nil {
+				logger.Printf("error running step %s: %v", s.name, err)
 
 				errsMu.Lock()
 				errors = append(errors, err)
 				errsMu.Unlock()
 			}
 			wg.Done()
-		}()
+		}(s)
 	}
 	wg.Wait()
 
 	if len(errors) != 0 {
 		return fmt.Errorf("errors running steps: %v", errors)
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 // Delete Ops Manager VMs created by the C0 Pipeline

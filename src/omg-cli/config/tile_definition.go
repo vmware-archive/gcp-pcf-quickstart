@@ -16,24 +16,28 @@
 
 package config
 
+// PivnetMetadata is metadata about a tile's information on the Pivotal Network.
 type PivnetMetadata struct {
 	Name      string
-	ReleaseId int
-	FileId    int
+	ReleaseID int
+	FileID    int
 	Sha256    string
 }
 
+// StemcellMetadata is metadata about a stemcell.
 type StemcellMetadata struct {
 	PivnetMetadata
 	StemcellName string
 }
 
+// OpsManagerMetadata is metadata associated with quickstart tiles.
 type OpsManagerMetadata struct {
 	Name         string
 	Version      string
 	DependsOnPAS bool // tiles which depend on PAS but don't specify so in their metadata
 }
 
+// Tile represents an Ops Manager tile.
 type Tile struct {
 	Pivnet   PivnetMetadata
 	Product  OpsManagerMetadata

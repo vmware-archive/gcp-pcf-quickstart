@@ -18,22 +18,22 @@ package google
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
-
-	"fmt"
-
 	"time"
 
 	"omg-cli/version"
 
-	servicemanagement "google.golang.org/api/servicemanagement/v1"
+	"google.golang.org/api/servicemanagement/v1"
 )
 
+// API represents a Google Cloud API.
 type API struct {
 	Name string
 }
 
+// APIService can enable APIs.
 //go:generate counterfeiter ./ APIService
 type APIService interface {
 	Enable([]API) ([]API, error)
@@ -41,11 +41,12 @@ type APIService interface {
 
 type apiService struct {
 	logger                   *log.Logger
-	projectId                string
+	projectID                string
 	servicemanagementService *servicemanagement.APIService
 }
 
-func NewAPIService(logger *log.Logger, projectId string, client *http.Client) (APIService, error) {
+// NewAPIService creates a new APIService.
+func NewAPIService(logger *log.Logger, projectID string, client *http.Client) (APIService, error) {
 	if logger == nil {
 		return nil, errors.New("logger blank")
 	}
@@ -56,7 +57,7 @@ func NewAPIService(logger *log.Logger, projectId string, client *http.Client) (A
 	}
 	servicemanagementService.UserAgent = version.UserAgent()
 
-	return &apiService{logger, projectId, servicemanagementService}, nil
+	return &apiService{logger, projectID, servicemanagementService}, nil
 }
 
 func (svc *apiService) Enable(apis []API) ([]API, error) {
@@ -73,7 +74,7 @@ func (svc *apiService) Enable(apis []API) ([]API, error) {
 		pendingOperations[api] = operation
 	}
 
-	apisEnabled := []API{}
+	var apisEnabled []API
 
 	for len(pendingOperations) != 0 {
 		svc.logger.Printf("waiting for %d service enable operation(s) to complete", len(pendingOperations))
@@ -94,7 +95,7 @@ func (svc *apiService) Enable(apis []API) ([]API, error) {
 
 func (svc *apiService) enableOne(api API) (operation string, err error) {
 	req := &servicemanagement.EnableServiceRequest{
-		ConsumerId: fmt.Sprintf("project:%s", svc.projectId),
+		ConsumerId: fmt.Sprintf("project:%s", svc.projectID),
 	}
 	oper, err := svc.servicemanagementService.Services.Enable(api.Name, req).Do()
 	if err != nil {

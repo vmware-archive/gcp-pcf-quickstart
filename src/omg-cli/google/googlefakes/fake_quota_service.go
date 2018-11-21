@@ -46,7 +46,7 @@ type FakeQuotaService struct {
 		result1 map[string]google.Quota
 		result2 error
 	}
-	invocations      map[string][][]interface{}
+	invocations map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 

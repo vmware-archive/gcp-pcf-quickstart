@@ -18,38 +18,37 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 
 	"omg-cli/config"
 	"omg-cli/google"
 	"omg-cli/version"
 
-	"encoding/json"
-
-	"fmt"
-	"io/ioutil"
-
 	"github.com/alecthomas/kingpin"
 	googleauth "golang.org/x/oauth2/google"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
+// GenerateConfigCommand generates a quickstart config file.
 type GenerateConfigCommand struct {
 	logger         *log.Logger
 	envDir         string
 	dnsZone        string
-	pivnetApiToken string
+	pivnetAPIToken string
 	baseZone       string
-	projectId      string
+	projectID      string
 }
 
-const GenerateConfigCommandName = "generate-config"
+const generateConfigCommandName = "generate-config"
 
 func (cmd *GenerateConfigCommand) register(app *kingpin.Application) {
-	c := app.Command(GenerateConfigCommandName, "Generate default environment configuration").Action(cmd.run)
+	c := app.Command(generateConfigCommandName, "Generate default environment configuration").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
-	registerPivnetApiTokenFlag(c, &cmd.pivnetApiToken)
-	c.Flag("gcp-project", "Google Cloud Project ID for deployment").Required().StringVar(&cmd.projectId)
+	registerPivnetAPITokenFlag(c, &cmd.pivnetAPIToken)
+	c.Flag("gcp-project", "Google Cloud Project ID for deployment").Required().StringVar(&cmd.projectID)
 	c.Flag("zone", "Base Zone used for deployment location. Other zones in the region will be used for the deployment.").Default("us-east1-b").StringVar(&cmd.baseZone)
 	c.Flag("dns-zone", "Existing Cloud DNS Zone used to create DNS records for deployment").Default("pcf-zone").StringVar(&cmd.dnsZone)
 }
@@ -70,7 +69,7 @@ func (cmd *GenerateConfigCommand) run(c *kingpin.ParseContext) error {
 	}
 	computeService.UserAgent = version.UserAgent()
 
-	zoneResult, err := google.ParseZone(cmd.projectId, cmd.baseZone, computeService)
+	zoneResult, err := google.ParseZone(cmd.projectID, cmd.baseZone, computeService)
 	if err != nil {
 		return fmt.Errorf("parsing zone %s: %v", cmd.baseZone, err)
 	}
@@ -78,9 +77,9 @@ func (cmd *GenerateConfigCommand) run(c *kingpin.ParseContext) error {
 	cfg.Zone1 = zoneResult.Zone1
 	cfg.Zone2 = zoneResult.Zone2
 	cfg.Zone3 = zoneResult.Zone3
-	cfg.DnsZoneName = cmd.dnsZone
-	cfg.PivnetApiToken = cmd.pivnetApiToken
-	cfg.ProjectID = cmd.projectId
+	cfg.DNSZoneName = cmd.dnsZone
+	cfg.PivnetAPIToken = cmd.pivnetAPIToken
+	cfg.ProjectID = cmd.projectID
 
 	cfgStr, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {

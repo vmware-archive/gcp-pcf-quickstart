@@ -29,6 +29,7 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// ReviewEulasCommand reviews and accepts Pivotal's EULAs.
 type ReviewEulasCommand struct {
 	logger    *log.Logger
 	envDir    string
@@ -37,24 +38,24 @@ type ReviewEulasCommand struct {
 	pivnetSdk *pivnet.Sdk
 }
 
-const ReviewEulasName = "review-eulas"
+const reviewEulasName = "review-eulas"
 
 var eulaSlugs = []string{"pivotal_software_eula"}
 
 func (cmd *ReviewEulasCommand) register(app *kingpin.Application) {
-	c := app.Command(ReviewEulasName, "View product EULAs and interactively accept/deny").Action(cmd.run)
+	c := app.Command(reviewEulasName, "View product EULAs and interactively accept/deny").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	c.Flag("accept-all", "Accept all EULAs non-interactively").Default("false").BoolVar(&cmd.acceptAll)
 }
 
 func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 	var err error
-	cmd.envConfig, err = config.ConfigFromEnvDirectory(cmd.envDir)
+	cmd.envConfig, err = config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}
 
-	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetApiToken, cmd.logger)
+	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetAPIToken, cmd.logger)
 	if err != nil {
 		return err
 	}

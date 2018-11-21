@@ -30,6 +30,7 @@ import (
 	"time"
 )
 
+// Jumpbox allows SSHing to the real Jumpbox.
 type Jumpbox struct {
 	logger  *log.Logger
 	output  io.Writer
@@ -39,12 +40,12 @@ type Jumpbox struct {
 
 const packageName = "omg-cli"
 
+// NewJumpbox creates a new Jumpbox.
 func NewJumpbox(cmdLogger *log.Logger, output io.Writer, ip, username, sshKeyPath, envDir string, quiet bool) (*Jumpbox, error) {
 	var logger *log.Logger
 	if !quiet {
 		// Duplicate the logger so we can modify the prefix
-		logger = &*cmdLogger
-		logger.SetPrefix(fmt.Sprintf("%s[jumpbox] ", logger.Prefix()))
+		logger = log.New(output, fmt.Sprintf("%s[jumpbox] ", cmdLogger.Prefix()), 0)
 	} else {
 		logger = log.New(ioutil.Discard, "", 0)
 	}
@@ -62,6 +63,7 @@ func NewJumpbox(cmdLogger *log.Logger, output io.Writer, ip, username, sshKeyPat
 	return jb, nil
 }
 
+// PoolTillStarted waits until the jumpbox is listening for SSH connections.
 func (jb *Jumpbox) PoolTillStarted() error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(time.Duration(120 * time.Second))
@@ -79,7 +81,7 @@ func (jb *Jumpbox) PoolTillStarted() error {
 	}
 }
 
-// Push the OMG binary, environment config to jumpbox
+// UploadDependencies pushes the OMG binary, environment config to the jumpbox.
 func (jb *Jumpbox) UploadDependencies() error {
 	if err := jb.session.EnsureConnected(); err != nil {
 		return err
@@ -110,7 +112,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 		{filepath.Join(jb.envDir, "keys", "jumpbox_ssh.pub"), "keys/jumpbox_ssh.pub"},
 	}
 
-	for _, f := range config.ConfigFiles {
+	for _, f := range config.Files {
 		files = append(files, plan{filepath.Join(jb.envDir, f), f})
 	}
 
@@ -126,6 +128,7 @@ func (jb *Jumpbox) UploadDependencies() error {
 	return nil
 }
 
+// RunOmg runs an omg-cli command on the jumpbox.
 func (jb *Jumpbox) RunOmg(args string) error {
 	if err := jb.session.EnsureConnected(); err != nil {
 		return err

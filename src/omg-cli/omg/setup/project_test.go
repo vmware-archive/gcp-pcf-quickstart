@@ -17,18 +17,14 @@ package setup_test
  */
 
 import (
-	. "omg-cli/omg/setup"
-
-	"omg-cli/google"
-	"omg-cli/google/googlefakes"
-
+	"errors"
 	"log"
-
 	"os"
 
-	"errors"
-
 	"omg-cli/config"
+	"omg-cli/google"
+	"omg-cli/google/googlefakes"
+	. "omg-cli/omg/setup"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -44,7 +40,7 @@ var _ = Describe("GcpProject", func() {
 	Describe("AdequateQuota", func() {
 		It("handles errors", func() {
 			service := &googlefakes.FakeQuotaService{ProjectStub: func() (map[string]google.Quota, error) {
-				return nil, errors.New("My Error")
+				return nil, errors.New("my error")
 			}}
 			project, err := NewProjectValidator(logger, service, nil, []google.Quota{}, map[string][]google.Quota{}, []google.API{})
 			Expect(err).NotTo(HaveOccurred())
@@ -67,9 +63,9 @@ var _ = Describe("GcpProject", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			quotaErrors, satisfied, err := project.ValidateQuotas()
-			Expect(err).To(Equal(UnsatisfiedQuotaErr))
+			Expect(err).To(Equal(ErrUnsatisfiedQuota))
 			Expect(quotaErrors).ToNot(BeNil())
-			Expect(quotaErrors).To(ContainElement(QuotaError{quotaRequirement, 0.0, "global"}))
+			Expect(quotaErrors).To(ContainElement(quotaError{Quota: quotaRequirement, Region: "global"}))
 			Expect(satisfied).To(BeEmpty())
 		})
 
@@ -106,8 +102,8 @@ var _ = Describe("GcpProject", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			errors, satisfied, err := project.ValidateQuotas()
-			Expect(err).To(Equal(UnsatisfiedQuotaErr))
-			Expect(errors).To(ContainElement(QuotaError{quotaRequirement, 10.0, "us-east1"}))
+			Expect(err).To(Equal(ErrUnsatisfiedQuota))
+			Expect(errors).To(ContainElement(quotaError{Quota: quotaRequirement, Actual: 10.0, Region: "us-east1"}))
 			Expect(satisfied).To(BeEmpty())
 		})
 	})
@@ -133,7 +129,7 @@ var _ = Describe("GcpProject", func() {
 			project, err := NewProjectValidator(logger, nil, service, []google.Quota{}, map[string][]google.Quota{}, requiredApis)
 			Expect(err).NotTo(HaveOccurred())
 
-			project.EnableAPIs()
+			Expect(project.EnableAPIs()).To(BeNil())
 
 			Expect(service.EnableCallCount()).To(Equal(1))
 			Expect(service.EnableArgsForCall(0)).To(Equal(requiredApis))

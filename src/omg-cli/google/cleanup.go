@@ -26,13 +26,15 @@ import (
 	"strings"
 	"time"
 
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
+// CleanupService cleans up leftover infrastructure from a quickstart installation.
 type CleanupService interface {
 	DeleteVM(...VMFilter) (int, error)
 }
 
+// VMFilter is a function to filter VMs.
 type VMFilter func(*vmFilter)
 
 type vmFilter struct {
@@ -42,18 +44,21 @@ type vmFilter struct {
 	labels     map[string]string
 }
 
+// WithTag creates a VMFilter for VMs with a given tag.
 func WithTag(tag string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.tag = tag
 	}
 }
 
+// WithNameRegex creates a VMFilter for VMs with names which match a regex.
 func WithNameRegex(prefix string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.namePrefix = prefix
 	}
 }
 
+// WithLabel creates a VMFilter for VMs with a label.
 func WithLabel(key, value string) VMFilter {
 	return func(opt *vmFilter) {
 		if opt.labels == nil {
@@ -63,6 +68,7 @@ func WithLabel(key, value string) VMFilter {
 	}
 }
 
+// WithSubNetwork creates a VMFilter for VMs within a subnet.
 func WithSubNetwork(subnet string) VMFilter {
 	return func(opt *vmFilter) {
 		opt.subnet = subnet
@@ -71,12 +77,13 @@ func WithSubNetwork(subnet string) VMFilter {
 
 type cleanupService struct {
 	logger         *log.Logger
-	projectId      string
+	projectID      string
 	computeService *compute.Service
 	dryRun         bool
 }
 
-func NewCleanupService(logger *log.Logger, projectId string, client *http.Client, dryRun bool) (CleanupService, error) {
+// NewCleanupService creates a new CleanupService.
+func NewCleanupService(logger *log.Logger, projectID string, client *http.Client, dryRun bool) (CleanupService, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
 	}
@@ -87,7 +94,7 @@ func NewCleanupService(logger *log.Logger, projectId string, client *http.Client
 	}
 	computeService.UserAgent = version.UserAgent()
 
-	return &cleanupService{logger, projectId, computeService, dryRun}, nil
+	return &cleanupService{logger, projectID, computeService, dryRun}, nil
 }
 
 func buildFilter(filter vmFilter) string {
@@ -122,7 +129,7 @@ func mapContains(subset, set map[string]string) bool {
 }
 
 func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
-	listCall := cs.computeService.Instances.AggregatedList(cs.projectId)
+	listCall := cs.computeService.Instances.AggregatedList(cs.projectID)
 	filter := vmFilter{}
 	for _, opt := range opts {
 		opt(&filter)
@@ -149,7 +156,7 @@ func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
 						}
 					}
 
-					if foundSubnet == false {
+					if !foundSubnet {
 						continue
 					}
 				}
@@ -170,7 +177,7 @@ func (cs *cleanupService) findVMs(opts ...VMFilter) ([]vm, error) {
 func (cs *cleanupService) deleteVMs(targets []vm) (operationsMap, error) {
 	operations := operationsMap{}
 	for _, vm := range targets {
-		call := cs.computeService.Instances.Delete(cs.projectId, vm.zone, vm.name)
+		call := cs.computeService.Instances.Delete(cs.projectID, vm.zone, vm.name)
 		oper, err := call.Do()
 		if err != nil {
 			return operations, err
@@ -241,7 +248,7 @@ const done = "DONE"
 func (cs *cleanupService) filterCompleted(operations operationsMap) (pending operationsMap, completed []vm, errors []error) {
 	pending = operationsMap{}
 	for vm, operationName := range operations {
-		oper, err := cs.computeService.ZoneOperations.Get(cs.projectId, vm.zone, operationName).Do()
+		oper, err := cs.computeService.ZoneOperations.Get(cs.projectID, vm.zone, operationName).Do()
 
 		if err != nil {
 			errors = append(errors, fmt.Errorf("fetching operation %s for vm %#v: %v", operationName, vm, err))

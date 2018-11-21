@@ -24,7 +24,6 @@ import (
 	"text/template"
 
 	"omg-cli/config"
-
 	"omg-cli/ops_manager"
 )
 
@@ -46,11 +45,11 @@ director-configuration:
   database_type: "{{.DatabaseType}}"
 {{if eq .DatabaseType "external"}}
   external_database_options:
-    host: "{{.ExternalSqlIp}}"
-    database: "{{.OpsManagerSqlDbName}}"
-    user: "{{.OpsManagerSqlUsername}}"
-    password: "{{.OpsManagerSqlPassword}}"
-    port: {{.ExternalSqlPort}}
+    host: "{{.ExternalSQLIP}}"
+    database: "{{.OpsManagerSQLDbName}}"
+    user: "{{.OpsManagerSQLUsername}}"
+    password: "{{.OpsManagerSQLPassword}}"
+    port: {{.ExternalSQLPort}}
 {{end}}
 iaas-configuration:
   project: "{{.ProjectName}}"
@@ -120,18 +119,19 @@ var tmpl = template.Must(template.New("director").Funcs(funcMap).Parse(directorT
 
 func reservedIPs(cidr string) string {
 	// Reserve .1-.20
-	lowerIp, _, err := net.ParseCIDR(cidr)
-	lowerIp = lowerIp.To4()
+	lowerIP, _, err := net.ParseCIDR(cidr)
+	lowerIP = lowerIP.To4()
 	if err != nil {
 		panic(err)
 	}
-	upperIp := make(net.IP, len(lowerIp))
-	copy(upperIp, lowerIp)
-	upperIp[3] = 20
+	upperIP := make(net.IP, len(lowerIP))
+	copy(upperIP, lowerIP)
+	upperIP[3] = 20
 
-	return fmt.Sprintf("%s-%s", lowerIp, upperIp)
+	return fmt.Sprintf("%s-%s", lowerIP, upperIP)
 }
 
+// Configure satisfies TileInstaller interface.
 func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	dc := struct {
 		config.Config

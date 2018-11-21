@@ -28,16 +28,17 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// PushTilesCommand pushes tiles to the Ops Manager.
 type PushTilesCommand struct {
 	logger       *log.Logger
 	envDir       string
 	tileCacheDir string
 }
 
-const PushTilesName = "push-tiles"
+const pushTilesName = "push-tiles"
 
 func (cmd *PushTilesCommand) register(app *kingpin.Application) {
-	c := app.Command(PushTilesName, "Push desired tiles to a deployed Ops Manager").Action(cmd.run)
+	c := app.Command(pushTilesName, "Push desired tiles to a deployed Ops Manager").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 	registerTileCacheFlag(c, &cmd.tileCacheDir)
 }
@@ -48,24 +49,24 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetApiToken, cmd.logger)
+	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetAPIToken, cmd.logger)
 	if err != nil {
 		return err
 	}
 
 	tileCache := &pivnet.TileCache{Dir: cmd.tileCacheDir}
 	tiles := selectedTiles(cmd.logger, envCfg)
-	opsMan := setup.NewService(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, tiles, tileCache)
+	opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, tiles, tileCache)
 
 	return run([]step{
 		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},

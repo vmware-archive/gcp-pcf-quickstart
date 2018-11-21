@@ -18,17 +18,19 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 )
 
+// EnvConfig is the config needed to install the quickstart.
 type EnvConfig struct {
-	DnsZoneName        string
+	DNSZoneName        string
 	ProjectID          string
 	BaseImageURL       string
 	EnvName            string
 	Region             string
-	PivnetApiToken     string
+	PivnetAPIToken     string
 	Zone1              string
 	Zone2              string
 	Zone3              string
@@ -36,9 +38,10 @@ type EnvConfig struct {
 	IncludeHealthwatch bool
 }
 
+// DefaultEnvConfig creates a default quickstart configuration.
 func DefaultEnvConfig() (*EnvConfig, error) {
 	c := &EnvConfig{
-		DnsZoneName:        "pcf-zone",
+		DNSZoneName:        "pcf-zone",
 		BaseImageURL:       "https://storage.cloud.google.com/ops-manager-us/pcf-gcp-2.3-build.194.tar.gz",
 		EnvName:            "pcf",
 		Region:             "us-east1",
@@ -52,8 +55,14 @@ func DefaultEnvConfig() (*EnvConfig, error) {
 	return c, nil
 }
 
-func ConfigFromEnvDirectory(path string) (*EnvConfig, error) {
-	return fromEnvironment(filepath.Join(path, EnvConfigFile))
+// FromEnvDirectory creates a quickstart config from a given directory.
+func FromEnvDirectory(path string) (*EnvConfig, error) {
+	config, err := fromEnvironment(filepath.Join(path, EnvConfigFile))
+	if err != nil {
+		return nil, fmt.Errorf("creating environment from directory %s: %v", path, err)
+	}
+
+	return config, nil
 }
 
 func fromEnvironment(filename string) (*EnvConfig, error) {

@@ -23,6 +23,7 @@ import (
 	"omg-cli/google"
 )
 
+// ProjectValidator validates a Google Cloud project is capable of launching the quickstart.
 type ProjectValidator struct {
 	logger              *log.Logger
 	quotaService        google.QuotaService
@@ -32,14 +33,17 @@ type ProjectValidator struct {
 	apiRequirements     []google.API
 }
 
+// QuotaError represents when a quota cannot be met.
 type QuotaError struct {
 	google.Quota
 	Actual float64
 	Region string
 }
 
-var UnsatisfiedQuotaErr = errors.New("Compute Engine quota is unsatisfied, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
+// ErrUnsatisfiedQuota is thrown when a quota is not met.
+var ErrUnsatisfiedQuota = errors.New("unsatisfied quota, request an increase at: https://console.cloud.google.com/iam-admin/quotas")
 
+// NewProjectValidator creates a new project validator.
 func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, apiService google.APIService, projectRequirements []google.Quota, regionRequirements map[string][]google.Quota, apiRequirements []google.API) (*ProjectValidator, error) {
 	if logger == nil {
 		return nil, errors.New("missing logger")
@@ -47,6 +51,7 @@ func NewProjectValidator(logger *log.Logger, quotaService google.QuotaService, a
 	return &ProjectValidator{logger, quotaService, apiService, projectRequirements, regionRequirements, apiRequirements}, nil
 }
 
+// ValidateQuotas ensures all required quotas are high enough for the quickstart.
 func (pv *ProjectValidator) ValidateQuotas() (errors []QuotaError, satisfied []google.Quota, err error) {
 	quotas, err := pv.quotaService.Project()
 	if err != nil {
@@ -63,7 +68,7 @@ func (pv *ProjectValidator) ValidateQuotas() (errors []QuotaError, satisfied []g
 	}
 
 	if len(errors) != 0 {
-		err = UnsatisfiedQuotaErr
+		err = ErrUnsatisfiedQuota
 	}
 	return errors, satisfied, err
 }
@@ -88,6 +93,7 @@ func validateQuotas(requirements []google.Quota, quotas map[string]google.Quota,
 	return
 }
 
+// EnableAPIs enables the required Google Cloud APIs.
 func (pv *ProjectValidator) EnableAPIs() ([]google.API, error) {
 	enabled, err := pv.apiService.Enable(pv.apiRequirements)
 	if err != nil {
@@ -96,70 +102,73 @@ func (pv *ProjectValidator) EnableAPIs() ([]google.API, error) {
 	return enabled, nil
 }
 
+// ProjectQuotaRequirements are quota requirements for a Google Cloud project.
 func ProjectQuotaRequirements() []google.Quota {
 	return []google.Quota{
-		{"NETWORKS", 2.0},
-		{"FIREWALLS", 7.0},
-		{"IMAGES", 15.0},
-		{"STATIC_ADDRESSES", 1.0},
-		{"ROUTES", 20.0},
-		{"FORWARDING_RULES", 4.0},
-		{"TARGET_POOLS", 2.0},
-		{"HEALTH_CHECKS", 3.0},
-		{"IN_USE_ADDRESSES", 4.0},
-		{"TARGET_HTTP_PROXIES", 1.0},
-		{"URL_MAPS", 2.0},
-		{"BACKEND_SERVICES", 4.0},
-		{"TARGET_HTTPS_PROXIES", 1.0},
-		{"SSL_CERTIFICATES", 1.0},
-		{"SUBNETWORKS", 15.0},
+		{Name: "NETWORKS", Limit: 2.0},
+		{Name: "FIREWALLS", Limit: 7.0},
+		{Name: "IMAGES", Limit: 15.0},
+		{Name: "STATIC_ADDRESSES", Limit: 1.0},
+		{Name: "ROUTES", Limit: 20.0},
+		{Name: "FORWARDING_RULES", Limit: 4.0},
+		{Name: "TARGET_POOLS", Limit: 2.0},
+		{Name: "HEALTH_CHECKS", Limit: 3.0},
+		{Name: "IN_USE_ADDRESSES", Limit: 4.0},
+		{Name: "TARGET_HTTP_PROXIES", Limit: 1.0},
+		{Name: "URL_MAPS", Limit: 2.0},
+		{Name: "BACKEND_SERVICES", Limit: 4.0},
+		{Name: "TARGET_HTTPS_PROXIES", Limit: 1.0},
+		{Name: "SSL_CERTIFICATES", Limit: 1.0},
+		{Name: "SUBNETWORKS", Limit: 15.0},
 	}
 }
 
+// RegionalQuotaRequirements are quotas requirements for the deployment Google Cloud region.
 func RegionalQuotaRequirements(cfg *config.EnvConfig) map[string][]google.Quota {
 	quotas := []google.Quota{
-		{"DISKS_TOTAL_GB", 2000.0},
-		{"STATIC_ADDRESSES", 5.0},
-		{"IN_USE_ADDRESSES", 6.0},
-		{"INSTANCE_GROUPS", 10.0},
-		{"INSTANCES", 100.0},
+		{Name: "DISKS_TOTAL_GB", Limit: 2000.0},
+		{Name: "STATIC_ADDRESSES", Limit: 5.0},
+		{Name: "IN_USE_ADDRESSES", Limit: 6.0},
+		{Name: "INSTANCE_GROUPS", Limit: 10.0},
+		{Name: "INSTANCES", Limit: 100.0},
 	}
 
 	if cfg.SmallFootprint {
-		quotas = append(quotas, google.Quota{"CPUS", 24.0})
+		quotas = append(quotas, google.Quota{Name: "CPUS", Limit: 24.0})
 	} else {
-		quotas = append(quotas, google.Quota{"CPUS", 200.0})
+		quotas = append(quotas, google.Quota{Name: "CPUS", Limit: 200.0})
 	}
 
 	return map[string][]google.Quota{cfg.Region: quotas}
 }
 
+// RequiredAPIs is the set of Google Cloud APIs which must be enabled.
 func RequiredAPIs() []google.API {
 	return []google.API{
-		{"bigquery-json.googleapis.com"},
-		{"cloudbuild.googleapis.com"},
-		{"clouddebugger.googleapis.com"},
-		{"cloudresourcemanager.googleapis.com"},
-		{"datastore.googleapis.com"},
-		{"storage-component.googleapis.com"},
-		{"pubsub.googleapis.com"},
-		{"vision.googleapis.com"},
-		{"storage-api.googleapis.com"},
-		{"logging.googleapis.com"},
-		{"resourceviews.googleapis.com"},
-		{"replicapool.googleapis.com"},
-		{"cloudapis.googleapis.com"},
-		{"deploymentmanager.googleapis.com"},
-		{"containerregistry.googleapis.com"},
-		{"sqladmin.googleapis.com"},
-		{"monitoring.googleapis.com"},
-		{"dns.googleapis.com"},
-		{"runtimeconfig.googleapis.com"},
-		{"compute.googleapis.com"},
-		{"sql-component.googleapis.com"},
-		{"iam.googleapis.com"},
-		{"cloudtrace.googleapis.com"},
-		{"servicemanagement.googleapis.com"},
-		{"replicapoolupdater.googleapis.com"},
+		{Name: "bigquery-json.googleapis.com"},
+		{Name: "cloudbuild.googleapis.com"},
+		{Name: "clouddebugger.googleapis.com"},
+		{Name: "cloudresourcemanager.googleapis.com"},
+		{Name: "datastore.googleapis.com"},
+		{Name: "storage-component.googleapis.com"},
+		{Name: "pubsub.googleapis.com"},
+		{Name: "vision.googleapis.com"},
+		{Name: "storage-api.googleapis.com"},
+		{Name: "logging.googleapis.com"},
+		{Name: "resourceviews.googleapis.com"},
+		{Name: "replicapool.googleapis.com"},
+		{Name: "cloudapis.googleapis.com"},
+		{Name: "deploymentmanager.googleapis.com"},
+		{Name: "containerregistry.googleapis.com"},
+		{Name: "sqladmin.googleapis.com"},
+		{Name: "monitoring.googleapis.com"},
+		{Name: "dns.googleapis.com"},
+		{Name: "runtimeconfig.googleapis.com"},
+		{Name: "compute.googleapis.com"},
+		{Name: "sql-component.googleapis.com"},
+		{Name: "iam.googleapis.com"},
+		{Name: "cloudtrace.googleapis.com"},
+		{Name: "servicemanagement.googleapis.com"},
+		{Name: "replicapoolupdater.googleapis.com"},
 	}
 }

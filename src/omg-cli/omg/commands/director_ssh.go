@@ -32,12 +32,13 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// DirectorSSHCommand SSHes into the BOSH Director.
 type DirectorSSHCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const DirectorSSHName = "director-ssh"
+const directorSSHName = "director-ssh"
 
 const jsonTemplate = `{
 	"method": "ssh",
@@ -45,7 +46,7 @@ const jsonTemplate = `{
 }`
 
 func (cmd *DirectorSSHCommand) register(app *kingpin.Application) {
-	c := app.Command(DirectorSSHName, "Add the 'jumpbox' user and credentials to the BOSH director VM.").Action(cmd.run)
+	c := app.Command(directorSSHName, "Add the 'jumpbox' user and credentials to the BOSH director VM.").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
@@ -55,7 +56,7 @@ func (cmd *DirectorSSHCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
 	if err != nil {
 		return err
 	}
@@ -99,7 +100,7 @@ func (cmd *DirectorSSHCommand) run(c *kingpin.ParseContext) error {
 	body, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Got %s from metron agent. Response body:\n%s\n", resp.Status, body)
+		return fmt.Errorf("got %s from metron agent, response body: %s", resp.Status, body)
 	}
 	return nil
 }

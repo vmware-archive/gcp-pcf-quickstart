@@ -21,8 +21,15 @@ import (
 	"omg-cli/ops_manager"
 )
 
+// TileInstaller defines and configures an Ops Manager Tile.
 type TileInstaller interface {
+
+	// Definition creates a Tile definition.
 	Definition(envConfig *config.EnvConfig) config.Tile
+
+	// Configure applies configuration to a tile via the Ops Manager SDK.
 	Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error
+
+	// BuiltIn is true if a tile is built in to the Ops Manager.
 	BuiltIn() bool
 }

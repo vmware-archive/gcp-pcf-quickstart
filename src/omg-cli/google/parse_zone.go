@@ -20,9 +20,10 @@ import (
 	"fmt"
 	"strings"
 
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
+// ZoneResult represents the zones to use for a given region.
 type ZoneResult struct {
 	Region string
 	Zone1  string
@@ -30,14 +31,14 @@ type ZoneResult struct {
 	Zone3  string
 }
 
-// Get the last path in a URL
-//
+// Get the last path in a URL.
 // eg: https://www.googleapis.com/compute/v1/projects/<project>/regions/us-central1 => us-central1
 func suffix(url string) string {
 	urlParts := strings.Split(url, "/")
 	return urlParts[len(urlParts)-1]
 }
 
+// ParseZone returns the region and zones to use, based on an initial zone.
 func ParseZone(project, baseZone string, client *compute.Service) (res ZoneResult, err error) {
 	zone, err := client.Zones.Get(project, baseZone).Do()
 	if err != nil {

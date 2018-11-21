@@ -27,15 +27,16 @@ import (
 	"github.com/alecthomas/kingpin"
 )
 
+// DeleteInstallationCommand deletes a quickstart installation.
 type DeleteInstallationCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const DeleteInstallationName = "delete-installation"
+const deleteInstallationName = "delete-installation"
 
 func (cmd *DeleteInstallationCommand) register(app *kingpin.Application) {
-	c := app.Command(DeleteInstallationName, "Delete an Ops Manager installation").Action(cmd.run)
+	c := app.Command(deleteInstallationName, "Delete an Ops Manager installation").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
@@ -45,17 +46,17 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	envCfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, *cmd.logger)
+	omSdk, err := ops_manager.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewService(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
+	opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
 
 	steps := []step{
 		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},

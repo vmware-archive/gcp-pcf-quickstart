@@ -17,27 +17,26 @@
 package commands
 
 import (
+	"encoding/json"
 	"log"
 	"regexp"
+	"strings"
 
 	"omg-cli/config"
-
-	"encoding/json"
-
-	"strings"
 
 	"github.com/alecthomas/kingpin"
 )
 
+// SourceConfigCommand outputs the quickstart's config.
 type SourceConfigCommand struct {
 	logger *log.Logger
 	envDir string
 }
 
-const SourceConfigCommandName = "source-config"
+const sourceConfigCommandName = "source-config"
 
 func (cmd *SourceConfigCommand) register(app *kingpin.Application) {
-	c := app.Command(SourceConfigCommandName, "Output environment config as environment variables").Action(cmd.run)
+	c := app.Command(sourceConfigCommandName, "Output environment config as environment variables").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
@@ -54,7 +53,7 @@ func nameToEnv(name string) string {
 }
 
 func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.ConfigFromEnvDirectory(cmd.envDir)
+	cfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}

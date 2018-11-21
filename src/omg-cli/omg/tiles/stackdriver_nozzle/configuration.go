@@ -19,6 +19,7 @@ package stackdriver_nozzle
 import (
 	"encoding/json"
 	"fmt"
+
 	"omg-cli/config"
 	"omg-cli/omg/tiles"
 	"omg-cli/ops_manager"
@@ -28,17 +29,18 @@ const (
 	skipSSLValidation = "true"
 )
 
-type Properties struct {
+type properties struct {
 	Endpoint          tiles.Value `json:".properties.firehose_endpoint"`
 	SkipSSLValidation tiles.Value `json:".properties.firehose_skip_ssl"`
 	ServiceAccount    tiles.Value `json:".properties.service_account"`
 	ProjectID         tiles.Value `json:".properties.project_id"`
 }
 
-type Resources struct {
+type resources struct {
 	StackdriverNozzle tiles.Resource `json:"stackdriver-nozzle"`
 }
 
+// Configure satisfies TileInstaller interface.
 func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(tile.Product); err != nil {
 		return err
@@ -51,11 +53,11 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 		return err
 	}
 
-	properties := &Properties{
-		Endpoint:          tiles.Value{fmt.Sprintf("https://api.sys.%s", cfg.DnsSuffix)},
-		SkipSSLValidation: tiles.Value{skipSSLValidation},
-		ServiceAccount:    tiles.Value{cfg.StackdriverNozzleServiceAccountKey},
-		ProjectID:         tiles.Value{cfg.ProjectName},
+	properties := &properties{
+		Endpoint:          tiles.Value{Value: fmt.Sprintf("https://api.sys.%s", cfg.DNSSuffix)},
+		SkipSSLValidation: tiles.Value{Value: skipSSLValidation},
+		ServiceAccount:    tiles.Value{Value: cfg.StackdriverNozzleServiceAccountKey},
+		ProjectID:         tiles.Value{Value: cfg.ProjectName},
 	}
 
 	propertiesBytes, err := json.Marshal(&properties)
@@ -67,10 +69,10 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 	if envConfig.SmallFootprint {
 		vmType = "micro"
 	}
-	resoruces := Resources{
+	resoruces := resources{
 		StackdriverNozzle: tiles.Resource{
 			InternetConnected: false,
-			VmTypeId:          vmType,
+			VMTypeID:          vmType,
 		},
 	}
 	resorucesBytes, err := json.Marshal(&resoruces)

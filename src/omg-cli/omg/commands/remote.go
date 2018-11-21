@@ -19,17 +19,16 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"omg-cli/config"
 	"omg-cli/omg/setup"
 
-	"path/filepath"
-
-	"os"
-
 	"github.com/alecthomas/kingpin"
 )
 
+// RemoteCommand executes an omg-cli command on the jumpbox.
 type RemoteCommand struct {
 	logger  *log.Logger
 	command string
@@ -38,12 +37,12 @@ type RemoteCommand struct {
 }
 
 const (
-	RemoteName = "remote"
-	Username   = "omg"
+	remoteName = "remote"
+	username   = "omg"
 )
 
 func (bc *RemoteCommand) register(app *kingpin.Application) {
-	c := app.Command(RemoteName, "Run an OMG command from outside of the network").Action(bc.run)
+	c := app.Command(remoteName, "Run an OMG command from outside of the network").Action(bc.run)
 	registerEnvConfigFlag(c, &bc.envDir)
 	registerQuietFlag(c, &bc.quiet)
 	c.Arg("command", "command and arguments to execute").Required().StringVar(&bc.command)
@@ -57,7 +56,7 @@ func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
 		return fmt.Errorf("load terraform config: %v", err)
 	}
 
-	jb, err := setup.NewJumpbox(bc.logger, os.Stdout, cfg.JumpboxIp, Username, sshKeyPath, bc.envDir, bc.quiet)
+	jb, err := setup.NewJumpbox(bc.logger, os.Stdout, cfg.JumpboxIP, username, sshKeyPath, bc.envDir, bc.quiet)
 	if err != nil {
 		return fmt.Errorf("connect to jumpbox: %v", err)
 	}
@@ -65,7 +64,7 @@ func (bc *RemoteCommand) run(c *kingpin.ParseContext) error {
 	return run([]step{
 		{function: jb.PoolTillStarted, name: "PoolTillStarted"},
 		{function: jb.UploadDependencies, name: "UploadDependencies"},
-		{function:func() error {
+		{function: func() error {
 			return jb.RunOmg(bc.command)
 		}, name: "RunOmg"},
 	}, bc.logger)

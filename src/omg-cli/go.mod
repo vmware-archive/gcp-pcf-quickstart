@@ -4,6 +4,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.0.0-20181109222614-193e596dec49 // indirect
 	code.cloudfoundry.org/clock v0.0.0-20180518195852-02e53af36e6c
 	code.cloudfoundry.org/lager v2.0.0+incompatible
+	code.cloudfoundry.org/trace-logger v0.0.0-20170119230301-107ef08a939d // indirect
 	code.cloudfoundry.org/uaa-go-client v0.0.0-20181022172934-480082394a82
 	github.com/PuerkitoBio/goquery v1.4.1 // indirect
 	github.com/alecthomas/kingpin v2.2.6+incompatible
@@ -16,6 +17,7 @@ require (
 	github.com/cloudfoundry/bosh-utils v0.0.0-20181109230347-f1d51d8b54a5 // indirect
 	github.com/cppforlife/go-patch v0.0.0-20171006213518-250da0e0e68c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd
