@@ -27,7 +27,7 @@ import (
 	"github.com/imdario/mergo"
 )
 
-type Properties struct {
+type properties struct {
 	// Domains
 	AppsDomain                tiles.Value              `json:".cloud_controller.apps_domain"`
 	SysDomain                 tiles.Value              `json:".cloud_controller.system_domain"`
@@ -82,7 +82,7 @@ type Properties struct {
 	MySQLMonitorRecipientEmail tiles.Value `json:".mysql_monitor.recipient_email"`
 }
 
-type LargeFootprintResources struct {
+type largeFootprintResources struct {
 	TCPRouter                    tiles.Resource `json:"tcp_router"`
 	Router                       tiles.Resource `json:"router"`
 	DiegoBrain                   tiles.Resource `json:"diego_brain"`
@@ -106,7 +106,7 @@ type LargeFootprintResources struct {
 	Doppler                      tiles.Resource `json:"doppler"`
 }
 
-type SmallFootprintResources struct {
+type smallFootprintResources struct {
 	TCPRouter tiles.Resource `json:"tcp_router"`
 	Router    tiles.Resource `json:"router"`
 
@@ -120,6 +120,7 @@ type SmallFootprintResources struct {
 	MysqlMonitor  tiles.Resource `json:"mysql_monitor"`
 }
 
+// Configure satisfies TileInstaller interface.
 func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	if err := om.StageProduct(product); err != nil {
 		return err
@@ -132,7 +133,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		return err
 	}
 
-	properties := Properties{
+	props := properties{
 		AppsDomain:          tiles.Value{Value: cfg.AppsDomain},
 		SysDomain:           tiles.Value{Value: cfg.SysDomain},
 		SkipSSLVerification: tiles.BooleanValue{Value: true},
@@ -162,13 +163,13 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	}
 
 	if envConfig.SmallFootprint {
-		if err := mergo.Merge(&properties, Properties{
+		if err := mergo.Merge(&props, properties{
 			ErtDbChoice: tiles.Value{Value: "internal_pxc"},
 		}); err != nil {
 			return err
 		}
 	} else {
-		if err := mergo.Merge(&properties, Properties{
+		if err := mergo.Merge(&props, properties{
 			UaaDbChoice:   &tiles.Value{Value: "external"},
 			UaaDbIP:       &tiles.Value{Value: cfg.ExternalSQLIP},
 			UaaDbPort:     &tiles.IntegerValue{Value: cfg.ExternalSQLPort},
@@ -205,7 +206,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		}
 	}
 
-	propertiesBytes, err := json.Marshal(&properties)
+	propertiesBytes, err := json.Marshal(&props)
 	if err != nil {
 		return err
 	}
@@ -216,7 +217,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 	one := 1
 	three := 3
 	if envConfig.SmallFootprint {
-		resources := SmallFootprintResources{
+		resources := smallFootprintResources{
 			TCPRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TCPTargetPoolName)},
 				InternetConnected: false,
@@ -241,7 +242,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_
 		}
 		resourcesBytes, err = json.Marshal(&resources)
 	} else {
-		resources := LargeFootprintResources{
+		resources := largeFootprintResources{
 			TCPRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TCPTargetPoolName)},
 				InternetConnected: false,

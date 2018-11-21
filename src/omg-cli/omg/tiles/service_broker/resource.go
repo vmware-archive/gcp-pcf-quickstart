@@ -43,12 +43,15 @@ var tile = config.Tile{
 	},
 }
 
+// Tile is the tile for the GCP Service Broker.
 type Tile struct{}
 
+// Definition satisfies TileInstaller interface.
 func (*Tile) Definition(*config.EnvConfig) config.Tile {
 	return tile
 }
 
+// BuiltIn satisfies TileInstaller interface.
 func (*Tile) BuiltIn() bool {
 	return false
 }

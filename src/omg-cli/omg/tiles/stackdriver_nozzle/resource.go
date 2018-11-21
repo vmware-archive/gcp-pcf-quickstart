@@ -45,14 +45,17 @@ var tile = config.Tile{
 	},
 }
 
+// Tile is the tile for the Stackdriver Nozzle.
 type Tile struct {
 	Logger *log.Logger
 }
 
+// Definition satisfies TileInstaller interface.
 func (*Tile) Definition(*config.EnvConfig) config.Tile {
 	return tile
 }
 
+// BuiltIn satisfies TileInstaller interface.
 func (*Tile) BuiltIn() bool {
 	return false
 }

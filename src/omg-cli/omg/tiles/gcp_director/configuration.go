@@ -131,6 +131,7 @@ func reservedIPs(cidr string) string {
 	return fmt.Sprintf("%s-%s", lowerIP, upperIP)
 }
 
+// Configure satisfies TileInstaller interface.
 func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *ops_manager.Sdk) error {
 	dc := struct {
 		config.Config

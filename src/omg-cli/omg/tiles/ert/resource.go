@@ -57,8 +57,10 @@ var stemcell = config.StemcellMetadata{
 	StemcellName: "light-bosh-stemcell-97.32-google-kvm-ubuntu-xenial-go_agent",
 }
 
+// Tile is the tile for the Pivotal Application Service.
 type Tile struct{}
 
+// Definition satisfies TileInstaller interface.
 func (*Tile) Definition(envConfig *config.EnvConfig) config.Tile {
 	if envConfig.SmallFootprint {
 		return smallRuntime
@@ -67,6 +69,7 @@ func (*Tile) Definition(envConfig *config.EnvConfig) config.Tile {
 	return fullRuntime
 }
 
+// BuiltIn satisfies TileInstaller interface.
 func (*Tile) BuiltIn() bool {
 	return false
 }
