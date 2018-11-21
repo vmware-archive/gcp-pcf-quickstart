@@ -6,7 +6,9 @@ groups:
       - prepare-project
       - generate-env
       - create-infrastructure
+      - destroy-infrastructure
       - deploy-pcf
+      - destroy-pcf
       - run-certification
       - destroy-all
       - promote-candidate-major
@@ -88,9 +90,53 @@ jobs:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
           env_file_name: ((env_file_name))
+          terraform_state_bucket: ((ci_bucket_name))
       - put: omg-env
         params:
           file: omg-env/*.tgz
+
+  - name: destroy-pcf
+    serial: true
+    serial_groups: [gcp-project]
+    plan:
+      - aggregate:
+          - get: omg-src-in
+            passed: [create-infrastructure]
+          - get: omg-env
+            passed: [create-infrastructure]
+          - get: ci-image
+      - do:
+        - &destroy_pcf
+          task: destroy-pcf
+          image: ci-image
+          file: omg-src-in/ci/tasks/destroy-pcf.yml
+          params:
+            google_project: ((google_project))
+            google_json_key_data: ((google_json_key_data))
+            env_file_name: ((env_file_name))
+
+  - name: destroy-infrastructure
+    serial: true
+    serial_groups: [gcp-project]
+    plan:
+      - aggregate:
+          - get: omg-src-in
+            passed: [create-infrastructure]
+          - get: omg-env
+            passed: [create-infrastructure]
+          - get: ci-image
+      - do:
+        - try:
+            *destroy_pcf
+        - &destroy_infrastructure
+          task: destroy-infrastructure
+          image: ci-image
+          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
+          params:
+            google_project: ((google_project))
+            google_json_key_data: ((google_json_key_data))
+            env_file_name: ((env_file_name))
+            terraform_state_bucket: ((ci_bucket_name))
 
   - name: deploy-pcf
     serial: true
@@ -112,30 +158,11 @@ jobs:
             file: omg-src-in/ci/tasks/push-tiles.yml
             params:
               env_file_name: ((env_file_name))
-            on_failure: &destroy_infrastructure
-              task: destroy-infrastructure
-              image: ci-image
-              file: omg-src-in/ci/tasks/destroy-infrastructure.yml
-              params:
-                google_project: ((google_project))
-                google_json_key_data: ((google_json_key_data))
-                env_file_name: ((env_file_name))
           - task: deploy-pcf
             image: ci-image
             file: omg-src-in/ci/tasks/deploy-pcf.yml
             params:
               env_file_name: ((env_file_name))
-            on_failure:
-              do:
-                - &destroy_pcf
-                  task: destroy-pcf
-                  image: ci-image
-                  file: omg-src-in/ci/tasks/destroy-pcf.yml
-                  params:
-                    google_project: ((google_project))
-                    google_json_key_data: ((google_json_key_data))
-                    env_file_name: ((env_file_name))
-                - *destroy_infrastructure
 
   - name: run-certification
     serial: true
@@ -157,10 +184,6 @@ jobs:
         file: omg-src-in/ci/tasks/run-certification.yml
         params:
           env_file_name: ((env_file_name))
-        on_failure:
-          do: &destroy_all
-            - *destroy_pcf
-            - *destroy_infrastructure
 
   - name: destroy-all
     serial: true
@@ -176,9 +199,9 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
-      - do: *destroy_all
-        on_failure:
-          do: *destroy_all
+      - do:
+        - *destroy_pcf
+        - *destroy_infrastructure
 
   - name: promote-candidate-major
     serial: true

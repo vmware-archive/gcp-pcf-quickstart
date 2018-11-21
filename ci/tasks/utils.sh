@@ -102,6 +102,19 @@ generate_env_config() {
     echo "${env_config}" > "${env_dir}/config.json"
 }
 
+configure_terraform_backend() {
+    check_param "terraform_state_bucket"
+    check_param "env_file_name"
+    cat << EOF > state.tf
+terraform {
+  backend "gcs" {
+    bucket = "${terraform_state_bucket}"
+    prefix  = "terraform/${env_file_name%.*}"
+  }
+}
+EOF
+}
+
 function save_terraform_state {
 	pushd "${env_dir}"
 		tar czvf ${env_output_file} .
