@@ -19,12 +19,11 @@ package commands
 import (
 	"encoding/json"
 	"log"
-	"regexp"
-	"strings"
 
 	"omg-cli/config"
 
 	"github.com/alecthomas/kingpin"
+  "github.com/iancoleman/strcase"
 )
 
 // SourceConfigCommand outputs the quickstart's config.
@@ -40,16 +39,8 @@ func (cmd *SourceConfigCommand) register(app *kingpin.Application) {
 	registerEnvConfigFlag(c, &cmd.envDir)
 }
 
-var camel = regexp.MustCompile("(^[^A-Z0-9]*|[A-Z0-9]*)([A-Z0-9][^A-Z]+|$)")
-
 func nameToEnv(name string) string {
-	var words []string
-	for _, part := range camel.FindAllStringSubmatch(name, -1) {
-		if part[0] != "" {
-			words = append(words, part[0])
-		}
-	}
-	return strings.ToUpper(strings.Join(words, "_"))
+	return strcase.ToScreamingSnake(name)
 }
 
 func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {

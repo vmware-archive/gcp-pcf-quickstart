@@ -35,6 +35,26 @@ if [ -z ${DNS_ZONE_NAME+x} ]; then
     exit 1
 fi
 
+if [ -z ${ZONE_1+x} ]; then
+    echo "ZONE_1 required"
+    exit 1
+fi
+
+if [ -z ${ZONE_2+x} ]; then
+    echo "ZONE_2 required"
+    exit 1
+fi
+
+if [ -z ${ZONE_3+x} ]; then
+    echo "ZONE_3 required"
+    exit 1
+fi
+
+if [ -z ${REGION+x} ]; then
+    echo "REGION required"
+    exit 1
+fi
+
 if [ -z ${PROJECT_ID+x} ]; then
     export PROJECT_ID=${PROJECT_ID-`gcloud config get-value project  2> /dev/null`}
     echo "PROJECT_ID unset, using: ${PROJECT_ID}"
@@ -111,7 +131,7 @@ jumpbox_machine_type="${jumpbox_machine_type}"
 ops_manager_password = "${OPSMAN_ADMIN_PASSWORD:-}"
 ops_manager_skip_ssl_verify = "true"
 region = "${REGION}"
-zones = ["${ZONE1}", "${ZONE2}", "${ZONE3}"]
+zones = ["${ZONE_1}", "${ZONE_2}", "${ZONE_3}"]
 external_database = "${external_database}"
 
 ssl_cert = <<SSL_CERT
