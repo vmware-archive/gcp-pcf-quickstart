@@ -128,11 +128,6 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 
 	network := tiles.NetworkConfig(cfg.ErtSubnetName, cfg)
 
-	networkBytes, err := json.Marshal(&network)
-	if err != nil {
-		return err
-	}
-
 	props := properties{
 		AppsDomain:          tiles.Value{Value: cfg.AppsDomain},
 		SysDomain:           tiles.Value{Value: cfg.SysDomain},
@@ -206,12 +201,7 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 		}
 	}
 
-	propertiesBytes, err := json.Marshal(&props)
-	if err != nil {
-		return err
-	}
-
-	var resourcesBytes []byte
+	var resourcesConfig interface{}
 
 	zero := 0
 	one := 1
@@ -240,9 +230,9 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 				Instances: &three,
 			}
 		}
-		resourcesBytes, err = json.Marshal(&resources)
+		resourcesConfig = resources
 	} else {
-		resources := largeFootprintResources{
+		resourcesConfig = largeFootprintResources{
 			TCPRouter: tiles.Resource{
 				RouterNames:       []string{fmt.Sprintf("tcp:%s", cfg.TCPTargetPoolName)},
 				InternetConnected: false,
@@ -261,11 +251,36 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 			Mysql:        tiles.Resource{Instances: &zero},
 			MysqlMonitor: tiles.Resource{Instances: &zero},
 		}
-		resourcesBytes, err = json.Marshal(&resources)
 	}
 
+	// Disable the notifications errands, since notifications are not configured.
+	errands := map[string]tiles.Errand{
+		"deploy-notifications": {
+			PostDeployState: false,
+		},
+		"deploy-notifications-ui": {
+			PostDeployState: false,
+		},
+	}
+
+	if envConfig.SmallFootprint {
+		errands["test-autoscaling"] = tiles.Errand{
+			PostDeployState: false,
+		}
+	}
+
+	productConfig := tiles.ProductConfig{
+		ProductName: product.Name,
+		NetworkProperties: network,
+		ProductProperties: props,
+		ResourceConfig: resourcesConfig,
+		ErrandConfig: errands,
+	}
+
+	configBytes, err := json.Marshal(productConfig)
 	if err != nil {
 		return err
 	}
-	return om.ConfigureProduct(product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
+
+	return om.ConfigureProduct(product.Name, configBytes)
 }

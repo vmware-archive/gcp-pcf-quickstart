@@ -20,6 +20,19 @@ import (
 	"omg-cli/config"
 )
 
+type ProductConfig struct {
+	ProductName       string      `json:"product-name,omitempty"`
+	ProductProperties interface{} `json:"product-properties,omitempty"`
+	NetworkProperties interface{} `json:"network-properties,omitempty"`
+	ResourceConfig    interface{} `json:"resource-config,omitempty"`
+	ErrandConfig      interface{} `json:"errand-config,omitempty"`
+}
+
+type Errand struct {
+	PostDeployState interface{} `json:"post-deploy-state,omitempty"`
+	PreDeleteState interface{} `json:"pre-delete-state,omitempty"`
+}
+
 // AvailabilityZone is a shared config struct used for tile configuration.
 type AvailabilityZone struct {
 	Name string `json:"name"`

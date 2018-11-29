@@ -69,6 +69,8 @@ github.com/pivotal-cf/jhanda v0.0.0-20181025233525-e6aa09a032df h1:0qMnOwc8HWxJY
 github.com/pivotal-cf/jhanda v0.0.0-20181025233525-e6aa09a032df/go.mod h1:GNr2RBRX0Gs2FaJRi4KUrfQV32EhnjQ3Fj+nw87cx08=
 github.com/pivotal-cf/kiln v0.0.0-20180926152015-0240e73df945 h1:XF1hrJb/dV2EwUzSiGHZhPyIagFUgwD4iukPgTUUaAQ=
 github.com/pivotal-cf/kiln v0.0.0-20180926152015-0240e73df945/go.mod h1:dtX102okHXUUdK9XmlK5WYl2lR0VP0OLaYCiIowB17M=
+github.com/pivotal-cf/om v0.0.0-20181101234326-040651b211b8985879337c86357727546099c46e h1:kZGMOLKDja07hucr73520XogpS6DPE4UswEz+yxt0AE=
+github.com/pivotal-cf/om v0.0.0-20181101234326-040651b211b8985879337c86357727546099c46e/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f h1:Z9iLAItrnbrRKFXp77Sgat4RMt9SxFiVdqmpErB196g=
 github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pivotal-cf/pivnet-cli v0.0.55 h1:R8mnLHUVb9DWuVqHdmkLCltG7bUTJq9nj5OexPt5Y2s=

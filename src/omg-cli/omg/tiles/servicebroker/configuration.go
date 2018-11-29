@@ -39,11 +39,6 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 
 	network := tiles.NetworkConfig(cfg.ServicesSubnetName, cfg)
 
-	networkBytes, err := json.Marshal(&network)
-	if err != nil {
-		return err
-	}
-
 	properties := properties{
 		ServiceAccountKey: tiles.Value{Value: cfg.ServiceBrokerServiceAccountKey},
 		DatabaseHost:      tiles.Value{Value: cfg.ServiceBrokerDbIP},
@@ -51,12 +46,17 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 		DatabasePassword:  tiles.SecretValue{Sec: tiles.Secret{Value: cfg.ServiceBrokerDbPassword}},
 	}
 
-	propertiesBytes, err := json.Marshal(&properties)
+	productConfig := tiles.ProductConfig{
+		ProductName: tile.Product.Name,
+		NetworkProperties: network,
+		ProductProperties: properties,
+		ResourceConfig: struct {}{},
+	}
+
+	configBytes, err := json.Marshal(productConfig)
 	if err != nil {
 		return err
 	}
 
-	resources := "{}"
-
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), resources)
+	return om.ConfigureProduct(tile.Product.Name, configBytes)
 }

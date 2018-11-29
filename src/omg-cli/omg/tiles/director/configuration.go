@@ -108,6 +108,9 @@ resource-configuration:
     instance_type:
       id: automatic
     internet_connected: false
+security-configuration: {}
+syslog-configuration:
+  enabled: false
 `
 
 var funcMap = template.FuncMap{
@@ -165,5 +168,5 @@ func (*Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *opsm
 		return fmt.Errorf("cannot generate director YAML: %v", err)
 	}
 
-	return om.SetupBosh(b.Bytes())
+	return om.SetupDirector(b.Bytes())
 }

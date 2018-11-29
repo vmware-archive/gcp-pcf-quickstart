@@ -25,7 +25,7 @@ require (
 	github.com/pivotal-cf/go-pivnet v0.0.50
 	github.com/pivotal-cf/jhanda v0.0.0-20181025233525-e6aa09a032df // indirect
 	github.com/pivotal-cf/kiln v0.0.0-20180926152015-0240e73df945 // indirect
-	github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f
+	github.com/pivotal-cf/om v0.0.0-20181101234326-040651b211b8985879337c86357727546099c46e
 	github.com/pivotal-cf/pivnet-cli v0.0.55 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2 // indirect

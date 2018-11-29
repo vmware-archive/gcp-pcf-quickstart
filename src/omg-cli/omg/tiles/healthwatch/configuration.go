@@ -42,27 +42,25 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 
 	network := tiles.NetworkODBConfig(cfg.ErtSubnetName, cfg, cfg.ServicesSubnetName)
 
-	networkBytes, err := json.Marshal(&network)
-	if err != nil {
-		return err
-	}
-
 	properties := &properties{
 		OpsManagerURL:           tiles.Value{Value: fmt.Sprintf("https://opsman.%s", cfg.DNSSuffix)},
 		BoshHealthCheckAZ:       tiles.Value{Value: cfg.Zone1},
 		EnableDeploymentChecker: tiles.Value{Value: "disable"},
 	}
 
-	propertiesBytes, err := json.Marshal(&properties)
-	if err != nil {
-		return err
-	}
-
 	resources := resources{}
-	resourcesBytes, err := json.Marshal(&resources)
+
+	productConfig := tiles.ProductConfig{
+		ProductName: tile.Product.Name,
+		NetworkProperties: network,
+		ProductProperties: properties,
+		ResourceConfig: resources,
+	}
+
+	configBytes, err := json.Marshal(productConfig)
 	if err != nil {
 		return err
 	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
+	return om.ConfigureProduct(tile.Product.Name, configBytes)
 }

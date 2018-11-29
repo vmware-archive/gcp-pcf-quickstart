@@ -150,21 +150,31 @@ func (om *Sdk) ReadyForAuth() bool {
 	return err == nil && resp.Status == api.EnsureAvailabilityStatusComplete
 }
 
-// SetupBosh applies the provided configuration to the BOSH director tile
-func (om *Sdk) SetupBosh(configYML []byte) error {
-	f, err := ioutil.TempFile("", "director-config")
+func (om *Sdk) tempConfigFile(prefix string, configBytes []byte) (string, error) {
+	f, err := ioutil.TempFile("", fmt.Sprintf("%s-config.yml", prefix))
 	if err != nil {
-		return fmt.Errorf("cannot create temp file for director configuration: %v", err)
+		return "", fmt.Errorf("cannot create temp file for %s configuration: %v", prefix, err)
 	}
-	defer os.Remove(f.Name())
-	_, err = f.Write(configYML)
+	defer f.Close()
+	_, err = f.Write(configBytes)
 	if err != nil {
-		return fmt.Errorf("cannot write to director yaml file: %v", err)
+		return "", fmt.Errorf("cannot write to %s yaml file: %v", prefix, err)
 	}
-	f.Close()
+
+	return f.Name(), nil
+}
+
+// SetupDirector applies the provided configuration to the BOSH director tile
+func (om *Sdk) SetupDirector(configYML []byte) error {
+	fileName, err := om.tempConfigFile("director", configYML)
+	if err != nil {
+		return err
+	}
+
+	defer os.Remove(fileName)
 
 	cmd := commands.NewConfigureDirector(os.Environ, om.api, om.logger)
-	return cmd.Execute([]string{"--config", f.Name()})
+	return cmd.Execute([]string{"--config", fileName})
 }
 
 // ApplyChanges deploys pending changes for a list of given tiles to the Ops Manager
@@ -225,14 +235,18 @@ func (om *Sdk) AvailableProducts() ([]api.ProductInfo, error) {
 	return products.ProductsList, nil
 }
 
-// ConfigureProduct sets up the settings for a given tile by name
-func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
+// ConfigureProduct sets up the settings for a given tile.
+func (om *Sdk) ConfigureProduct(name string, config []byte) error {
+	fileName, err := om.tempConfigFile(name, config)
+	if err != nil {
+		return err
+	}
+
+	defer os.Remove(fileName)
+
 	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.logger)
 	return cmd.Execute([]string{
-		"--product-name", name,
-		"--product-network", networks,
-		"--product-properties", properties,
-		"--product-resources", resources,
+		"--config", fileName,
 	})
 }
 

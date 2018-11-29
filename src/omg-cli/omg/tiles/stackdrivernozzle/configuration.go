@@ -48,21 +48,11 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 
 	network := tiles.NetworkConfig(cfg.ServicesSubnetName, cfg)
 
-	networkBytes, err := json.Marshal(&network)
-	if err != nil {
-		return err
-	}
-
 	properties := &properties{
 		Endpoint:          tiles.Value{Value: fmt.Sprintf("https://api.sys.%s", cfg.DNSSuffix)},
 		SkipSSLValidation: tiles.Value{Value: skipSSLValidation},
 		ServiceAccount:    tiles.Value{Value: cfg.StackdriverNozzleServiceAccountKey},
 		ProjectID:         tiles.Value{Value: cfg.ProjectName},
-	}
-
-	propertiesBytes, err := json.Marshal(&properties)
-	if err != nil {
-		return err
 	}
 
 	vmType := ""
@@ -75,10 +65,18 @@ func (t *Tile) Configure(envConfig *config.EnvConfig, cfg *config.Config, om *op
 			VMTypeID:          vmType,
 		},
 	}
-	resourcesBytes, err := json.Marshal(&resources)
+
+	productConfig := tiles.ProductConfig{
+		ProductName: tile.Product.Name,
+		NetworkProperties: network,
+		ProductProperties: properties,
+		ResourceConfig: resources,
+	}
+
+	configBytes, err := json.Marshal(productConfig)
 	if err != nil {
 		return err
 	}
 
-	return om.ConfigureProduct(tile.Product.Name, string(networkBytes), string(propertiesBytes), string(resourcesBytes))
+	return om.ConfigureProduct(tile.Product.Name, configBytes)
 }
