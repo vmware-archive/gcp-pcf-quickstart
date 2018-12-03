@@ -16,6 +16,7 @@ Follow this guide to prepare you Google Cloud Project and deployment machine.
    - If deploying Elastic Runtime:
      - Persistent Disk Standard (GB) (in desired region): 10,000 GB
      - CPUs (in desired region): 200
+1. Verify OS Login is NOT enabled in your project's Compute Engine project wide metadata. The quickstart relies on SSH keys from instance metadata during the installation process, and [enabling OS Login will disable SSH keys from instance metadata](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable_oslogin). Ensure the `enable-oslogin` key is either not set or set to `FALSE` in [the Compute Engine project wide metadata](https://pantheon.corp.google.com/compute/metadata). (Running the script `./util/disable-os-login.sh` will do this for you)
 
 ## Setting up your Deployment Machine
 
