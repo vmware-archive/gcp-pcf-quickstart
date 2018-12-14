@@ -40,9 +40,9 @@ import (
 )
 
 const (
-	connectTimeout     = 5
-	requestTimeout     = 1800
-	pollingIntervalSec = 10
+	connectTimeout  = time.Duration(30)*time.Second
+	requestTimeout  = time.Duration(1800)*time.Second
+	pollingInterval = time.Duration(10)*time.Second
 )
 
 // Sdk interacts with the Ops Manager's API.
@@ -57,14 +57,13 @@ type Sdk struct {
 // NewSdk creates an authenticated session and object to interact with Ops Manager
 func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logger) (*Sdk, error) {
 	client, err := network.NewOAuthClient(target, creds.Username, creds.Password, "", "",
-		creds.SkipSSLVerification, true, time.Duration(requestTimeout)*time.Second, time.Duration(connectTimeout)*time.Second)
+		creds.SkipSSLVerification, true, requestTimeout, connectTimeout)
 	if err != nil {
 		return nil, err
 	}
 
 	unauthenticatedClient := network.NewUnauthenticatedClient(target, creds.SkipSSLVerification,
-		time.Duration(requestTimeout)*time.Second,
-		time.Duration(connectTimeout)*time.Second)
+		requestTimeout, connectTimeout)
 
 	logger.SetPrefix(fmt.Sprintf("%s[OM SDK] ", logger.Prefix()))
 
@@ -170,14 +169,14 @@ func (om *Sdk) SetupBosh(configYML []byte) error {
 // ApplyChanges deploys pending changes for a list of given tiles to the Ops Manager
 func (om *Sdk) ApplyChanges(args []string) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, pollingInterval)
 	return cmd.Execute(args)
 }
 
 // ApplyDirector deploys the BOSH Director to the Ops Manager
 func (om *Sdk) ApplyDirector() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
+	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, pollingInterval)
 	return cmd.Execute([]string{"--skip-deploy-products"})
 }
 
@@ -404,6 +403,6 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 // DeleteInstallation runs the om cli DeleteInstallation command.
 func (om *Sdk) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)
+	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingInterval)
 	return cmd.Execute(nil)
 }
