@@ -94,7 +94,7 @@ func (c *Connection) UploadFile(path, destName string) error {
 	defer ses.Close()
 
 	c.logger.Printf("uploading file %s as %s", path, destName)
-	return scp.CopyPath(path, fmt.Sprintf("~/%s", destName), ses)
+	return scp.CopyPath(path, destName, ses)
 }
 
 // Mkdir makes a directory on the ssh target host.
