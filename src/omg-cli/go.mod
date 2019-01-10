@@ -54,7 +54,7 @@ require (
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 	github.com/zmb3/gogetdoc v0.0.0-20181208215853-c5ca8f4d4936 // indirect
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
-	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
+	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
 	golang.org/x/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect
 	golang.org/x/net v0.0.0-20181217023233-e147a9138326 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
