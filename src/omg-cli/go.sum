@@ -67,6 +67,8 @@ github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf h1:7+FW5aGwISbqUtkfmI
 github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf/go.mod h1:RpwtwJQFrIEPstU94h88MWPXP2ektJZ8cZ0YntAmXiE=
 github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd h1:1e+0Z+T4t1mKL5xxvxXh5FkjuiToQGKreCobLu7lR3Y=
 github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd/go.mod h1:qkLSc0A5EXSP6B04TrN4oQoxqFI7A8XvoXSlJi8cwk8=
+github.com/hashicorp/go-version v1.1.0 h1:bPIoEKD27tNdebFGGxxYwcL4nepeY4j1QP23PFRGzg0=
+github.com/hashicorp/go-version v1.1.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/iancoleman/strcase v0.0.0-20181128000000-3605ed457bf7 h1:xaEaXiQ2EzvQHzFrbPkX0MhxmG7eXUDLw4BP9gi7IA4=
@@ -134,8 +136,14 @@ github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f h1:Z9iLAItrnbrRKFXp7
 github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pivotal-cf/om v0.0.0-20181203235446-d23650eea8c5 h1:5/Bi0FLoh66zRN/8rJ+WLv/88tqUZu4DHyTKZulBk4U=
 github.com/pivotal-cf/om v0.0.0-20181203235446-d23650eea8c5/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
+github.com/pivotal-cf/om v0.0.0-20190103232402-ada0d4a4790f h1:epB9Z6UOQxL7IKx3Zg90kSkUZYZbt6Af3SLNkc4b2io=
+github.com/pivotal-cf/om v0.0.0-20190103232402-ada0d4a4790f/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
+github.com/pivotal-cf/om v0.0.0-20190110231022-87c74ad9b546 h1:SvXqutSryQ2HvVn9UpphWJdi9S5dFLKrZ09OkiDB0vQ=
+github.com/pivotal-cf/om v0.0.0-20190110231022-87c74ad9b546/go.mod h1:lvUXUJbWlZpq3odWwJ67T2IbKSNxkvUuLOooTFo98t8=
 github.com/pivotal-cf/pivnet-cli v0.0.55 h1:R8mnLHUVb9DWuVqHdmkLCltG7bUTJq9nj5OexPt5Y2s=
 github.com/pivotal-cf/pivnet-cli v0.0.55/go.mod h1:GIenTUfi8rXtvDXnOuUMfQ+ZofegQ+7XG2Hby3jB0+4=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/robdimsdale/sanitizer v0.0.0-20160522134901-ab2334cb7539/go.mod h1:tqCODtkKV+9Tfvt9JURvKCTxJ69bA/OU/QhsaQLK/rc=

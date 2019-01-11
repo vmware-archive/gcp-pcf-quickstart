@@ -23,6 +23,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf // indirect
 	github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd
+	github.com/hashicorp/go-version v1.1.0 // indirect
 	github.com/iancoleman/strcase v0.0.0-20181128000000-3605ed457bf7
 	github.com/imdario/mergo v0.3.6
 	github.com/josharian/impl v0.0.0-20180228163738-3d0f908298c4 // indirect
@@ -44,8 +45,9 @@ require (
 	github.com/pivotal-cf/go-pivnet v0.0.50
 	github.com/pivotal-cf/jhanda v0.0.0-20181025233525-e6aa09a032df // indirect
 	github.com/pivotal-cf/kiln v0.0.0-20181206154151-8c596535b097 // indirect
-	github.com/pivotal-cf/om v0.0.0-20181101234326-f77a9133441f
+	github.com/pivotal-cf/om v0.0.0-20190103232402-ada0d4a4790f
 	github.com/pivotal-cf/pivnet-cli v0.0.55 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rogpeppe/godef v1.1.1 // indirect
 	github.com/shirou/gopsutil v2.18.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.2.0 // indirect

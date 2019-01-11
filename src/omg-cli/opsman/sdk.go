@@ -52,6 +52,7 @@ type Sdk struct {
 	api                   api.Api
 	creds                 config.OpsManagerCredentials
 	logger                *log.Logger
+	target                string
 }
 
 // NewSdk creates an authenticated session and object to interact with Ops Manager
@@ -83,6 +84,7 @@ func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logge
 		}),
 		creds:  creds,
 		logger: logger,
+		target: target,
 	}
 	return sdk, nil
 }
@@ -227,12 +229,20 @@ func (om *Sdk) AvailableProducts() ([]api.ProductInfo, error) {
 
 // ConfigureProduct sets up the settings for a given tile by name
 func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
-	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.logger)
+	configFileContents := fmt.Sprintf(`{
+		"product-name": "%s",
+		"product-properties": %s,
+		"network-properties": %s,
+		"resource-config": %s
+		}`, name, properties, networks, resources)
+	configFile, err := ioutil.TempFile("", "")
+	if err != nil {
+		return err
+	}
+	configFile.WriteString(configFileContents)
+	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.target, om.logger)
 	return cmd.Execute([]string{
-		"--product-name", name,
-		"--product-network", networks,
-		"--product-properties", properties,
-		"--product-resources", resources,
+		"--config", configFile.Name(),
 	})
 }
 
