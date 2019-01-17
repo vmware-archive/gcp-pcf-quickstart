@@ -86,7 +86,6 @@ type largeFootprintResources struct {
 	TCPRouter                    tiles.Resource `json:"tcp_router"`
 	Router                       tiles.Resource `json:"router"`
 	DiegoBrain                   tiles.Resource `json:"diego_brain"`
-	ConsulServer                 tiles.Resource `json:"consul_server"`
 	Nats                         tiles.Resource `json:"nats"`
 	NfsServer                    tiles.Resource `json:"nfs_server"`
 	MysqlProxy                   tiles.Resource `json:"mysql_proxy"`
