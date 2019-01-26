@@ -39,33 +39,6 @@
       },
       "optional": false
     },
-    ".properties.consul_encrypt_key": {
-      "type": "secret",
-      "configurable": false,
-      "credential": true,
-      "value": {
-        "secret": "***"
-      },
-      "optional": false
-    },
-    ".properties.consul_agent_cert": {
-      "type": "rsa_cert_credentials",
-      "configurable": false,
-      "credential": true,
-      "value": {
-        "private_key_pem": "***"
-      },
-      "optional": false
-    },
-    ".properties.consul_server_cert": {
-      "type": "rsa_cert_credentials",
-      "configurable": false,
-      "credential": true,
-      "value": {
-        "private_key_pem": "***"
-      },
-      "optional": false
-    },
     ".properties.auctioneer_client_cert": {
       "type": "rsa_cert_credentials",
       "configurable": false,
