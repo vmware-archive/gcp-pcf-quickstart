@@ -24,8 +24,8 @@ var fullRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
 		ReleaseID: 309043,
-		FileID:    317727,
-		Sha256:    "4ccd8080c3e383d4359208ca1849322a857dbb5d03cc96cfb16ec0fe7b90a6f5",
+		FileID:    317700,
+		Sha256:    "04b381f83736e3d3af398bd6efbbf06dff986c6706371aac6b7f64863ee90d1f",
 	},
 	Product:  product,
 	Stemcell: &stemcell,
@@ -35,8 +35,8 @@ var smallRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
 		ReleaseID: 309043,
-		FileID:    317700,
-		Sha256:    "04b381f83736e3d3af398bd6efbbf06dff986c6706371aac6b7f64863ee90d1f",
+		FileID:    317727,
+		Sha256:    "4ccd8080c3e383d4359208ca1849322a857dbb5d03cc96cfb16ec0fe7b90a6f5",
 	},
 	Product:  product,
 	Stemcell: &stemcell,
