@@ -23,6 +23,7 @@ root=$(pwd)
 pushd src/omg-cli
 rm -f $root/bin/omg-cli
 export GOFLAGS=-mod=vendor
+export GO111MODULE=on
 go build -o $root/bin/omg-cli
 popd
 export PATH=$root/bin:$PATH
