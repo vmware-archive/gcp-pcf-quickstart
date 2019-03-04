@@ -23,9 +23,9 @@ import (
 var fullRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
-		ReleaseID: 259105,
-		FileID:    279697,
-		Sha256:    "30a827ec8106f359ee49448707c2304b87e73ad4a422baff15038b8acb1525c7",
+		ReleaseID: 309043,
+		FileID:    317727,
+		Sha256:    "4ccd8080c3e383d4359208ca1849322a857dbb5d03cc96cfb16ec0fe7b90a6f5",
 	},
 	Product:  product,
 	Stemcell: &stemcell,
@@ -34,9 +34,9 @@ var fullRuntime = config.Tile{
 var smallRuntime = config.Tile{
 	Pivnet: config.PivnetMetadata{
 		Name:      "elastic-runtime",
-		ReleaseID: 259105,
-		FileID:    279697,
-		Sha256:    "9756289d1b4f7c9ad565755395cad98dce77917432221ea6c789719696521887",
+		ReleaseID: 309043,
+		FileID:    317700,
+		Sha256:    "04b381f83736e3d3af398bd6efbbf06dff986c6706371aac6b7f64863ee90d1f",
 	},
 	Product:  product,
 	Stemcell: &stemcell,
@@ -44,17 +44,17 @@ var smallRuntime = config.Tile{
 
 var product = config.OpsManagerMetadata{
 	Name:    "cf",
-	Version: "2.4.1",
+	Version: "2.4.4",
 }
 
 var stemcell = config.StemcellMetadata{
 	PivnetMetadata: config.PivnetMetadata{
 		Name:      "stemcells-ubuntu-xenial",
-		ReleaseID: 276954,
-		FileID:    288597,
-		Sha256:    "9f9d1fab2b5165c5cee52c6b0a84df96c6861355135fa8a99748f59832466b4e",
+		ReleaseID: 301761,
+		FileID:    313921,
+		Sha256:    "b28e52be92ba3bba929807d395c81159cbb99b6feb0524aa41ab548cfd77b85b",
 	},
-	StemcellName: "light-bosh-stemcell-170.19-google-kvm-ubuntu-xenial-go_agent",
+	StemcellName: "light-bosh-stemcell-170.30-google-kvm-ubuntu-xenial-go_agent",
 }
 
 // Tile is the tile for the Pivotal Application Service.
