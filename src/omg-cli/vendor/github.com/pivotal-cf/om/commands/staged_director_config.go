@@ -16,12 +16,13 @@ type StagedDirectorConfig struct {
 	Options struct {
 		IncludeCredentials  bool `long:"include-credentials" short:"c" description:"include credentials. note: requires product to have been deployed"`
 		IncludePlaceholders bool `long:"include-placeholders" short:"r" description:"replace obscured credentials to interpolatable placeholders"`
+		NoRedact            bool `long:"no-redact" description:"Redact IaaS values from director configuration"`
 	}
 }
 
 //go:generate counterfeiter -o ./fakes/staged_director_config_service.go --fake-name StagedDirectorConfigService . stagedDirectorConfigService
 type stagedDirectorConfigService interface {
-	GetStagedDirectorProperties() (map[string]map[string]interface{}, error)
+	GetStagedDirectorProperties(bool) (map[string]map[string]interface{}, error)
 	GetStagedDirectorAvailabilityZones() (api.AvailabilityZonesOutput, error)
 	GetStagedDirectorNetworks() (api.NetworksConfigurationOutput, error)
 
@@ -66,7 +67,7 @@ func (ec StagedDirectorConfig) Execute(args []string) error {
 		return err
 	}
 
-	properties, err := ec.service.GetStagedDirectorProperties()
+	properties, err := ec.service.GetStagedDirectorProperties(!ec.Options.NoRedact)
 	if err != nil {
 		return err
 	}
@@ -95,10 +96,7 @@ func (ec StagedDirectorConfig) Execute(args []string) error {
 	if azs.AvailabilityZones != nil {
 		config["az-configuration"] = azs.AvailabilityZones
 	}
-	config["director-configuration"] = properties["director_configuration"]
-	config["iaas-configuration"] = properties["iaas_configuration"]
-	config["syslog-configuration"] = properties["syslog_configuration"]
-	config["security-configuration"] = properties["security_configuration"]
+	config["properties-configuration"] = properties
 	config["network-assignment"] = assignedNetworkAZ
 	config["networks-configuration"] = networks
 	config["vmextensions-configuration"] = vmExtensions
@@ -114,7 +112,7 @@ func (ec StagedDirectorConfig) Execute(args []string) error {
 	config["resource-configuration"] = resourceConfigs
 
 	if !ec.Options.IncludeCredentials && !ec.Options.IncludePlaceholders {
-		delete(config, "iaas-configuration")
+		delete(config["properties-configuration"].(map[string]map[string]interface{}), "iaas_configuration")
 	}
 
 	for key, value := range config {
@@ -141,12 +139,14 @@ func (ec StagedDirectorConfig) filterSecrets(prefix string, keyName string, valu
 	switch typedValue := value.(type) {
 	case map[string]interface{}:
 		return ec.handleMap(prefix, typedValue)
+	case map[string]map[string]interface{}:
+		return ec.handleMapOfMaps(prefix, typedValue)
 
 	case []interface{}:
 		return ec.handleSlice(prefix, typedValue)
 
 	case string, nil:
-		if strings.Contains(prefix, "iaas-configuration") {
+		if strings.Contains(prefix, "iaas_configuration") {
 			if ec.Options.IncludePlaceholders {
 				return "((" + prefix + "))", nil
 			}
@@ -168,6 +168,21 @@ func (ec StagedDirectorConfig) filterSecrets(prefix string, keyName string, valu
 }
 
 func (ec StagedDirectorConfig) handleMap(prefix string, value map[string]interface{}) (interface{}, error) {
+	newValue := map[string]interface{}{}
+	for innerKey, innerVal := range value {
+		returnedVal, err := ec.filterSecrets(prefix+"_"+innerKey, innerKey, innerVal)
+
+		if err != nil {
+			return nil, err
+		}
+		if returnedVal != nil {
+			newValue[innerKey] = returnedVal
+		}
+	}
+	return newValue, nil
+}
+
+func (ec StagedDirectorConfig) handleMapOfMaps(prefix string, value map[string]map[string]interface{}) (interface{}, error) {
 	newValue := map[string]interface{}{}
 	for innerKey, innerVal := range value {
 		returnedVal, err := ec.filterSecrets(prefix+"_"+innerKey, innerKey, innerVal)
