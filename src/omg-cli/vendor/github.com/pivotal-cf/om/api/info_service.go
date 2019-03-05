@@ -14,24 +14,19 @@ type Info struct {
 }
 
 func (i Info) VersionAtLeast(major, minor int) bool {
-	// Given: X.Y-build.Z or X.Y.Z-build.A
+	// Given: X.Y-build.Z
 	// Extract X and Y
 	idx := strings.Index(i.Version, ".")
-	majv := i.Version[:idx]                                        // take substring up to '.'
-	legacyMinv := i.Version[idx+1 : strings.Index(i.Version, "-")] // take substring between '.' and '-'
+	majv := i.Version[:idx]                                  // take substring up to '.'
+	minv := i.Version[idx+1 : strings.Index(i.Version, "-")] // take substring between '.' and '-'
 
 	maj, err := strconv.Atoi(majv)
 	if err != nil {
 		panic("invalid version: " + i.Version)
 	}
-
-	min, err := strconv.Atoi(legacyMinv)
+	min, err := strconv.Atoi(minv)
 	if err != nil {
-		semverMinv := legacyMinv[:strings.Index(legacyMinv, ".")] // take substring up to '.'
-		min, err = strconv.Atoi(semverMinv)
-		if err != nil {
-			panic("invalid version: " + i.Version)
-		}
+		panic("invalid version: " + i.Version)
 	}
 
 	if maj < major || (maj == major && min < minor) {
@@ -51,10 +46,6 @@ func (a Api) Info() (Info, error) {
 		return r.Info, errors.Wrap(err, "could not make request to info endpoint")
 	}
 	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return Info{}, err
-	}
 
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	return r.Info, err

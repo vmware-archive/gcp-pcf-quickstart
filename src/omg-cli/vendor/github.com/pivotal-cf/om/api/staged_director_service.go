@@ -42,24 +42,12 @@ type ClusterOutput struct {
 	ResourcePool string `yaml:"resource_pool"`
 }
 
-func (a Api) GetStagedDirectorProperties(redact bool) (map[string]map[string]interface{}, error) {
-	var queryString string
-
-	if redact {
-		queryString = "/api/v0/staged/director/properties?redact=true"
-	} else {
-		queryString = "/api/v0/staged/director/properties?redact=false"
-	}
-
-	resp, err := a.sendAPIRequest("GET", queryString, nil)
+func (a Api) GetStagedDirectorProperties() (map[string]map[string]interface{}, error) {
+	resp, err := a.sendAPIRequest("GET", "/api/v0/staged/director/properties", nil)
 	if err != nil {
 		return nil, err // un-tested
 	}
 	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return nil, err
-	}
 
 	var properties map[string]map[string]interface{}
 	if err = yaml.NewDecoder(resp.Body).Decode(&properties); err != nil {
@@ -70,21 +58,16 @@ func (a Api) GetStagedDirectorProperties(redact bool) (map[string]map[string]int
 }
 
 func (a Api) GetStagedDirectorAvailabilityZones() (AvailabilityZonesOutput, error) {
-	var properties AvailabilityZonesOutput
-
 	resp, err := a.sendAPIRequest("GET", "/api/v0/staged/director/availability_zones", nil)
+	var properties AvailabilityZonesOutput
 	if err != nil {
+		if resp.StatusCode == http.StatusMethodNotAllowed {
+			return properties, nil
+		}
+
 		return properties, err // un-tested
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusMethodNotAllowed {
-		return properties, nil
-	}
-
-	if err = validateStatusOK(resp); err != nil {
-		return AvailabilityZonesOutput{}, err
-	}
 
 	if err = yaml.NewDecoder(resp.Body).Decode(&properties); err != nil {
 		return properties, errors.Wrap(err, "could not parse json")
@@ -94,17 +77,12 @@ func (a Api) GetStagedDirectorAvailabilityZones() (AvailabilityZonesOutput, erro
 }
 
 func (a Api) GetStagedDirectorNetworks() (NetworksConfigurationOutput, error) {
-	var properties NetworksConfigurationOutput
-
 	resp, err := a.sendAPIRequest("GET", "/api/v0/staged/director/networks", nil)
+	var properties NetworksConfigurationOutput
 	if err != nil {
 		return properties, err // un-tested
 	}
 	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return NetworksConfigurationOutput{}, err
-	}
 
 	if err = yaml.NewDecoder(resp.Body).Decode(&properties); err != nil {
 		return properties, errors.Wrap(err, "could not parse json")

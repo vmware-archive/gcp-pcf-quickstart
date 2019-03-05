@@ -26,17 +26,9 @@ func (a Api) ListStemcells() (ProductStemcells, error) {
 	}
 	defer resp.Body.Close()
 
-	if err = validateStatusOK(resp); err != nil {
-		return ProductStemcells{}, err
-	}
-
 	var productStemcells ProductStemcells
 	err = json.NewDecoder(resp.Body).Decode(&productStemcells)
-	if err != nil {
-		return ProductStemcells{}, nil
-	}
-
-	return productStemcells, nil
+	return productStemcells, err
 }
 
 func (a Api) AssignStemcell(input ProductStemcells) error {
@@ -45,14 +37,6 @@ func (a Api) AssignStemcell(input ProductStemcells) error {
 		return errors.Wrap(err, "could not marshal json")
 	}
 
-	resp, err := a.sendAPIRequest("PATCH", "/api/v0/stemcell_assignments", jsonData)
-	if err != nil {
-		return err
-	}
-
-	if err = validateStatusOK(resp); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = a.sendAPIRequest("PATCH", "/api/v0/stemcell_assignments", jsonData)
+	return err
 }

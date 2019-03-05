@@ -55,16 +55,10 @@ func (a Api) Setup(input SetupInput) (SetupOutput, error) {
 		return SetupOutput{}, err
 	}
 
-	resp, err := a.sendUnauthedAPIRequest("POST", "/api/v0/setup", payload)
+	_, err = a.sendUnauthedAPIRequest("POST", "/api/v0/setup", payload)
 	if err != nil {
 		return SetupOutput{}, errors.Wrap(err, "could not make api request to setup endpoint")
 	}
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return SetupOutput{}, err
-	}
-
 	return SetupOutput{}, nil
 }
 

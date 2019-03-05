@@ -2,14 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/pivotal-cf/jhanda"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/validator"
-	"os"
-	"path/filepath"
-	"regexp"
 
 	"strconv"
 )
@@ -63,10 +62,9 @@ func (us UploadStemcell) Execute(args []string) error {
 		return fmt.Errorf("could not parse upload-stemcell flags: %s", err)
 	}
 
-	stemcellFilename := us.Options.Stemcell
 	if us.Options.Shasum != "" {
 		shaValidator := validator.NewSHA256Calculator()
-		shasum, err := shaValidator.Checksum(stemcellFilename)
+		shasum, err := shaValidator.Checksum(us.Options.Stemcell)
 
 		if err != nil {
 			return err
@@ -92,7 +90,7 @@ func (us UploadStemcell) Execute(args []string) error {
 		}
 
 		for _, stemcell := range report.Stemcells {
-			if stemcell == filepath.Base(stemcellFilename) {
+			if stemcell == filepath.Base(us.Options.Stemcell) {
 				us.logger.Printf("stemcell has already been uploaded")
 				return nil
 			}
@@ -100,22 +98,8 @@ func (us UploadStemcell) Execute(args []string) error {
 	}
 
 	var err error
-	prefixRegex := regexp.MustCompile(`^\[.*?,.*?\](.+)$`)
-	if prefixRegex.MatchString(filepath.Base(stemcellFilename)) {
-		matches := prefixRegex.FindStringSubmatch(filepath.Base(stemcellFilename))
-
-		newStemcellFilename := filepath.Join(filepath.Dir(stemcellFilename), matches[1])
-		err = os.Symlink(stemcellFilename, newStemcellFilename)
-		if err != nil {
-			return err
-		}
-		stemcellFilename = newStemcellFilename
-
-		defer os.Remove(newStemcellFilename)
-	}
-
 	for i := 0; i <= maxStemcellUploadRetries; i++ {
-		err = us.multipart.AddFile("stemcell[file]", stemcellFilename)
+		err = us.multipart.AddFile("stemcell[file]", us.Options.Stemcell)
 		if err != nil {
 			return fmt.Errorf("failed to load stemcell: %s", err)
 		}

@@ -39,33 +39,13 @@ func (a Api) ListCertificateAuthorities() (CertificateAuthoritiesOutput, error) 
 		return output, err
 	}
 
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return CertificateAuthoritiesOutput{}, err
-	}
-
 	err = json.NewDecoder(resp.Body).Decode(&output)
-	if err != nil {
-		return CertificateAuthoritiesOutput{}, err
-	}
-
-	return output, nil
+	return output, err
 }
 
 func (a Api) RegenerateCertificates() error {
-	resp, err := a.sendAPIRequest("POST", "/api/v0/certificate_authorities/active/regenerate", nil)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := a.sendAPIRequest("POST", "/api/v0/certificate_authorities/active/regenerate", nil)
+	return err
 }
 
 func (a Api) GenerateCertificateAuthority() (CA, error) {
@@ -76,18 +56,8 @@ func (a Api) GenerateCertificateAuthority() (CA, error) {
 		return CA{}, err
 	}
 
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return CA{}, err
-	}
-
 	err = json.NewDecoder(resp.Body).Decode(&output)
-	if err != nil {
-		return CA{}, err
-	}
-
-	return output, nil
+	return output, err
 }
 
 func (a Api) CreateCertificateAuthority(certBody CertificateAuthorityInput) (CA, error) {
@@ -103,47 +73,17 @@ func (a Api) CreateCertificateAuthority(certBody CertificateAuthorityInput) (CA,
 		return CA{}, err
 	}
 
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return CA{}, err
-	}
-
 	err = json.NewDecoder(resp.Body).Decode(&output)
-	if err != nil {
-		return CA{}, err
-	}
-
-	return output, nil
+	return output, err
 }
 
 func (a Api) ActivateCertificateAuthority(input ActivateCertificateAuthorityInput) error {
-	resp, err := a.sendAPIRequest("POST", fmt.Sprintf("/api/v0/certificate_authorities/%s/activate", input.GUID), []byte("{}"))
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := a.sendAPIRequest("POST", fmt.Sprintf("/api/v0/certificate_authorities/%s/activate", input.GUID), []byte("{}"))
+	return err
 }
 
 func (a Api) DeleteCertificateAuthority(input DeleteCertificateAuthorityInput) error {
 	path := fmt.Sprintf("/api/v0/certificate_authorities/%s", input.GUID)
-	resp, err := a.sendAPIRequest("DELETE", path, nil)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := a.sendAPIRequest("DELETE", path, nil)
+	return err
 }

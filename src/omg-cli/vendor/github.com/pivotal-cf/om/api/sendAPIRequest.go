@@ -30,7 +30,12 @@ func sendRequest(client httpClient, method, endpoint string, jsonData []byte) (*
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not send api request to %s %s", method, endpoint))
+		return resp, errors.Wrap(err, fmt.Sprintf("could not send api request to %s %s", method, endpoint))
+	}
+
+	err = validateStatusOK(resp)
+	if err != nil {
+		return resp, err
 	}
 
 	return resp, nil

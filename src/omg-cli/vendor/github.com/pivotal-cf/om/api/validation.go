@@ -17,6 +17,5 @@ func validateStatusOK(resp *http.Response) error {
 
 		return fmt.Errorf("request failed: unexpected response:\n%s", out)
 	}
-
 	return nil
 }

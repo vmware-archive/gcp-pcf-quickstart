@@ -17,16 +17,12 @@ type ImportInstallationInput struct {
 	PollingInterval int
 }
 
-func (a Api) DownloadInstallationAssetCollection(outputFile string) error {
+func (a Api) DownloadInstallationAssetCollection(outputFile string, pollingInterval int) error {
 	resp, err := a.sendProgressAPIRequest("GET", "/api/v0/installation_asset_collection", nil)
 	if err != nil {
 		return errors.Wrap(err, "could not make api request to installation_asset_collection endpoint")
 	}
 	defer resp.Body.Close()
-
-	if err = validateStatusOK(resp); err != nil {
-		return err
-	}
 
 	outputFileHandle, err := os.Create(outputFile)
 	if err != nil {
@@ -71,17 +67,12 @@ func (a Api) UploadInstallationAssetCollection(input ImportInstallationInput) er
 func (a Api) DeleteInstallationAssetCollection() (InstallationsServiceOutput, error) {
 	resp, err := a.sendAPIRequest("DELETE", "/api/v0/installation_asset_collection", []byte(`{"errands": {}}`))
 	if err != nil {
+		if resp.StatusCode == http.StatusGone {
+			return InstallationsServiceOutput{}, nil
+		}
 		return InstallationsServiceOutput{}, errors.Wrap(err, "could not make api request to installation_asset_collection endpoint")
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusGone {
-		return InstallationsServiceOutput{}, nil
-	}
-
-	if err = validateStatusOK(resp); err != nil {
-		return InstallationsServiceOutput{}, err
-	}
 
 	var installation struct {
 		Install struct {
