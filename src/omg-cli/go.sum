@@ -219,6 +219,10 @@ github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d/go.mod h1:Udh
 github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e/go.mod h1:HuIsMU8RRBOtsCgI77wP899iHVBQpCmg4ErYMZB+2IA=
 github.com/starkandwayne/om-tiler v0.0.0-20190314182556-3814cd1c7a70 h1:OCEAGD5v6DACr6qoe4PK9i2MdqyRtkRuOUAThOZB1mM=
 github.com/starkandwayne/om-tiler v0.0.0-20190314182556-3814cd1c7a70/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
+github.com/starkandwayne/om-tiler v0.0.0-20190318105842-3d4a54168922 h1:2rfngAXZ5EdirKKht0l6gvoWwcPtc24NYy+RFvwJ+Lg=
+github.com/starkandwayne/om-tiler v0.0.0-20190318105842-3d4a54168922/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
+github.com/starkandwayne/om-tiler v0.0.0-20190318111610-b7348916a383 h1:EzysXX1BOzoQXiZU78Y8j9oYMqXmNY85y22PG6Fff5c=
+github.com/starkandwayne/om-tiler v0.0.0-20190318111610-b7348916a383/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -52,14 +53,14 @@ func NewClient(c Config, logger *log.Logger) *Client {
 		acceptEULA: c.AcceptEULA, filter: filter}
 }
 
-func (c *Client) DownloadFile(f pattern.PivnetFile, path string) (file *os.File, err error) {
+func (c *Client) DownloadFile(f pattern.PivnetFile, dir string) (file *os.File, err error) {
 	if c.acceptEULA {
 		if err = c.AcceptEULA(f); err != nil {
 			return
 		}
 	}
 	for i := 0; i < retryAttempts; i++ {
-		file, err = c.downloadFile(f, path)
+		file, err = c.downloadFile(f, dir)
 
 		// Success or recoverable error
 		if err == nil || err != io.ErrUnexpectedEOF {
@@ -96,13 +97,21 @@ func (c *Client) AcceptEULA(f pattern.PivnetFile) error {
 	return c.client.EULA.Accept(f.Slug, release.ID)
 }
 
-func (c *Client) downloadFile(f pattern.PivnetFile, path string) (file *os.File, err error) {
-	if path == "" {
-		file, err = ioutil.TempFile("", f.Slug)
-		path = file.Name()
-	} else {
-		file, err = os.Create(path)
+func (c *Client) downloadFile(f pattern.PivnetFile, dir string) (file *os.File, err error) {
+	if dir == "" {
+		dir, err = ioutil.TempDir("", f.Slug)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	productFile, release, err := c.lookupProductFile(f)
+	if err != nil {
+		return nil, err
+	}
+
+	baseName := filepath.Base(productFile.AWSObjectKey)
+	file, err = os.Create(filepath.Join(dir, baseName))
 	if err != nil {
 		return nil, err
 	}
@@ -110,14 +119,9 @@ func (c *Client) downloadFile(f pattern.PivnetFile, path string) (file *os.File,
 	// Delete the file if we're returning an error
 	defer func() {
 		if err != nil {
-			os.Remove(path)
+			os.RemoveAll(dir)
 		}
 	}()
-
-	productFile, release, err := c.lookupProductFile(f)
-	if err != nil {
-		return nil, err
-	}
 
 	return file, c.client.ProductFiles.DownloadForRelease(file, f.Slug, release.ID, productFile.ID, os.Stdout)
 }

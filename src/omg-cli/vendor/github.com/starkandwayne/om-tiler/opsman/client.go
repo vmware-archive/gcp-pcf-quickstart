@@ -100,7 +100,6 @@ func (c *Client) UploadProduct(p *os.File) error {
 }
 
 func (c *Client) UploadStemcell(s *os.File) error {
-	fmt.Println(s.Name())
 	args := []string{
 		fmt.Sprintf("--stemcell=%s", s.Name()),
 		"--floating",

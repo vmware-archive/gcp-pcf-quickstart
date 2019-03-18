@@ -44,7 +44,7 @@ tiles:
     uaa/service_provider_key_credentials/certificate: ((ssl_cert))
     uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     security_acknowledgement: true
-    mysql_monitor/recipient_email: admin@example.org # TODO: configurable?
+    mysql_monitor/recipient_email: admin@example.org
     system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
     system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
     system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
@@ -52,9 +52,9 @@ tiles:
     system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
     system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
     system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
-    control_elb_names: ((http_lb_backend_name))
-    ha_proxy_elb_names: ((http_lb_backend_name))
-    router_elb_names: ((http_lb_backend_name))
+    control_elb_names: [tcp:((ssh_router_pool))]
+    ha_proxy_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
+    router_elb_names: [tcp:((tcp_router_pool))]
 
 
 # - product:

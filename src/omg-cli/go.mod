@@ -13,7 +13,7 @@ require (
 	github.com/onsi/gomega v1.4.3
 	github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
-	github.com/starkandwayne/om-tiler v0.0.0-20190314182556-3814cd1c7a70
+	github.com/starkandwayne/om-tiler v0.0.0-20190318111610-b7348916a383
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a // indirect
