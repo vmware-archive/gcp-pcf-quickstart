@@ -1,0 +1,37 @@
+- type: replace
+  path: /product-properties/.properties.system_blobstore?
+  value:
+    value: external_azure
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.buildpacks_container?
+  value:
+    value: ((system_blobstore/external_azure/buildpacks_container))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.droplets_container?
+  value:
+    value: ((system_blobstore/external_azure/droplets_container))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.packages_container?
+  value:
+    value: ((system_blobstore/external_azure/packages_container))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.resources_container?
+  value:
+    value: ((system_blobstore/external_azure/resources_container))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.account_name?
+  value:
+    value: ((system_blobstore/external_azure/account_name))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.access_key?
+  value:
+    value:
+      secret: ((system_blobstore/external_azure/access_key))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.environment?
+  value:
+    value: ((system_blobstore/external_azure/environment))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_azure.enable_bbr?
+  value:
+    value: ((system_blobstore/external_azure/enable_bbr))

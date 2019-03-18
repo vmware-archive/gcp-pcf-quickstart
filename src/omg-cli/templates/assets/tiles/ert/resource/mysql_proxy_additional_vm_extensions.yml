@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/mysql_proxy?/additional_vm_extensions?
+  value: ((mysql_proxy_additional_vm_extensions))

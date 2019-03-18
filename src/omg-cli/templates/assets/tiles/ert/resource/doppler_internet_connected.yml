@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/doppler?/internet_connected?
+  value: ((doppler_internet_connected))

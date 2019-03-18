@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/healthwatch-forwarder?/internet_connected?
+  value: ((healthwatch-forwarder_internet_connected))

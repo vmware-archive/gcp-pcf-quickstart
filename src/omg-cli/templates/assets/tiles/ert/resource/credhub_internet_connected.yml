@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/credhub?/internet_connected?
+  value: ((credhub_internet_connected))

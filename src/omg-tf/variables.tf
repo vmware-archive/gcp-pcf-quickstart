@@ -177,3 +177,12 @@ variable "credhub_key" {
   type        = "string"
   default     = ""
 }
+
+/*********************************
+ * Google Cloud Storage Options *
+ *********************************/
+
+variable "create_blobstore_service_account_key" {
+  description = "Create a scoped service account key for gcs storage access"
+  default     = true
+}

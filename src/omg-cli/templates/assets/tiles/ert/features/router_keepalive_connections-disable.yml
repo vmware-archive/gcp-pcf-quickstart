@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.router_keepalive_connections?
+  value:
+    value: disable

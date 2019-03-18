@@ -17,11 +17,7 @@
 package commands
 
 import (
-	"fmt"
 	"log"
-
-	"omg-cli/config"
-	"omg-cli/opsman"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -37,31 +33,31 @@ type GetCredentialCommand struct {
 const getCredentialName = "get-credential"
 
 func (cmd *GetCredentialCommand) register(app *kingpin.Application) {
-	c := app.Command(getCredentialName, "Fetch a credential for a tile").Action(cmd.run)
-	registerEnvConfigFlag(c, &cmd.envDir)
+	// 	c := app.Command(getCredentialName, "Fetch a credential for a tile").Action(cmd.run)
+	// 	registerEnvConfigFlag(c, &cmd.envDir)
+	//
+	// 	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&cmd.appName)
+	// 	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&cmd.credential)
+	// }
+	//
+	// func (cmd *GetCredentialCommand) run(c *kingpin.ParseContext) error {
+	// 	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	cred, err := omSdk.GetCredentials(cmd.appName, cmd.credential)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	cmd.logger.Printf("identity: %s", cred.Identity)
+	// 	cmd.logger.Printf("password: %s", cred.Password)
 
-	c.Flag("app-name", "Name of the Product (type)").Required().StringVar(&cmd.appName)
-	c.Flag("credential", "Credential to fetch (eg .uaa.admin_credentials)").Required().StringVar(&cmd.credential)
-}
-
-func (cmd *GetCredentialCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
-	if err != nil {
-		return err
-	}
-
-	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	cred, err := omSdk.GetCredentials(cmd.appName, cmd.credential)
-	if err != nil {
-		return err
-	}
-
-	cmd.logger.Printf("identity: %s", cred.Identity)
-	cmd.logger.Printf("password: %s", cred.Password)
-
-	return nil
+	return
 }

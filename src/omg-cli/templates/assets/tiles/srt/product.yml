@@ -1,0 +1,333 @@
+product-name: cf
+network-properties:
+  network:
+    name: ((network_name))
+  other_availability_zones:
+  - name: ((singleton_availability_zone))
+  singleton_availability_zone:
+    name: ((singleton_availability_zone))
+product-properties:
+  .cloud_controller.allow_app_ssh_access:
+    value: ((cloud_controller/allow_app_ssh_access))
+  .cloud_controller.apps_domain:
+    value: ((cloud_controller/apps_domain))
+  .cloud_controller.default_app_memory:
+    value: ((cloud_controller/default_app_memory))
+  .cloud_controller.default_app_ssh_access:
+    value: ((cloud_controller/default_app_ssh_access))
+  .cloud_controller.default_disk_quota_app:
+    value: ((cloud_controller/default_disk_quota_app))
+  .cloud_controller.default_quota_max_number_services:
+    value: ((cloud_controller/default_quota_max_number_services))
+  .cloud_controller.default_quota_memory_limit_mb:
+    value: ((cloud_controller/default_quota_memory_limit_mb))
+  .cloud_controller.enable_custom_buildpacks:
+    value: ((cloud_controller/enable_custom_buildpacks))
+  .cloud_controller.max_disk_quota_app:
+    value: ((cloud_controller/max_disk_quota_app))
+  .cloud_controller.max_file_size:
+    value: ((cloud_controller/max_file_size))
+  .cloud_controller.security_event_logging_enabled:
+    value: ((cloud_controller/security_event_logging_enabled))
+  .cloud_controller.staging_timeout_in_seconds:
+    value: ((cloud_controller/staging_timeout_in_seconds))
+  .cloud_controller.system_domain:
+    value: ((cloud_controller/system_domain))
+  .diego_brain.starting_container_count_maximum:
+    value: ((diego_brain/starting_container_count_maximum))
+  .doppler.message_drain_buffer_size:
+    value: ((doppler/message_drain_buffer_size))
+  .ha_proxy.skip_cert_verify:
+    value: ((ha_proxy/skip_cert_verify))
+  .mysql.cli_history:
+    value: ((mysql/cli_history))
+  .mysql.max_connections:
+    value: ((mysql/max_connections))
+  .mysql.prevent_node_auto_rejoin:
+    value: ((mysql/prevent_node_auto_rejoin))
+  .mysql.remote_admin_access:
+    value: ((mysql/remote_admin_access))
+  .mysql_monitor.poll_frequency:
+    value: ((mysql_monitor/poll_frequency))
+  .mysql_monitor.recipient_email:
+    value: ((mysql_monitor/recipient_email))
+  .mysql_monitor.write_read_delay:
+    value: ((mysql_monitor/write_read_delay))
+  .mysql_proxy.shutdown_delay:
+    value: ((mysql_proxy/shutdown_delay))
+  .mysql_proxy.startup_delay:
+    value: ((mysql_proxy/startup_delay))
+  .nfs_server.blobstore_internal_access_rules:
+    value: ((nfs_server/blobstore_internal_access_rules))
+  .properties.autoscale_api_disable_connection_pooling:
+    value: ((autoscale_api_disable_connection_pooling))
+  .properties.autoscale_api_instance_count:
+    value: ((autoscale_api_instance_count))
+  .properties.autoscale_enable_verbose_logging:
+    value: ((autoscale_enable_verbose_logging))
+  .properties.autoscale_instance_count:
+    value: ((autoscale_instance_count))
+  .properties.autoscale_metric_bucket_count:
+    value: ((autoscale_metric_bucket_count))
+  .properties.autoscale_scaling_interval_in_seconds:
+    value: ((autoscale_scaling_interval_in_seconds))
+  .properties.cc_api_rate_limit:
+    value: disable
+  .properties.ccdb_connection_validation_timeout:
+    value: ((ccdb_connection_validation_timeout))
+  .properties.ccdb_read_timeout:
+    value: ((ccdb_read_timeout))
+  .properties.cf_networking_database_connection_timeout:
+    value: ((cf_networking_database_connection_timeout))
+  .properties.cf_networking_enable_space_developer_self_service:
+    value: ((cf_networking_enable_space_developer_self_service))
+  .properties.cf_networking_internal_domain:
+    value: ((cf_networking_internal_domain))
+  .properties.cloud_controller_default_health_check_timeout:
+    value: ((cloud_controller_default_health_check_timeout))
+  .properties.cloud_controller_default_stack:
+    value: default
+  .properties.cloud_controller_temporary_disable_deployments:
+    value: ((cloud_controller_temporary_disable_deployments))
+  .properties.container_networking_interface_plugin:
+    value: silk
+  .properties.container_networking_interface_plugin.silk.enable_log_traffic:
+    value: ((container_networking_interface_plugin/silk/enable_log_traffic))
+  .properties.container_networking_interface_plugin.silk.iptables_accepted_udp_logs_per_sec:
+    value: ((container_networking_interface_plugin/silk/iptables_accepted_udp_logs_per_sec))
+  .properties.container_networking_interface_plugin.silk.iptables_denied_logs_per_sec:
+    value: ((container_networking_interface_plugin/silk/iptables_denied_logs_per_sec))
+  .properties.container_networking_interface_plugin.silk.network_mtu:
+    value: ((container_networking_interface_plugin/silk/network_mtu))
+  .properties.container_networking_interface_plugin.silk.vtep_port:
+    value: ((container_networking_interface_plugin/silk/vtep_port))
+  .properties.credhub_database:
+    value: internal_mysql
+  .properties.credhub_key_encryption_passwords:
+    value:
+    - key:
+        secret: ((credhub_key_encryption_passwords_0/key))
+      name: ((credhub_key_encryption_passwords_0/name))
+      primary: ((credhub_key_encryption_passwords_0/primary))
+      provider: ((credhub_key_encryption_passwords_0/provider))
+  .properties.diego_database_max_open_connections:
+    value: ((diego_database_max_open_connections))
+  .properties.diego_log_timestamp_format:
+    value: rfc3339
+  .properties.enable_cf_metric_name:
+    value: ((enable_cf_metric_name))
+  .properties.enable_smb_volume_driver:
+    value: ((enable_smb_volume_driver))
+  .properties.enable_tls_to_internal_pxc:
+    value: ((enable_tls_to_internal_pxc))
+  .properties.experimental_dynamic_egress_enforcement:
+    value: ((experimental_dynamic_egress_enforcement))
+  .properties.garden_disk_cleanup:
+    value: reserved
+  .properties.gorouter_ssl_ciphers:
+    value: ((gorouter_ssl_ciphers))
+  .properties.haproxy_client_cert_validation:
+    value: none
+  .properties.haproxy_forward_tls:
+    value: enable
+  .properties.haproxy_forward_tls.enable.backend_ca:
+    value: ((haproxy_forward_tls/enable/backend_ca))
+  .properties.haproxy_hsts_support:
+    value: disable
+  .properties.haproxy_max_buffer_size:
+    value: ((haproxy_max_buffer_size))
+  .properties.haproxy_ssl_ciphers:
+    value: ((haproxy_ssl_ciphers))
+  .properties.locket_database_max_open_connections:
+    value: ((locket_database_max_open_connections))
+  .properties.metric_registrar_blacklisted_tags:
+    value: ((metric_registrar_blacklisted_tags))
+  .properties.metric_registrar_enabled:
+    value: ((metric_registrar_enabled))
+  .properties.metric_registrar_scrape_interval_in_seconds:
+    value: ((metric_registrar_scrape_interval_in_seconds))
+  .properties.mysql_activity_logging:
+    value: enable
+  .properties.mysql_activity_logging.enable.audit_logging_events:
+    value: ((mysql_activity_logging/enable/audit_logging_events))
+  .properties.networking_poe_ssl_certs:
+    value:
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_0/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_0/privatekey))
+      name: ((networking_poe_ssl_certs_0/name))
+  .properties.networkpolicyserver_database_max_open_connections:
+    value: ((networkpolicyserver_database_max_open_connections))
+  .properties.networkpolicyserverinternal_database_max_open_connections:
+    value: ((networkpolicyserverinternal_database_max_open_connections))
+  .properties.nfs_volume_driver:
+    value: enable
+  .properties.push_apps_manager_app_poll_interval:
+    value: ((push_apps_manager_app_poll_interval))
+  .properties.push_apps_manager_currency_lookup:
+    value: ((push_apps_manager_currency_lookup))
+  .properties.push_apps_manager_display_plan_prices:
+    value: ((push_apps_manager_display_plan_prices))
+  .properties.push_apps_manager_enable_invitations:
+    value: ((push_apps_manager_enable_invitations))
+  .properties.push_apps_manager_nav_links:
+    value:
+    - href: /marketplace
+      name: Marketplace
+    - href: https://docs.pivotal.io/pivotalcf/2-4/pas/intro.html
+      name: Docs
+    - href: /tools
+      name: Tools
+  .properties.push_apps_manager_poll_interval:
+    value: ((push_apps_manager_poll_interval))
+  .properties.route_integrity:
+    value: tls_verify
+  .properties.route_services:
+    value: enable
+  .properties.route_services.enable.ignore_ssl_cert_verification:
+    value: ((route_services/enable/ignore_ssl_cert_verification))
+  .properties.router_backend_max_conn:
+    value: ((router_backend_max_conn))
+  .properties.router_client_cert_validation:
+    value: request
+  .properties.router_enable_proxy:
+    value: ((router_enable_proxy))
+  .properties.router_keepalive_connections:
+    value: enable
+  .properties.routing_disable_http:
+    value: ((routing_disable_http))
+  .properties.routing_log_client_ips:
+    value: log_client_ips
+  .properties.routing_minimum_tls_version:
+    value: tls_v1_2
+  .properties.routing_tls_termination:
+    value: load_balancer
+  .properties.saml_signature_algorithm:
+    value: ((saml_signature_algorithm))
+  .properties.secure_service_instance_credentials:
+    value: ((secure_service_instance_credentials))
+  .properties.security_acknowledgement:
+    value: ((security_acknowledgement))
+  .properties.silk_database_max_open_connections:
+    value: ((silk_database_max_open_connections))
+  .properties.smoke_tests:
+    value: on_demand
+  .properties.smtp_auth_mechanism:
+    value: ((smtp_auth_mechanism))
+  .properties.smtp_enable_starttls_auto:
+    value: ((smtp_enable_starttls_auto))
+  .properties.syslog_drop_debug:
+    value: ((syslog_drop_debug))
+  .properties.syslog_metrics_to_syslog_enabled:
+    value: ((syslog_metrics_to_syslog_enabled))
+  .properties.syslog_tls:
+    value: disabled
+  .properties.syslog_use_tcp_for_file_forwarding_local_transport:
+    value: ((syslog_use_tcp_for_file_forwarding_local_transport))
+  .properties.system_blobstore:
+    value: internal
+  .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
+    value: ((system_blobstore_ccdroplet_max_staged_droplets_stored))
+  .properties.system_blobstore_ccpackage_max_valid_packages_stored:
+    value: ((system_blobstore_ccpackage_max_valid_packages_stored))
+  .properties.system_database:
+    value: internal_pxc
+  .properties.tcp_routing:
+    value: disable
+  .properties.uaa:
+    value: internal
+  .properties.uaa.internal.password_expires_after_months:
+    value: ((uaa/internal/password_expires_after_months))
+  .properties.uaa.internal.password_max_retry:
+    value: ((uaa/internal/password_max_retry))
+  .properties.uaa.internal.password_min_length:
+    value: ((uaa/internal/password_min_length))
+  .properties.uaa.internal.password_min_lowercase:
+    value: ((uaa/internal/password_min_lowercase))
+  .properties.uaa.internal.password_min_numeric:
+    value: ((uaa/internal/password_min_numeric))
+  .properties.uaa.internal.password_min_special:
+    value: ((uaa/internal/password_min_special))
+  .properties.uaa.internal.password_min_uppercase:
+    value: ((uaa/internal/password_min_uppercase))
+  .properties.uaa_database:
+    value: internal_mysql
+  .properties.uaa_session_cookie_max_age:
+    value: ((uaa_session_cookie_max_age))
+  .properties.uaa_session_idle_timeout:
+    value: ((uaa_session_idle_timeout))
+  .router.disable_insecure_cookies:
+    value: ((router/disable_insecure_cookies))
+  .router.drain_wait:
+    value: ((router/drain_wait))
+  .router.enable_isolated_routing:
+    value: ((router/enable_isolated_routing))
+  .router.enable_write_access_logs:
+    value: ((router/enable_write_access_logs))
+  .router.enable_zipkin:
+    value: ((router/enable_zipkin))
+  .router.frontend_idle_timeout:
+    value: ((router/frontend_idle_timeout))
+  .router.lb_healthy_threshold:
+    value: ((router/lb_healthy_threshold))
+  .router.request_timeout_in_seconds:
+    value: ((router/request_timeout_in_seconds))
+  .uaa.apps_manager_access_token_lifetime:
+    value: ((uaa/apps_manager_access_token_lifetime))
+  .uaa.apps_manager_refresh_token_lifetime:
+    value: ((uaa/apps_manager_refresh_token_lifetime))
+  .uaa.cf_cli_access_token_lifetime:
+    value: ((uaa/cf_cli_access_token_lifetime))
+  .uaa.cf_cli_refresh_token_lifetime:
+    value: ((uaa/cf_cli_refresh_token_lifetime))
+  .uaa.customize_password_label:
+    value: ((uaa/customize_password_label))
+  .uaa.customize_username_label:
+    value: ((uaa/customize_username_label))
+  .uaa.proxy_ips_regex:
+    value: ((uaa/proxy_ips_regex))
+  .uaa.service_provider_key_credentials:
+    value:
+      cert_pem: ((uaa/service_provider_key_credentials/certificate))
+      private_key_pem: ((uaa/service_provider_key_credentials/privatekey))
+resource-config:
+  backup_restore:
+    instance_type:
+      id: ((backup_restore_instance_type))
+    instances: ((backup_restore_instances))
+  blobstore:
+    instance_type:
+      id: ((blobstore_instance_type))
+    instances: ((blobstore_instances))
+    persistent_disk:
+      size_mb: ((blobstore_persistent_disk_size))
+  compute:
+    instance_type:
+      id: ((compute_instance_type))
+    instances: ((compute_instances))
+  control:
+    instance_type:
+      id: ((control_instance_type))
+    instances: ((control_instances))
+  database:
+    instance_type:
+      id: ((database_instance_type))
+    instances: ((database_instances))
+    persistent_disk:
+      size_mb: ((database_persistent_disk_size))
+  ha_proxy:
+    instance_type:
+      id: ((ha_proxy_instance_type))
+    instances: ((ha_proxy_instances))
+  mysql_monitor:
+    instance_type:
+      id: ((mysql_monitor_instance_type))
+    instances: ((mysql_monitor_instances))
+  router:
+    instance_type:
+      id: ((router_instance_type))
+    instances: ((router_instances))
+  tcp_router:
+    instance_type:
+      id: ((tcp_router_instance_type))
+    instances: ((tcp_router_instances))

@@ -1,0 +1,86 @@
+director:
+  manifest: director/config.yml
+  ops_files: []
+  vars:
+    # TODO: investigate move to terraform static vars
+    management_subnet_reserved_ips: 10.0.0.0-10.0.0.20
+    services_subnet_reserved_ips: 10.0.8.0-10.0.8.20
+    ert_subnet_reserved_ips: 10.0.4.0-10.0.4.20
+tiles:
+- product:
+    product_slug: elastic-runtime
+    release_version: 2.4.4
+    file_glob: "srt*.pivotal"
+  stemcell:
+    product_slug: stemcells-ubuntu-xenial
+    release_version: "170.38"
+    file_glob: "*google*.tgz"
+  name: cf
+  version: 2.4.4
+  manifest: tiles/srt/product.yml
+  ops_files:
+  - tiles/srt/network/3-az-configuration.yml
+  - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
+  - tiles/srt/resource/control_elb_names.yml
+  - tiles/srt/resource/ha_proxy_elb_names.yml
+  - tiles/srt/resource/router_elb_names.yml
+  vars_files:
+  - tiles/srt/product-default-vars.yml
+  - tiles/srt/resource-vars.yml
+  - tiles/srt/errand-vars.yml
+  vars:
+    network_name: ((ert_subnet_name))
+    az2_name: ((azs_1))
+    az3_name: ((azs_2))
+    singleton_availability_zone: ((azs_0))
+    cloud_controller/system_domain: ((sys_domain))
+    cloud_controller/apps_domain: ((apps_domain))
+    networking_poe_ssl_certs_0/name: pcf-certs
+    networking_poe_ssl_certs_0/certificate: ((ssl_cert))
+    networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
+    credhub_key_encryption_passwords_0/key: ((credhub_key))
+    credhub_key_encryption_passwords_0/name: ((credhub_key_name))
+    haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
+    uaa/service_provider_key_credentials/certificate: ((ssl_cert))
+    uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
+    security_acknowledgement: true
+    mysql_monitor/recipient_email: admin@example.org # TODO: configurable?
+    system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
+    system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
+    system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
+    system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
+    system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
+    system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
+    system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
+    control_elb_names: ((http_lb_backend_name))
+    ha_proxy_elb_names: ((http_lb_backend_name))
+    router_elb_names: ((http_lb_backend_name))
+
+
+# - product:
+#     slug: p-healthwatch
+#     version: 1.4.5
+#     glob: "*.pivotal"
+#     stemcell_iaas: google
+#   name: p-healthwatch
+#   version: 1.4.5-build.41
+#   manifest: tiles/p-healthwatch/product.yml
+#   ops_files:
+#   - tiles/p-healthwatch/network/3-az-configuration.yml
+#   - tiles/p-healthwatch/features/opsman-disable.yml
+#   - tiles/p-healthwatch/optional/add-healthwatch-forwarder-foundation_name.yml
+#   vars_files:
+#   - tiles/p-healthwatch/product-default-vars.yml
+#   - tiles/p-healthwatch/resource-vars.yml
+#   - tiles/p-healthwatch/errand-vars.yml
+#   vars:
+#     boshtasks/enable/bosh_taskcheck_password: password
+#     boshtasks/enable/bosh_taskcheck_username: username
+#     healthwatch-forwarder/foundation_name: example
+#     network_name: ((ert_subnet_name))
+#     service_network_name: ((services_subnet_name))
+#     healthwatch-forwarder_instances: 2
+#     az2_name: ((azs_1))
+#     az3_name: ((azs_2))
+#     healthwatch-forwarder/health_check_az: ((azs_0))
+#     singleton_availability_zone: ((azs_0))

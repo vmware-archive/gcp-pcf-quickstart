@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/doppler?/nsx_security_groups?
+  value: ((doppler_nsx_security_groups))

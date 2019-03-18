@@ -17,15 +17,20 @@
 package commands
 
 import (
-	"fmt"
 	"log"
 
 	"omg-cli/config"
-	"omg-cli/omg/setup"
-	"omg-cli/opsman"
-	"omg-cli/pivnet"
+	"omg-cli/templates"
+
+	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
+
+	"github.com/starkandwayne/om-tiler/mover"
+	"github.com/starkandwayne/om-tiler/opsman"
+	"github.com/starkandwayne/om-tiler/pattern"
+	"github.com/starkandwayne/om-tiler/pivnet"
+	"github.com/starkandwayne/om-tiler/tiler"
 )
 
 // PushTilesCommand pushes tiles to the Ops Manager.
@@ -54,23 +59,44 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	pivnetSdk, err := pivnet.NewSdk(envCfg.PivnetAPIToken, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	tileCache := &pivnet.TileCache{Dir: cmd.tileCacheDir}
-	tiles := selectedTiles(cmd.logger, envCfg)
-	opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, pivnetSdk, cmd.logger, tiles, tileCache)
-
-	return run([]step{
-		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
-		{function: opsMan.SetupAuth, name: "SetupAuth"},
-		{function: opsMan.UploadTiles, name: "UploadTiles"},
+	omclient, err := opsman.NewClient(opsman.Config{
+		Target:               cfg.OpsManagerHostname,
+		Username:             cfg.OpsManager.Username,
+		Password:             cfg.OpsManager.Password,
+		DecryptionPassphrase: cfg.OpsManager.DecryptionPhrase,
+		SkipSSLVerification:  cfg.OpsManager.SkipSSLVerification,
 	}, cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	pivnetclient := pivnet.NewClient(pivnet.Config{
+		Token:      envCfg.PivnetAPIToken,
+		UserAgent:  version.UserAgent(),
+		AcceptEULA: true,
+	}, cmd.logger)
+
+	mover, err := mover.NewMover(pivnetclient, "", cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	omConfigurator, err := tiler.NewTiler(omclient, mover, cmd.logger)
+	if err != nil {
+		return err
+	}
+	var opsFiles []string
+	if envCfg.SmallFootprint {
+		opsFiles = append(opsFiles, "options/small-footprint.yml")
+	}
+	if envCfg.IncludeHealthwatch {
+		opsFiles = append(opsFiles, "options/healthwatch.yml")
+	}
+	return omConfigurator.Apply(pattern.Template{
+		Store:    templates.Templates,
+		Manifest: "deployment.yml",
+		OpsFiles: opsFiles,
+		Vars:     cfg.Raw,
+	})
+
 }

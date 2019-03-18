@@ -51,12 +51,7 @@ type NetworkAndAZConfiguration struct {
 	NetworkAZ json.RawMessage `json:"network_and_az,omitempty"`
 }
 
-type DirectorProperties struct {
-	IAASConfiguration     json.RawMessage `json:"iaas_configuration,omitempty"`
-	DirectorConfiguration json.RawMessage `json:"director_configuration,omitempty"`
-	SecurityConfiguration json.RawMessage `json:"security_configuration,omitempty"`
-	SyslogConfiguration   json.RawMessage `json:"syslog_configuration,omitempty"`
-}
+type DirectorProperties json.RawMessage
 
 func (a Api) UpdateStagedDirectorAvailabilityZones(input AvailabilityZoneInput) error {
 	azs := AvailabilityZones{}
@@ -86,8 +81,17 @@ func (a Api) UpdateStagedDirectorAvailabilityZones(input AvailabilityZoneInput) 
 		return errors.Wrap(err, "problem converting request to JSON") // un-tested
 	}
 
-	_, err = a.sendAPIRequest("PUT", "/api/v0/staged/director/availability_zones", jsonData)
-	return err
+	resp, err := a.sendAPIRequest("PUT", "/api/v0/staged/director/availability_zones", jsonData)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if err = validateStatusOK(resp); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a Api) UpdateStagedDirectorNetworks(input NetworkInput) error {
@@ -118,46 +122,79 @@ func (a Api) UpdateStagedDirectorNetworks(input NetworkInput) error {
 		return errors.Wrap(err, "problem converting request to JSON") // un-tested
 	}
 
-	_, err = a.sendAPIRequest("PUT", "/api/v0/staged/director/networks", jsonData)
-	return err
+	resp, err := a.sendAPIRequest("PUT", "/api/v0/staged/director/networks", jsonData)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if err = validateStatusOK(resp); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a Api) UpdateStagedDirectorNetworkAndAZ(input NetworkAndAZConfiguration) error {
-	_, err := a.sendAPIRequest("GET", "/api/v0/deployed/director/credentials", nil)
-	if err == nil {
-		a.logger.Println("unable to set network assignment for director as it has already been deployed")
+	resp, err := a.sendAPIRequest("GET", "/api/v0/deployed/director/credentials", nil)
+	if err != nil {
 		return err
 	}
-	jsonData, err := json.Marshal(&input)
-	if err != nil {
-		return errors.Wrap(err, "could not marshal json")
-	}
 
-	_, err = a.sendAPIRequest("PUT", "/api/v0/staged/director/network_and_az", jsonData)
-	return err
+	switch resp.StatusCode {
+	case http.StatusOK:
+		a.logger.Println("unable to set network assignment for director as it has already been deployed")
+		return nil
+	case http.StatusNotFound:
+		jsonData, err := json.Marshal(&input)
+		if err != nil {
+			return errors.Wrap(err, "could not marshal json")
+		}
+
+		resp, err = a.sendAPIRequest("PUT", "/api/v0/staged/director/network_and_az", jsonData)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if err = validateStatusOK(resp); err != nil {
+			return err
+		}
+
+		return nil
+	default:
+		return fmt.Errorf("unexpected request status code: %d", resp.StatusCode)
+	}
 }
 
 func (a Api) UpdateStagedDirectorProperties(input DirectorProperties) error {
-	jsonData, err := json.Marshal(&input)
+	resp, err := a.sendAPIRequest("PUT", "/api/v0/staged/director/properties", input)
 	if err != nil {
-		return errors.Wrap(err, "could not marshal json")
+		return err
+	}
+	defer resp.Body.Close()
+
+	if err = validateStatusOK(resp); err != nil {
+		return err
 	}
 
-	_, err = a.sendAPIRequest("PUT", "/api/v0/staged/director/properties", jsonData)
-	return err
+	return nil
 }
 
 func (a Api) addGUIDToExistingNetworks(networks Networks) (Networks, error) {
 	existingNetworksResponse, err := a.sendAPIRequest("GET", "/api/v0/staged/director/networks", nil)
 	if err != nil {
-		if existingNetworksResponse.StatusCode != http.StatusNotFound {
-			return Networks{}, errors.Wrap(err, "unable to fetch existing network configuration")
-		}
+		return Networks{}, err
 	}
+	defer existingNetworksResponse.Body.Close()
 
 	if existingNetworksResponse.StatusCode == http.StatusNotFound {
 		a.logger.Println("unable to retrieve existing network configuration, attempting to configure anyway")
-		return networks, nil
+		return Networks{}, nil
+	}
+
+	if err = validateStatusOK(existingNetworksResponse); err != nil {
+		return Networks{}, err
 	}
 
 	existingNetworksJSON, err := ioutil.ReadAll(existingNetworksResponse.Body)
@@ -179,20 +216,24 @@ func (a Api) addGUIDToExistingNetworks(networks Networks) (Networks, error) {
 			}
 		}
 	}
+
 	return networks, nil
 }
 
 func (a Api) addGUIDToExistingAZs(azs AvailabilityZones) (AvailabilityZones, error) {
 	existingAzsResponse, err := a.sendAPIRequest("GET", "/api/v0/staged/director/availability_zones", nil)
 	if err != nil {
-		if existingAzsResponse.StatusCode != http.StatusNotFound {
-			return AvailabilityZones{}, errors.Wrap(err, "unable to fetch existing AZ configuration")
-		}
+		return AvailabilityZones{}, err
 	}
 
-	if existingAzsResponse.StatusCode == http.StatusNotFound {
+	switch {
+	case existingAzsResponse.StatusCode == http.StatusOK:
+		a.logger.Println("successfully fetched AZs, continuing")
+	case existingAzsResponse.StatusCode == http.StatusNotFound:
 		a.logger.Println("unable to retrieve existing AZ configuration, attempting to configure anyway")
 		return azs, nil
+	default:
+		return AvailabilityZones{}, fmt.Errorf("received unexpected status while fetching AZ configuration: %d", existingAzsResponse.StatusCode)
 	}
 
 	existingAzsJSON, err := ioutil.ReadAll(existingAzsResponse.Body)
@@ -224,5 +265,6 @@ func (a Api) addGUIDToExistingAZs(azs AvailabilityZones) (AvailabilityZones, err
 			}
 		}
 	}
+
 	return azs, nil
 }

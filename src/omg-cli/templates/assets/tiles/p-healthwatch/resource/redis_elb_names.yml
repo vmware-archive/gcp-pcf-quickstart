@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/redis?/elb_names?
+  value: ((redis_elb_names))

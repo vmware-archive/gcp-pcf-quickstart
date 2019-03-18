@@ -29,8 +29,8 @@ type OpsManagerCredentials struct {
 
 // CredhubEncryptionKey is the key for Credhub.
 type CredhubEncryptionKey struct {
-	Name string
-	Key  string
+	Name string `json:"name"`
+	Key  string `json:"key"`
 }
 
 // Filenames for configs.

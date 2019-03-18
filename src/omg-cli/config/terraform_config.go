@@ -22,81 +22,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
+	"strings"
 )
 
-// TerraformConfigSchema is the quickstart's Terraform schema as a struct.
 type TerraformConfigSchema struct {
-	OpsManagerHostname  string `json:"ops_manager_dns"`
-	OpsManagerIP        string `json:"ops_manager_private_ip"`
-	JumpboxIP           string `json:"jumpbox_public_ip"`
-	NetworkName         string `json:"network_name"`
-	DeploymentTargetTag string `json:"vm_tag"`
-
-	OpsManagerServiceAccountKey string
-
-	// External database properties are omitted if internal database is chosen.
-	ExternalSQLIP         string `json:"sql_db_ip,omitempty"`
-	ExternalSQLPort       int
-	OpsManagerSQLDbName   string `json:"opsman_sql_db_name,omitempty"`
-	OpsManagerSQLUsername string `json:"opsman_sql_username,omitempty"`
-	OpsManagerSQLPassword string `json:"opsman_sql_password,omitempty"`
-	ERTSQLDbName          string `json:"ert_sql_db_name,omitempty"`
-	ERTSQLUsername        string `json:"ert_sql_username,omitempty"`
-	ERTSQLPassword        string `json:"ert_sql_password,omitempty"`
-
-	MgmtSubnetName    string `json:"management_subnet_name"`
-	MgmtSubnetGateway string `json:"management_subnet_gateway"`
-	MgmtSubnetCIDR    string `json:"management_subnet_cidrs_0"`
-
-	ServicesSubnetName    string `json:"services_subnet_name"`
-	ServicesSubnetGateway string `json:"services_subnet_gateway"`
-	ServicesSubnetCIDR    string `json:"services_subnet_cidrs_0"`
-
-	DynamicServicesSubnetName    string `json:"dynamic_services_subnet_name"`
-	DynamicServicesSubnetGateway string `json:"dynamic_services_subnet_gateway"`
-	DynamicServicesSubnetCIDR    string `json:"dynamic_services_subnet_cidrs_0"`
-
-	ErtSubnetName    string `json:"ert_subnet_name"`
-	ErtSubnetGateway string `json:"ert_subnet_gateway"`
-	ErtSubnetCIDR    string `json:"ert_subnet_cidrs_0"`
-
-	HTTPBackendServiceName string `json:"http_lb_backend_name"`
-	SSHTargetPoolName      string `json:"ssh_router_pool"`
-	WSSTargetPoolName      string `json:"wss_router_pool"`
-	TCPTargetPoolName      string `json:"tcp_router_pool"`
-	TCPPortRange           string `json:"tcp_port_range"`
-
-	BuildpacksBucket string `json:"buildpacks_bucket"`
-	DropletsBucket   string `json:"droplets_bucket"`
-	PackagesBucket   string `json:"packages_bucket"`
-	ResourcesBucket  string `json:"resources_bucket"`
-	DirectorBucket   string `json:"director_blobstore_bucket"`
-
-	DNSSuffix         string `json:"dns_suffix"`
-	AppsDomain        string `json:"apps_domain"`
-	SysDomain         string `json:"sys_domain"`
-	DopplerDomain     string `json:"doppler_domain"`
-	LoggregatorDomain string `json:"loggregator_domain"`
-
-	SSLCertificate string `json:"ssl_cert"`
-	SSLPrivateKey  string `json:"ssl_cert_private_key"`
-
-	StackdriverNozzleServiceAccountKey string
-
-	ServiceBrokerServiceAccountKey string
-	ServiceBrokerDbIP              string `json:"service_broker_db_ip"`
-	ServiceBrokerDbUsername        string `json:"service_broker_db_username"`
-	ServiceBrokerDbPassword        string `json:"service_broker_db_password"`
-
-	Region      string `json:"region"`
-	Zone1       string `json:"azs_0"`
-	Zone2       string `json:"azs_1"`
-	Zone3       string `json:"azs_2"`
-	ProjectName string `json:"project"`
+	MgmtSubnetName                string `json:"management_subnet_name"`
+	ErtSubnetName                 string `json:"ert_subnet_name"`
+	ServicesSubnetName            string `json:"services_subnet_name"`
+	JumpboxIP                     string `json:"jumpbox_public_ip"`
+	OpsManagerHostname            string `json:"ops_manager_dns"`
+	OpsManagerUsername            string `json:"ops_manager_username"`
+	OpsManagerPassword            string `json:"ops_manager_password"`
+	OpsManagerDecryptionPhrase    string `json:"ops_manager_decryption_phrase"`
+	OpsManagerSkipSSLVerification string `json:"ops_manager_skip_ssl_verify"`
+	Raw                           map[string]interface{}
 
 	OpsManager OpsManagerCredentials
-	CredhubKey CredhubEncryptionKey
 }
 
 // TerraformFromEnvDirectory creates a Terraform config from a directory.
@@ -122,7 +63,6 @@ func fromTerraform(filename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	flattened, err := flattenTerraform(file)
 	if err != nil {
 		return nil, err
@@ -138,47 +78,24 @@ func fromTerraform(filename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if flattened["ops_manager_skip_ssl_verify"] == "true" {
+	hydratedCfg.OpsManager.Username = hydratedCfg.OpsManagerUsername
+	hydratedCfg.OpsManager.Password = hydratedCfg.OpsManagerPassword
+	hydratedCfg.OpsManager.DecryptionPhrase = hydratedCfg.OpsManagerDecryptionPhrase
+	if hydratedCfg.OpsManagerSkipSSLVerification == "true" {
 		hydratedCfg.OpsManager.SkipSSLVerification = true
 	}
-
-	if val := flattened["sql_db_port"]; val != "" {
-		parsed, err := strconv.ParseInt(val, 10, 0)
-		if err != nil {
-			return nil, err
-		}
-		hydratedCfg.ExternalSQLPort = int(parsed)
-	}
-
-	hydratedCfg.OpsManagerServiceAccountKey = decode(flattened["ops_manager_service_account_key_base64"])
-	hydratedCfg.ServiceBrokerServiceAccountKey = decode(flattened["service_broker_service_account_key_base64"])
-	hydratedCfg.StackdriverNozzleServiceAccountKey = decode(flattened["stackdriver_service_account_key_base64"])
-
-	hydratedCfg.OpsManager.Username = flattened["ops_manager_username"]
-	hydratedCfg.OpsManager.Password = flattened["ops_manager_password"]
-	hydratedCfg.OpsManager.DecryptionPhrase = flattened["ops_manager_decryption_phrase"]
-	hydratedCfg.CredhubKey.Name = flattened["credhub_key_name"]
-	hydratedCfg.CredhubKey.Key = flattened["credhub_key"]
-
+	hydratedCfg.Raw = flattened
 	cfg := Config(hydratedCfg)
 
 	return &cfg, nil
 }
 
-/*
- * translate:
- * { "foo": {"value": "bar"}, "baz": {"value": ["pizza", "thebest"]}}
- * to:
- * {"foo": "bar", "baz_0": "pizza", "baz_1": "thebest"}
- */
-
 type terraformValue struct {
 	Value interface{} `json:"value"`
 }
 
-func flattenTerraform(contents []byte) (map[string]string, error) {
-	res := map[string]string{}
+func flattenTerraform(contents []byte) (map[string]interface{}, error) {
+	res := map[string]interface{}{}
 
 	tf := map[string]terraformValue{}
 
@@ -189,7 +106,11 @@ func flattenTerraform(contents []byte) (map[string]string, error) {
 
 	for k, v := range tf {
 		if str, ok := v.Value.(string); ok {
-			res[k] = str
+			if strings.HasSuffix(k, "_base64") {
+				res[strings.TrimSuffix(k, "_base64")] = decode(str)
+			} else {
+				res[k] = str
+			}
 		} else if arr, ok := v.Value.([]interface{}); ok {
 			for i, entry := range arr {
 				res[fmt.Sprintf("%s_%d", k, i)] = entry.(string)
@@ -198,6 +119,6 @@ func flattenTerraform(contents []byte) (map[string]string, error) {
 			return nil, fmt.Errorf("encountered unknown type in terraform config: %v", v.Value)
 		}
 	}
-
+	// fmt.Println(res)
 	return res, nil
 }

@@ -1,0 +1,79 @@
+az-configuration:
+- name: ((azs_0))
+- name: ((azs_1))
+- name: ((azs_2))
+properties-configuration:
+  director_configuration:
+    ntp_servers_string: 169.254.169.254
+    retry_bosh_deploys: true
+    resurrector_enabled: true
+    max_threads: 5
+    blobstore_type: gcs
+    gcs_blobstore_options:
+      bucket_name: ((director_blobstore_bucket))
+      service_account_key: ((ops_manager_service_account_key))
+      storage_class: MULTI_REGIONAL
+    database_type: external
+    external_database_options:
+      host: ((sql_db_ip))
+      database: ((opsman_sql_db_name))
+      user: ((opsman_sql_username))
+      password: ((opsman_sql_password))
+      port: ((sql_db_port)) # TODO tag
+  iaas_configuration:
+    project: ((project))
+    auth_json: ((ops_manager_service_account_key))
+    default_deployment_tag: ((vm_tag))
+network-assignment:
+  singleton_availability_zone:
+    name: ((azs_0))
+  network:
+    name: ((management_subnet_name))
+networks-configuration:
+  icmp: false
+  networks:
+  - name: ((management_subnet_name))
+    subnets:
+    - iaas_identifier: ((network_name))/((management_subnet_name))/((region))
+      cidr: ((management_subnet_cidrs_0))
+      gateway: ((management_subnet_gateway))
+      reserved_ip_ranges: ((management_subnet_reserved_ips))
+      dns: 169.254.169.254
+      availability_zone_names:
+      - ((azs_0))
+      - ((azs_1))
+      - ((azs_2))
+  - name: ((services_subnet_name))
+    subnets:
+    - iaas_identifier: ((network_name))/((services_subnet_name))/((region))
+      cidr: ((services_subnet_cidrs_0))
+      reserved_ip_ranges: ((services_subnet_reserved_ips))
+      gateway: ((services_subnet_gateway))
+      dns: 169.254.169.254
+      availability_zone_names:
+      - ((azs_0))
+      - ((azs_1))
+      - ((azs_2))
+  - name: ((ert_subnet_name))
+    subnets:
+    - iaas_identifier: ((network_name))/((ert_subnet_name))/((region))
+      cidr: ((ert_subnet_cidrs_0))
+      reserved_ip_ranges: ((ert_subnet_reserved_ips))
+      gateway: ((ert_subnet_gateway))
+      dns: 169.254.169.254
+      availability_zone_names:
+      - ((azs_0))
+      - ((azs_1))
+      - ((azs_2))
+resource-configuration:
+  compilation:
+    instances: 4
+    instance_type:
+      id: large.cpu
+  director:
+    instances: automatic
+    persistent_disk:
+      size_mb: automatic
+    instance_type:
+      id: automatic
+    internet_connected: false

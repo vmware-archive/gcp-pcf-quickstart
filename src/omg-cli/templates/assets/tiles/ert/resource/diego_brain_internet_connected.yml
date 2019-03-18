@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/diego_brain?/internet_connected?
+  value: ((diego_brain_internet_connected))

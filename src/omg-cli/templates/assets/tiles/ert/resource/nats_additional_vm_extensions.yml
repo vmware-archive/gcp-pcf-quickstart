@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/nats?/additional_vm_extensions?
+  value: ((nats_additional_vm_extensions))

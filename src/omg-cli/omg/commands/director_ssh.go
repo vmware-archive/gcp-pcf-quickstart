@@ -17,17 +17,7 @@
 package commands
 
 import (
-	"bytes"
-	"crypto/tls"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"path/filepath"
-
-	"omg-cli/config"
-	"omg-cli/opsman"
-	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -51,56 +41,56 @@ func (cmd *DirectorSSHCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DirectorSSHCommand) run(c *kingpin.ParseContext) error {
-	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
-	if err != nil {
-		return err
-	}
-
-	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	cred, err := omSdk.GetDirectorCredentials("agent_credentials")
-	if err != nil {
-		return err
-	}
-
-	directorIP, err := omSdk.GetDirectorIP()
-	if err != nil {
-		return err
-	}
-
-	pubkey, err := ioutil.ReadFile(filepath.Join(cmd.envDir, "keys", "jumpbox_ssh.pub"))
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("https://%s:6868/agent", directorIP),
-		bytes.NewBufferString(fmt.Sprintf(jsonTemplate, pubkey)))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("User-Agent", version.UserAgent())
-	req.Header.Set("Content-Type", "application/json")
-	req.SetBasicAuth(cred.Identity, cred.Password)
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: cfg.OpsManager.SkipSSLVerification,
-			},
-		},
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("got %s from metron agent, response body: %s", resp.Status, body)
-	}
+	// cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// cred, err := omSdk.GetDirectorCredentials("agent_credentials")
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// directorIP, err := omSdk.GetDirectorIP()
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// pubkey, err := ioutil.ReadFile(filepath.Join(cmd.envDir, "keys", "jumpbox_ssh.pub"))
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// req, err := http.NewRequest("POST", fmt.Sprintf("https://%s:6868/agent", directorIP),
+	// 	bytes.NewBufferString(fmt.Sprintf(jsonTemplate, pubkey)))
+	// if err != nil {
+	// 	return err
+	// }
+	// req.Header.Set("User-Agent", version.UserAgent())
+	// req.Header.Set("Content-Type", "application/json")
+	// req.SetBasicAuth(cred.Identity, cred.Password)
+	//
+	// client := &http.Client{
+	// 	Transport: &http.Transport{
+	// 		TLSClientConfig: &tls.Config{
+	// 			InsecureSkipVerify: cfg.OpsManager.SkipSSLVerification,
+	// 		},
+	// 	},
+	// }
+	//
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	return err
+	// }
+	// body, _ := ioutil.ReadAll(resp.Body)
+	// resp.Body.Close()
+	// if resp.StatusCode != http.StatusOK {
+	// 	return fmt.Errorf("got %s from metron agent, response body: %s", resp.Status, body)
+	// }
 	return nil
 }

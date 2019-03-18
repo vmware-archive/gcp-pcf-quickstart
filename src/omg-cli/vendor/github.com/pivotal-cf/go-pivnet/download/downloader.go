@@ -55,7 +55,7 @@ func (c Client) Get(
 ) error {
 	contentURL, err := downloadLinkFetcher.NewDownloadLink()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new download link in get: %s", err)
 	}
 
 	req, err := http.NewRequest("HEAD", contentURL, nil)
@@ -73,6 +73,10 @@ func (c Client) Get(
 	c.Logger.Debug(fmt.Sprintf("HEAD response content size: %d", resp.ContentLength))
 
 	contentURL = resp.Request.URL.String()
+
+	if resp.ContentLength == -1 {
+		return fmt.Errorf("failed to find file on remote filestore")
+	}
 
 	ranges, err := c.Ranger.BuildRange(resp.ContentLength)
 	if err != nil {
@@ -118,7 +122,7 @@ func (c Client) Get(
 	}
 
 	if err := g.Wait(); err != nil {
-		return err
+		return fmt.Errorf("problem while waiting for chunks to download: %s", err)
 	}
 
 	return nil
@@ -137,7 +141,7 @@ Retry:
 
 	req, err := http.NewRequest("GET", currentURL, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get new request: %s", err)
 	}
 
 	rangeHeader.Add("Referer", "https://go-pivnet.network.pivotal.io")
@@ -160,7 +164,7 @@ Retry:
 		c.Logger.Debug("received unsuccessful status code: %d", logger.Data{"statusCode": resp.StatusCode})
 		currentURL, err = downloadLinkFetcher.NewDownloadLink()
 		if err != nil {
-			return err
+			return fmt.Errorf("could not get new download link: %s", err)
 		}
 		c.Logger.Debug("fetched new download url: %d", logger.Data{"url": currentURL})
 

@@ -1,0 +1,12 @@
+- type: replace
+  path: /product-properties/.properties.syslog_tls?
+  value:
+    value: enabled
+- type: replace
+  path: /product-properties/.properties.syslog_tls.enabled.tls_ca_cert?
+  value:
+    value: ((syslog_tls/enabled/tls_ca_cert))
+- type: replace
+  path: /product-properties/.properties.syslog_tls.enabled.tls_permitted_peer?
+  value:
+    value: ((syslog_tls/enabled/tls_permitted_peer))

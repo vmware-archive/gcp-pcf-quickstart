@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/cloud_controller?/additional_vm_extensions?
+  value: ((cloud_controller_additional_vm_extensions))

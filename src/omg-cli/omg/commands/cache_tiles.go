@@ -17,13 +17,7 @@
 package commands
 
 import (
-	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-
-	"omg-cli/config"
-	"omg-cli/pivnet"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -46,42 +40,42 @@ func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
-	pivnetSdk, err := pivnet.NewSdk(cmd.pivnetAPIToken, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	envCfg, err := config.FromEnvDirectory(cmd.envDir)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
-		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
-			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
-	}
-
-	tileCache := pivnet.TileCache{Dir: cmd.tileCacheDir}
-	tiles := selectedTiles(cmd.logger, envCfg)
-	for _, tile := range tiles {
-		if tile.BuiltIn() {
-			continue
-		}
-		definition := tile.Definition(&config.EnvConfig{SmallFootprint: true})
-		cmd.logger.Printf("caching tile: %s", definition.Product.Name)
-
-		output := filepath.Join(cmd.tileCacheDir, tileCache.FileName(definition.Pivnet))
-		file, err := pivnetSdk.DownloadTileToPath(definition.Pivnet, output)
-		if err != nil {
-			return fmt.Errorf("downloading tile: %v", err)
-		}
-		if err := file.Close(); err != nil {
-			return fmt.Errorf("closing tile: %v", err)
-		}
-	}
+	// pivnetSdk, err := pivnet.NewSdk(cmd.pivnetAPIToken, cmd.logger)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// envCfg, err := config.FromEnvDirectory(cmd.envDir)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
+	// 	if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
+	// 		return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
+	// 	}
+	// } else if err != nil {
+	// 	return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
+	// }
+	//
+	// tileCache := pivnet.TileCache{Dir: cmd.tileCacheDir}
+	// tiles := selectedTiles(cmd.logger, envCfg)
+	// for _, tile := range tiles {
+	// 	if tile.BuiltIn() {
+	// 		continue
+	// 	}
+	// 	definition := tile.Definition(&config.EnvConfig{SmallFootprint: true})
+	// 	cmd.logger.Printf("caching tile: %s", definition.Product.Name)
+	//
+	// 	output := filepath.Join(cmd.tileCacheDir, tileCache.FileName(definition.Pivnet))
+	// 	file, err := pivnetSdk.DownloadTileToPath(definition.Pivnet, output)
+	// 	if err != nil {
+	// 		return fmt.Errorf("downloading tile: %v", err)
+	// 	}
+	// 	if err := file.Close(); err != nil {
+	// 		return fmt.Errorf("closing tile: %v", err)
+	// 	}
+	// }
 
 	return nil
 }
