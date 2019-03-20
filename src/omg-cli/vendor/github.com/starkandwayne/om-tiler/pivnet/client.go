@@ -37,6 +37,12 @@ type Client struct {
 	filter     *filter.Filter
 }
 
+type EULA struct {
+	Name    string
+	Content string
+	Slug    string
+}
+
 func NewClient(c Config, logger *log.Logger) *Client {
 	host := c.Host
 	if c.Host == "" {
@@ -74,18 +80,18 @@ func (c *Client) DownloadFile(f pattern.PivnetFile, dir string) (file *os.File, 
 	return nil, fmt.Errorf("download tile failed after %d attempts", retryAttempts)
 }
 
-func (c *Client) GetEULA(f pattern.PivnetFile) (string, error) {
+func (c *Client) GetEULA(f pattern.PivnetFile) (*EULA, error) {
 	release, err := c.lookupRelease(f)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	eula, err := c.client.EULA.Get(release.EULA.Slug)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return eula.Content, nil
+	return &EULA{Name: eula.Name, Content: eula.Content, Slug: eula.Slug}, nil
 }
 
 func (c *Client) AcceptEULA(f pattern.PivnetFile) error {

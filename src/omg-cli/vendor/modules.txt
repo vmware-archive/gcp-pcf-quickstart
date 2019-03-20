@@ -146,11 +146,11 @@ github.com/pivotal-cf/jhanda
 github.com/pivotal-cf/jhanda/internal/parser
 # github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
 github.com/pivotal-cf/om/api
+github.com/pivotal-cf/om/network
+github.com/pivotal-cf/om/progress
 github.com/pivotal-cf/om/commands
 github.com/pivotal-cf/om/extractor
 github.com/pivotal-cf/om/formcontent
-github.com/pivotal-cf/om/network
-github.com/pivotal-cf/om/progress
 github.com/pivotal-cf/om/config
 github.com/pivotal-cf/om/configparser
 github.com/pivotal-cf/om/download_clients
@@ -167,12 +167,12 @@ github.com/pkg/errors
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/disk
 github.com/shirou/gopsutil/internal/common
-# github.com/starkandwayne/om-tiler v0.0.0-20190320123114-249853d51387
+# github.com/starkandwayne/om-tiler v0.0.0-20190320134527-7d6ae3bf63d3
 github.com/starkandwayne/om-tiler/mover
 github.com/starkandwayne/om-tiler/opsman
+github.com/starkandwayne/om-tiler/pattern
 github.com/starkandwayne/om-tiler/pivnet
 github.com/starkandwayne/om-tiler/tiler
-github.com/starkandwayne/om-tiler/pattern
 # github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 github.com/tmc/scp
 # golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
