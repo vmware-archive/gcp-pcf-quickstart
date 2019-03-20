@@ -72,7 +72,7 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 }
 
 func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
-	var eulas map[string]*pivnet.EULA
+	eulas := make(map[string]*pivnet.EULA)
 	for _, tile := range cmd.pattern.Tiles {
 		eula, err := cmd.pivnet.GetEULA(tile.Product)
 		if err != nil {
