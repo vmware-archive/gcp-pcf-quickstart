@@ -17,9 +17,17 @@
 package commands
 
 import (
+	"fmt"
 	"log"
+	"os"
+
+	"omg-cli/config"
+	"omg-cli/templates"
+	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
+	"github.com/starkandwayne/om-tiler/mover"
+	"github.com/starkandwayne/om-tiler/pivnet"
 )
 
 // CacheTilesCommand caches tiles to the given tileCacheDir.
@@ -40,42 +48,51 @@ func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
-	// pivnetSdk, err := pivnet.NewSdk(cmd.pivnetAPIToken, cmd.logger)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// envCfg, err := config.FromEnvDirectory(cmd.envDir)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
-	// 	if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
-	// 		return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
-	// 	}
-	// } else if err != nil {
-	// 	return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
-	// }
-	//
-	// tileCache := pivnet.TileCache{Dir: cmd.tileCacheDir}
-	// tiles := selectedTiles(cmd.logger, envCfg)
-	// for _, tile := range tiles {
-	// 	if tile.BuiltIn() {
-	// 		continue
-	// 	}
-	// 	definition := tile.Definition(&config.EnvConfig{SmallFootprint: true})
-	// 	cmd.logger.Printf("caching tile: %s", definition.Product.Name)
-	//
-	// 	output := filepath.Join(cmd.tileCacheDir, tileCache.FileName(definition.Pivnet))
-	// 	file, err := pivnetSdk.DownloadTileToPath(definition.Pivnet, output)
-	// 	if err != nil {
-	// 		return fmt.Errorf("downloading tile: %v", err)
-	// 	}
-	// 	if err := file.Close(); err != nil {
-	// 		return fmt.Errorf("closing tile: %v", err)
-	// 	}
-	// }
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
+	pivnetClient := pivnet.NewClient(pivnet.Config{
+		Token:      cmd.pivnetAPIToken,
+		UserAgent:  version.UserAgent(),
+		AcceptEULA: true,
+	}, cmd.logger)
+
+	if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
+		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
+			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
+	}
+
+	mover, err := mover.NewMover(pivnetClient, cmd.tileCacheDir, cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	pattern, err := templates.GetPattern(envCfg, map[string]interface{}{})
+	if err != nil {
+		return err
+	}
+
+	pattern.Validate(false)
+	if err != nil {
+		return err
+	}
+
+	for _, tile := range pattern.Tiles {
+		err = mover.Cache(tile.Product)
+		if err != nil {
+			return err
+		}
+
+		err = mover.Cache(tile.Stemcell)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

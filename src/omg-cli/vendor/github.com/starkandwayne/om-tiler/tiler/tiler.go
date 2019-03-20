@@ -1,7 +1,6 @@
 package tiler
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -12,6 +11,5 @@ type Tiler struct {
 }
 
 func NewTiler(c OpsmanClient, m Mover, l *log.Logger) (*Tiler, error) {
-	l.SetPrefix(fmt.Sprintf("%s[OM Tiler] ", l.Prefix()))
 	return &Tiler{client: c, mover: m, logger: l}, nil
 }

@@ -1,6 +1,8 @@
 package opsman
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -35,6 +37,7 @@ const (
 	connectTimeout     = time.Duration(5) * time.Second
 	requestTimeout     = time.Duration(1800) * time.Second
 	pollingIntervalSec = "10"
+	applySleepDuration = time.Duration(10) * time.Second
 )
 
 func NewClient(c Config, logger *log.Logger) (*Client, error) {
@@ -85,7 +88,15 @@ func (c *Client) ConfigureAuthentication() error {
 }
 
 func (c *Client) FilesUploaded(t pattern.Tile) (bool, error) {
-	return false, nil
+	products, err := c.uploadedProducts()
+	if err != nil {
+		return false, err
+	}
+
+	pok := contains(products, fmt.Sprintf("%s/%s", t.Name, t.Version))
+	sok := contains(products, fmt.Sprintf("stemcell/%s", t.Stemcell.Version))
+
+	return (pok && sok), nil
 }
 
 func (c *Client) UploadProduct(p *os.File) error {
@@ -148,7 +159,10 @@ func (c *Client) ConfigureDirector(config []byte) error {
 }
 
 func (c *Client) ApplyChanges() error {
-	return nil
+	args := []string{"--skip-unchanged-products"}
+	logWriter := commands.NewLogWriter(os.Stdout)
+	cmd := commands.NewApplyChanges(c.api, c.api, logWriter, c.log, applySleepDuration)
+	return cmd.Execute(args)
 }
 
 func tmpConfigFile(config []byte) (string, error) {
@@ -166,4 +180,48 @@ func tmpConfigFile(config []byte) (string, error) {
 	}
 
 	return configFile.Name(), nil
+}
+
+type StemcellAssignments struct {
+	Products []Product `json:"products"`
+}
+
+type Product struct {
+	Name             string   `json:"type"`
+	Version          string   `json:"product_version"`
+	StemcellVersions []string `json:"available_stemcell_versions"`
+}
+
+func (c *Client) uploadedProducts() ([]string, error) {
+	args := []string{"--silent", "--path=/api/v0/stemcell_assignments"}
+	out := bytes.NewBuffer([]byte{})
+	cmd := commands.NewCurl(c.api, log.New(out, "", 0), c.log)
+	err := cmd.Execute(args)
+	if err != nil {
+		return []string{}, fmt.Errorf("retrieving stemcell assignments: %s", err)
+	}
+
+	var assignments StemcellAssignments
+	err = json.Unmarshal(out.Bytes(), &assignments)
+	if err != nil {
+		return []string{}, fmt.Errorf("decoding stemcell assignments: %s", err)
+	}
+
+	products := []string{}
+	for _, p := range assignments.Products {
+		products = append(products, fmt.Sprintf("%s/%s", p.Name, p.Version))
+		for _, s := range p.StemcellVersions {
+			products = append(products, fmt.Sprintf("stemcell/%s", s))
+		}
+	}
+	return products, nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

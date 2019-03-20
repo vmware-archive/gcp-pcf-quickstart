@@ -21,14 +21,12 @@ import (
 
 	"omg-cli/config"
 	"omg-cli/templates"
-
 	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
 
 	"github.com/starkandwayne/om-tiler/mover"
 	"github.com/starkandwayne/om-tiler/opsman"
-	"github.com/starkandwayne/om-tiler/pattern"
 	"github.com/starkandwayne/om-tiler/pivnet"
 	"github.com/starkandwayne/om-tiler/tiler"
 )
@@ -59,7 +57,7 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omclient, err := opsman.NewClient(opsman.Config{
+	omClient, err := opsman.NewClient(opsman.Config{
 		Target:               cfg.OpsManagerHostname,
 		Username:             cfg.OpsManager.Username,
 		Password:             cfg.OpsManager.Password,
@@ -70,33 +68,26 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pivnetclient := pivnet.NewClient(pivnet.Config{
+	pivnetClient := pivnet.NewClient(pivnet.Config{
 		Token:      envCfg.PivnetAPIToken,
 		UserAgent:  version.UserAgent(),
 		AcceptEULA: true,
 	}, cmd.logger)
 
-	mover, err := mover.NewMover(pivnetclient, "", cmd.logger)
+	mover, err := mover.NewMover(pivnetClient, "", cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	omConfigurator, err := tiler.NewTiler(omclient, mover, cmd.logger)
+	tiler, err := tiler.NewTiler(omClient, mover, cmd.logger)
 	if err != nil {
 		return err
 	}
-	var opsFiles []string
-	if envCfg.SmallFootprint {
-		opsFiles = append(opsFiles, "options/small-footprint.yml")
-	}
-	if envCfg.IncludeHealthwatch {
-		opsFiles = append(opsFiles, "options/healthwatch.yml")
-	}
-	return omConfigurator.Apply(pattern.Template{
-		Store:    templates.Templates,
-		Manifest: "deployment.yml",
-		OpsFiles: opsFiles,
-		Vars:     cfg.Raw,
-	})
 
+	pattern, err := templates.GetPattern(envCfg, cfg.Raw)
+	if err != nil {
+		return err
+	}
+
+	return tiler.Apply(pattern)
 }

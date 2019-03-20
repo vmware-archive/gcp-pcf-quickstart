@@ -167,12 +167,12 @@ github.com/pkg/errors
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/disk
 github.com/shirou/gopsutil/internal/common
-# github.com/starkandwayne/om-tiler v0.0.0-20190318105842-3d4a54168922
+# github.com/starkandwayne/om-tiler v0.0.0-20190320110617-83ba5978ac15
 github.com/starkandwayne/om-tiler/mover
 github.com/starkandwayne/om-tiler/opsman
-github.com/starkandwayne/om-tiler/pattern
 github.com/starkandwayne/om-tiler/pivnet
 github.com/starkandwayne/om-tiler/tiler
+github.com/starkandwayne/om-tiler/pattern
 # github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 github.com/tmc/scp
 # golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2

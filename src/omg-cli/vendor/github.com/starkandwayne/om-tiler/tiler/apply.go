@@ -7,17 +7,12 @@ import (
 	"github.com/starkandwayne/om-tiler/pattern"
 )
 
-func (c *Tiler) Apply(t pattern.Template) error {
-	p, err := pattern.NewPattern(t)
-	if err != nil {
+func (c *Tiler) Apply(p pattern.Pattern) error {
+	if err := p.Validate(true); err != nil {
 		return err
 	}
 
-	if err = p.Validate(true); err != nil {
-		return err
-	}
-
-	err = c.client.ConfigureAuthentication()
+	err := c.client.ConfigureAuthentication()
 	if err != nil {
 		return err
 	}
@@ -57,6 +52,8 @@ func (c *Tiler) ensureFilesUploaded(t pattern.Tile) error {
 		return err
 	}
 	if ok {
+		c.logger.Printf("files for %s/%s already uploaded skipping download",
+			t.Name, t.Version)
 		return nil
 	}
 
