@@ -76,7 +76,7 @@ func getMover(envCfg *config.EnvConfig, c string, l *log.Logger) (*mover.Mover, 
 		return nil, fmt.Errorf("finding tile cache directory %s: %v", c, err)
 	}
 
-	return mover.NewMover(getPivnet(envCfg, l), "", l)
+	return mover.NewMover(getPivnet(envCfg, l), c, l)
 }
 
 func getTiler(cfg *config.Config, envCfg *config.EnvConfig, c string, l *log.Logger) (*tiler.Tiler, error) {
