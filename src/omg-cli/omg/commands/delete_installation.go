@@ -18,6 +18,9 @@ package commands
 
 import (
 	"log"
+	"os"
+
+	"omg-cli/config"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -36,29 +39,20 @@ func (cmd *DeleteInstallationCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
-	// cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// envCfg, err := config.FromEnvDirectory(cmd.envDir)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
-	//
-	// steps := []step{
-	// 	{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
-	// 	{function: opsMan.Unlock, name: "Unlock"},
-	// 	{function: opsMan.DeleteInstallation, name: "DeleteInstallation"},
-	// }
-	//
-	// return run(steps, cmd.logger)
-	return nil
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
+	tiler, err := getTiler(cfg, envCfg, os.TempDir(), cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	return tiler.Delete()
 }

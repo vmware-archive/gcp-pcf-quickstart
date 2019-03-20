@@ -21,14 +21,8 @@ import (
 
 	"omg-cli/config"
 	"omg-cli/templates"
-	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
-
-	"github.com/starkandwayne/om-tiler/mover"
-	"github.com/starkandwayne/om-tiler/opsman"
-	"github.com/starkandwayne/om-tiler/pivnet"
-	"github.com/starkandwayne/om-tiler/tiler"
 )
 
 // PushTilesCommand pushes tiles to the Ops Manager.
@@ -57,29 +51,7 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omClient, err := opsman.NewClient(opsman.Config{
-		Target:               cfg.OpsManagerHostname,
-		Username:             cfg.OpsManager.Username,
-		Password:             cfg.OpsManager.Password,
-		DecryptionPassphrase: cfg.OpsManager.DecryptionPhrase,
-		SkipSSLVerification:  cfg.OpsManager.SkipSSLVerification,
-	}, cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	pivnetClient := pivnet.NewClient(pivnet.Config{
-		Token:      envCfg.PivnetAPIToken,
-		UserAgent:  version.UserAgent(),
-		AcceptEULA: true,
-	}, cmd.logger)
-
-	mover, err := mover.NewMover(pivnetClient, "", cmd.logger)
-	if err != nil {
-		return err
-	}
-
-	tiler, err := tiler.NewTiler(omClient, mover, cmd.logger)
+	tiler, err := getTiler(cfg, envCfg, cmd.tileCacheDir, cmd.logger)
 	if err != nil {
 		return err
 	}
@@ -89,5 +61,5 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	return tiler.Apply(pattern)
+	return tiler.Configure(pattern)
 }

@@ -19,9 +19,18 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 
+	"omg-cli/config"
+	"omg-cli/version"
+
 	"github.com/alecthomas/kingpin"
+
+	"github.com/starkandwayne/om-tiler/mover"
+	"github.com/starkandwayne/om-tiler/opsman"
+	"github.com/starkandwayne/om-tiler/pivnet"
+	"github.com/starkandwayne/om-tiler/tiler"
 )
 
 type register interface {
@@ -50,18 +59,45 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 	}
 }
 
-// func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileInstaller {
-// 	result := []tiles.TileInstaller{
-// 		&director.Tile{},
-// 		&ert.Tile{},
-// 		&stackdrivernozzle.Tile{Logger: logger},
-// 		&servicebroker.Tile{},
-// 	}
-// 	if config.IncludeHealthwatch {
-// 		result = append(result, &healthwatch.Tile{})
-// 	}
-// 	return result
-// }
+func getPivnet(envCfg *config.EnvConfig, l *log.Logger) *pivnet.Client {
+	return pivnet.NewClient(pivnet.Config{
+		Token:      envCfg.PivnetAPIToken,
+		UserAgent:  version.UserAgent(),
+		AcceptEULA: true,
+	}, l)
+}
+
+func getMover(envCfg *config.EnvConfig, c string, l *log.Logger) (*mover.Mover, error) {
+	if _, err := os.Stat(c); os.IsNotExist(err) {
+		if err := os.Mkdir(c, os.ModePerm); err != nil {
+			return nil, fmt.Errorf("creating tile cache directory %s: %v", c, err)
+		}
+	} else if err != nil {
+		return nil, fmt.Errorf("finding tile cache directory %s: %v", c, err)
+	}
+
+	return mover.NewMover(getPivnet(envCfg, l), "", l)
+}
+
+func getTiler(cfg *config.Config, envCfg *config.EnvConfig, c string, l *log.Logger) (*tiler.Tiler, error) {
+	omClient, err := opsman.NewClient(opsman.Config{
+		Target:               cfg.OpsManagerHostname,
+		Username:             cfg.OpsManager.Username,
+		Password:             cfg.OpsManager.Password,
+		DecryptionPassphrase: cfg.OpsManager.DecryptionPhrase,
+		SkipSSLVerification:  cfg.OpsManager.SkipSSLVerification,
+	}, l)
+	if err != nil {
+		return nil, err
+	}
+
+	mover, err := getMover(envCfg, c, l)
+	if err != nil {
+		return nil, err
+	}
+
+	return tiler.NewTiler(omClient, mover, l)
+}
 
 type step struct {
 	function func() error

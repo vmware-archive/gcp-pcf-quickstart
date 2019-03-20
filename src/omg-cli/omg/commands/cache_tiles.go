@@ -17,17 +17,12 @@
 package commands
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"omg-cli/config"
 	"omg-cli/templates"
-	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/starkandwayne/om-tiler/mover"
-	"github.com/starkandwayne/om-tiler/pivnet"
 )
 
 // CacheTilesCommand caches tiles to the given tileCacheDir.
@@ -53,21 +48,9 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pivnetClient := pivnet.NewClient(pivnet.Config{
-		Token:      cmd.pivnetAPIToken,
-		UserAgent:  version.UserAgent(),
-		AcceptEULA: true,
-	}, cmd.logger)
+	envCfg.PivnetAPIToken = cmd.pivnetAPIToken
 
-	if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
-		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
-			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
-	}
-
-	mover, err := mover.NewMover(pivnetClient, cmd.tileCacheDir, cmd.logger)
+	mover, err := getMover(envCfg, cmd.tileCacheDir, cmd.logger)
 	if err != nil {
 		return err
 	}

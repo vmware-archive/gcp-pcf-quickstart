@@ -16,4 +16,5 @@ type OpsmanClient interface {
 	ConfigureDirector([]byte) error
 	ConfigureProduct([]byte) error
 	ApplyChanges() error
+	DeleteInstallation() error
 }

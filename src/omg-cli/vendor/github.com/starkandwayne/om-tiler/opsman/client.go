@@ -36,7 +36,7 @@ type Client struct {
 const (
 	connectTimeout     = time.Duration(5) * time.Second
 	requestTimeout     = time.Duration(1800) * time.Second
-	pollingIntervalSec = "10"
+	pollingInterval    = time.Duration(10) * time.Second
 	applySleepDuration = time.Duration(10) * time.Second
 )
 
@@ -102,7 +102,7 @@ func (c *Client) FilesUploaded(t pattern.Tile) (bool, error) {
 func (c *Client) UploadProduct(p *os.File) error {
 	args := []string{
 		fmt.Sprintf("--product=%s", p.Name()),
-		fmt.Sprintf("--polling-interval=%s", pollingIntervalSec),
+		fmt.Sprintf("--polling-interval=%f", pollingInterval.Seconds()),
 	}
 	form := formcontent.NewForm()
 	metadataExtractor := extractor.MetadataExtractor{}
@@ -163,6 +163,12 @@ func (c *Client) ApplyChanges() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewApplyChanges(c.api, c.api, logWriter, c.log, applySleepDuration)
 	return cmd.Execute(args)
+}
+
+func (c *Client) DeleteInstallation() error {
+	logWriter := commands.NewLogWriter(os.Stdout)
+	cmd := commands.NewDeleteInstallation(c.api, logWriter, c.log, pollingInterval)
+	return cmd.Execute(nil)
 }
 
 func tmpConfigFile(config []byte) (string, error) {

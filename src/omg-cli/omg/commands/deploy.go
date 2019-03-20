@@ -18,6 +18,8 @@ package commands
 
 import (
 	"log"
+	"omg-cli/config"
+	"os"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -38,36 +40,20 @@ func (cmd *DeployCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
-	// cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// envCfg, err := config.FromEnvDirectory(cmd.envDir)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// tiles := selectedTiles(cmd.logger, envCfg)
-	// opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, nil, cmd.logger, tiles, nil)
-	//
-	// steps := []step{
-	// 	{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
-	// 	{function: opsMan.Unlock, name: "Unlock"},
-	// 	{function: opsMan.ConfigureTiles, name: "ConfigureTiles"},
-	// }
-	//
-	// if cmd.applyChanges {
-	// 	steps = append(steps, step{function: opsMan.ApplyDirector, name: "ApplyDirector"})
-	// 	steps = append(steps, step{function: opsMan.ApplyChangesPAS, name: "ApplyChangesPAS"})
-	// 	steps = append(steps, step{function: opsMan.ApplyChangesSkipUnchanged, name: "ApplyChangesSkipUnchanged"})
-	// }
-	//
-	// return run(steps, cmd.logger)
-	return nil
+	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
+	envCfg, err := config.FromEnvDirectory(cmd.envDir)
+	if err != nil {
+		return err
+	}
+
+	tiler, err := getTiler(cfg, envCfg, os.TempDir(), cmd.logger)
+	if err != nil {
+		return err
+	}
+
+	return tiler.Apply()
 }
