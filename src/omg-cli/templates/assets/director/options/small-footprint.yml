@@ -1,9 +1,9 @@
-- type: replace
-  path: /resource-configuration/compilation
-  value:
-    instances: 1
-    instance_type:
-      id: medium.mem
+# - type: replace
+#   path: /resource-configuration/compilation
+#   value:
+#     instances:
+#     instance_type:
+#       id: medium.mem
 
 - type: replace
   path: /properties-configuration/director_configuration/database_type

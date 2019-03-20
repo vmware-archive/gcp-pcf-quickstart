@@ -106,7 +106,7 @@ pushd keys
   openssl genrsa -passout pass:x -out server.pass.key 2048
   openssl rsa -passin pass:x -in server.pass.key -out server.key
   openssl req -new -key server.key -out server.csr \
-  -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=*.${DNS_SUFFIX}"
+  -subj "/C=US/ST=Washington/L=Seattle/CN=${ENV_NAME}.${DNS_SUFFIX}/subjectAltName=DNS:*.${DNS_SUFFIX},DNS:*.sys.${DNS_SUFFIX},DNS:*.apps.${DNS_SUFFIX},DNS:*.login.sys.${DNS_SUFFIX},*.uaa.sys.${DNS_SUFFIX}"
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
   rm -f jumpbox_ssh jumpbox_ssh.pub
