@@ -66,8 +66,8 @@ properties-configuration:
 resource-configuration:
   compilation:
     instance_type:
-      id: large.cpu
-    instances: 4
+      id: medium.cpu
+    instances: 1
   director:
     instance_type:
       id: automatic

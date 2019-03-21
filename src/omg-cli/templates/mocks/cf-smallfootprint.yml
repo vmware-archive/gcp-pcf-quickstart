@@ -66,8 +66,6 @@ product-properties:
     value: 35
   .properties.cc_api_rate_limit:
     value: disable
-  .properties.cc_logging_level:
-    value: info
   .properties.ccdb_connection_validation_timeout:
     value: 3600
   .properties.ccdb_read_timeout:
@@ -245,7 +243,7 @@ product-properties:
   .properties.tcp_routing:
     value: enable
   .properties.tcp_routing.enable.reservable_ports:
-    value: 1024-65535
+    value: 10-20
   .properties.uaa:
     value: internal
   .properties.uaa.internal.password_expires_after_months:
@@ -303,8 +301,6 @@ network-properties:
     name: test-ert-subnet
   other_availability_zones:
   - name: testzone-1
-  - name: testzone-2
-  - name: testzone-3
   singleton_availability_zone:
     name: testzone-1
 resource-config:

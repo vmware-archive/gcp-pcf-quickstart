@@ -38,3 +38,4 @@ wss_router_pool: test-wss-pool-name
 ssl_cert: test-ssl-cert
 ssl_cert_private_key: test-ssl-key
 stackdriver_service_account_key:  { type: service_account, project_id: test-stackdriver-project }
+tcp_port_range: 10-20
