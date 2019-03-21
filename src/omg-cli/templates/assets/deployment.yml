@@ -7,7 +7,9 @@ director:
     services_subnet_reserved_ips: 10.0.8.0-10.0.8.20
     ert_subnet_reserved_ips: 10.0.4.0-10.0.4.20
 tiles:
-- product:
+- name: cf
+  version: 2.4.4
+  product:
     product_slug: elastic-runtime
     release_version: 2.4.4
     file_glob: "srt*.pivotal"
@@ -15,12 +17,11 @@ tiles:
     product_slug: stemcells-ubuntu-xenial
     release_version: "170.38"
     file_glob: "*google*.tgz"
-  name: cf
-  version: 2.4.4
   manifest: tiles/srt/product.yml
   ops_files:
   - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
+  - tiles/srt/features/tcp_routing-enable.yml
   - tiles/srt/resource/control_elb_names.yml
   - tiles/srt/resource/router_elb_names.yml
   - tiles/srt/resource/tcp_router_elb_names.yml
@@ -37,10 +38,10 @@ tiles:
     networking_poe_ssl_certs_0/certificate: ((ssl_cert))
     networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
     ha_proxy/skip_cert_verify: true
+    haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
     credhub_key_encryption_passwords_0/key: ((credhub_key))
     credhub_key_encryption_passwords_0/name: ((credhub_key_name))
     credhub_key_encryption_passwords_0/primary: true
-    haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
     uaa/service_provider_key_credentials/certificate: ((ssl_cert))
     uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     security_acknowledgement: X
@@ -56,7 +57,9 @@ tiles:
     router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
     tcp_router_elb_names: [tcp:((tcp_router_pool))]
 
-- product:
+- name: gcp-service-broker
+  version: 4.2.2
+  product:
     product_slug: gcp-service-broker
     release_version: 4.2.2
     file_glob: "*.pivotal"
@@ -64,8 +67,6 @@ tiles:
     product_slug: stemcells-ubuntu-xenial
     release_version: "170.38"
     file_glob: "*google*.tgz"
-  name: gcp-service-broker
-  version: 4.2.2
   manifest: tiles/gcp-service-broker/product.yml
   ops_files:
   - tiles/gcp-service-broker/optional/add-db_username.yml
@@ -82,7 +83,9 @@ tiles:
     db_username: ((service_broker_db_username))
     db_password: ((service_broker_db_password))
 
-- product:
+- name: stackdriver-nozzle
+  version: 2.1.0
+  product:
     product_slug: gcp-stackdriver-nozzle
     release_version: 2.1.0
     file_glob: "*.pivotal"
@@ -90,10 +93,7 @@ tiles:
     product_slug: stemcells-ubuntu-xenial
     release_version: "170.38"
     file_glob: "*google*.tgz"
-  name: stackdriver-nozzle
-  version: 2.1.0
   manifest: tiles/gcp-stackdriver-nozzle/product.yml
-  ops_files:
   vars_files:
   - tiles/gcp-stackdriver-nozzle/product-default-vars.yml
   - tiles/gcp-stackdriver-nozzle/resource-vars.yml
