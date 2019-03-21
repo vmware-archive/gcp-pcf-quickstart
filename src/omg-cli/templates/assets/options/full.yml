@@ -1,0 +1,57 @@
+# DIRECTOR
+- type: replace
+  path: /director/ops_files/-
+  value: director/options/full.yml
+
+# CF
+- type: replace
+  path: /tiles/name=cf/ops_files/-
+  value: tiles/srt/network/3-az-configuration.yml
+- type: replace
+  path: /tiles/name=cf/vars/az2_name?
+  value: ((azs_1))
+- type: replace
+  path: /tiles/name=cf/vars/az3_name?
+  value: ((azs_2))
+
+- type: replace
+  path: /tiles/name=cf/product/file_glob
+  value: "cf*.pivotal"
+
+- type: replace
+  path: /tiles/name=cf/ops_files?
+  value:
+    - tiles/ert/features/system_blobstore-external_gcs_service_account.yml
+    - tiles/ert/features/haproxy_forward_tls-disable.yml
+    - tiles/ert/resource/diego_brain_elb_names.yml
+    - tiles/ert/resource/router_elb_names.yml
+    - tiles/ert/resource/tcp_router_elb_names.yml
+
+- type: replace
+  path: /tiles/name=cf/vars_files?
+  value:
+    - tiles/ert/product-default-vars.yml
+    - tiles/ert/resource-vars.yml
+    - tiles/ert/errand-vars.yml
+
+# GCP-SERVICE-BROKER
+- type: replace
+  path: /tiles/name=gcp-service-broker/ops_files/-
+  value: tiles/gcp-service-broker/network/3-az-configuration.yml
+- type: replace
+  path: /tiles/name=gcp-service-broker/vars/az2_name?
+  value: ((azs_1))
+- type: replace
+  path: /tiles/name=gcp-service-broker/vars/az3_name?
+  value: ((azs_2))
+
+# GCP-SERVICE-BROKER
+- type: replace
+  path: /tiles/name=stackdriver-nozzle/ops_files/-
+  value: tiles/gcp-stackdriver-nozzle/network/3-az-configuration.yml
+- type: replace
+  path: /tiles/name=stackdriver-nozzle/vars/az2_name?
+  value: ((azs_1))
+- type: replace
+  path: /tiles/name=stackdriver-nozzle/vars/az3_name?
+  value: ((azs_2))

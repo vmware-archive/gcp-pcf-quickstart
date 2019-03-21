@@ -97,6 +97,7 @@ product-properties:
       {
         "type": "service_account",
         "project_id": "test",
+      }
   .properties.space:
     value: gcp-service-broker-space
 network-properties:

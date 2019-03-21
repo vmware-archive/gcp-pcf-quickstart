@@ -13,13 +13,7 @@ properties-configuration:
       bucket_name: ((director_blobstore_bucket))
       service_account_key: ((ops_manager_service_account_key))
       storage_class: MULTI_REGIONAL
-    database_type: external
-    external_database_options:
-      host: ((sql_db_ip))
-      database: ((opsman_sql_db_name))
-      user: ((opsman_sql_username))
-      password: ((opsman_sql_password))
-      port: ((sql_db_port)) # TODO tag
+    database_type: internal
   iaas_configuration:
     project: ((project))
     auth_json: ((ops_manager_service_account_key))
@@ -67,9 +61,9 @@ networks-configuration:
       - ((azs_2))
 resource-configuration:
   compilation:
-    instances: 4
+    instances: 1
     instance_type:
-      id: large.cpu
+      id: medium.cpu
   director:
     instances: automatic
     persistent_disk:

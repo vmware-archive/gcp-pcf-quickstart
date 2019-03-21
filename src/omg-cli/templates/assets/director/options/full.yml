@@ -1,0 +1,19 @@
+- type: replace
+  path: /resource-configuration/compilation
+  value:
+    instances: 4
+    instance_type:
+      id: large.cpu
+
+- type: replace
+  path: /properties-configuration/director_configuration/database_type
+  value: external
+
+- type: replace
+  path: /properties-configuration/director_configuration/external_database_options?
+  value:
+    host: ((sql_db_ip))
+    database: ((opsman_sql_db_name))
+    user: ((opsman_sql_username))
+    password: ((opsman_sql_password))
+    port: ((sql_db_port)) # TODO tag

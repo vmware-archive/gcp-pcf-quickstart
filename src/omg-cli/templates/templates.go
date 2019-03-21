@@ -10,11 +10,14 @@ import (
 
 func GetPattern(envCfg *config.EnvConfig, vars map[string]interface{}) (pattern.Pattern, error) {
 	var opsFiles []string
-	if envCfg.SmallFootprint {
-		opsFiles = append(opsFiles, "options/small-footprint.yml")
+	if !envCfg.SmallFootprint {
+		opsFiles = append(opsFiles, "options/full.yml")
 	}
 	if envCfg.IncludeHealthwatch {
 		opsFiles = append(opsFiles, "options/healthwatch.yml")
+	}
+	if envCfg.IncludeHealthwatch && !envCfg.SmallFootprint {
+		opsFiles = append(opsFiles, "options/healthwatch-full.yml")
 	}
 	return pattern.NewPattern(pattern.Template{
 		Store:    Templates,

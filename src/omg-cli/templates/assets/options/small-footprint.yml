@@ -1,3 +1,0 @@
-- type: replace
-  path: /director/ops_files/-
-  value: director/options/small-footprint.yml

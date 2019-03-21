@@ -19,7 +19,6 @@ tiles:
   version: 2.4.4
   manifest: tiles/srt/product.yml
   ops_files:
-  - tiles/srt/network/3-az-configuration.yml #TODO: small footprint need 3 az?
   - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
   - tiles/srt/resource/control_elb_names.yml
@@ -31,8 +30,6 @@ tiles:
   - tiles/srt/errand-vars.yml
   vars:
     network_name: ((ert_subnet_name))
-    az2_name: ((azs_1))
-    az3_name: ((azs_2))
     singleton_availability_zone: ((azs_0))
     cloud_controller/system_domain: ((sys_domain))
     cloud_controller/apps_domain: ((apps_domain))
@@ -59,35 +56,6 @@ tiles:
     router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
     tcp_router_elb_names: [tcp:((tcp_router_pool))]
 
-
-# - product:
-#     slug: p-healthwatch
-#     version: 1.4.5
-#     glob: "*.pivotal"
-#     stemcell_iaas: google
-#   name: p-healthwatch
-#   version: 1.4.5-build.41
-#   manifest: tiles/p-healthwatch/product.yml
-#   ops_files:
-#   - tiles/p-healthwatch/network/3-az-configuration.yml
-#   - tiles/p-healthwatch/features/opsman-disable.yml
-#   - tiles/p-healthwatch/optional/add-healthwatch-forwarder-foundation_name.yml
-#   vars_files:
-#   - tiles/p-healthwatch/product-default-vars.yml
-#   - tiles/p-healthwatch/resource-vars.yml
-#   - tiles/p-healthwatch/errand-vars.yml
-#   vars:
-#     boshtasks/enable/bosh_taskcheck_password: password
-#     boshtasks/enable/bosh_taskcheck_username: username
-#     healthwatch-forwarder/foundation_name: example
-#     network_name: ((ert_subnet_name))
-#     service_network_name: ((services_subnet_name))
-#     healthwatch-forwarder_instances: 2
-#     az2_name: ((azs_1))
-#     az3_name: ((azs_2))
-#     healthwatch-forwarder/health_check_az: ((azs_0))
-#     singleton_availability_zone: ((azs_0))
-
 - product:
     product_slug: gcp-service-broker
     release_version: 4.2.2
@@ -100,7 +68,6 @@ tiles:
   version: 4.2.2
   manifest: tiles/gcp-service-broker/product.yml
   ops_files:
-  # - tiles/gcp-service-broker/network/3-az-configuration.yml #TODO: small footprint need 3 az?
   - tiles/gcp-service-broker/optional/add-db_username.yml
   - tiles/gcp-service-broker/optional/add-db_password.yml
   vars_files:
@@ -127,7 +94,6 @@ tiles:
   version: 2.1.0
   manifest: tiles/gcp-stackdriver-nozzle/product.yml
   ops_files:
-  # - tiles/gcp-service-broker/network/3-az-configuration.yml #TODO: small footprint need 3 az?
   vars_files:
   - tiles/gcp-stackdriver-nozzle/product-default-vars.yml
   - tiles/gcp-stackdriver-nozzle/resource-vars.yml

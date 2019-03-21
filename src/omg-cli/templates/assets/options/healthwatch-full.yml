@@ -1,0 +1,13 @@
+- type: replace
+  path: /tiles/name=p-healthwatch/ops_files/-
+  value: tiles/p-healthwatch/network/3-az-configuration.yml
+
+- type: replace
+  path: /tiles/name=p-healthwatch/vars/az2_name?
+  value: ((azs_1))
+- type: replace
+  path: /tiles/name=p-healthwatch/vars/az3_name?
+  value: ((azs_2))
+- type: replace
+  path: /tiles/name=p-healthwatch/vars/healthwatch-forwarder_instances
+  value: 2
