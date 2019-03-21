@@ -60,6 +60,7 @@
       diego_brain_elb_names: [tcp:((ssh_router_pool))]
       router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
       tcp_router_elb_names: [tcp:((tcp_router_pool))]
+      tcp_routing/enable/reservable_ports: ((tcp_port_range))
       system_database/external/host: ((sql_db_ip))
       system_database/external/port: ((sql_db_port))
       system_database/external/account_password: ((ert_sql_password))
