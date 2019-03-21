@@ -1,0 +1,18 @@
+azs_0: testzone-1
+azs_1: testzone-2
+azs_2: testzone-3
+director_blobstore_bucket: test-director-bucket
+ert_subnet_cidrs_0: 101.0.1.0/24
+ert_subnet_gateway: 101.0.1.1
+ert_subnet_name: test-ert-subnet
+management_subnet_cidrs_0: 102.0.2.0/24
+management_subnet_gateway: 102.0.2.1
+management_subnet_name: test-mgm-subnet
+services_subnet_cidrs_0: 103.0.3.0/24
+services_subnet_gateway: 103.0.3.1
+services_subnet_name: test-services-subnet
+network_name: test-network
+ops_manager_service_account_key: { type: service_account, project_id: test-project }
+project: test-project
+region: test-region
+vm_tag: test-tag
