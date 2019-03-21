@@ -1,0 +1,16 @@
+- type: replace
+  path: /product-properties/.properties.whitelist?
+  value:
+    value:
+    - description: ((whitelist_0/description))
+      regexp: ((whitelist_0/regexp))
+      sink: ((whitelist_0/sink))
+      type: ((whitelist_0/type))
+    - description: ((whitelist_1/description))
+      regexp: ((whitelist_1/regexp))
+      sink: ((whitelist_1/sink))
+      type: ((whitelist_1/type))
+    - description: ((whitelist_2/description))
+      regexp: ((whitelist_2/regexp))
+      sink: ((whitelist_2/sink))
+      type: ((whitelist_2/type))

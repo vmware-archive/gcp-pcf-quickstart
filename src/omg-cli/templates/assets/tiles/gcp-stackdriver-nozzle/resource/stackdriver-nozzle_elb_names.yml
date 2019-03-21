@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/stackdriver-nozzle?/elb_names?
+  value: ((stackdriver-nozzle_elb_names))

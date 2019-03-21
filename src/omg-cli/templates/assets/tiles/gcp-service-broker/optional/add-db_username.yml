@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.db_username?
+  value:
+    value: ((db_username))

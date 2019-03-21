@@ -13,14 +13,14 @@ require (
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.4.3
 	github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
-	github.com/starkandwayne/om-tiler v0.0.0-20190320134527-7d6ae3bf63d3
+	github.com/starkandwayne/om-tiler v0.0.0-20190320155314-6dc95eba2ba6
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a // indirect
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	golang.org/x/sys v0.0.0-20190312061237-fead79001313 // indirect
 	google.golang.org/api v0.1.0
+	gopkg.in/yaml.v2 v2.2.2
 )
 
 replace github.com/graymeta/stow => github.com/jtarchie/stow v0.0.0-20190209005554-0bff39424d5b

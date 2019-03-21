@@ -1,0 +1,10 @@
+- type: replace
+  path: /product-properties/.properties.storage_custom_plans?
+  value:
+    value:
+    - description: ((storage_custom_plans_0/description))
+      display_name: ((storage_custom_plans_0/display_name))
+      guid: ((storage_custom_plans_0/guid))
+      name: ((storage_custom_plans_0/name))
+      service: ((storage_custom_plans_0/service))
+      storage_class: ((storage_custom_plans_0/storage_class))

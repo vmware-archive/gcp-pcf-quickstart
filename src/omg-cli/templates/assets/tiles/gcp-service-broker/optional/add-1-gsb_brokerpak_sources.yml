@@ -1,0 +1,11 @@
+- type: replace
+  path: /product-properties/.properties.gsb_brokerpak_sources?
+  value:
+    value:
+    - config: ((gsb_brokerpak_sources_0/config))
+      excluded_plans: ((gsb_brokerpak_sources_0/excluded_plans))
+      guid: ((gsb_brokerpak_sources_0/guid))
+      name: ((gsb_brokerpak_sources_0/name))
+      notes: ((gsb_brokerpak_sources_0/notes))
+      service_prefix: ((gsb_brokerpak_sources_0/service_prefix))
+      uri: ((gsb_brokerpak_sources_0/uri))

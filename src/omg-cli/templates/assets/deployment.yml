@@ -19,7 +19,7 @@ tiles:
   version: 2.4.4
   manifest: tiles/srt/product.yml
   ops_files:
-  - tiles/srt/network/3-az-configuration.yml
+  - tiles/srt/network/3-az-configuration.yml #TODO: small footprint need 3 az?
   - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
   - tiles/srt/resource/control_elb_names.yml
@@ -87,3 +87,54 @@ tiles:
 #     az3_name: ((azs_2))
 #     healthwatch-forwarder/health_check_az: ((azs_0))
 #     singleton_availability_zone: ((azs_0))
+
+- product:
+    product_slug: gcp-service-broker
+    release_version: 4.2.2
+    file_glob: "*.pivotal"
+  stemcell:
+    product_slug: stemcells-ubuntu-xenial
+    release_version: "170.38"
+    file_glob: "*google*.tgz"
+  name: gcp-service-broker
+  version: 4.2.2
+  manifest: tiles/gcp-service-broker/product.yml
+  ops_files:
+  # - tiles/gcp-service-broker/network/3-az-configuration.yml #TODO: small footprint need 3 az?
+  - tiles/gcp-service-broker/optional/add-db_username.yml
+  - tiles/gcp-service-broker/optional/add-db_password.yml
+  vars_files:
+  - tiles/gcp-service-broker/product-default-vars.yml
+  - tiles/gcp-service-broker/resource-vars.yml
+  - tiles/gcp-service-broker/errand-vars.yml
+  vars:
+    network_name: ((services_subnet_name))
+    singleton_availability_zone: ((azs_0))
+    root_service_account_json: ((service_broker_service_account_key))
+    db_host: ((service_broker_db_ip))
+    db_username: ((service_broker_db_username))
+    db_password: ((service_broker_db_password))
+
+- product:
+    product_slug: gcp-stackdriver-nozzle
+    release_version: 2.1.0
+    file_glob: "*.pivotal"
+  stemcell:
+    product_slug: stemcells-ubuntu-xenial
+    release_version: "170.38"
+    file_glob: "*google*.tgz"
+  name: stackdriver-nozzle
+  version: 2.1.0
+  manifest: tiles/gcp-stackdriver-nozzle/product.yml
+  ops_files:
+  # - tiles/gcp-service-broker/network/3-az-configuration.yml #TODO: small footprint need 3 az?
+  vars_files:
+  - tiles/gcp-stackdriver-nozzle/product-default-vars.yml
+  - tiles/gcp-stackdriver-nozzle/resource-vars.yml
+  - tiles/gcp-stackdriver-nozzle/errand-vars.yml
+  vars:
+    network_name: ((services_subnet_name))
+    singleton_availability_zone: ((azs_0))
+    service_account: ((stackdriver_service_account_key))
+    project_id: ((project))
+    firehose_skip_ssl: true

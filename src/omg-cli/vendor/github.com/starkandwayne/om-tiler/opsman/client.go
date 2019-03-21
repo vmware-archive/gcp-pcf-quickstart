@@ -102,7 +102,7 @@ func (c *Client) FilesUploaded(t pattern.Tile) (bool, error) {
 func (c *Client) UploadProduct(p *os.File) error {
 	args := []string{
 		fmt.Sprintf("--product=%s", p.Name()),
-		fmt.Sprintf("--polling-interval=%f", pollingInterval.Seconds()),
+		fmt.Sprintf("--polling-interval=%d", int(pollingInterval.Seconds())),
 	}
 	form := formcontent.NewForm()
 	metadataExtractor := extractor.MetadataExtractor{}

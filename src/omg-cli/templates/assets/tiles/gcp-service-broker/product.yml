@@ -1,0 +1,128 @@
+product-name: gcp-service-broker
+network-properties:
+  network:
+    name: ((network_name))
+  other_availability_zones:
+  - name: ((singleton_availability_zone))
+  singleton_availability_zone:
+    name: ((singleton_availability_zone))
+product-properties:
+  .properties.db_host:
+    value: ((db_host))
+  .properties.db_name:
+    value: ((db_name))
+  .properties.db_port:
+    value: ((db_port))
+  .properties.gcp_service_broker_enable_global_access_to_plans:
+    value: ((gcp_service_broker_enable_global_access_to_plans))
+  .properties.gsb_brokerpak_config:
+    value: ((gsb_brokerpak_config))
+  .properties.gsb_compatibility_enable_catalog_schemas:
+    value: ((gsb_compatibility_enable_catalog_schemas))
+  .properties.gsb_compatibility_enable_cf_sharing:
+    value: ((gsb_compatibility_enable_cf_sharing))
+  .properties.gsb_compatibility_enable_eol_services:
+    value: ((gsb_compatibility_enable_eol_services))
+  .properties.gsb_compatibility_enable_gcp_beta_services:
+    value: ((gsb_compatibility_enable_gcp_beta_services))
+  .properties.gsb_compatibility_enable_gcp_deprecated_services:
+    value: ((gsb_compatibility_enable_gcp_deprecated_services))
+  .properties.gsb_compatibility_enable_input_validation:
+    value: ((gsb_compatibility_enable_input_validation))
+  .properties.gsb_compatibility_enable_preview_services:
+    value: ((gsb_compatibility_enable_preview_services))
+  .properties.gsb_compatibility_enable_terraform_services:
+    value: ((gsb_compatibility_enable_terraform_services))
+  .properties.gsb_compatibility_enable_unmaintained_services:
+    value: ((gsb_compatibility_enable_unmaintained_services))
+  .properties.gsb_compatibility_three_to_four_legacy_plans:
+    value: ((gsb_compatibility_three_to_four_legacy_plans))
+  .properties.gsb_service_google_bigquery_bind_defaults:
+    value: ((gsb_service_google_bigquery_bind_defaults))
+  .properties.gsb_service_google_bigquery_enabled:
+    value: ((gsb_service_google_bigquery_enabled))
+  .properties.gsb_service_google_bigquery_provision_defaults:
+    value: ((gsb_service_google_bigquery_provision_defaults))
+  .properties.gsb_service_google_bigquery_whitelist:
+    value: ((gsb_service_google_bigquery_whitelist))
+  .properties.gsb_service_google_bigtable_bind_defaults:
+    value: ((gsb_service_google_bigtable_bind_defaults))
+  .properties.gsb_service_google_bigtable_enabled:
+    value: ((gsb_service_google_bigtable_enabled))
+  .properties.gsb_service_google_bigtable_provision_defaults:
+    value: ((gsb_service_google_bigtable_provision_defaults))
+  .properties.gsb_service_google_bigtable_whitelist:
+    value: ((gsb_service_google_bigtable_whitelist))
+  .properties.gsb_service_google_cloudsql_mysql_bind_defaults:
+    value: ((gsb_service_google_cloudsql_mysql_bind_defaults))
+  .properties.gsb_service_google_cloudsql_mysql_enabled:
+    value: ((gsb_service_google_cloudsql_mysql_enabled))
+  .properties.gsb_service_google_cloudsql_mysql_provision_defaults:
+    value: ((gsb_service_google_cloudsql_mysql_provision_defaults))
+  .properties.gsb_service_google_cloudsql_mysql_whitelist:
+    value: ((gsb_service_google_cloudsql_mysql_whitelist))
+  .properties.gsb_service_google_cloudsql_postgres_bind_defaults:
+    value: ((gsb_service_google_cloudsql_postgres_bind_defaults))
+  .properties.gsb_service_google_cloudsql_postgres_enabled:
+    value: ((gsb_service_google_cloudsql_postgres_enabled))
+  .properties.gsb_service_google_cloudsql_postgres_provision_defaults:
+    value: ((gsb_service_google_cloudsql_postgres_provision_defaults))
+  .properties.gsb_service_google_cloudsql_postgres_whitelist:
+    value: ((gsb_service_google_cloudsql_postgres_whitelist))
+  .properties.gsb_service_google_dataflow_enabled:
+    value: ((gsb_service_google_dataflow_enabled))
+  .properties.gsb_service_google_datastore_enabled:
+    value: ((gsb_service_google_datastore_enabled))
+  .properties.gsb_service_google_dialogflow_enabled:
+    value: ((gsb_service_google_dialogflow_enabled))
+  .properties.gsb_service_google_firestore_enabled:
+    value: ((gsb_service_google_firestore_enabled))
+  .properties.gsb_service_google_ml_apis_bind_defaults:
+    value: ((gsb_service_google_ml_apis_bind_defaults))
+  .properties.gsb_service_google_ml_apis_enabled:
+    value: ((gsb_service_google_ml_apis_enabled))
+  .properties.gsb_service_google_ml_apis_provision_defaults:
+    value: ((gsb_service_google_ml_apis_provision_defaults))
+  .properties.gsb_service_google_ml_apis_whitelist:
+    value: ((gsb_service_google_ml_apis_whitelist))
+  .properties.gsb_service_google_pubsub_bind_defaults:
+    value: ((gsb_service_google_pubsub_bind_defaults))
+  .properties.gsb_service_google_pubsub_enabled:
+    value: ((gsb_service_google_pubsub_enabled))
+  .properties.gsb_service_google_pubsub_provision_defaults:
+    value: ((gsb_service_google_pubsub_provision_defaults))
+  .properties.gsb_service_google_pubsub_whitelist:
+    value: ((gsb_service_google_pubsub_whitelist))
+  .properties.gsb_service_google_spanner_bind_defaults:
+    value: ((gsb_service_google_spanner_bind_defaults))
+  .properties.gsb_service_google_spanner_enabled:
+    value: ((gsb_service_google_spanner_enabled))
+  .properties.gsb_service_google_spanner_provision_defaults:
+    value: ((gsb_service_google_spanner_provision_defaults))
+  .properties.gsb_service_google_spanner_whitelist:
+    value: ((gsb_service_google_spanner_whitelist))
+  .properties.gsb_service_google_stackdriver_debugger_enabled:
+    value: ((gsb_service_google_stackdriver_debugger_enabled))
+  .properties.gsb_service_google_stackdriver_monitoring_enabled:
+    value: ((gsb_service_google_stackdriver_monitoring_enabled))
+  .properties.gsb_service_google_stackdriver_profiler_enabled:
+    value: ((gsb_service_google_stackdriver_profiler_enabled))
+  .properties.gsb_service_google_stackdriver_trace_enabled:
+    value: ((gsb_service_google_stackdriver_trace_enabled))
+  .properties.gsb_service_google_storage_bind_defaults:
+    value: ((gsb_service_google_storage_bind_defaults))
+  .properties.gsb_service_google_storage_enabled:
+    value: ((gsb_service_google_storage_enabled))
+  .properties.gsb_service_google_storage_provision_defaults:
+    value: ((gsb_service_google_storage_provision_defaults))
+  .properties.gsb_service_google_storage_whitelist:
+    value: ((gsb_service_google_storage_whitelist))
+  .properties.root_service_account_json:
+    value: ((root_service_account_json))
+resource-config:
+  delete-all:
+    instance_type:
+      id: ((delete-all_instance_type))
+  deploy-all:
+    instance_type:
+      id: ((deploy-all_instance_type))
