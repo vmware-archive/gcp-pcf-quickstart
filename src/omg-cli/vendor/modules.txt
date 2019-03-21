@@ -60,6 +60,8 @@ github.com/cloudfoundry/bosh-utils/system
 github.com/cloudfoundry/bosh-utils/logger
 # github.com/cppforlife/go-patch v0.2.0
 github.com/cppforlife/go-patch/patch
+# github.com/d4l3k/messagediff v1.2.1
+github.com/d4l3k/messagediff
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/go-ole/go-ole v1.2.4

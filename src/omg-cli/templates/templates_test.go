@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"omg-cli/config"
 	. "omg-cli/templates"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -13,6 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	ompattern "github.com/starkandwayne/om-tiler/pattern"
+	"github.com/thadc23/yamldiff/differ"
 )
 
 func mocksDir() string {
@@ -27,7 +29,7 @@ func readMock(f string) []byte {
 	return in
 }
 
-func getVars(f string) map[string]interface{} {
+func readYAML(f string) map[string]interface{} {
 	out := make(map[string]interface{})
 	err := yaml.Unmarshal(readMock(f), out)
 	Expect(err).ToNot(HaveOccurred())
@@ -37,30 +39,48 @@ func getVars(f string) map[string]interface{} {
 
 var _ = Describe("GetPattern", func() {
 	var (
-		pattern        ompattern.Pattern
-		healthwatch    bool
-		smallfootprint bool
-		varsfile       string
-		getTile        func(string) *ompattern.Tile
+		pattern         ompattern.Pattern
+		healthwatch     bool
+		smallfootprint  bool
+		varsfile        string
+		tileMatchesMock func(string, string) string
 	)
 	JustBeforeEach(func() {
 		var err error
 		pattern, err = GetPattern(&config.EnvConfig{
 			SmallFootprint:     smallfootprint,
 			IncludeHealthwatch: healthwatch,
-		}, getVars(varsfile))
+		}, readYAML(varsfile), true)
 		Expect(err).ToNot(HaveOccurred())
 		err = pattern.Validate(true)
 		Expect(err).ToNot(HaveOccurred())
-		getTile = func(n string) *ompattern.Tile {
-			for _, tile := range pattern.Tiles {
-				if tile.Name == n {
-					return &tile
+
+		tileMatchesMock = func(t string, f string) string {
+			var tile ompattern.Tile
+			for _, tile = range pattern.Tiles {
+				if tile.Name == t {
+					break
 				}
 			}
-			panic(fmt.Sprintf("expected to find tile: %s", n))
+			if tile.Name != t {
+				panic(fmt.Sprintf("expected to find tile: %s", t))
+			}
+			actualRaw, err := tile.ToTemplate().Evaluate(true)
+			Expect(err).ToNot(HaveOccurred())
+
+			actual, err := ioutil.TempFile(os.TempDir(), t)
+			Expect(err).ToNot(HaveOccurred())
+			defer os.Remove(actual.Name())
+			_, err = actual.Write(actualRaw)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(actual.Close()).ToNot(HaveOccurred())
+
+			return differ.NewDiffer(actual.Name(),
+				filepath.Join(mocksDir(), f), false).ComputeDiff()
+
 		}
 	})
+
 	Context("when small-footprint is enabled", func() {
 		BeforeEach(func() {
 			smallfootprint = true
@@ -71,11 +91,10 @@ var _ = Describe("GetPattern", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readMock("bosh-smallfootprint.yml")))
-			cf, err := getTile("cf").ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(cf).To(MatchYAML(readMock("cf-smallfootprint.yml")))
+			Expect(tileMatchesMock("cf", "cf-smallfootprint.yml")).To(Equal(""))
 		})
 	})
+
 	Context("when small-footprint and healthwatch are enabled", func() {
 		BeforeEach(func() {
 			smallfootprint = true
@@ -83,6 +102,7 @@ var _ = Describe("GetPattern", func() {
 			varsfile = "vars-smallfootprint.yml"
 		})
 	})
+
 	Context("when small-footprint is disabled", func() {
 		BeforeEach(func() {
 			smallfootprint = false

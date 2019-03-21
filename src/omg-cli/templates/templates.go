@@ -8,7 +8,7 @@ import (
 	"github.com/starkandwayne/om-tiler/pattern"
 )
 
-func GetPattern(envCfg *config.EnvConfig, vars map[string]interface{}) (pattern.Pattern, error) {
+func GetPattern(envCfg *config.EnvConfig, vars map[string]interface{}, expectAllKeys bool) (pattern.Pattern, error) {
 	var opsFiles []string
 	if !envCfg.SmallFootprint {
 		opsFiles = append(opsFiles, "options/full.yml")
@@ -24,5 +24,5 @@ func GetPattern(envCfg *config.EnvConfig, vars map[string]interface{}) (pattern.
 		Manifest: "deployment.yml",
 		OpsFiles: opsFiles,
 		Vars:     vars,
-	})
+	}, expectAllKeys)
 }

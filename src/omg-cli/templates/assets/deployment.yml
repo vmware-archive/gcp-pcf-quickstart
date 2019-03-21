@@ -57,6 +57,9 @@ tiles:
     router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
     tcp_router_elb_names: [tcp:((tcp_router_pool))]
     tcp_routing/enable/reservable_ports: ((tcp_port_range))
+    gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+    haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+
 
 - name: gcp-service-broker
   version: 4.2.2
