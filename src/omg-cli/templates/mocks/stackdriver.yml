@@ -42,15 +42,7 @@ product-properties:
     value: |
       {
         "type": "service_account",
-        "project_id": "cf-sandbox-wseguin",
-        "private_key_id": "8d3b49b821f45b106a7165f1d20d634a30c5f179",
-        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqagO0sdCJwqpC\nzUjFruNHJO/Isu0RUr1+KSnLuhXYPS7j4yo527F/sP7ElWgSBA5ZM/QMhm1CjIE4\n2ZFlmz+tcY2qm8OYt0cxcP1UnZOWdCYg/u2pn2LbmNhqNLOKhsTBvb+1q6BA4/Yi\nBso5kLaW+/r0fJhFpFvVT1kASgbqGaaObbXGa3vFRGQmkOy9T9/3EOc7RINnIcGD\nC/b5QfzmjFBK+K5dkVhq0UBD1JV4/P4ntfQhtU2XLEDEGKo563eYqtq4fKBKe5XB\nlwmgwdav2OGiLfi5csx2iTBNpNJrokt4zLEUJ1DSx8VMVnEEEc4Xi68vaSsY6SMj\nhxbvInKvAgMBAAECggEAEY+aMSkvvbp/NCIWcTSb/C1cvlhd4K6fk1wnj/Rtotpv\nNhGnPM4cZPW200g4ML8VQXD+obnKkZSMDnExMADHF5b/i8jAZ8DfR8OGf407c8Il\nWbobgKLJm6qNBqjGpaxMo1Br7IsymO1E5G3BshvtDPMLgd1DDc4pnnouSD7Ypo/y\nEsBHEQKzArj5BJ8S2ccLoBvEe7XyhXxT5gAajfMdwvcTV7BeVjG0jBO5VeZL9ezZ\nXYJi+IyWjQ0460wTIV5WcBfVe8QMqvxCKOiB7pR8Ncz6LSvTsfMDSdApPkaF+pXQ\nvkHGSXd7JtMvuzdzSW6o+P/YpvMH+bYT8pz/CvZm0QKBgQDSwfIHlvv48fQAG9FT\nDJhmAymdKg1seLMAa8s3zyKcB9PS1unuM6L0gWvCGbvAsNS9sMSyG9rx5K9zAodJ\nYBPN+GRA9EAVKUVFjPXXQzTZA3Ksn1h4iozpcpz+gQmNcHnh7V2KnVY3J3EkPfOJ\nTqFAR+2vSRVbQdXsIRBKph2jvwKBgQDO/wSRHoTyPCT6nv8TUXZRtZvLppGLSYbx\nXvi0K3FclWDR9JIh/1xil95l8AndDlQ2Ssp/3o+VkyXKftWJWx97vj/U29Addy+2\nTMAsFrAoLKq+ExOiWGDnDxaDxiImN03QNgfan5zcZrI/F1NJoAZOaB74TqhOzEno\nWMw2vx4tEQKBgCtMXQTiJ/IFAzPigyakt8p9a9c2BHv8cAnuG1nj3CBiG0p9jKG7\nSgchb5n433G+4nX2EvLkdh6r9L+UDWctrePq2+3cQC4YxHp9cyQ+UmUjKDP+qJZb\nIIf1W/uNVwEP0npv4X/Qwx2hpMTlVVsoJEioflQ8l36gD+rrAAXWCtDRAoGAUFXj\nFNtOZ6D2DRqGDp5QGFgudfRYikFoEOd2CJ7PqUoEQJf12yH7XfxpAREPEu8LueJ/\nAu+CtF9ejF97SorGBkWJCnihJb5rEwpojvPjPERRo+FNfnVkbmiJqWzNNh3ComtF\n0xCdVWC6Dwhjd7CWofmBA4erhKF+kaFc6GZ2NLECgYEAxvhHjJVTwGL6qDslibH4\nfOa8JU95UuwED69BEy9rM0Vp/nMoLWlXz265O/j4oKpNnqK7SLKxb7ID7j4laN2E\nx+XkpCo7oyMFZMtWxnVOdJSbiYC250wYVHPGVLIoKCoK1V7D1xB6/Q7SUI4zpS0X\nTwH0WJXlwII2qxLjTS73v1A=\n-----END PRIVATE KEY-----\n",
-        "client_email": "sdn-32bf197d@cf-sandbox-wseguin.iam.gserviceaccount.com",
-        "client_id": "102682337951670353874",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sdn-32bf197d%40cf-sandbox-wseguin.iam.gserviceaccount.com"
+        "project_id": "test",
       }
   .properties.space:
     value: stackdriver-nozzle-space
@@ -127,4 +119,3 @@ resource-config:
     instance_type:
       id: automatic
     internet_connected: false
-

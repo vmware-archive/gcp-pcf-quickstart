@@ -96,16 +96,7 @@ product-properties:
     value: |
       {
         "type": "service_account",
-        "project_id": "cf-sandbox-wseguin",
-        "private_key_id": "89d209179cceb8da6ce010b09a865fe38f8ded7a",
-        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCWjoXwR+7uiywu\n2uMrO3tpxOyBtHxvM1DCn+d5p77QhT4M13COAuWkePEGUBmbVLa7eOQMGs4qBYpE\nyClat1NZkPBNJrhQ+qEB4pWzduXoiE1ZJvUxqGHSO1lJ6zbCzvBiaBNszb8ZYOjg\nILp66MGt5YIORZJCPO+xF7J6c3owMEVU+il3ZpffzogH1te+Aq92pPWVuVFac9nB\npNDRWWgJCqw353iFofOE3lMlfXpCHwGxK9IqCHn8oFM95+5SUkucZP69J6CTXRwe\n3kUQ0Jwp031Hat8UH8+QnXyxfy8Xa92CC/vgHDnD/hKF8IY1tO6j19tQyrSinmdN\nlyv1chZTAgMBAAECggEASy1ikv8QPxvOVZ0lxt4eO0vB/ug1JD+e6Xf4GQaaYLvP\nppDjGn421gAv9gOELcxIrGbqlGLEJDZ8+uhpwer9myEk5JlbetATGoJeVu0dUxXQ\nbZ5m28NlCRlqdd8WCoNThAfM/0zjSdRapCOjiiD0KRWLcf3qUNnlo+udysgjsLB9\nthuSym8kLueD/sy8Peb4vBhoCI1+k2elWfDSGtqnUNQK/Slr7NEFsJ8KzLPLqRc5\nxKDBqFIuKLgSc7RGfKzJH9c4UB56yrrNYMYqhwXTM8zVOynIydG41m+Akgoa8iLz\nVy+DcF3yVhSM3BDfjqn8CmlOsT9MFlMnxgWqFMmGQQKBgQDE9yoGrLRvCYrgCBlh\nf8UpzOt8lCcEFjEtR5fHJRfJAwX/DZpGGX3d09BAFERrYK6SkK2enRGVjCL0o5AD\nmOycToRwTUGz2dvguz27BPeq8nxSrCe9NAeLO+VL/BSefazYafbdUYjVP82u/2Ky\n+6bLGT3BMfBf2KOBPVEWZiIjkwKBgQDDrn38E4YLnD2KHvSb5sNd4BGot94yzXfc\nCgqgw0DrcgaqNOL5JjNr5A/x3HLu0sWtYPEOAw1ZHFdPU5lrmkuR1Junts9wQsmy\nzQ5HvO9rZ52AcnE6o02WIzSvAUD8f+50QpbbZf3USB4zdv0RyT23TQZ6vpSibx+J\nUWZXUMF6QQKBgFXbAyerqm7oMu/at+2G+1NwLom8LpGads8s8Nzur0KAneGCdWfu\n/q1uAc2cyAIiP5ZFmFiWUK7mSepnTYQz6ZdsplApbOVPpod8NrlJvgd28Xg78IqJ\nnmwzrIyFkhtP3sLq1Z+9Ra7mw+pvCf/Ir/jBxOhss0GkNglEyA7CcEkfAoGAMJmk\n9reOolGSwzw++n2M5kLhf+ryx+FaNI9V5mm4NQHj/+AUw1amjNRe1W4wKXq12ALs\nu9MsPIaadLxJrXzr6fNJGZWA3dvopnzhYBXfzOg2KRHDZ5HpkjF6Q0DneA76FWv4\nddNWAKRMw/F4lzNJHb6GrnOpDNLWnU9XQLZw50ECgYAFqhI45to98yEb386FdRag\njC/CXkMfUzXWR6eAdYKFttURFyMep2WaiXeEcYt3re+0N19wcYb6j7Zx7fbC6PJg\nIiYlumh3VTEN3KZkKjA/s6e12OhJUmWhH0fOzvP27f1MA8IY6ao5U2UQf8urzt4P\nzRDSWM/JFjOKK4oH5cgNBA==\n-----END PRIVATE KEY-----\n",
-        "client_email": "sb-1fc8d88c@cf-sandbox-wseguin.iam.gserviceaccount.com",
-        "client_id": "104604295572435323739",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sb-1fc8d88c%40cf-sandbox-wseguin.iam.gserviceaccount.com"
-      }
+        "project_id": "test",
   .properties.space:
     value: gcp-service-broker-space
 network-properties:
@@ -133,4 +124,3 @@ errand-config:
     pre-delete-state: true
   deploy-all:
     post-deploy-state: true
-
