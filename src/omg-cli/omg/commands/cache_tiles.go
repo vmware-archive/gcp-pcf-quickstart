@@ -55,7 +55,7 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pattern, err := templates.GetPattern(envCfg, map[string]interface{}{})
+	pattern, err := templates.GetPattern(envCfg, map[string]interface{}{}, false)
 	if err != nil {
 		return err
 	}

@@ -22,3 +22,13 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.out
+
+# coverage
+
+cover.html
+
+# benchcmp
+
+*.cmp
+

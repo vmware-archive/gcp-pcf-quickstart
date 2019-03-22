@@ -51,8 +51,6 @@ github.com/cppforlife/go-patch v0.1.0 h1:I0fT+gFTSW4xWwvaTaUUVjr9xxjNXJ4naGc01Be
 github.com/cppforlife/go-patch v0.1.0/go.mod h1:67a7aIi94FHDZdoeGSJRRFDp66l9MhaAG1yGxpUoFD8=
 github.com/cppforlife/go-patch v0.2.0 h1:Y14MnCQjDlbw7WXT4k+u6DPAA9XnygN4BfrSpI/19RU=
 github.com/cppforlife/go-patch v0.2.0/go.mod h1:67a7aIi94FHDZdoeGSJRRFDp66l9MhaAG1yGxpUoFD8=
-github.com/d4l3k/messagediff v1.2.1 h1:ZcAIMYsUg0EAp9X+tt8/enBE/Q8Yd5kzPynLyKptt9U=
-github.com/d4l3k/messagediff v1.2.1/go.mod h1:Oozbb1TVXFac9FtSIxHBMnBCq2qeH/2KkEQxENCrlLo=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -223,8 +221,6 @@ github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd/go.mod h1:TrYk7fJV
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
 github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d/go.mod h1:UdhH50NIW0fCiwBSr0co2m7BnFLdv4fQTgdqdJTHFeE=
 github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e/go.mod h1:HuIsMU8RRBOtsCgI77wP899iHVBQpCmg4ErYMZB+2IA=
-github.com/starkandwayne/om-tiler v0.0.0-20190320155314-6dc95eba2ba6 h1:VB6L4nOJboCGY4d5yaQEqjPirkNV0JGmC/+w50rvsZo=
-github.com/starkandwayne/om-tiler v0.0.0-20190320155314-6dc95eba2ba6/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
 github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0 h1:un3X6BWt7Jo7CUnJheOrjcNlhRBhgxqLc0bUra4KhB4=
 github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -60,8 +60,6 @@ github.com/cloudfoundry/bosh-utils/system
 github.com/cloudfoundry/bosh-utils/logger
 # github.com/cppforlife/go-patch v0.2.0
 github.com/cppforlife/go-patch/patch
-# github.com/d4l3k/messagediff v1.2.1
-github.com/d4l3k/messagediff
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/go-ole/go-ole v1.2.4
@@ -97,8 +95,13 @@ github.com/iancoleman/strcase
 github.com/jmespath/go-jmespath
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 github.com/kballard/go-shellquote
+# github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348
+github.com/kylelemons/godebug/pretty
+github.com/kylelemons/godebug/diff
 # github.com/leodido/go-urn v1.1.0
 github.com/leodido/go-urn
+# github.com/logrusorgru/aurora v0.0.0-20181002194514-a7b3b318ed4e
+github.com/logrusorgru/aurora
 # github.com/mattn/go-isatty v0.0.7
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
@@ -169,12 +172,14 @@ github.com/pkg/errors
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/disk
 github.com/shirou/gopsutil/internal/common
-# github.com/starkandwayne/om-tiler v0.0.0-20190320155314-6dc95eba2ba6
+# github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0
 github.com/starkandwayne/om-tiler/mover
 github.com/starkandwayne/om-tiler/opsman
 github.com/starkandwayne/om-tiler/pattern
 github.com/starkandwayne/om-tiler/pivnet
 github.com/starkandwayne/om-tiler/tiler
+# github.com/thadc23/yamldiff v0.0.0-20181024205526-2f3964ccb7da
+github.com/thadc23/yamldiff/differ
 # github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 github.com/tmc/scp
 # golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2

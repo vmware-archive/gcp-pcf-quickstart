@@ -15,8 +15,8 @@ type Pattern struct {
 	Tiles    []Tile   `yaml:"tiles" validate:"required,dive"`
 }
 
-func NewPattern(t Template) (p Pattern, err error) {
-	db, err := t.Evaluate(false)
+func NewPattern(t Template, expectAllKeys bool) (p Pattern, err error) {
+	db, err := t.Evaluate(expectAllKeys)
 	if err != nil {
 		return Pattern{}, err
 	}

@@ -56,7 +56,7 @@ func (cmd *PushTilesCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pattern, err := templates.GetPattern(envCfg, cfg.Raw)
+	pattern, err := templates.GetPattern(envCfg, cfg.Raw, true)
 	if err != nil {
 		return err
 	}
