@@ -1,0 +1,83 @@
+az-configuration:
+- name: testzone-1
+- name: testzone-2
+- name: testzone-3
+network-assignment:
+  network:
+    name: test-mgm-subnet
+  singleton_availability_zone:
+    name: testzone-1
+networks-configuration:
+  icmp: false
+  networks:
+  - name: test-mgm-subnet
+    subnets:
+    - availability_zone_names:
+      - testzone-1
+      - testzone-2
+      - testzone-3
+      cidr: 102.0.2.0/24
+      dns: 169.254.169.254
+      gateway: 102.0.2.1
+      iaas_identifier: test-network/test-mgm-subnet/test-region
+      reserved_ip_ranges: 10.0.0.0-10.0.0.20
+  - name: test-services-subnet
+    subnets:
+    - availability_zone_names:
+      - testzone-1
+      - testzone-2
+      - testzone-3
+      cidr: 103.0.3.0/24
+      dns: 169.254.169.254
+      gateway: 103.0.3.1
+      iaas_identifier: test-network/test-services-subnet/test-region
+      reserved_ip_ranges: 10.0.8.0-10.0.8.20
+  - name: test-ert-subnet
+    subnets:
+    - availability_zone_names:
+      - testzone-1
+      - testzone-2
+      - testzone-3
+      cidr: 101.0.1.0/24
+      dns: 169.254.169.254
+      gateway: 101.0.1.1
+      iaas_identifier: test-network/test-ert-subnet/test-region
+      reserved_ip_ranges: 10.0.4.0-10.0.4.20
+properties-configuration:
+  director_configuration:
+    blobstore_type: gcs
+    database_type: external
+    external_database_options:
+      database: test-ops-sql-ip
+      host: test-sql-ip
+      password: test-ops-sql-password
+      port: test-sql-port
+      user: test-ops-sqlo-username
+    gcs_blobstore_options:
+      bucket_name: test-director-bucket
+      service_account_key:
+        project_id: test-project
+        type: service_account
+      storage_class: MULTI_REGIONAL
+    max_threads: 5
+    ntp_servers_string: 169.254.169.254
+    resurrector_enabled: true
+    retry_bosh_deploys: true
+  iaas_configuration:
+    auth_json:
+      project_id: test-project
+      type: service_account
+    default_deployment_tag: test-tag
+    project: test-project
+resource-configuration:
+  compilation:
+    instance_type:
+      id: large.disk
+    instances: 4
+  director:
+    instance_type:
+      id: automatic
+    instances: automatic
+    internet_connected: false
+    persistent_disk:
+      size_mb: automatic

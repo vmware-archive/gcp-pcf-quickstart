@@ -1,3 +1,43 @@
+errand-config:
+  deploy-autoscaler:
+    post-deploy-state: default
+    pre-delete-state: default
+  deploy-notifications:
+    post-deploy-state: default
+    pre-delete-state: default
+  deploy-notifications-ui:
+    post-deploy-state: default
+    pre-delete-state: default
+  metric_registrar_smoke_test:
+    post-deploy-state: default
+    pre-delete-state: default
+  nfsbrokerpush:
+    post-deploy-state: default
+    pre-delete-state: default
+  push-apps-manager:
+    post-deploy-state: default
+    pre-delete-state: default
+  push-usage-service:
+    post-deploy-state: default
+    pre-delete-state: default
+  smbbrokerpush:
+    post-deploy-state: default
+    pre-delete-state: default
+  smoke_tests:
+    post-deploy-state: default
+    pre-delete-state: default
+  test-autoscaling:
+    post-deploy-state: default
+    pre-delete-state: default
+network-properties:
+  network:
+    name: test-ert-subnet
+  other_availability_zones:
+  - name: testzone-1
+  - name: testzone-2
+  - name: testzone-3
+  singleton_availability_zone:
+    name: testzone-1
 product-name: cf
 product-properties:
   .cloud_controller.allow_app_ssh_access:
@@ -98,11 +138,11 @@ product-properties:
     value: internal_mysql
   .properties.credhub_key_encryption_passwords:
     value:
-    - name: test-credhub-key-name
+    - key:
+        secret: test-credhub-key
+      name: test-credhub-key-name
       primary: true
       provider: internal
-      key:
-        secret: test-credhub-key
   .properties.diego_database_max_open_connections:
     value: 100
   .properties.diego_log_timestamp_format:
@@ -143,10 +183,10 @@ product-properties:
     value: connect,query
   .properties.networking_poe_ssl_certs:
     value:
-    - name: Certificate
-      certificate:
+    - certificate:
         cert_pem: test-ssl-cert
         private_key_pem: test-ssl-key
+      name: Certificate
   .properties.networkpolicyserver_database_max_open_connections:
     value: 200
   .properties.networkpolicyserverinternal_database_max_open_connections:
@@ -223,22 +263,81 @@ product-properties:
     value: test-droplets-bucket
   .properties.system_blobstore.external_gcs_service_account.packages_bucket:
     value: test-packges-bucket
-  .properties.system_blobstore.external_gcs_service_account.resources_bucket:
-    value: test-resources-bucket
   .properties.system_blobstore.external_gcs_service_account.project_id:
     value: test-blobstore-project
+  .properties.system_blobstore.external_gcs_service_account.resources_bucket:
+    value: test-resources-bucket
   .properties.system_blobstore.external_gcs_service_account.service_account_email:
     value: blobstore@example.com
   .properties.system_blobstore.external_gcs_service_account.service_account_json_key:
     value:
-      type: service_account
       project_id: test-blobstore-project
+      type: service_account
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
     value: 2
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:
     value: 2
   .properties.system_database:
-    value: internal_pxc
+    value: external
+  .properties.system_database.external.account_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.account_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.app_usage_service_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.app_usage_service_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.autoscale_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.autoscale_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.ccdb_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.ccdb_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.diego_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.diego_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.host:
+    value: test-sql-ip
+  .properties.system_database.external.locket_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.locket_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.networkpolicyserver_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.networkpolicyserver_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.nfsvolume_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.nfsvolume_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.notifications_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.notifications_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.port:
+    value: test-sql-port
+  .properties.system_database.external.routing_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.routing_username:
+    value: test-ert-sql-username
+  .properties.system_database.external.silk_password:
+    value:
+      secret: test-ert-sql-password
+  .properties.system_database.external.silk_username:
+    value: test-ert-sql-username
   .properties.tcp_routing:
     value: enable
   .properties.tcp_routing.enable.reservable_ports:
@@ -281,10 +380,6 @@ product-properties:
     value: 20
   .router.request_timeout_in_seconds:
     value: 900
-  .uaa.service_provider_key_credentials:
-    value:
-      cert_pem: test-ssl-cert
-      private_key_pem: test-ssl-key
   .uaa.apps_manager_access_token_lifetime:
     value: 3600
   .uaa.apps_manager_refresh_token_lifetime:
@@ -299,90 +394,103 @@ product-properties:
     value: Email
   .uaa.proxy_ips_regex:
     value: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}
-network-properties:
-  network:
-    name: test-ert-subnet
-  other_availability_zones:
-  - name: testzone-1
-  singleton_availability_zone:
-    name: testzone-1
+  .uaa.service_provider_key_credentials:
+    value:
+      cert_pem: test-ssl-cert
+      private_key_pem: test-ssl-key
 resource-config:
   backup_restore:
-    instances: automatic
     instance_type:
       id: automatic
-  blobstore:
     instances: automatic
-    persistent_disk:
-      size_mb: automatic
+  clock_global:
     instance_type:
       id: automatic
-  compute:
     instances: automatic
+  cloud_controller:
     instance_type:
       id: automatic
-  control:
     instances: automatic
+  cloud_controller_worker:
     instance_type:
       id: automatic
+    instances: automatic
+  credhub:
+    instance_type:
+      id: automatic
+    instances: automatic
+  diego_brain:
     elb_names:
     - tcp:test-ssh-pool-name
-  database:
+    instance_type:
+      id: automatic
+    instances: automatic
+  diego_cell:
+    instance_type:
+      id: automatic
+    instances: automatic
+  diego_database:
+    instance_type:
+      id: automatic
+    instances: automatic
+  doppler:
+    instance_type:
+      id: automatic
+    instances: automatic
+  ha_proxy:
+    instance_type:
+      id: automatic
+    instances: automatic
+  loggregator_trafficcontroller:
+    instance_type:
+      id: automatic
+    instances: automatic
+  mysql:
+    instance_type:
+      id: automatic
     instances: automatic
     persistent_disk:
       size_mb: automatic
-    instance_type:
-      id: automatic
-  ha_proxy:
-    instances: automatic
-    instance_type:
-      id: automatic
   mysql_monitor:
-    instances: 0
     instance_type:
       id: automatic
-  router:
     instances: automatic
+  mysql_proxy:
     instance_type:
       id: automatic
+    instances: automatic
+  nats:
+    instance_type:
+      id: automatic
+    instances: automatic
+  nfs_server:
+    instance_type:
+      id: automatic
+    instances: automatic
+    persistent_disk:
+      size_mb: automatic
+  router:
     elb_names:
     - tcp:test-wss-pool-name
     - http:test-http-lb-name
-  tcp_router:
-    instances: automatic
     instance_type:
       id: automatic
+    instances: automatic
+  syslog_adapter:
+    instance_type:
+      id: automatic
+    instances: automatic
+  syslog_scheduler:
+    instance_type:
+      id: automatic
+    instances: automatic
+  tcp_router:
     elb_names:
     - tcp:test-tcp-pool-name
-
-errand-config:
-  deploy-autoscaler:
-    post-deploy-state: default
-    pre-delete-state: default
-  deploy-notifications:
-    post-deploy-state: default
-    pre-delete-state: default
-  deploy-notifications-ui:
-    post-deploy-state: default
-    pre-delete-state: default
-  metric_registrar_smoke_test:
-    post-deploy-state: default
-    pre-delete-state: default
-  nfsbrokerpush:
-    post-deploy-state: default
-    pre-delete-state: default
-  push-apps-manager:
-    post-deploy-state: default
-    pre-delete-state: default
-  push-usage-service:
-    post-deploy-state: default
-    pre-delete-state: default
-  smbbrokerpush:
-    post-deploy-state: default
-    pre-delete-state: default
-  smoke_tests:
-    post-deploy-state: default
-    pre-delete-state: default
-  test-autoscaling:
-    post-deploy-state: default
-    pre-delete-state: default
+    instance_type:
+      id: automatic
+    instances: automatic
+  uaa:
+    instance_type:
+      id: automatic
+    instances: automatic
