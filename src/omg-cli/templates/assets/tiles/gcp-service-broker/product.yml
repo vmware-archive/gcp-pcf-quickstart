@@ -126,3 +126,10 @@ resource-config:
   deploy-all:
     instance_type:
       id: ((deploy-all_instance_type))
+errand-config:
+  delete-all:
+    post-deploy-state: ((delete-all_post_deploy_state))
+    pre-delete-state: ((delete-all_pre_delete_state))
+  deploy-all:
+    post-deploy-state: ((deploy-all_post_deploy_state))
+    pre-delete-state: ((deploy-all_pre_delete_state))

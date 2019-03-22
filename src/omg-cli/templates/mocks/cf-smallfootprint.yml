@@ -82,8 +82,6 @@ product-properties:
     value: default
   .properties.cloud_controller_temporary_disable_deployments:
     value: false
-  .properties.container_networking:
-    value: enable
   .properties.container_networking_interface_plugin:
     value: silk
   .properties.container_networking_interface_plugin.silk.enable_log_traffic:
@@ -111,8 +109,6 @@ product-properties:
     value: rfc3339
   .properties.enable_cf_metric_name:
     value: false
-  .properties.enable_log_cache:
-    value: true
   .properties.enable_smb_volume_driver:
     value: false
   .properties.enable_tls_to_internal_pxc:
@@ -148,6 +144,9 @@ product-properties:
   .properties.networking_poe_ssl_certs:
     value:
     - name: Certificate
+      certificate:
+        cert_pem: test-ssl-cert
+        private_key_pem: test-ssl-key
   .properties.networkpolicyserver_database_max_open_connections:
     value: 200
   .properties.networkpolicyserverinternal_database_max_open_connections:
@@ -282,6 +281,10 @@ product-properties:
     value: 20
   .router.request_timeout_in_seconds:
     value: 900
+  .uaa.service_provider_key_credentials:
+    value:
+      cert_pem: test-ssl-cert
+      private_key_pem: test-ssl-key
   .uaa.apps_manager_access_token_lifetime:
     value: 3600
   .uaa.apps_manager_refresh_token_lifetime:
@@ -306,8 +309,6 @@ network-properties:
 resource-config:
   backup_restore:
     instances: automatic
-    persistent_disk:
-      size_mb: automatic
     instance_type:
       id: automatic
   blobstore:
@@ -333,7 +334,7 @@ resource-config:
     instance_type:
       id: automatic
   ha_proxy:
-    instances: 0
+    instances: automatic
     instance_type:
       id: automatic
   mysql_monitor:
@@ -348,9 +349,7 @@ resource-config:
     - tcp:test-wss-pool-name
     - http:test-http-lb-name
   tcp_router:
-    instances: 1
-    persistent_disk:
-      size_mb: automatic
+    instances: automatic
     instance_type:
       id: automatic
     elb_names:

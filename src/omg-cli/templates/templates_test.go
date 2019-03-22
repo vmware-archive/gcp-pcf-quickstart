@@ -75,8 +75,12 @@ var _ = Describe("GetPattern", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actual.Close()).ToNot(HaveOccurred())
 
-			return differ.NewDiffer(actual.Name(),
+			diff := differ.NewDiffer(actual.Name(),
 				filepath.Join(mocksDir(), f), false).ComputeDiff()
+			if diff != "" {
+				fmt.Println(string(actualRaw))
+			}
+			return diff
 
 		}
 	})
@@ -92,6 +96,8 @@ var _ = Describe("GetPattern", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readMock("bosh-smallfootprint.yml")))
 			Expect(tileMatchesMock("cf", "cf-smallfootprint.yml")).To(Equal(""))
+			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver.yml")).To(Equal(""))
+			Expect(tileMatchesMock("gcp-service-broker", "service-broker.yml")).To(Equal(""))
 		})
 	})
 

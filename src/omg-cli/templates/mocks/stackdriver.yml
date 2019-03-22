@@ -1,9 +1,5 @@
 product-name: stackdriver-nozzle
 product-properties:
-  .properties.allow_paid_service_plans:
-    value: false
-  .properties.apply_open_security_group:
-    value: false
   .properties.blacklist:
     value:
     - description: Blacklist all metrics from Stackdriver Monitoring.
@@ -12,8 +8,6 @@ product-properties:
       type: name
   .properties.debug:
     value: false
-  .properties.firehose_endpoint:
-    value: https://api.sys.gcp-1click-test.starkandwayne.com
   .properties.firehose_events_to_stackdriver_logging:
     value: HttpStartStop,LogMessage,Error
   .properties.firehose_events_to_stackdriver_monitoring:
@@ -34,18 +28,12 @@ product-properties:
     value: 200
   .properties.metrics_buffer_duration:
     value: 30
-  .properties.org:
-    value: stackdriver-nozzle-org
   .properties.project_id:
-    value: cf-sandbox-wseguin
+    value: test-project
   .properties.service_account:
-    value: |
-      {
-        "type": "service_account",
-        "project_id": "test",
-      }
-  .properties.space:
-    value: stackdriver-nozzle-space
+    value:
+      type: service_account
+      project_id: test-stackdriver-project
   .properties.whitelist:
     value:
     - description: Whitelist auctioneer KPI metrics.
@@ -106,16 +94,15 @@ product-properties:
       type: name
 network-properties:
   network:
-    name: pcf-services-subnet
+    name: test-services-subnet
   other_availability_zones:
-  - name: europe-west4-c
-  - name: europe-west4-b
-  - name: europe-west4-a
+  - name: testzone-1
   singleton_availability_zone:
-    name: europe-west4-c
+    name: testzone-1
 resource-config:
   stackdriver-nozzle:
     instances: automatic
+    persistent_disk:
+      size_mb: automatic
     instance_type:
       id: automatic
-    internet_connected: false
