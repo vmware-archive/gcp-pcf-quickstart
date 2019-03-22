@@ -5,13 +5,16 @@
 - type: replace
   path: /tiles/-
   value:
-    product:
-      slug: p-healthwatch
-      version: 1.4.5
-      glob: "*.pivotal"
-      stemcell_iaas: google
     name: p-healthwatch
     version: 1.4.5-build.41
+    product:
+      product_slug: p-healthwatch
+      release_version: 1.4.5
+      file_glob: "*.pivotal"
+    stemcell:
+      product_slug: stemcells-ubuntu-xenial
+      release_version: "170.38"
+      file_glob: "*google*.tgz"
     manifest: tiles/p-healthwatch/product.yml
     ops_files:
     - tiles/p-healthwatch/features/opsman-disable.yml

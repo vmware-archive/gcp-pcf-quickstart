@@ -17,13 +17,13 @@ import (
 	"github.com/thadc23/yamldiff/differ"
 )
 
-func mocksDir() string {
+func fixturesDir() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return filepath.Join(filepath.Dir(filename), "mocks")
+	return filepath.Join(filepath.Dir(filename), "fixtures")
 }
 
-func readMock(f string) []byte {
-	in, err := ioutil.ReadFile(filepath.Join(mocksDir(), f))
+func readFixture(f string) []byte {
+	in, err := ioutil.ReadFile(filepath.Join(fixturesDir(), f))
 	Expect(err).ToNot(HaveOccurred())
 
 	return in
@@ -31,7 +31,7 @@ func readMock(f string) []byte {
 
 func readYAML(f string) map[string]interface{} {
 	out := make(map[string]interface{})
-	err := yaml.Unmarshal(readMock(f), out)
+	err := yaml.Unmarshal(readFixture(f), out)
 	Expect(err).ToNot(HaveOccurred())
 
 	return out
@@ -76,7 +76,7 @@ var _ = Describe("GetPattern", func() {
 			Expect(actual.Close()).ToNot(HaveOccurred())
 
 			diff := differ.NewDiffer(actual.Name(),
-				filepath.Join(mocksDir(), f), false).ComputeDiff()
+				filepath.Join(fixturesDir(), f), false).ComputeDiff()
 			if diff != "" {
 				fmt.Println(string(actualRaw))
 			}
@@ -94,7 +94,7 @@ var _ = Describe("GetPattern", func() {
 		It("renders tile configs", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(director).To(MatchYAML(readMock("bosh-smallfootprint.yml")))
+			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint.yml")))
 			Expect(tileMatchesMock("cf", "cf-smallfootprint.yml")).To(Equal(""))
 			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver.yml")).To(Equal(""))
 			Expect(tileMatchesMock("gcp-service-broker", "service-broker.yml")).To(Equal(""))
@@ -107,6 +107,15 @@ var _ = Describe("GetPattern", func() {
 			healthwatch = true
 			varsfile = "vars-smallfootprint.yml"
 		})
+		It("renders tile configs", func() {
+			director, err := pattern.Director.ToTemplate().Evaluate(true)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint-healthwatch.yml")))
+			Expect(tileMatchesMock("cf", "cf-smallfootprint.yml")).To(Equal(""))
+			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver.yml")).To(Equal(""))
+			Expect(tileMatchesMock("gcp-service-broker", "service-broker.yml")).To(Equal(""))
+			Expect(tileMatchesMock("p-healthwatch", "p-healthwatch.yml")).To(Equal(""))
+		})
 	})
 
 	Context("when small-footprint is disabled", func() {
@@ -114,6 +123,15 @@ var _ = Describe("GetPattern", func() {
 			smallfootprint = false
 			healthwatch = false
 			varsfile = "vars.yml"
+		})
+		It("renders tile configs", func() {
+			director, err := pattern.Director.ToTemplate().Evaluate(true)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(director).To(MatchYAML(readFixture("bosh/full.yml")))
+			Expect(tileMatchesMock("cf", "cf.yml")).To(Equal(""))
+			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver.yml")).To(Equal(""))
+			Expect(tileMatchesMock("gcp-service-broker", "service-broker.yml")).To(Equal(""))
+			Expect(tileMatchesMock("p-healthwatch", "p-healthwatch.yml")).To(Equal(""))
 		})
 	})
 	Context("when small-footprint is disabled and healthwatch enabled", func() {
