@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export GO111MODULE=on # manually active module mode
+export GOFLAGS=-mod=vendor
 
 check_param() {
   local name=$1
