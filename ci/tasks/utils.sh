@@ -80,6 +80,8 @@ set_resource_dirs() {
     export terraform_output="${env_dir}/terraform_output.json"
     export terraform_config="${env_dir}/terraform.tfvars"
     export terraform_state="${env_dir}/terraform.tfstate"
+    export GOFLAGS=-mod=vendor
+    export GO111MODULE=on
 }
 
 extract_env() {
