@@ -16,8 +16,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y -qq update && apt-get -y -qq insta
 WORKDIR /tmp/docker-build
 
 # Golang
-ENV GO_VERSION=1.11.1
-ENV GO_SHA256SUM=2871270d8ff0c8c69f161aaae42f9f28739855ff5c5204752a8d92a1c9f63993
+ENV GO_VERSION=1.12.1
+ENV GO_SHA256SUM=2a3fdabf665496a0db5f41ec6af7a9b15a49fbe71a85a50ca38b1f13a103aeec
 
 RUN curl -LO https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz && \
     echo "${GO_SHA256SUM}  go${GO_VERSION}.linux-amd64.tar.gz" > go_${GO_VERSION}_SHA256SUM && \
