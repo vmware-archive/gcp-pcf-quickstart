@@ -28,7 +28,7 @@ RUN mkdir -p /root/go/bin
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 RUN go get github.com/onsi/ginkgo
 RUN go install github.com/onsi/ginkgo/...
-RUN go get github.com/golang/lint/golint
+RUN go get golang.org/x/lint/golint
 
 # Google SDK
 ENV GCLOUD_VERSION=157.0.0
