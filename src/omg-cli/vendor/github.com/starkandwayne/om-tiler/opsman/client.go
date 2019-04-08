@@ -3,9 +3,11 @@ package opsman
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -28,9 +30,10 @@ type Config struct {
 }
 
 type Client struct {
-	api    api.Api
-	log    *log.Logger
-	config Config
+	api                   api.Api
+	log                   *log.Logger
+	config                Config
+	unauthenticatedClient network.UnauthenticatedClient
 }
 
 const (
@@ -38,6 +41,7 @@ const (
 	requestTimeout     = time.Duration(1800) * time.Second
 	pollingInterval    = time.Duration(10) * time.Second
 	applySleepDuration = time.Duration(10) * time.Second
+	onlineTimeout      = time.Duration(240 * time.Second)
 )
 
 func NewClient(c Config, logger *log.Logger) (*Client, error) {
@@ -70,8 +74,9 @@ func NewClient(c Config, logger *log.Logger) (*Client, error) {
 				unauthenticatedClient, progress.NewBar(), live),
 			Logger: logger,
 		}),
-		log:    logger,
-		config: c,
+		log:                   logger,
+		config:                c,
+		unauthenticatedClient: unauthenticatedClient,
 	}
 
 	return &client, nil
@@ -169,6 +174,33 @@ func (c *Client) DeleteInstallation() error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewDeleteInstallation(c.api, logWriter, c.log, pollingInterval)
 	return cmd.Execute(nil)
+}
+
+func (c *Client) PollTillOnline() error {
+	timer := time.After(time.Duration(0 * time.Second))
+	timeout := time.After(onlineTimeout)
+	for {
+		select {
+		case <-timeout:
+			return errors.New("timeout waiting for Ops Manager to start")
+		case <-timer:
+			if c.online() {
+				return nil
+			}
+			c.log.Print("waiting for Ops Manager to start")
+			timer = time.After(pollingInterval)
+		}
+	}
+}
+
+func (c *Client) online() bool {
+	req, _ := http.NewRequest(http.MethodGet, "/", nil)
+	resp, err := c.unauthenticatedClient.Do(req)
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return resp.StatusCode < 500
 }
 
 func tmpConfigFile(config []byte) (string, error) {

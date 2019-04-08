@@ -7,6 +7,12 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
+	boshcmd "github.com/cloudfoundry/bosh-cli/cmd"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-utils/system"
+
+	cfgtypes "github.com/cloudfoundry/config-server/types"
+
 	boshtpl "github.com/cloudfoundry/bosh-cli/director/template"
 	"github.com/cppforlife/go-patch/patch"
 )
@@ -18,6 +24,9 @@ func (t *Template) Evaluate(expectAllKeys bool) ([]byte, error) {
 	}
 
 	tpl := boshtpl.NewTemplate(template)
+
+	var firstToUse []boshtpl.Variables
+
 	staticVars := boshtpl.StaticVariables{}
 	ops := patch.Ops{}
 
@@ -49,13 +58,36 @@ func (t *Template) Evaluate(expectAllKeys bool) ([]byte, error) {
 		staticVars[k] = v
 	}
 
+	firstToUse = append(firstToUse, staticVars)
+
+	logger := boshlog.NewLogger(boshlog.LevelError)
+	fs := boshsys.NewOsFileSystem(logger)
+	store := &boshcmd.VarsFSStore{FS: fs}
+
+	if t.VarsStore != "" {
+		err := store.UnmarshalFlag(t.VarsStore)
+		if err != nil {
+			return []byte{}, err
+		}
+	}
+
+	if store.IsSet() {
+		firstToUse = append(firstToUse, store)
+	}
+
+	vars := boshtpl.NewMultiVars(firstToUse)
+
+	if store.IsSet() {
+		store.ValueGeneratorFactory = cfgtypes.NewValueGeneratorConcrete(boshcmd.NewVarsCertLoader(vars))
+	}
+
 	evalOpts := boshtpl.EvaluateOpts{
 		UnescapedMultiline: true,
 		ExpectAllKeys:      expectAllKeys,
 		ExpectAllVarsUsed:  false,
 	}
 
-	bytes, err := tpl.Evaluate(staticVars, ops, evalOpts)
+	bytes, err := tpl.Evaluate(vars, ops, evalOpts)
 	if err != nil {
 		return nil, err
 	}

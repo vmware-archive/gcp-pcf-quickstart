@@ -19,6 +19,8 @@ package commands
 import (
 	"log"
 	"omg-cli/config"
+	"omg-cli/templates"
+
 	"os"
 
 	"github.com/alecthomas/kingpin"
@@ -55,5 +57,10 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	return tiler.Apply()
+	pattern, err := templates.GetPattern(envCfg, cfg.Raw, true)
+	if err != nil {
+		return err
+	}
+
+	return tiler.Build(pattern, !cmd.applyChanges)
 }

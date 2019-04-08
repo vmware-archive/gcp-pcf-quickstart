@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -26,7 +27,6 @@ type Config struct {
 	Host       string
 	Token      string
 	UserAgent  string
-	Logger     *log.Logger
 	AcceptEULA bool
 }
 
@@ -34,6 +34,7 @@ type Client struct {
 	logger     *log.Logger
 	client     gopivnet.Client
 	acceptEULA bool
+	userAgent  string
 	filter     *filter.Filter
 }
 
@@ -48,7 +49,7 @@ func NewClient(c Config, logger *log.Logger) *Client {
 	if c.Host == "" {
 		host = gopivnet.DefaultHost
 	}
-	log := logshim.NewLogShim(c.Logger, c.Logger, false)
+	log := logshim.NewLogShim(logger, logger, false)
 	client := gopivnet.NewClient(gopivnet.ClientConfig{
 		Host:      host,
 		Token:     c.Token,
@@ -56,7 +57,7 @@ func NewClient(c Config, logger *log.Logger) *Client {
 	}, log)
 	filter := filter.NewFilter(log)
 	return &Client{client: client, logger: logger,
-		acceptEULA: c.AcceptEULA, filter: filter}
+		acceptEULA: c.AcceptEULA, userAgent: c.UserAgent, filter: filter}
 }
 
 func (c *Client) DownloadFile(f pattern.PivnetFile, dir string) (file *os.File, err error) {
@@ -100,7 +101,31 @@ func (c *Client) AcceptEULA(f pattern.PivnetFile) error {
 		return err
 	}
 
+	if c.userAgent != "" {
+		return c.forceAcceptEULA(f.Slug, release.ID)
+	}
 	return c.client.EULA.Accept(f.Slug, release.ID)
+}
+
+func (c *Client) forceAcceptEULA(productSlug string, releaseID int) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/eula_acceptance",
+		productSlug,
+		releaseID,
+	)
+
+	resp, err := c.client.MakeRequest(
+		"POST",
+		url,
+		http.StatusOK,
+		strings.NewReader(`{}`),
+	)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
 
 func (c *Client) downloadFile(f pattern.PivnetFile, dir string) (file *os.File, err error) {

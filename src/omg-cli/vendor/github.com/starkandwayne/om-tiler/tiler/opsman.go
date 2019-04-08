@@ -8,6 +8,7 @@ import (
 
 //go:generate counterfeiter . OpsmanClient
 type OpsmanClient interface {
+	PollTillOnline() error
 	ConfigureAuthentication() error
 	UploadProduct(*os.File) error
 	UploadStemcell(*os.File) error

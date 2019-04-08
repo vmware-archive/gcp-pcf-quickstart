@@ -2,11 +2,11 @@ module omg-cli
 
 require (
 	cloud.google.com/go v0.37.0 // indirect
+	git.apache.org/thrift.git v0.12.0 // indirect
 	github.com/alecthomas/kingpin v2.2.6+incompatible
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/aws/aws-sdk-go v1.18.0 // indirect
 	github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd
+	github.com/grpc-ecosystem/grpc-gateway v1.6.2 // indirect
 	github.com/iancoleman/strcase v0.0.0-20181128000000-3605ed457bf7
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348 // indirect
@@ -16,15 +16,18 @@ require (
 	github.com/onsi/gomega v1.4.3
 	github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
-	github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0
+	github.com/starkandwayne/om-tiler v0.0.0-20190408101807-56bfb55d9b95
 	github.com/thadc23/yamldiff v0.0.0-20181024205526-2f3964ccb7da
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a // indirect
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	golang.org/x/sys v0.0.0-20190312061237-fead79001313 // indirect
-	google.golang.org/api v0.1.0
+	google.golang.org/api v0.2.0
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/graymeta/stow => github.com/jtarchie/stow v0.0.0-20190209005554-0bff39424d5b
+replace (
+	github.com/graymeta/stow => github.com/jtarchie/stow v0.0.0-20190209005554-0bff39424d5b
+	github.com/jessevdk/go-flags => github.com/cppforlife/go-flags v0.0.0-20170707010757-351f5f310b26
+	gopkg.in/mattn/go-colorable.v0 => github.com/mattn/go-colorable v0.1.1
+)

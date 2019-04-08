@@ -15,7 +15,8 @@ type Pattern struct {
 	Tiles    []Tile   `yaml:"tiles" validate:"required,dive"`
 }
 
-func NewPattern(t Template, expectAllKeys bool) (p Pattern, err error) {
+func NewPattern(t Template, varsStore string, expectAllKeys bool) (p Pattern, err error) {
+	t.VarsStore = varsStore
 	db, err := t.Evaluate(expectAllKeys)
 	if err != nil {
 		return Pattern{}, err
@@ -78,6 +79,7 @@ type Template struct {
 	OpsFiles  []string               `yaml:"ops_files"`
 	VarsFiles []string               `yaml:"vars_files"`
 	Vars      map[string]interface{} `yaml:"vars"`
+	VarsStore string
 	Store     http.FileSystem
 }
 

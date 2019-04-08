@@ -98,5 +98,4 @@ pushd src/omg-tf
 popd
 
 # # Deploy PCF
-omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
-# omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"
+ omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"

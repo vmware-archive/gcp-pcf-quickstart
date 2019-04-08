@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc. All rights reserved.
+// Copyright 2019 Google Inc. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -770,6 +770,10 @@ type BackendRule struct {
 	// seconds.
 	Deadline float64 `json:"deadline,omitempty"`
 
+	// JwtAudience: The JWT audience is used when generating a JWT id token
+	// for the backend.
+	JwtAudience string `json:"jwtAudience,omitempty"`
+
 	// MinDeadline: Minimum deadline in seconds needed for this method.
 	// Calls having deadline
 	// value lower than this will be rejected.
@@ -779,6 +783,60 @@ type BackendRule struct {
 	// of a long running
 	// operation. The default is no deadline.
 	OperationDeadline float64 `json:"operationDeadline,omitempty"`
+
+	// Possible values:
+	//   "PATH_TRANSLATION_UNSPECIFIED"
+	//   "CONSTANT_ADDRESS" - Use the backend address as-is, with no
+	// modification to the path. If the
+	// URL pattern contains variables, the variable names and values will
+	// be
+	// appended to the query string. If a query string parameter and a
+	// URL
+	// pattern variable have the same name, this may result in duplicate
+	// keys in
+	// the query string.
+	//
+	// # Examples
+	//
+	// Given the following operation config:
+	//
+	//     Method path:        /api/company/{cid}/user/{uid}
+	//     Backend address:
+	// https://example.cloudfunctions.net/getUser
+	//
+	// Requests to the following request paths will call the backend at
+	// the
+	// translated path:
+	//
+	//     Request path: /api/company/widgetworks/user/johndoe
+	//     Translated:
+	// https://example.cloudfunctions.net/getUser?cid=widgetworks&uid=johndoe
+	//
+	//     Request path: /api/company/widgetworks/user/johndoe?timezone=EST
+	//     Translated:
+	// https://example.cloudfunctions.net/getUser?timezone=EST&cid=widgetworks&uid=johndoe
+	//   "APPEND_PATH_TO_ADDRESS" - The request path will be appended to the
+	// backend address.
+	//
+	// # Examples
+	//
+	// Given the following operation config:
+	//
+	//     Method path:        /api/company/{cid}/user/{uid}
+	//     Backend address:    https://example.appspot.com
+	//
+	// Requests to the following request paths will call the backend at
+	// the
+	// translated path:
+	//
+	//     Request path: /api/company/widgetworks/user/johndoe
+	//     Translated:
+	// https://example.appspot.com/api/company/widgetworks/user/johndoe
+	//
+	//     Request path: /api/company/widgetworks/user/johndoe?timezone=EST
+	//     Translated:
+	// https://example.appspot.com/api/company/widgetworks/user/johndoe?timezone=EST
+	PathTranslation string `json:"pathTranslation,omitempty"`
 
 	// Selector: Selects the methods to which this rule applies.
 	//
@@ -959,7 +1017,7 @@ type Binding struct {
 	//    For example, `admins@example.com`.
 	//
 	//
-	// * `domain:{domain}`: A Google Apps domain name that represents all
+	// * `domain:{domain}`: The G Suite domain (primary) that represents all
 	// the
 	//    users of that domain. For example, `google.com` or
 	// `example.com`.
@@ -2256,7 +2314,7 @@ type GetIamPolicyRequest struct {
 // HttpRule, each specifying the mapping of an RPC method
 // to one or more HTTP REST API methods.
 type Http struct {
-	// FullyDecodeReservedExpansion: When set to true, URL path parmeters
+	// FullyDecodeReservedExpansion: When set to true, URL path parameters
 	// will be fully URI-decoded except in
 	// cases of single segment matches in reserved expansion, where "%2F"
 	// will be
@@ -3740,20 +3798,28 @@ func (s *MonitoredResourceDescriptor) MarshalJSON() ([]byte, error) {
 type Monitoring struct {
 	// ConsumerDestinations: Monitoring configurations for sending metrics
 	// to the consumer project.
-	// There can be multiple consumer destinations, each one must have
-	// a
-	// different monitored resource type. A metric can be used in at
-	// most
-	// one consumer destination.
+	// There can be multiple consumer destinations. A monitored resouce type
+	// may
+	// appear in multiple monitoring destinations if different aggregations
+	// are
+	// needed for different sets of metrics associated with that
+	// monitored
+	// resource type. A monitored resource and metric pair may only be used
+	// once
+	// in the Monitoring configuration.
 	ConsumerDestinations []*MonitoringDestination `json:"consumerDestinations,omitempty"`
 
 	// ProducerDestinations: Monitoring configurations for sending metrics
 	// to the producer project.
-	// There can be multiple producer destinations, each one must have
-	// a
-	// different monitored resource type. A metric can be used in at
-	// most
-	// one producer destination.
+	// There can be multiple producer destinations. A monitored resouce type
+	// may
+	// appear in multiple monitoring destinations if different aggregations
+	// are
+	// needed for different sets of metrics associated with that
+	// monitored
+	// resource type. A monitored resource and metric pair may only be used
+	// once
+	// in the Monitoring configuration.
 	ProducerDestinations []*MonitoringDestination `json:"producerDestinations,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g.
@@ -3785,9 +3851,9 @@ func (s *Monitoring) MarshalJSON() ([]byte, error) {
 // destination (the producer project
 // or the consumer project).
 type MonitoringDestination struct {
-	// Metrics: Names of the metrics to report to this monitoring
+	// Metrics: Types of the metrics to report to this monitoring
 	// destination.
-	// Each name must be defined in Service.metrics section.
+	// Each type must be defined in Service.metrics section.
 	Metrics []string `json:"metrics,omitempty"`
 
 	// MonitoredResource: The monitored resource type. The type must be
@@ -4213,59 +4279,6 @@ func (s *Policy) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Quota: Quota configuration helps to achieve fairness and budgeting in
-// service
-// usage.
-//
-// The quota configuration works this way:
-// - The service configuration defines a set of metrics.
-// - For API calls, the quota.metric_rules maps methods to metrics with
-//   corresponding costs.
-// - The quota.limits defines limits on the metrics, which will be used
-// for
-//   quota checks at runtime.
-//
-// An example quota configuration in yaml format:
-//
-//    quota:
-//      limits:
-//
-//      - name: apiWriteQpsPerProject
-//        metric: library.googleapis.com/write_calls
-//        unit: "1/min/{project}"  # rate limit for consumer projects
-//        values:
-//          STANDARD: 10000
-//
-//
-//      # The metric rules bind all methods to the read_calls metric,
-//      # except for the UpdateBook and DeleteBook methods. These two
-// methods
-//      # are mapped to the write_calls metric, with the UpdateBook
-// method
-//      # consuming at twice rate as the DeleteBook method.
-//      metric_rules:
-//      - selector: "*"
-//        metric_costs:
-//          library.googleapis.com/read_calls: 1
-//      - selector: google.example.library.v1.LibraryService.UpdateBook
-//        metric_costs:
-//          library.googleapis.com/write_calls: 2
-//      - selector: google.example.library.v1.LibraryService.DeleteBook
-//        metric_costs:
-//          library.googleapis.com/write_calls: 1
-//
-//  Corresponding Metric definition:
-//
-//      metrics:
-//      - name: library.googleapis.com/read_calls
-//        display_name: Read requests
-//        metric_kind: DELTA
-//        value_type: INT64
-//
-//      - name: library.googleapis.com/write_calls
-//        display_name: Write requests
-//        metric_kind: DELTA
-//        value_type: INT64
 type Quota struct {
 	// Limits: List of `QuotaLimit` definitions for the service.
 	Limits []*QuotaLimit `json:"limits,omitempty"`
@@ -4646,8 +4659,12 @@ type Service struct {
 	// Monitoring: Monitoring configuration.
 	Monitoring *Monitoring `json:"monitoring,omitempty"`
 
-	// Name: The DNS address at which this service is available,
-	// e.g. `calendar.googleapis.com`.
+	// Name: The service name, which is a DNS-like logical identifier for
+	// the
+	// service, such as `calendar.googleapis.com`. The service
+	// name
+	// typically goes through DNS verification to make sure the owner
+	// of the service also owns the DNS name.
 	Name string `json:"name,omitempty"`
 
 	// ProducerProjectId: The Google project that owns this service.
@@ -7132,8 +7149,9 @@ func (c *ServicesListCall) ConsumerId(consumerId string) *ServicesListCall {
 	return c
 }
 
-// PageSize sets the optional parameter "pageSize": Requested size of
-// the next page of data.
+// PageSize sets the optional parameter "pageSize": The max number of
+// items to include in the response list. Page size is 50
+// if not specified. Maximum value is 100.
 func (c *ServicesListCall) PageSize(pageSize int64) *ServicesListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -7261,7 +7279,7 @@ func (c *ServicesListCall) Do(opts ...googleapi.CallOption) (*ListServicesRespon
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "Requested size of the next page of data.",
+	//       "description": "The max number of items to include in the response list. Page size is 50\nif not specified. Maximum value is 100.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
@@ -8091,7 +8109,8 @@ func (r *ServicesConfigsService) List(serviceName string) *ServicesConfigsListCa
 }
 
 // PageSize sets the optional parameter "pageSize": The max number of
-// items to include in the response list.
+// items to include in the response list. Page size is 50
+// if not specified. Maximum value is 100.
 func (c *ServicesConfigsListCall) PageSize(pageSize int64) *ServicesConfigsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -8211,7 +8230,7 @@ func (c *ServicesConfigsListCall) Do(opts ...googleapi.CallOption) (*ListService
 	//   ],
 	//   "parameters": {
 	//     "pageSize": {
-	//       "description": "The max number of items to include in the response list.",
+	//       "description": "The max number of items to include in the response list. Page size is 50\nif not specified. Maximum value is 100.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
@@ -9210,7 +9229,8 @@ func (c *ServicesRolloutsListCall) Filter(filter string) *ServicesRolloutsListCa
 }
 
 // PageSize sets the optional parameter "pageSize": The max number of
-// items to include in the response list.
+// items to include in the response list. Page size is 50
+// if not specified. Maximum value is 100.
 func (c *ServicesRolloutsListCall) PageSize(pageSize int64) *ServicesRolloutsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -9335,7 +9355,7 @@ func (c *ServicesRolloutsListCall) Do(opts ...googleapi.CallOption) (*ListServic
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "The max number of items to include in the response list.",
+	//       "description": "The max number of items to include in the response list. Page size is 50\nif not specified. Maximum value is 100.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"

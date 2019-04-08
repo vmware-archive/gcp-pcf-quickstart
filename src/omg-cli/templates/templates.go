@@ -24,5 +24,5 @@ func GetPattern(envCfg *config.EnvConfig, vars map[string]interface{}, expectAll
 		Manifest: "deployment.yml",
 		OpsFiles: opsFiles,
 		Vars:     vars,
-	}, expectAllKeys)
+	}, "", expectAllKeys)
 }
