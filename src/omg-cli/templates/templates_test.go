@@ -1,11 +1,9 @@
 package templates_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"omg-cli/config"
 	. "omg-cli/templates"
-	"os"
 	"path/filepath"
 	"runtime"
 
@@ -14,7 +12,6 @@ import (
 	"gopkg.in/yaml.v2"
 
 	ompattern "github.com/starkandwayne/om-tiler/pattern"
-	"github.com/thadc23/yamldiff/differ"
 )
 
 func fixturesDir() string {
@@ -39,11 +36,11 @@ func readYAML(f string) map[string]interface{} {
 
 var _ = Describe("GetPattern", func() {
 	var (
-		pattern         ompattern.Pattern
-		healthwatch     bool
-		smallfootprint  bool
-		varsfile        string
-		tileMatchesMock func(string, string) string
+		pattern            ompattern.Pattern
+		healthwatch        bool
+		smallfootprint     bool
+		varsfile           string
+		tileMatchesFixture func(string, string)
 	)
 	JustBeforeEach(func() {
 		var err error
@@ -55,33 +52,17 @@ var _ = Describe("GetPattern", func() {
 		err = pattern.Validate(true)
 		Expect(err).ToNot(HaveOccurred())
 
-		tileMatchesMock = func(t string, f string) string {
+		tileMatchesFixture = func(name, fixture string) {
 			var tile ompattern.Tile
 			for _, tile = range pattern.Tiles {
-				if tile.Name == t {
+				if tile.Name == name {
 					break
 				}
 			}
-			if tile.Name != t {
-				panic(fmt.Sprintf("expected to find tile: %s", t))
-			}
-			actualRaw, err := tile.ToTemplate().Evaluate(true)
+			Expect(tile.Name).ToNot(Equal(""), "Expected to find tile")
+			result, err := tile.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
-
-			actual, err := ioutil.TempFile(os.TempDir(), t)
-			Expect(err).ToNot(HaveOccurred())
-			defer os.Remove(actual.Name())
-			_, err = actual.Write(actualRaw)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(actual.Close()).ToNot(HaveOccurred())
-
-			diff := differ.NewDiffer(actual.Name(),
-				filepath.Join(fixturesDir(), f), false).ComputeDiff()
-			if diff != "" {
-				fmt.Println(string(actualRaw))
-			}
-			return diff
-
+			Expect(result).To(MatchYAML(readFixture(fixture)))
 		}
 	})
 
@@ -95,9 +76,9 @@ var _ = Describe("GetPattern", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint.yml")))
-			Expect(tileMatchesMock("cf", "cf/smallfootprint.yml")).To(Equal(""))
-			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver/smallfootprint.yml")).To(Equal(""))
-			Expect(tileMatchesMock("gcp-service-broker", "service-broker/smallfootprint.yml")).To(Equal(""))
+			tileMatchesFixture("cf", "cf/smallfootprint.yml")
+			tileMatchesFixture("stackdriver-nozzle", "stackdriver/smallfootprint.yml")
+			tileMatchesFixture("gcp-service-broker", "service-broker/smallfootprint.yml")
 		})
 	})
 
@@ -111,10 +92,10 @@ var _ = Describe("GetPattern", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint-healthwatch.yml")))
-			Expect(tileMatchesMock("cf", "cf/smallfootprint.yml")).To(Equal(""))
-			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver/smallfootprint.yml")).To(Equal(""))
-			Expect(tileMatchesMock("gcp-service-broker", "service-broker/smallfootprint.yml")).To(Equal(""))
-			Expect(tileMatchesMock("p-healthwatch", "healthwatch/smallfootprint.yml")).To(Equal(""))
+			tileMatchesFixture("cf", "cf/smallfootprint.yml")
+			tileMatchesFixture("stackdriver-nozzle", "stackdriver/smallfootprint.yml")
+			tileMatchesFixture("gcp-service-broker", "service-broker/smallfootprint.yml")
+			tileMatchesFixture("p-healthwatch", "healthwatch/smallfootprint.yml")
 		})
 	})
 
@@ -128,9 +109,9 @@ var _ = Describe("GetPattern", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readFixture("bosh/full.yml")))
-			Expect(tileMatchesMock("cf", "cf/full.yml")).To(Equal(""))
-			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver/full.yml")).To(Equal(""))
-			Expect(tileMatchesMock("gcp-service-broker", "service-broker/full.yml")).To(Equal(""))
+			tileMatchesFixture("cf", "cf/full.yml")
+			tileMatchesFixture("stackdriver-nozzle", "stackdriver/full.yml")
+			tileMatchesFixture("gcp-service-broker", "service-broker/full.yml")
 		})
 	})
 	Context("when small-footprint is disabled and healthwatch enabled", func() {
@@ -143,10 +124,10 @@ var _ = Describe("GetPattern", func() {
 			director, err := pattern.Director.ToTemplate().Evaluate(true)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(director).To(MatchYAML(readFixture("bosh/full-healthwatch.yml")))
-			Expect(tileMatchesMock("cf", "cf/full.yml")).To(Equal(""))
-			Expect(tileMatchesMock("stackdriver-nozzle", "stackdriver/full.yml")).To(Equal(""))
-			Expect(tileMatchesMock("gcp-service-broker", "service-broker/full.yml")).To(Equal(""))
-			Expect(tileMatchesMock("p-healthwatch", "healthwatch/full.yml")).To(Equal(""))
+			tileMatchesFixture("cf", "cf/full.yml")
+			tileMatchesFixture("stackdriver-nozzle", "stackdriver/full.yml")
+			tileMatchesFixture("gcp-service-broker", "service-broker/full.yml")
+			tileMatchesFixture("p-healthwatch", "healthwatch/full.yml")
 		})
 	})
 })

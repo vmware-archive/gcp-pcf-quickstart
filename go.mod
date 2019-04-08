@@ -5,7 +5,8 @@ go 1.12
 require (
 	cloud.google.com/go v0.34.0
 	github.com/golang/protobuf v1.2.0
-	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
+	github.com/google/btree v1.0.0 // indirect
+	github.com/googleapis/gax-go v2.0.2+incompatible
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53
