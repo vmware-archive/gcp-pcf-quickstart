@@ -13,5 +13,4 @@ popd > /dev/null
 
 pushd ${release_dir}
   omg-cli review-eulas --env-dir="${env_dir}" --accept-all
-  omg-cli remote --env-dir="${env_dir}" "push-tiles"
 popd

@@ -153,9 +153,9 @@ jobs:
             resource: omg-env
           - get: ci-image
       - do:
-          - task: push-tiles
+          - task: accept-eula
             image: ci-image
-            file: omg-src-in/ci/tasks/push-tiles.yml
+            file: omg-src-in/ci/tasks/accept-eula.yml
             params:
               env_file_name: ((env_file_name))
           - task: deploy-pcf

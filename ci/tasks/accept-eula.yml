@@ -8,4 +8,4 @@ inputs:
 - name: omg-env
   path: omg-env-in
 run:
-  path: omg-src-in/ci/tasks/push-tiles.sh
+  path: omg-src-in/ci/tasks/accept-eula.sh
