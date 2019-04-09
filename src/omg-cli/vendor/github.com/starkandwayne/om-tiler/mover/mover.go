@@ -1,6 +1,7 @@
 package mover
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,11 +11,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/starkandwayne/om-tiler/pattern"
+	"github.com/starkandwayne/om-tiler/steps"
 )
 
 type Mover struct {
 	client PivnetClient
-	logger *log.Logger
+	logger func(context.Context) *log.Logger
 	cache  string
 }
 
@@ -27,39 +29,43 @@ func NewMover(c PivnetClient, cache string, l *log.Logger) (*Mover, error) {
 			return nil, err
 		}
 	}
-	return &Mover{client: c, cache: cache, logger: l}, nil
+	log := func(ctx context.Context) *log.Logger {
+		return steps.ContextLogger(ctx, l, "[Cache]")
+	}
+	return &Mover{client: c, cache: cache, logger: log}, nil
 }
 
-func (m *Mover) Get(f pattern.PivnetFile) (*os.File, error) {
-	ok, file, err := m.cachedFile(f)
+func (m *Mover) Get(ctx context.Context, f pattern.PivnetFile) (*os.File, error) {
+	logger := m.logger(ctx)
+	ok, file, err := m.cachedFile(ctx, f)
 	if err != nil {
 		return nil, err
 	}
 	if ok {
-		m.logger.Printf("using file: %s from cache", file.Name())
+		logger.Printf("using file: %s from cache", file.Name())
 		return file, nil
 	}
 
-	m.logger.Printf("file: %s/%s not found in cache", f.Slug, f.Version)
-	if err = m.Cache(f); err != nil {
+	logger.Printf("file: %s/%s not found in cache", f.Slug, f.Version)
+	if err = m.Cache(ctx, f); err != nil {
 		return nil, err
 	}
-	_, file, err = m.cachedFile(f)
+	_, file, err = m.cachedFile(ctx, f)
 
 	return file, err
 }
 
-func (m *Mover) Cache(f pattern.PivnetFile) error {
-	m.logger.Printf("caching file: %s/%s", f.Slug, f.Version)
+func (m *Mover) Cache(ctx context.Context, f pattern.PivnetFile) error {
+	m.logger(ctx).Printf("caching file: %s/%s", f.Slug, f.Version)
 	dir, err := m.cachedFileDir(f)
 	if err != nil {
 		return err
 	}
-	_, err = m.client.DownloadFile(f, dir.Name())
+	_, err = m.client.DownloadFile(ctx, f, dir.Name())
 	return err
 }
 
-func (m *Mover) cachedFile(f pattern.PivnetFile) (bool, *os.File, error) {
+func (m *Mover) cachedFile(ctx context.Context, f pattern.PivnetFile) (bool, *os.File, error) {
 	dir, err := m.cachedFileDir(f)
 	if err != nil {
 		return false, nil, err
@@ -75,7 +81,7 @@ func (m *Mover) cachedFile(f pattern.PivnetFile) (bool, *os.File, error) {
 	}
 
 	if len(files) > 1 {
-		m.logger.Printf("cache corrupted for %s/%s, removing dir %s",
+		m.logger(ctx).Printf("cache corrupted for %s/%s, removing dir %s",
 			f.Slug, f.Version, dir.Name())
 		err = os.RemoveAll(dir.Name())
 		if err != nil {

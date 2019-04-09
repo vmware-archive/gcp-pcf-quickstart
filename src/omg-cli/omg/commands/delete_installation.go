@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -39,6 +40,7 @@ func (cmd *DeleteInstallationCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
+	ctx := context.Background()
 	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
@@ -54,5 +56,5 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	return tiler.Delete()
+	return tiler.Delete(ctx)
 }

@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"log"
 	"omg-cli/config"
 	"omg-cli/templates"
@@ -42,6 +43,7 @@ func (cmd *DeployCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
+	ctx := context.Background()
 	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
@@ -62,5 +64,5 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	return tiler.Build(pattern, !cmd.applyChanges)
+	return tiler.Build(ctx, pattern, !cmd.applyChanges)
 }

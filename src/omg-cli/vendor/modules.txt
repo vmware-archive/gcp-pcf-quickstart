@@ -285,12 +285,13 @@ github.com/pkg/errors
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/disk
 github.com/shirou/gopsutil/internal/common
-# github.com/starkandwayne/om-tiler v0.0.0-20190408101807-56bfb55d9b95
+# github.com/starkandwayne/om-tiler v0.0.0-20190409193041-c27dd9a5e58d
 github.com/starkandwayne/om-tiler/mover
 github.com/starkandwayne/om-tiler/opsman
 github.com/starkandwayne/om-tiler/pattern
 github.com/starkandwayne/om-tiler/pivnet
 github.com/starkandwayne/om-tiler/tiler
+github.com/starkandwayne/om-tiler/steps
 # github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 github.com/tmc/scp
 # github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec

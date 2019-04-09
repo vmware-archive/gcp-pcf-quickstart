@@ -18,6 +18,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -72,16 +73,17 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 }
 
 func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
+	ctx := context.Background()
 	eulas := make(map[string]*pivnet.EULA)
 	for _, tile := range cmd.pattern.Tiles {
-		eula, err := cmd.pivnet.GetEULA(tile.Product)
+		eula, err := cmd.pivnet.GetEULA(ctx, tile.Product)
 		if err != nil {
 			return err
 		}
 
 		eulas[eula.Slug] = eula
 
-		eula, err = cmd.pivnet.GetEULA(tile.Stemcell)
+		eula, err = cmd.pivnet.GetEULA(ctx, tile.Stemcell)
 		if err != nil {
 			return err
 		}
@@ -109,12 +111,13 @@ func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
 }
 
 func (cmd *ReviewEulasCommand) acceptEulas() error {
+	ctx := context.Background()
 	for _, tile := range cmd.pattern.Tiles {
-		if err := cmd.pivnet.AcceptEULA(tile.Product); err != nil {
+		if err := cmd.pivnet.AcceptEULA(ctx, tile.Product); err != nil {
 			return fmt.Errorf("accepting EULA for %s: %v", tile.Product.Slug, err)
 		}
 
-		if err := cmd.pivnet.AcceptEULA(tile.Stemcell); err != nil {
+		if err := cmd.pivnet.AcceptEULA(ctx, tile.Stemcell); err != nil {
 			return fmt.Errorf("accepting EULA for %s: %v", tile.Stemcell.Slug, err)
 		}
 	}

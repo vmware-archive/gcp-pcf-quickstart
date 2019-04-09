@@ -1,80 +1,59 @@
 package tiler
 
 import (
-	"fmt"
-	"path/filepath"
+	"context"
 
 	goflow "github.com/kamildrazkiewicz/go-flow"
 	"github.com/starkandwayne/om-tiler/pattern"
+	"github.com/starkandwayne/om-tiler/steps"
 )
 
-func (c *Tiler) Build(p pattern.Pattern, skipApplyChanges bool) error {
+func (c *Tiler) Build(ctx context.Context, p pattern.Pattern, skipApplyChanges bool) error {
 	if err := p.Validate(true); err != nil {
 		return err
 	}
 
-	pollTillOnline := func(r map[string]interface{}) (interface{}, error) {
-		err := c.client.PollTillOnline()
+	pollTillOnline := steps.Step(ctx, "pollTillOnline", c.client.PollTillOnline)
+	configureAuthentication := steps.Step(ctx, "configureAuthentication", c.client.ConfigureAuthentication)
+	configureDirector := steps.Step(ctx, "configureDirector", func(ctx context.Context) error {
+		err := c.configureDirector(ctx, p.Director)
 		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
-
-	configureAuthentication := func(r map[string]interface{}) (interface{}, error) {
-		err := c.client.ConfigureAuthentication()
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
-
-	configureDirector := func(r map[string]interface{}) (interface{}, error) {
-		err := c.configureDirector(p.Director)
-		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if !skipApplyChanges {
-			err = c.client.ApplyChanges()
-			if err != nil {
-				return nil, err
+			return c.client.ApplyChanges(ctx)
+		}
+		return nil
+	})
+
+	ensureFilesUploaded := steps.Step(ctx, "ensureFilesUploaded", func(ctx context.Context) error {
+		for _, tile := range p.Tiles {
+			if err := c.ensureFilesUploaded(ctx, tile); err != nil {
+				return err
 			}
 		}
-		return nil, nil
-	}
+		return nil
+	})
 
-	ensureFilesUploaded := func(r map[string]interface{}) (interface{}, error) {
+	configureTiles := steps.Step(ctx, "configureTiles", func(ctx context.Context) error {
 		for _, tile := range p.Tiles {
-			if err := c.ensureFilesUploaded(tile); err != nil {
-				return nil, err
-			}
-		}
-		return nil, nil
-	}
-
-	configureTiles := func(r map[string]interface{}) (interface{}, error) {
-		for _, tile := range p.Tiles {
-			err := c.client.StageProduct(tile)
+			err := c.client.StageProduct(ctx, tile)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			err = c.configureProduct(tile)
+			err = c.configureProduct(ctx, tile)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 
 		if !skipApplyChanges {
-			err := c.client.ApplyChanges()
-			if err != nil {
-				return nil, err
-			}
+			return c.client.ApplyChanges(ctx)
 		}
-
-		return nil, nil
-	}
+		return nil
+	})
 
 	_, err := goflow.New().
 		Add("pollTillOnline", nil, pollTillOnline).
@@ -87,59 +66,48 @@ func (c *Tiler) Build(p pattern.Pattern, skipApplyChanges bool) error {
 	return err
 }
 
-func (c *Tiler) ensureFilesUploaded(t pattern.Tile) error {
-	ok, err := c.client.FilesUploaded(t)
+func (c *Tiler) ensureFilesUploaded(ctx context.Context, t pattern.Tile) error {
+	ok, err := c.client.FilesUploaded(ctx, t)
 	if err != nil {
 		return err
 	}
 	if ok {
-		c.logger.Printf("files for %s/%s already uploaded skipping download",
+		c.logger(ctx).Printf("files for %s/%s already uploaded skipping download",
 			t.Name, t.Version)
 		return nil
 	}
 
-	product, err := c.mover.Get(t.Product)
+	product, err := c.mover.Get(ctx, t.Product)
 	if err != nil {
 		return err
 	}
 
-	if err = c.client.UploadProduct(product); err != nil {
+	if err = c.client.UploadProduct(ctx, product); err != nil {
 		return err
 	}
 
-	stemcell, err := c.mover.Get(t.Stemcell)
+	stemcell, err := c.mover.Get(ctx, t.Stemcell)
 	if err != nil {
 		return err
 	}
 
-	return c.client.UploadStemcell(stemcell)
+	return c.client.UploadStemcell(ctx, stemcell)
 }
 
-func (c *Tiler) configureProduct(t pattern.Tile) error {
+func (c *Tiler) configureProduct(ctx context.Context, t pattern.Tile) error {
 	tpl, err := t.ToTemplate().Evaluate(true)
 	if err != nil {
 		return err
 	}
 
-	return c.client.ConfigureProduct(tpl)
+	return c.client.ConfigureProduct(ctx, tpl)
 }
 
-func (c *Tiler) configureDirector(d pattern.Director) error {
+func (c *Tiler) configureDirector(ctx context.Context, d pattern.Director) error {
 	tpl, err := d.ToTemplate().Evaluate(true)
 	if err != nil {
 		return err
 	}
 
-	return c.client.ConfigureDirector(tpl)
-}
-
-func findFileInDir(dir, glob string) (string, error) {
-	files, err := filepath.Glob(filepath.Join(dir, glob))
-	if err != nil {
-		return "", err
-	}
-	if len(files) != 1 {
-		return "", fmt.Errorf("no file found for %s in %s", glob, dir)
-	}
-	return files[0], nil
+	return c.client.ConfigureDirector(ctx, tpl)
 }

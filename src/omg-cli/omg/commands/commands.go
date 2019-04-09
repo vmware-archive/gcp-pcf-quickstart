@@ -95,7 +95,7 @@ func getTiler(cfg *config.Config, envCfg *config.EnvConfig, c string, l *log.Log
 		return nil, err
 	}
 
-	return tiler.NewTiler(omClient, mover, l)
+	return tiler.NewTiler(omClient, mover, l), nil
 }
 
 type step struct {

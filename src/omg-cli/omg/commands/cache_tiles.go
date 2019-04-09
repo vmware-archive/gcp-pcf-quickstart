@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"log"
 
 	"omg-cli/config"
@@ -43,6 +44,7 @@ func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
+	ctx := context.Background()
 	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
@@ -66,12 +68,12 @@ func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
 	}
 
 	for _, tile := range pattern.Tiles {
-		err = mover.Cache(tile.Product)
+		err = mover.Cache(ctx, tile.Product)
 		if err != nil {
 			return err
 		}
 
-		err = mover.Cache(tile.Stemcell)
+		err = mover.Cache(ctx, tile.Stemcell)
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package mover
 
 import (
+	"context"
 	"os"
 
 	"github.com/starkandwayne/om-tiler/pattern"
@@ -8,5 +9,5 @@ import (
 
 //go:generate counterfeiter . PivnetClient
 type PivnetClient interface {
-	DownloadFile(pattern.PivnetFile, string) (*os.File, error)
+	DownloadFile(context.Context, pattern.PivnetFile, string) (*os.File, error)
 }

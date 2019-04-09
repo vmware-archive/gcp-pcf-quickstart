@@ -2,6 +2,7 @@ package opsman
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,6 +20,7 @@ import (
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/progress"
 	"github.com/starkandwayne/om-tiler/pattern"
+	"github.com/starkandwayne/om-tiler/steps"
 )
 
 type Config struct {
@@ -30,10 +32,10 @@ type Config struct {
 }
 
 type Client struct {
-	api                   api.Api
-	log                   *log.Logger
 	config                Config
+	logger                func(context.Context) *log.Logger
 	unauthenticatedClient network.UnauthenticatedClient
+	oauthClient           network.OAuthClient
 }
 
 const (
@@ -54,46 +56,33 @@ func NewClient(c Config, logger *log.Logger) (*Client, error) {
 		return &Client{}, err
 	}
 
-	unauthenticatedClient := network.NewUnauthenticatedClient(
-		c.Target, c.SkipSSLVerification,
-		requestTimeout, connectTimeout,
-	)
-
-	logger.SetPrefix(fmt.Sprintf("%s[OM] ", logger.Prefix()))
-
-	live := uilive.New()
-	live.Out = os.Stderr
-
-	client := Client{
-		api: api.New(api.ApiInput{
-			Client:         oauthClient,
-			UnauthedClient: unauthenticatedClient,
-			ProgressClient: network.NewProgressClient(
-				oauthClient, progress.NewBar(), live),
-			UnauthedProgressClient: network.NewProgressClient(
-				unauthenticatedClient, progress.NewBar(), live),
-			Logger: logger,
-		}),
-		log:                   logger,
-		config:                c,
-		unauthenticatedClient: unauthenticatedClient,
+	log := func(ctx context.Context) *log.Logger {
+		return steps.ContextLogger(ctx, logger, "[OM]")
 	}
 
-	return &client, nil
+	return &Client{
+		config:      c,
+		logger:      log,
+		oauthClient: oauthClient,
+		unauthenticatedClient: network.NewUnauthenticatedClient(
+			c.Target, c.SkipSSLVerification,
+			requestTimeout, connectTimeout,
+		),
+	}, nil
 }
 
-func (c *Client) ConfigureAuthentication() error {
+func (c *Client) ConfigureAuthentication(ctx context.Context) error {
 	args := []string{
 		fmt.Sprintf("--username=%s", c.config.Username),
 		fmt.Sprintf("--password=%s", c.config.Password),
 		fmt.Sprintf("--decryption-passphrase=%s", c.config.DecryptionPassphrase),
 	}
-	cmd := commands.NewConfigureAuthentication(c.api, c.log)
+	cmd := commands.NewConfigureAuthentication(c.api(ctx), c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) FilesUploaded(t pattern.Tile) (bool, error) {
-	products, err := c.uploadedProducts()
+func (c *Client) FilesUploaded(ctx context.Context, t pattern.Tile) (bool, error) {
+	products, err := c.uploadedProducts(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -104,37 +93,37 @@ func (c *Client) FilesUploaded(t pattern.Tile) (bool, error) {
 	return (pok && sok), nil
 }
 
-func (c *Client) UploadProduct(p *os.File) error {
+func (c *Client) UploadProduct(ctx context.Context, p *os.File) error {
 	args := []string{
 		fmt.Sprintf("--product=%s", p.Name()),
 		fmt.Sprintf("--polling-interval=%d", int(pollingInterval.Seconds())),
 	}
 	form := formcontent.NewForm()
 	metadataExtractor := extractor.MetadataExtractor{}
-	cmd := commands.NewUploadProduct(form, metadataExtractor, c.api, c.log)
+	cmd := commands.NewUploadProduct(form, metadataExtractor, c.api(ctx), c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) UploadStemcell(s *os.File) error {
+func (c *Client) UploadStemcell(ctx context.Context, s *os.File) error {
 	args := []string{
 		fmt.Sprintf("--stemcell=%s", s.Name()),
 		"--floating",
 	}
 	form := formcontent.NewForm()
-	cmd := commands.NewUploadStemcell(form, c.api, c.log)
+	cmd := commands.NewUploadStemcell(form, c.api(ctx), c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) StageProduct(t pattern.Tile) error {
+func (c *Client) StageProduct(ctx context.Context, t pattern.Tile) error {
 	args := []string{
 		fmt.Sprintf("--product-name=%s", t.Name),
 		fmt.Sprintf("--product-version=%s", t.Version),
 	}
-	cmd := commands.NewStageProduct(c.api, c.log)
+	cmd := commands.NewStageProduct(c.api(ctx), c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) ConfigureProduct(config []byte) error {
+func (c *Client) ConfigureProduct(ctx context.Context, config []byte) error {
 	configFile, err := tmpConfigFile(config)
 	if err != nil {
 		return err
@@ -145,11 +134,11 @@ func (c *Client) ConfigureProduct(config []byte) error {
 		fmt.Sprintf("--config=%s", configFile),
 	}
 	cmd := commands.NewConfigureProduct(
-		os.Environ, c.api, c.config.Target, c.log)
+		os.Environ, c.api(ctx), c.config.Target, c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) ConfigureDirector(config []byte) error {
+func (c *Client) ConfigureDirector(ctx context.Context, config []byte) error {
 	configFile, err := tmpConfigFile(config)
 	if err != nil {
 		return err
@@ -159,24 +148,25 @@ func (c *Client) ConfigureDirector(config []byte) error {
 	args := []string{
 		fmt.Sprintf("--config=%s", configFile),
 	}
-	cmd := commands.NewConfigureDirector(os.Environ, c.api, c.log)
+	cmd := commands.NewConfigureDirector(os.Environ, c.api(ctx), c.logger(ctx))
 	return cmd.Execute(args)
 }
 
-func (c *Client) ApplyChanges() error {
+func (c *Client) ApplyChanges(ctx context.Context) error {
 	args := []string{"--skip-unchanged-products"}
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(c.api, c.api, logWriter, c.log, applySleepDuration)
+	api := c.api(ctx)
+	cmd := commands.NewApplyChanges(api, api, logWriter, c.logger(ctx), applySleepDuration)
 	return cmd.Execute(args)
 }
 
-func (c *Client) DeleteInstallation() error {
+func (c *Client) DeleteInstallation(ctx context.Context) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewDeleteInstallation(c.api, logWriter, c.log, pollingInterval)
+	cmd := commands.NewDeleteInstallation(c.api(ctx), logWriter, c.logger(ctx), pollingInterval)
 	return cmd.Execute(nil)
 }
 
-func (c *Client) PollTillOnline() error {
+func (c *Client) PollTillOnline(ctx context.Context) error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(onlineTimeout)
 	for {
@@ -187,10 +177,25 @@ func (c *Client) PollTillOnline() error {
 			if c.online() {
 				return nil
 			}
-			c.log.Print("waiting for Ops Manager to start")
+			c.logger(ctx).Print("waiting for Ops Manager to start")
 			timer = time.After(pollingInterval)
 		}
 	}
+}
+
+func (c *Client) api(ctx context.Context) api.Api {
+	live := uilive.New()
+	live.Out = ioutil.Discard
+
+	return api.New(api.ApiInput{
+		Client:         c.oauthClient,
+		UnauthedClient: c.unauthenticatedClient,
+		ProgressClient: network.NewProgressClient(
+			c.oauthClient, progress.NewBar(), live),
+		UnauthedProgressClient: network.NewProgressClient(
+			c.unauthenticatedClient, progress.NewBar(), live),
+		Logger: c.logger(ctx),
+	})
 }
 
 func (c *Client) online() bool {
@@ -230,10 +235,10 @@ type Product struct {
 	StemcellVersions []string `json:"available_stemcell_versions"`
 }
 
-func (c *Client) uploadedProducts() ([]string, error) {
+func (c *Client) uploadedProducts(ctx context.Context) ([]string, error) {
 	args := []string{"--silent", "--path=/api/v0/stemcell_assignments"}
 	out := bytes.NewBuffer([]byte{})
-	cmd := commands.NewCurl(c.api, log.New(out, "", 0), c.log)
+	cmd := commands.NewCurl(c.api(ctx), log.New(out, "", 0), c.logger(ctx))
 	err := cmd.Execute(args)
 	if err != nil {
 		return []string{}, fmt.Errorf("retrieving stemcell assignments: %s", err)

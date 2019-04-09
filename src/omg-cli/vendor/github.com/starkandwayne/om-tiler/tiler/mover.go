@@ -1,6 +1,7 @@
 package tiler
 
 import (
+	"context"
 	"os"
 
 	"github.com/starkandwayne/om-tiler/pattern"
@@ -8,6 +9,6 @@ import (
 
 //go:generate counterfeiter . Mover
 type Mover interface {
-	Get(pattern.PivnetFile) (*os.File, error)
-	Cache(pattern.PivnetFile) error
+	Get(context.Context, pattern.PivnetFile) (*os.File, error)
+	Cache(context.Context, pattern.PivnetFile) error
 }

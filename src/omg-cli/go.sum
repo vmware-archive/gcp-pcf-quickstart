@@ -296,6 +296,8 @@ github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0 h1:un3X6BWt
 github.com/starkandwayne/om-tiler v0.0.0-20190321150528-40cd431640e0/go.mod h1:0ZGJhoTdOLwV5ZZxL8t+3H4vC2as5MLTbruRdSS/04M=
 github.com/starkandwayne/om-tiler v0.0.0-20190408101807-56bfb55d9b95 h1:SGnL2qzIuBPzyEOr6xHYCzJn8pOVrF/y1/EpFUteBNA=
 github.com/starkandwayne/om-tiler v0.0.0-20190408101807-56bfb55d9b95/go.mod h1:gzSWv4IP6Th1KETKjHSte/BvsV8vDczjgS9QYhssJJU=
+github.com/starkandwayne/om-tiler v0.0.0-20190409193041-c27dd9a5e58d h1:DhYhLdBr8JKu6rec8dSijzeGPRqaW+lWtRya/RjoLCw=
+github.com/starkandwayne/om-tiler v0.0.0-20190409193041-c27dd9a5e58d/go.mod h1:gzSWv4IP6Th1KETKjHSte/BvsV8vDczjgS9QYhssJJU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
