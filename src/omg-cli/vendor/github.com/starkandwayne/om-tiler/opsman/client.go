@@ -225,16 +225,6 @@ func tmpConfigFile(config []byte) (string, error) {
 	return configFile.Name(), nil
 }
 
-type StemcellAssignments struct {
-	Products []Product `json:"products"`
-}
-
-type Product struct {
-	Name             string   `json:"type"`
-	Version          string   `json:"product_version"`
-	StemcellVersions []string `json:"available_stemcell_versions"`
-}
-
 func (c *Client) uploadedProducts(ctx context.Context) ([]string, error) {
 	args := []string{"--silent", "--path=/api/v0/stemcell_assignments"}
 	out := bytes.NewBuffer([]byte{})
@@ -242,6 +232,16 @@ func (c *Client) uploadedProducts(ctx context.Context) ([]string, error) {
 	err := cmd.Execute(args)
 	if err != nil {
 		return []string{}, fmt.Errorf("retrieving stemcell assignments: %s", err)
+	}
+
+	type Product struct {
+		Name             string   `json:"identifier"`
+		Version          string   `json:"staged_product_version"`
+		StemcellVersions []string `json:"available_stemcell_versions"`
+	}
+
+	type StemcellAssignments struct {
+		Products []Product `json:"products"`
 	}
 
 	var assignments StemcellAssignments

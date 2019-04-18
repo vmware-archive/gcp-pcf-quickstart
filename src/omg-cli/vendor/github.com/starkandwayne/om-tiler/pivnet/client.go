@@ -70,7 +70,7 @@ func NewClient(c Config, logger *log.Logger) *Client {
 }
 
 func (c *Client) DownloadFile(ctx context.Context, f pattern.PivnetFile, dir string) (file *os.File, err error) {
-	if c.acceptEULA {
+	if c.acceptEULA && f.URL == "" {
 		if err = c.AcceptEULA(ctx, f); err != nil {
 			return
 		}
@@ -141,10 +141,25 @@ func (c *Client) downloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 	if dir == "" {
 		dir, err = ioutil.TempDir("", f.Slug)
 		if err != nil {
-			return nil, err
+			return
 		}
 	}
 
+	// Delete the file if we're returning an error
+	defer func() {
+		if err != nil {
+			os.RemoveAll(dir)
+		}
+	}()
+
+	if f.URL != "" {
+		file, err = downloadDirectFile(ctx, f.URL, dir)
+		return
+	}
+	return c.downloadPivnetFile(ctx, f, dir)
+}
+
+func (c *Client) downloadPivnetFile(ctx context.Context, f pattern.PivnetFile, dir string) (file *os.File, err error) {
 	productFile, release, err := c.lookupProductFile(ctx, f)
 	if err != nil {
 		return nil, err
@@ -156,14 +171,27 @@ func (c *Client) downloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 		return nil, err
 	}
 
-	// Delete the file if we're returning an error
-	defer func() {
-		if err != nil {
-			os.RemoveAll(dir)
-		}
-	}()
+	return file, c.client(ctx).ProductFiles.DownloadForRelease(file, f.Slug, release.ID, productFile.ID, ioutil.Discard)
+}
 
-	return file, c.client(ctx).ProductFiles.DownloadForRelease(file, f.Slug, release.ID, productFile.ID, os.Stdout)
+func downloadDirectFile(ctx context.Context, url string, dir string) (file *os.File, err error) {
+	baseName := filepath.Base(url)
+	file, err = os.Create(filepath.Join(dir, baseName))
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (c *Client) lookupRelease(ctx context.Context, f pattern.PivnetFile) (gopivnet.Release, error) {

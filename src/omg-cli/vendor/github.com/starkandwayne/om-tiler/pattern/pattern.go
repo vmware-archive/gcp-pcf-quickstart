@@ -11,8 +11,9 @@ import (
 )
 
 type Pattern struct {
-	Director Director `yaml"director validate:"required,dive"`
-	Tiles    []Tile   `yaml:"tiles" validate:"required,dive"`
+	Director  Director      `yaml"director validate:"required,dive"`
+	Tiles     []Tile        `yaml:"tiles" validate:"required,dive"`
+	Variables []interface{} `yaml:"variables"`
 }
 
 func NewPattern(t Template, varsStore string, expectAllKeys bool) (p Pattern, err error) {
@@ -22,7 +23,7 @@ func NewPattern(t Template, varsStore string, expectAllKeys bool) (p Pattern, er
 		return Pattern{}, err
 	}
 
-	if err = yaml.Unmarshal(db, &p); err != nil {
+	if err = yaml.UnmarshalStrict(db, &p); err != nil {
 		return Pattern{}, err
 	}
 
@@ -117,6 +118,7 @@ type PivnetFile struct {
 	Slug    string `yaml:"product_slug" validate:"required"`
 	Version string `yaml:"release_version" validate:"required"`
 	Glob    string `yaml:"file_glob" validate:"required"`
+	URL     string `yaml:"download_url"`
 }
 
 func mergeVars(target map[string]interface{}, source map[string]interface{}) {
