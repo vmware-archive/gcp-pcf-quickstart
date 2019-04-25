@@ -11,6 +11,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.4.3
 	github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
+	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/starkandwayne/om-tiler v0.0.0-20190423194837-3cda9d677308
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
