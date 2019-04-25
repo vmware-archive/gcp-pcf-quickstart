@@ -6,10 +6,10 @@
   path: /tiles/-
   value:
     name: p-healthwatch
-    version: 1.4.5-build.41
+    version: 1.5.2-build.4
     product:
       product_slug: p-healthwatch
-      release_version: 1.4.5
+      release_version: 1.5.2
       file_glob: "*.pivotal"
     stemcell:
       product_slug: stemcells-ubuntu-xenial
