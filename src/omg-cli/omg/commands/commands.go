@@ -61,7 +61,7 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 func getPivnet(envCfg *config.EnvConfig, l *log.Logger) *pivnet.Client {
 	return pivnet.NewClient(pivnet.Config{
 		Token:      envCfg.PivnetAPIToken,
-		UserAgent:  version.UserAgent(),
+		// UserAgent:  version.UserAgent(),
 		AcceptEULA: true,
 	}, l)
 }
