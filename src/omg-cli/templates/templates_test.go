@@ -1,6 +1,7 @@
 package templates_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"omg-cli/config"
 	. "omg-cli/templates"
@@ -34,100 +35,82 @@ func readYAML(f string) map[string]interface{} {
 	return out
 }
 
+func directorMatchesFixture(director ompattern.Director, suffix string) {
+	template, err := director.ToTemplate().Evaluate(true)
+	Expect(err).ToNot(HaveOccurred())
+	Expect(template).To(MatchYAML(readFixture(fmt.Sprintf("bosh/%s.yml", suffix))))
+}
+
+func tilesMatchFixtures(tiles []ompattern.Tile, suffix string) {
+	for _, tile := range tiles {
+		template, err := tile.ToTemplate().Evaluate(true)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(template).To(MatchYAML(readFixture(fmt.Sprintf("%s/%s.yml", tile.Name, suffix))))
+	}
+}
+
 var _ = Describe("GetPattern", func() {
 	var (
-		pattern            ompattern.Pattern
-		healthwatch        bool
-		smallfootprint     bool
-		varsfile           string
-		tileMatchesFixture func(string, string)
+		pattern        ompattern.Pattern
+		healthwatch    bool
+		smallFootPrint bool
+		varsFile       string
 	)
 	JustBeforeEach(func() {
 		var err error
 		pattern, err = GetPattern(&config.EnvConfig{
-			SmallFootprint:     smallfootprint,
+			SmallFootprint:     smallFootPrint,
 			IncludeHealthwatch: healthwatch,
-		}, readYAML(varsfile), true)
+		}, readYAML(varsFile), true)
 		Expect(err).ToNot(HaveOccurred())
 		err = pattern.Validate(true)
 		Expect(err).ToNot(HaveOccurred())
-
-		tileMatchesFixture = func(name, fixture string) {
-			var tile ompattern.Tile
-			for _, tile = range pattern.Tiles {
-				if tile.Name == name {
-					break
-				}
-			}
-			Expect(tile.Name).ToNot(Equal(""), "Expected to find tile")
-			result, err := tile.ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(result).To(MatchYAML(readFixture(fixture)))
-		}
 	})
 
 	Context("when small-footprint is enabled", func() {
 		BeforeEach(func() {
-			smallfootprint = true
+			smallFootPrint = true
 			healthwatch = false
-			varsfile = "vars-smallfootprint.yml"
+			varsFile = "vars-small.yml"
 		})
 		It("renders tile configs", func() {
-			director, err := pattern.Director.ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint.yml")))
-			tileMatchesFixture("cf", "cf/smallfootprint.yml")
-			tileMatchesFixture("stackdriver-nozzle", "stackdriver/smallfootprint.yml")
-			tileMatchesFixture("gcp-service-broker", "service-broker/smallfootprint.yml")
+			directorMatchesFixture(pattern.Director, "small")
+			tilesMatchFixtures(pattern.Tiles, "small")
 		})
 	})
 
 	Context("when small-footprint and healthwatch are enabled", func() {
 		BeforeEach(func() {
-			smallfootprint = true
+			smallFootPrint = true
 			healthwatch = true
-			varsfile = "vars-smallfootprint.yml"
+			varsFile = "vars-small.yml"
 		})
 		It("renders tile configs", func() {
-			director, err := pattern.Director.ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(director).To(MatchYAML(readFixture("bosh/smallfootprint-healthwatch.yml")))
-			tileMatchesFixture("cf", "cf/smallfootprint.yml")
-			tileMatchesFixture("stackdriver-nozzle", "stackdriver/smallfootprint.yml")
-			tileMatchesFixture("gcp-service-broker", "service-broker/smallfootprint.yml")
-			tileMatchesFixture("p-healthwatch", "healthwatch/smallfootprint.yml")
+			directorMatchesFixture(pattern.Director, "small-healthwatch")
+			tilesMatchFixtures(pattern.Tiles, "small")
 		})
 	})
 
 	Context("when small-footprint is disabled", func() {
 		BeforeEach(func() {
-			smallfootprint = false
+			smallFootPrint = false
 			healthwatch = false
-			varsfile = "vars.yml"
+			varsFile = "vars.yml"
 		})
 		It("renders tile configs", func() {
-			director, err := pattern.Director.ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(director).To(MatchYAML(readFixture("bosh/full.yml")))
-			tileMatchesFixture("cf", "cf/full.yml")
-			tileMatchesFixture("stackdriver-nozzle", "stackdriver/full.yml")
-			tileMatchesFixture("gcp-service-broker", "service-broker/full.yml")
+			directorMatchesFixture(pattern.Director, "full")
+			tilesMatchFixtures(pattern.Tiles, "full")
 		})
 	})
 	Context("when small-footprint is disabled and healthwatch enabled", func() {
 		BeforeEach(func() {
-			smallfootprint = false
+			smallFootPrint = false
 			healthwatch = true
-			varsfile = "vars.yml"
+			varsFile = "vars.yml"
 		})
 		It("renders tile configs", func() {
-			director, err := pattern.Director.ToTemplate().Evaluate(true)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(director).To(MatchYAML(readFixture("bosh/full-healthwatch.yml")))
-			tileMatchesFixture("cf", "cf/full.yml")
-			tileMatchesFixture("stackdriver-nozzle", "stackdriver/full.yml")
-			tileMatchesFixture("gcp-service-broker", "service-broker/full.yml")
-			tileMatchesFixture("p-healthwatch", "healthwatch/full.yml")
+			directorMatchesFixture(pattern.Director, "full-healthwatch")
+			tilesMatchFixtures(pattern.Tiles, "full")
 		})
 	})
 })
