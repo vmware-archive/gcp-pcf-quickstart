@@ -1,7 +1,6 @@
 package templates_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"omg-cli/config"
 	. "omg-cli/templates"
@@ -20,33 +19,14 @@ func fixturesDir() string {
 	return filepath.Join(filepath.Dir(filename), "fixtures")
 }
 
-func readFixture(f string) []byte {
+func readYAML(f string) map[string]interface{} {
 	in, err := ioutil.ReadFile(filepath.Join(fixturesDir(), f))
 	Expect(err).ToNot(HaveOccurred())
-
-	return in
-}
-
-func readYAML(f string) map[string]interface{} {
 	out := make(map[string]interface{})
-	err := yaml.Unmarshal(readFixture(f), out)
+	err = yaml.Unmarshal(in, out)
 	Expect(err).ToNot(HaveOccurred())
 
 	return out
-}
-
-func directorMatchesFixture(director ompattern.Director, suffix string) {
-	template, err := director.ToTemplate().Evaluate(true)
-	Expect(err).ToNot(HaveOccurred())
-	Expect(template).To(MatchYAML(readFixture(fmt.Sprintf("bosh/%s.yml", suffix))))
-}
-
-func tilesMatchFixtures(tiles []ompattern.Tile, suffix string) {
-	for _, tile := range tiles {
-		template, err := tile.ToTemplate().Evaluate(true)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(template).To(MatchYAML(readFixture(fmt.Sprintf("%s/%s.yml", tile.Name, suffix))))
-	}
 }
 
 var _ = Describe("GetPattern", func() {
@@ -74,8 +54,11 @@ var _ = Describe("GetPattern", func() {
 			varsFile = "vars-small.yml"
 		})
 		It("renders tile configs", func() {
-			directorMatchesFixture(pattern.Director, "small")
-			tilesMatchFixtures(pattern.Tiles, "small")
+			pattern.MatchesFixtures(ompattern.Fixtures{
+				Dir:            fixturesDir(),
+				DirectorSuffix: "small",
+				TilesSuffix:    "small",
+			})
 		})
 	})
 
@@ -86,8 +69,11 @@ var _ = Describe("GetPattern", func() {
 			varsFile = "vars-small.yml"
 		})
 		It("renders tile configs", func() {
-			directorMatchesFixture(pattern.Director, "small-healthwatch")
-			tilesMatchFixtures(pattern.Tiles, "small")
+			pattern.MatchesFixtures(ompattern.Fixtures{
+				Dir:            fixturesDir(),
+				DirectorSuffix: "small-healthwatch",
+				TilesSuffix:    "small",
+			})
 		})
 	})
 
@@ -98,8 +84,11 @@ var _ = Describe("GetPattern", func() {
 			varsFile = "vars.yml"
 		})
 		It("renders tile configs", func() {
-			directorMatchesFixture(pattern.Director, "full")
-			tilesMatchFixtures(pattern.Tiles, "full")
+			pattern.MatchesFixtures(ompattern.Fixtures{
+				Dir:            fixturesDir(),
+				DirectorSuffix: "full",
+				TilesSuffix:    "full",
+			})
 		})
 	})
 	Context("when small-footprint is disabled and healthwatch enabled", func() {
@@ -109,8 +98,11 @@ var _ = Describe("GetPattern", func() {
 			varsFile = "vars.yml"
 		})
 		It("renders tile configs", func() {
-			directorMatchesFixture(pattern.Director, "full-healthwatch")
-			tilesMatchFixtures(pattern.Tiles, "full")
+			pattern.MatchesFixtures(ompattern.Fixtures{
+				Dir:            fixturesDir(),
+				DirectorSuffix: "full-healthwatch",
+				TilesSuffix:    "full",
+			})
 		})
 	})
 })

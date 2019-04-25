@@ -294,6 +294,8 @@ github.com/square/certstrap v1.1.1 h1:GAzfXUcuior+dIWBo0OYODROz71P3mf0B9AQsVX0FS
 github.com/square/certstrap v1.1.1/go.mod h1:1+xoDwJbjCv1e3erNygZ/sHwgq8dr8CgQB3M5mMI6ds=
 github.com/starkandwayne/om-tiler v0.0.0-20190423194837-3cda9d677308 h1:9CisBzC7jLvyyuRKo2rLZ0LHjxjTW3+fd0tdvE3Ygro=
 github.com/starkandwayne/om-tiler v0.0.0-20190423194837-3cda9d677308/go.mod h1:gzSWv4IP6Th1KETKjHSte/BvsV8vDczjgS9QYhssJJU=
+github.com/starkandwayne/om-tiler v0.0.0-20190425101201-21f3f302aa7c h1:+sz2r8bnMNcj3NYTPc19Hvo8mTBFG6uSSNs9keybjwg=
+github.com/starkandwayne/om-tiler v0.0.0-20190425101201-21f3f302aa7c/go.mod h1:gzSWv4IP6Th1KETKjHSte/BvsV8vDczjgS9QYhssJJU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
