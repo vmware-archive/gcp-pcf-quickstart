@@ -2,12 +2,15 @@ package steps
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
 	goflow "github.com/kamildrazkiewicz/go-flow"
 )
 
+// Step wraps a function and it's dependencies to perform concurrently
+// optionally Retry can be specified for steps which need to be retried on error
 type Step struct {
 	Name      string
 	DependsOn []string
@@ -21,6 +24,7 @@ const (
 	stepNameKey contextKeyType = iota
 )
 
+// Run takes a slice of Steps to be performed concurrently
 func Run(ctx context.Context, steps []Step, logger *log.Logger) error {
 	flow := goflow.New()
 	for _, step := range steps {
@@ -43,7 +47,7 @@ func Run(ctx context.Context, steps []Step, logger *log.Logger) error {
 							continue
 						}
 						l.Printf("Max retry %d reached giving up: %s", attempt, err.Error())
-						return nil, err
+						return nil, fmt.Errorf("step %s failed: %v", step.Name, err)
 					}
 					return nil, nil
 				}
@@ -55,6 +59,7 @@ func Run(ctx context.Context, steps []Step, logger *log.Logger) error {
 	return err
 }
 
+// ContextLogger can be used to get a logger prefixed with the current Step Name
 func ContextLogger(ctx context.Context, logger *log.Logger, prefix string) *log.Logger {
 	prefixes := []string{}
 	if logger.Prefix() != "" {

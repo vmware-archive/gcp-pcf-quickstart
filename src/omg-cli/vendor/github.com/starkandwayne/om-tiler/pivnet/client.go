@@ -25,6 +25,7 @@ const (
 	retryDelay    = 5 // How long wait in between download retries
 )
 
+// Config information needed to create a Client
 type Config struct {
 	Host       string
 	Token      string
@@ -32,6 +33,7 @@ type Config struct {
 	AcceptEULA bool
 }
 
+// Client responsible for interacting with Pivotal Network API
 type Client struct {
 	acceptEULA bool
 	userAgent  string
@@ -40,12 +42,15 @@ type Client struct {
 	filter     func(context.Context) *filter.Filter
 }
 
+// EULA contains text of a Pivnet End User License Agreement
 type EULA struct {
 	Name    string
 	Content string
 	Slug    string
 }
 
+// NewClient creates a new Client when given Config and a logger
+// will attempt to get current Step from context.Context to prefix logger
 func NewClient(c Config, logger *log.Logger) *Client {
 	host := c.Host
 	if c.Host == "" {
@@ -69,10 +74,12 @@ func NewClient(c Config, logger *log.Logger) *Client {
 		acceptEULA: c.AcceptEULA, userAgent: c.UserAgent, filter: filter}
 }
 
+// DownloadFile downloads a PivnetFile into a destination directory
+// will invoke AcceptEULA unless downloading form a URL
 func (c *Client) DownloadFile(ctx context.Context, f pattern.PivnetFile, dir string) (file *os.File, err error) {
 	if c.acceptEULA && f.URL == "" {
 		if err = c.AcceptEULA(ctx, f); err != nil {
-			return
+			return nil, fmt.Errorf("could not accept EULA: %v", err)
 		}
 	}
 	for i := 0; i < retryAttempts; i++ {
@@ -87,27 +94,31 @@ func (c *Client) DownloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 		time.Sleep(time.Duration(retryDelay) * time.Second)
 	}
 
-	return nil, fmt.Errorf("download tile failed after %d attempts", retryAttempts)
+	return nil, fmt.Errorf("download tile failed after %d attempts: %v", retryAttempts, err)
 }
 
+// GetEULA retrieves EULA for a given PivnetFile
 func (c *Client) GetEULA(ctx context.Context, f pattern.PivnetFile) (*EULA, error) {
 	release, err := c.lookupRelease(ctx, f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not lookup release: %v", err)
 	}
 
 	eula, err := c.client(ctx).EULA.Get(release.EULA.Slug)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not retrieve EULA for %s: %v",
+			release.EULA.Slug, err)
 	}
 
 	return &EULA{Name: eula.Name, Content: eula.Content, Slug: eula.Slug}, nil
 }
 
+// AcceptEULA accepts eula for a given PivnetFile
+// will use different endpoint when client is configured with UserAgent
 func (c *Client) AcceptEULA(ctx context.Context, f pattern.PivnetFile) error {
 	release, err := c.lookupRelease(ctx, f)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not lookup release: %v", err)
 	}
 
 	if c.userAgent != "" {
@@ -130,7 +141,7 @@ func (c *Client) forceAcceptEULA(ctx context.Context, productSlug string, releas
 		strings.NewReader(`{}`),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("POST to %s failed: %v", url, err)
 	}
 	defer resp.Body.Close()
 
@@ -141,7 +152,7 @@ func (c *Client) downloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 	if dir == "" {
 		dir, err = ioutil.TempDir("", f.Slug)
 		if err != nil {
-			return
+			return nil, fmt.Errorf("could not create tmp download dir: %v", err)
 		}
 	}
 
@@ -154,6 +165,9 @@ func (c *Client) downloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 
 	if f.URL != "" {
 		file, err = downloadDirectFile(ctx, f.URL, dir)
+		if err != nil {
+			return nil, fmt.Errorf("could not download file from url %s: %v", f.URL, err)
+		}
 		return
 	}
 	return c.downloadPivnetFile(ctx, f, dir)
@@ -162,13 +176,13 @@ func (c *Client) downloadFile(ctx context.Context, f pattern.PivnetFile, dir str
 func (c *Client) downloadPivnetFile(ctx context.Context, f pattern.PivnetFile, dir string) (file *os.File, err error) {
 	productFile, release, err := c.lookupProductFile(ctx, f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not lookup product file: %v", err)
 	}
 
 	baseName := filepath.Base(productFile.AWSObjectKey)
 	file, err = os.Create(filepath.Join(dir, baseName))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not create download file %s: %v", file.Name(), err)
 	}
 
 	return file, c.client(ctx).ProductFiles.DownloadForRelease(file, f.Slug, release.ID, productFile.ID, ioutil.Discard)
@@ -178,18 +192,18 @@ func downloadDirectFile(ctx context.Context, url string, dir string) (file *os.F
 	baseName := filepath.Base(url)
 	file, err = os.Create(filepath.Join(dir, baseName))
 	if err != nil {
-		return
+		return nil, fmt.Errorf("could not create download file %s: %v", file.Name(), err)
 	}
 	defer file.Close()
 	resp, err := http.Get(url)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("GET on %s failed: %v", url, err)
 	}
 
 	defer resp.Body.Close()
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("could not copy response body: %v", err)
 	}
 	return
 }
@@ -197,7 +211,7 @@ func downloadDirectFile(ctx context.Context, url string, dir string) (file *os.F
 func (c *Client) lookupRelease(ctx context.Context, f pattern.PivnetFile) (gopivnet.Release, error) {
 	releases, err := c.client(ctx).Releases.List(f.Slug)
 	if err != nil {
-		return gopivnet.Release{}, err
+		return gopivnet.Release{}, fmt.Errorf("failed to list releases: %v", err)
 	}
 
 	for _, r := range releases {
@@ -212,9 +226,15 @@ func (c *Client) lookupRelease(ctx context.Context, f pattern.PivnetFile) (gopiv
 
 func (c *Client) lookupProductFile(ctx context.Context, f pattern.PivnetFile) (gopivnet.ProductFile, gopivnet.Release, error) {
 	release, err := c.lookupRelease(ctx, f)
+	if err != nil {
+		return gopivnet.ProductFile{}, gopivnet.Release{}, fmt.Errorf(
+			"could not find release for product file: %v", err)
+	}
+
 	productFiles, err := c.client(ctx).ProductFiles.ListForRelease(f.Slug, release.ID)
 	if err != nil {
-		return gopivnet.ProductFile{}, gopivnet.Release{}, err
+		return gopivnet.ProductFile{}, gopivnet.Release{}, fmt.Errorf(
+			"could not list product files for release: %v", err)
 	}
 
 	productFiles, err = c.filter(ctx).ProductFileKeysByGlobs(productFiles, []string{f.Glob})
@@ -224,7 +244,8 @@ func (c *Client) lookupProductFile(ctx context.Context, f pattern.PivnetFile) (g
 	}
 
 	if err := c.checkForSingleProductFile(f.Glob, productFiles); err != nil {
-		return gopivnet.ProductFile{}, gopivnet.Release{}, err
+		return gopivnet.ProductFile{}, gopivnet.Release{}, fmt.Errorf(
+			"could not ensure single product file: %v", err)
 	}
 
 	return productFiles[0], release, nil

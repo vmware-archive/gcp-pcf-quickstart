@@ -11,8 +11,10 @@ import (
 type callbackType string
 
 const (
-	BuildCallback  callbackType = "BuildCallback"
-	DeleteCallback              = "DeleteCallback"
+	// BuildCallback register Step to be invoked during Build
+	BuildCallback callbackType = "BuildCallback"
+	// DeleteCallback register Step to be invoked during Delete
+	DeleteCallback = "DeleteCallback"
 )
 
 var allowedCallbackHooks = map[callbackType][]string{
@@ -32,6 +34,7 @@ var allowedCallbackHooks = map[callbackType][]string{
 	},
 }
 
+// Tiler responsible for configuring Ops Manager conform a given Pattern
 type Tiler struct {
 	client    OpsmanClient
 	logger    func(context.Context) *log.Logger
@@ -39,6 +42,8 @@ type Tiler struct {
 	callbacks map[callbackType][]steps.Step
 }
 
+// NewTiler creates a new Tiler needs a Mover for Tile movement
+// and OpsmanClient for Ops Manager interaction
 func NewTiler(client OpsmanClient, mover Mover, logger *log.Logger) *Tiler {
 	l := func(ctx context.Context) *log.Logger {
 		return steps.ContextLogger(ctx, logger, "[Tiler]")
@@ -51,11 +56,12 @@ func NewTiler(client OpsmanClient, mover Mover, logger *log.Logger) *Tiler {
 	}
 }
 
+// RegisterStep allows registering a Step as BuildCallback or DeleteCallback
 func (t *Tiler) RegisterStep(ct callbackType, steps ...steps.Step) error {
 	for _, step := range steps {
 		err := validateStep(ct, step)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not register step: %v", err)
 		}
 		t.callbacks[ct] = append(t.callbacks[ct], step)
 	}

@@ -9,15 +9,23 @@ import (
 )
 
 const (
-	StepWaitOpsmanOnline        string = "WaitOpsmanOnline"
-	StepConfigureAuthentication        = "ConfigureAuthentication"
-	StepConfigureDirector              = "ConfigureDirector"
-	StepDeployDirector                 = "DeployDirector"
-	StepUploadFiles                    = "UploadFiles"
-	StepConfigureTiles                 = "ConfigureTiles"
-	StepApplyChanges                   = "ApplyChanges"
-	StepDeleteInstallation             = "DeleteInstallation"
-	retry                              = 5
+	// StepWaitOpsmanOnline invoked [Build, Delete] when OpsMan API is available
+	StepWaitOpsmanOnline string = "WaitOpsmanOnline"
+	// StepConfigureAuthentication invoked [Build, Delete] when Authentication has been configured
+	StepConfigureAuthentication = "ConfigureAuthentication"
+	// StepConfigureDirector invoked [Build] when Director has been configured
+	StepConfigureDirector = "ConfigureDirector"
+	// StepDeployDirector invoked [Build] when Director has been deployed
+	StepDeployDirector = "DeployDirector"
+	// StepUploadFiles invoked [Build] when all PivnetFiles have been uploaded
+	StepUploadFiles = "UploadFiles"
+	// StepConfigureTiles invoked [Build] when all Tiles have ben configured
+	StepConfigureTiles = "ConfigureTiles"
+	// StepApplyChanges invoked [Build] when all Tiles have been deployed
+	StepApplyChanges = "ApplyChanges"
+	// StepDeleteInstallation invoked [Delete] when all Tiles have been deleted
+	StepDeleteInstallation = "DeleteInstallation"
+	retry                  = 5
 )
 
 func stepUploadFilesName(tile pattern.Tile) string {

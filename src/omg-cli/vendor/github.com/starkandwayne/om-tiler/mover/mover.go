@@ -14,19 +14,21 @@ import (
 	"github.com/starkandwayne/om-tiler/steps"
 )
 
+// Mover downloads and caches pivnet products
 type Mover struct {
 	client PivnetClient
 	logger func(context.Context) *log.Logger
 	cache  string
 }
 
+// NewMover create a Mover when given a PivnetClient and cache location
 func NewMover(c PivnetClient, cache string, l *log.Logger) (*Mover, error) {
 	if cache == "" {
 		cache = os.TempDir()
 	} else {
 		err := os.MkdirAll(cache, os.ModePerm)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not create cache dir %s: %v", cache, err)
 		}
 	}
 	log := func(ctx context.Context) *log.Logger {
@@ -35,11 +37,12 @@ func NewMover(c PivnetClient, cache string, l *log.Logger) (*Mover, error) {
 	return &Mover{client: c, cache: cache, logger: log}, nil
 }
 
+// Get downloads a given PivnetFiles if not found in cache returns a file
 func (m *Mover) Get(ctx context.Context, f pattern.PivnetFile) (*os.File, error) {
 	logger := m.logger(ctx)
 	ok, file, err := m.cachedFile(ctx, f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not look up cache file: %v", err)
 	}
 	if ok {
 		logger.Printf("using file: %s from cache", file.Name())
@@ -48,18 +51,19 @@ func (m *Mover) Get(ctx context.Context, f pattern.PivnetFile) (*os.File, error)
 
 	logger.Printf("file: %s/%s not found in cache", f.Slug, f.Version)
 	if err = m.Cache(ctx, f); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not cache file: %v", err)
 	}
 	_, file, err = m.cachedFile(ctx, f)
 
 	return file, err
 }
 
+// Cache will store a copy of a PivnetFile in a deterministic cache location
 func (m *Mover) Cache(ctx context.Context, f pattern.PivnetFile) error {
 	m.logger(ctx).Printf("caching file: %s/%s", f.Slug, f.Version)
 	dir, err := m.cachedFileDir(f)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not look up cache dir: %v", err)
 	}
 	_, err = m.client.DownloadFile(ctx, f, dir.Name())
 	return err

@@ -23,6 +23,7 @@ import (
 	"github.com/starkandwayne/om-tiler/steps"
 )
 
+// Config information needed to create a Client
 type Config struct {
 	Target               string
 	Username             string
@@ -31,6 +32,7 @@ type Config struct {
 	SkipSSLVerification  bool
 }
 
+// Client responsible for interacting with the OpsManager API
 type Client struct {
 	config                Config
 	logger                func(context.Context) *log.Logger
@@ -46,6 +48,8 @@ const (
 	onlineTimeout      = time.Duration(240 * time.Second)
 )
 
+// NewClient creates a new Client when given Config and a logger
+// will attempt to get current Step from context.Context to prefix logger
 func NewClient(c Config, logger *log.Logger) (*Client, error) {
 	oauthClient, err := network.NewOAuthClient(
 		c.Target, c.Username, c.Password, "", "",
@@ -53,7 +57,8 @@ func NewClient(c Config, logger *log.Logger) (*Client, error) {
 		requestTimeout, connectTimeout,
 	)
 	if err != nil {
-		return &Client{}, err
+		return &Client{}, fmt.Errorf(
+			"could not create OpsManager OAuth Client: %v", err)
 	}
 
 	log := func(ctx context.Context) *log.Logger {
@@ -71,6 +76,7 @@ func NewClient(c Config, logger *log.Logger) (*Client, error) {
 	}, nil
 }
 
+// ConfigureAuthentication configures OpsManager authentication
 func (c *Client) ConfigureAuthentication(ctx context.Context) error {
 	args := []string{
 		fmt.Sprintf("--username=%s", c.config.Username),
@@ -81,10 +87,11 @@ func (c *Client) ConfigureAuthentication(ctx context.Context) error {
 	return cmd.Execute(args)
 }
 
+// FilesUploaded checks if all PivnetFiles for a given Tile have been uploaded
 func (c *Client) FilesUploaded(ctx context.Context, t pattern.Tile) (bool, error) {
 	products, err := c.uploadedProducts(ctx)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("could not fetch already uploaded products: %v", err)
 	}
 
 	pok := contains(products, fmt.Sprintf("%s/%s", t.Name, t.Version))
@@ -93,6 +100,7 @@ func (c *Client) FilesUploaded(ctx context.Context, t pattern.Tile) (bool, error
 	return (pok && sok), nil
 }
 
+// UploadProduct uploads a given tile file to OpsManager
 func (c *Client) UploadProduct(ctx context.Context, p *os.File) error {
 	args := []string{
 		fmt.Sprintf("--product=%s", p.Name()),
@@ -104,6 +112,7 @@ func (c *Client) UploadProduct(ctx context.Context, p *os.File) error {
 	return cmd.Execute(args)
 }
 
+// UploadStemcell uploads a given stemcell file to OpsManager
 func (c *Client) UploadStemcell(ctx context.Context, s *os.File) error {
 	args := []string{
 		fmt.Sprintf("--stemcell=%s", s.Name()),
@@ -114,6 +123,7 @@ func (c *Client) UploadStemcell(ctx context.Context, s *os.File) error {
 	return cmd.Execute(args)
 }
 
+// StageProduct stages the product with Tile.Name and Tile.Version
 func (c *Client) StageProduct(ctx context.Context, t pattern.Tile) error {
 	args := []string{
 		fmt.Sprintf("--product-name=%s", t.Name),
@@ -123,10 +133,11 @@ func (c *Client) StageProduct(ctx context.Context, t pattern.Tile) error {
 	return cmd.Execute(args)
 }
 
+// ConfigureProduct configures a product when given an om cli compatible manifest
 func (c *Client) ConfigureProduct(ctx context.Context, config []byte) error {
 	configFile, err := tmpConfigFile(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create temporary product config file: %v", err)
 	}
 	defer os.Remove(configFile)
 
@@ -138,10 +149,11 @@ func (c *Client) ConfigureProduct(ctx context.Context, config []byte) error {
 	return cmd.Execute(args)
 }
 
+// ConfigureDirector configures the director when given an om cli compatible manifest
 func (c *Client) ConfigureDirector(ctx context.Context, config []byte) error {
 	configFile, err := tmpConfigFile(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create temporary director config file: %v", err)
 	}
 	defer os.Remove(configFile)
 
@@ -152,6 +164,7 @@ func (c *Client) ConfigureDirector(ctx context.Context, config []byte) error {
 	return cmd.Execute(args)
 }
 
+// ApplyChanges applies all pending changes (will skip unchanged products)
 func (c *Client) ApplyChanges(ctx context.Context) error {
 	args := []string{"--skip-unchanged-products"}
 	logWriter := commands.NewLogWriter(os.Stdout)
@@ -160,12 +173,14 @@ func (c *Client) ApplyChanges(ctx context.Context) error {
 	return cmd.Execute(args)
 }
 
+// DeleteInstallation deletes all tiles and their resources
 func (c *Client) DeleteInstallation(ctx context.Context) error {
 	logWriter := commands.NewLogWriter(os.Stdout)
 	cmd := commands.NewDeleteInstallation(c.api(ctx), logWriter, c.logger(ctx), pollingInterval)
 	return cmd.Execute(nil)
 }
 
+// PollTillOnline wait for the OpsManager API to become available
 func (c *Client) PollTillOnline(ctx context.Context) error {
 	timer := time.After(time.Duration(0 * time.Second))
 	timeout := time.After(onlineTimeout)

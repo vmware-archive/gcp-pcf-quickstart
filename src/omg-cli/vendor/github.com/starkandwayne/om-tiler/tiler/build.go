@@ -7,6 +7,7 @@ import (
 	"github.com/starkandwayne/om-tiler/steps"
 )
 
+// Build will perform a series of steps to lay tiles according a given Pattern.
 func (t *Tiler) Build(ctx context.Context, p pattern.Pattern, skipApplyChanges bool) error {
 	if err := p.Validate(true); err != nil {
 		return err

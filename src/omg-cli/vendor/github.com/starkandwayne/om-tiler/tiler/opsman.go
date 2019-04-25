@@ -7,6 +7,7 @@ import (
 	"github.com/starkandwayne/om-tiler/pattern"
 )
 
+// OpsmanClient responsible for interacting with the OpsManager API
 //go:generate counterfeiter . OpsmanClient
 type OpsmanClient interface {
 	PollTillOnline(context.Context) error
