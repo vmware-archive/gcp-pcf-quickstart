@@ -278,66 +278,7 @@ product-properties:
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:
     value: 2
   .properties.system_database:
-    value: external
-  .properties.system_database.external.account_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.account_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.app_usage_service_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.app_usage_service_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.autoscale_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.autoscale_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.ccdb_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.ccdb_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.diego_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.diego_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.host:
-    value: test-sql-ip
-  .properties.system_database.external.locket_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.locket_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.networkpolicyserver_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.networkpolicyserver_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.nfsvolume_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.nfsvolume_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.notifications_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.notifications_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.port:
-    value: test-sql-port
-  .properties.system_database.external.routing_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.routing_username:
-    value: test-ert-sql-username
-  .properties.system_database.external.silk_password:
-    value:
-      secret: test-ert-sql-password
-  .properties.system_database.external.silk_username:
-    value: test-ert-sql-username
+    value: internal_pxc
   .properties.tcp_routing:
     value: enable
   .properties.tcp_routing.enable.reservable_ports:
