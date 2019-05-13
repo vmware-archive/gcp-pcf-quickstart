@@ -199,7 +199,7 @@ func (cp *ConfigureProduct) configureProperties(cfg configureProduct, productGUI
 		case map[interface{}]interface{}:
 			v := value.(map[interface{}]interface{})
 			// This is here:
-			// * the GET /properties returns the value as a field named `selected_options`.
+			// * the GET /properties returns the value as a field named `selected_option`.
 			// * the PUT /properties expects the filed to be named `option_value`.
 			// We are future-proofing and migrating until the issue is resolved.
 			// See for more information [#163833845]
@@ -284,11 +284,12 @@ func (cp *ConfigureProduct) configureErrands(cfg configureProduct, productGUID s
 
 func (cp *ConfigureProduct) interpolateConfig(cfg configureProduct) (configureProduct, error) {
 	configContents, err := interpolate(interpolateOptions{
-		templateFile: cp.Options.ConfigFile,
-		varsFiles:    cp.Options.VarsFile,
-		environFunc:  cp.environFunc,
-		varsEnvs:     cp.Options.VarsEnv,
-		opsFiles:     cp.Options.OpsFile,
+		templateFile:  cp.Options.ConfigFile,
+		varsFiles:     cp.Options.VarsFile,
+		environFunc:   cp.environFunc,
+		varsEnvs:      cp.Options.VarsEnv,
+		opsFiles:      cp.Options.OpsFile,
+		expectAllKeys: true,
 	}, "")
 	if err != nil {
 		return configureProduct{}, err

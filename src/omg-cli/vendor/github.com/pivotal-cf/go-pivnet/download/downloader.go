@@ -48,8 +48,27 @@ type Client struct {
 	Timeout    time.Duration
 }
 
+type FileInfo struct {
+	Name string
+	Mode os.FileMode
+}
+
+func NewFileInfo(file *os.File) (*FileInfo, error) {
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	fileInfo := &FileInfo {
+		Name: file.Name(),
+		Mode: stat.Mode(),
+	}
+
+	return fileInfo, nil
+}
+
 func (c Client) Get(
-	location *os.File,
+	location *FileInfo,
 	downloadLinkFetcher downloadLinkFetcher,
 	progressWriter io.Writer,
 ) error {
@@ -83,7 +102,7 @@ func (c Client) Get(
 		return fmt.Errorf("failed to construct range: %s", err)
 	}
 
-	diskStats, err := disk.Usage(path.Dir(location.Name()))
+	diskStats, err := disk.Usage(path.Dir(location.Name))
 	if err != nil {
 		return fmt.Errorf("failed to get disk free space: %s", err)
 	}
@@ -97,18 +116,14 @@ func (c Client) Get(
 	c.Bar.Kickoff()
 
 	defer c.Bar.Finish()
-	fileInfo, err := location.Stat()
-	if err != nil {
-		return fmt.Errorf("failed to read information from output file: %s", err)
-	}
 
 	var g errgroup.Group
 	for _, r := range ranges {
 		byteRange := r
 
-		fileWriter, err := os.OpenFile(location.Name(), os.O_RDWR, fileInfo.Mode())
+		fileWriter, err := os.OpenFile(location.Name, os.O_RDWR, location.Mode)
 		if err != nil {
-			return fmt.Errorf("failed to open file for writing: %s", err)
+			return fmt.Errorf("failed to open file %s for writing: %s", location.Name, err)
 		}
 
 		g.Go(func() error {

@@ -16,10 +16,11 @@ type ConfigureDirector struct {
 	service     configureDirectorService
 	logger      logger
 	Options     struct {
-		ConfigFile string   `short:"c" long:"config" description:"path to yml file containing all config fields (see docs/configure-director/README.md for format)" required:"true"`
-		VarsFile   []string `long:"vars-file"  description:"Load variables from a YAML file"`
-		VarsEnv    []string `long:"vars-env"   description:"Load variables from environment variables (e.g.: 'MY' to load MY_var=value)"`
-		OpsFile    []string `long:"ops-file"  description:"YAML operations file"`
+		IgnoreVerifierWarnings bool     `long:"ignore-verifier-warnings" description:"option to ignore verifier warnings. NOT RECOMMENDED UNLESS DISABLED IN OPS MANAGER"`
+		ConfigFile             string   `short:"c" long:"config" description:"path to yml file containing all config fields (see docs/configure-director/README.md for format)" required:"true"`
+		VarsFile               []string `long:"vars-file" description:"Load variables from a YAML file"`
+		VarsEnv                []string `long:"vars-env" description:"Load variables from environment variables (e.g.: 'MY' to load MY_var=value)"`
+		OpsFile                []string `long:"ops-file" description:"YAML operations file"`
 	}
 }
 
@@ -28,6 +29,7 @@ type directorConfig struct {
 	AZConfiguration         interface{}            `yaml:"az-configuration"`
 	NetworksConfiguration   interface{}            `yaml:"networks-configuration"`
 	PropertiesConfiguration interface{}            `yaml:"properties-configuration"`
+	IAASConfigurations      interface{}            `yaml:"iaas-configurations"`
 	ResourceConfiguration   map[string]interface{} `yaml:"resource-configuration"`
 	VMExtensions            interface{}            `yaml:"vmextensions-configuration"`
 	Field                   map[string]interface{} `yaml:",inline"`
@@ -40,10 +42,12 @@ type configureDirectorService interface {
 	GetStagedProductByName(name string) (api.StagedProductsFindOutput, error)
 	GetStagedProductJobResourceConfig(string, string) (api.JobProperties, error)
 	GetStagedProductManifest(guid string) (manifest string, err error)
+	Info() (api.Info, error)
 	ListInstallations() ([]api.InstallationsServiceOutput, error)
 	ListStagedProductJobs(string) (map[string]string, error)
 	ListStagedVMExtensions() ([]api.VMExtension, error)
-	UpdateStagedDirectorAvailabilityZones(api.AvailabilityZoneInput) error
+	UpdateStagedDirectorIAASConfigurations(api.IAASConfigurationsInput) error
+	UpdateStagedDirectorAvailabilityZones(api.AvailabilityZoneInput, bool) error
 	UpdateStagedDirectorNetworkAndAZ(api.NetworkAndAZConfiguration) error
 	UpdateStagedDirectorNetworks(api.NetworkInput) error
 	UpdateStagedDirectorProperties(api.DirectorProperties) error
@@ -86,6 +90,11 @@ func (c ConfigureDirector) Execute(args []string) error {
 		return err
 	}
 
+	err = c.updateIAASConfigurations(config)
+	if err != nil {
+		return err
+	}
+
 	err = c.updateStagedDirectorProperties(config)
 	if err != nil {
 		return err
@@ -121,11 +130,12 @@ func (c ConfigureDirector) Execute(args []string) error {
 
 func (c ConfigureDirector) interpolateConfig() (*directorConfig, error) {
 	configContents, err := interpolate(interpolateOptions{
-		templateFile: c.Options.ConfigFile,
-		varsFiles:    c.Options.VarsFile,
-		environFunc:  c.environFunc,
-		varsEnvs:     c.Options.VarsEnv,
-		opsFiles:     c.Options.OpsFile,
+		templateFile:  c.Options.ConfigFile,
+		varsFiles:     c.Options.VarsFile,
+		environFunc:   c.environFunc,
+		varsEnvs:      c.Options.VarsEnv,
+		opsFiles:      c.Options.OpsFile,
+		expectAllKeys: true,
 	}, "")
 	if err != nil {
 		return nil, err
@@ -140,6 +150,19 @@ func (c ConfigureDirector) interpolateConfig() (*directorConfig, error) {
 }
 
 func (c ConfigureDirector) validateConfig(config *directorConfig) error {
+	err := c.checkForDeprecatedKeys(config)
+	if err != nil {
+		return err
+	}
+
+	err = c.checkIAASConfigurationIsOnlySetOnce(config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c ConfigureDirector) checkForDeprecatedKeys(config *directorConfig) error {
 	if len(config.Field) > 0 {
 		var unrecognizedKeys []string
 		for key := range config.Field {
@@ -192,6 +215,50 @@ vmextensions-configuration: {}
 	return nil
 }
 
+func (c ConfigureDirector) checkIAASConfigurationIsOnlySetOnce(config *directorConfig) error {
+	iaasConfigurations := config.IAASConfigurations
+	properties, ok := config.PropertiesConfiguration.(map[interface{}]interface{})
+	if !ok {
+		return nil
+	}
+
+	iaasProperties := properties["iaas-configuration"]
+
+	if iaasConfigurations != nil && iaasProperties != nil {
+		return fmt.Errorf("iaas-configurations cannot be used with properties-configuration.iaas-configurations\n" +
+			"Please only use one implementation.")
+	}
+	return nil
+}
+
+func (c ConfigureDirector) updateIAASConfigurations(config *directorConfig) error {
+	if config.IAASConfigurations != nil {
+		c.logger.Printf("started setting iaas configurations for bosh tile")
+
+		info, err := c.service.Info()
+		if err != nil {
+			return fmt.Errorf("could not retrieve info from targetted ops manager: %v", err)
+		}
+		if ok, _ := info.VersionAtLeast(2, 2); !ok {
+			return fmt.Errorf("\"iaas-configurations\" is only available with Ops Manager 2.2 or later: you are running %s", info.Version)
+		}
+
+		configurations, err := getJSONProperties(config.IAASConfigurations)
+		if err != nil {
+			return err
+		}
+
+		err = c.service.UpdateStagedDirectorIAASConfigurations(api.IAASConfigurationsInput(configurations))
+
+		if err != nil {
+			return fmt.Errorf("iaas configurations could not be completed: %s", err)
+		}
+
+		c.logger.Printf("finished setting iaas configurations for bosh tile")
+	}
+	return nil
+}
+
 func (c ConfigureDirector) updateStagedDirectorProperties(config *directorConfig) error {
 	if config.PropertiesConfiguration != nil {
 		c.logger.Printf("started configuring director options for bosh tile")
@@ -223,7 +290,7 @@ func (c ConfigureDirector) configureAvailabilityZones(config *directorConfig) er
 
 		err = c.service.UpdateStagedDirectorAvailabilityZones(api.AvailabilityZoneInput{
 			AvailabilityZones: json.RawMessage(azs),
-		})
+		}, c.Options.IgnoreVerifierWarnings)
 		if err != nil {
 			return fmt.Errorf("availability zones configuration could not be applied: %s", err)
 		}

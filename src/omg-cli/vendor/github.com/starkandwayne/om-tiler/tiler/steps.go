@@ -116,6 +116,7 @@ func (t *Tiler) stepApplyChanges(skipApplyChanges bool) steps.Step {
 	s := steps.Step{
 		Name:      StepApplyChanges,
 		DependsOn: []string{StepConfigureTiles},
+		Retry:     retry,
 	}
 	if !skipApplyChanges {
 		s.Do = t.client.ApplyChanges

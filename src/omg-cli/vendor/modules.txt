@@ -180,9 +180,6 @@ github.com/google/uuid
 github.com/googleapis/gax-go/v2
 # github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd
 github.com/gosuri/uilive
-# github.com/graymeta/stow v0.0.0-20181228161447-b469cfb112f8 => github.com/jtarchie/stow v0.0.0-20190209005554-0bff39424d5b
-github.com/graymeta/stow
-github.com/graymeta/stow/s3
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v1.0.0
@@ -245,22 +242,22 @@ github.com/onsi/gomega/internal/asyncassertion
 github.com/onsi/gomega/internal/testingtsupport
 github.com/onsi/gomega/matchers
 github.com/onsi/gomega/types
+github.com/onsi/gomega/gbytes
 github.com/onsi/gomega/internal/oraclematcher
 github.com/onsi/gomega/format
 github.com/onsi/gomega/matchers/support/goraph/bipartitegraph
-github.com/onsi/gomega/gbytes
 github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
-# github.com/pivotal-cf/go-pivnet v0.0.51
+# github.com/pivotal-cf/go-pivnet v0.0.53
 github.com/pivotal-cf/go-pivnet
+github.com/pivotal-cf/go-pivnet/download
 github.com/pivotal-cf/go-pivnet/logshim
 github.com/pivotal-cf/go-pivnet/logger
-github.com/pivotal-cf/go-pivnet/download
 # github.com/pivotal-cf/jhanda v0.0.0-20181025233525-e6aa09a032df
 github.com/pivotal-cf/jhanda
 github.com/pivotal-cf/jhanda/internal/parser
-# github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
+# github.com/pivotal-cf/om v0.0.0-20190506223434-0d16b1addef1
 github.com/pivotal-cf/om/api
 github.com/pivotal-cf/om/network
 github.com/pivotal-cf/om/progress
@@ -269,7 +266,8 @@ github.com/pivotal-cf/om/extractor
 github.com/pivotal-cf/om/formcontent
 github.com/pivotal-cf/om/config
 github.com/pivotal-cf/om/configparser
-github.com/pivotal-cf/om/download_clients
+github.com/pivotal-cf/om/configtemplate/generator
+github.com/pivotal-cf/om/configtemplate/metadata
 github.com/pivotal-cf/om/models
 github.com/pivotal-cf/om/presenters
 github.com/pivotal-cf/om/renderers
@@ -277,15 +275,14 @@ github.com/pivotal-cf/om/ui
 github.com/pivotal-cf/om/validator
 # github.com/pivotal-cf/paraphernalia v0.0.0-20180203224945-a64ae2051c20
 github.com/pivotal-cf/paraphernalia/secure/tlsconfig
-# github.com/pivotal-cf/pivnet-cli v0.0.55
+# github.com/pivotal-cf/pivnet-cli v0.0.56
 github.com/pivotal-cf/pivnet-cli/filter
-github.com/pivotal-cf/pivnet-cli/gp
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/disk
 github.com/shirou/gopsutil/internal/common
-# github.com/starkandwayne/om-tiler v0.0.0-20190425101201-21f3f302aa7c
+# github.com/starkandwayne/om-tiler v0.0.0-20190507133204-d30528491138
 github.com/starkandwayne/om-tiler/mover
 github.com/starkandwayne/om-tiler/opsman
 github.com/starkandwayne/om-tiler/pattern
@@ -440,3 +437,5 @@ gopkg.in/go-playground/validator.v9
 gopkg.in/tomb.v1
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
+# howett.net/ranger v0.0.0-20171016084633-e2e137620847
+howett.net/ranger

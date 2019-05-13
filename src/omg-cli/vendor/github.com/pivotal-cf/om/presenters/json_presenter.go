@@ -68,3 +68,7 @@ func (j JSONPresenter) encodeJSON(v interface{}) {
 	_, _ = j.stdout.Write(b)
 	_, _ = j.stdout.Write([]byte("\n"))
 }
+
+func (j JSONPresenter) PresentDiagnosticReport(report api.DiagnosticReport) {
+	_, _ = j.stdout.Write([]byte(report.FullReport))
+}

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	gopivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logshim"
 	"github.com/pivotal-cf/pivnet-cli/filter"
 	"github.com/starkandwayne/om-tiler/pattern"
@@ -185,7 +186,11 @@ func (c *Client) downloadPivnetFile(ctx context.Context, f pattern.PivnetFile, d
 		return nil, fmt.Errorf("could not create download file %s: %v", file.Name(), err)
 	}
 
-	return file, c.client(ctx).ProductFiles.DownloadForRelease(file, f.Slug, release.ID, productFile.ID, ioutil.Discard)
+	fi, err := download.NewFileInfo(file)
+	if err != nil {
+		return nil, fmt.Errorf("could not get file info %s: %v", file.Name(), err)
+	}
+	return file, c.client(ctx).ProductFiles.DownloadForRelease(fi, f.Slug, release.ID, productFile.ID, ioutil.Discard)
 }
 
 func downloadDirectFile(ctx context.Context, url string, dir string) (file *os.File, err error) {

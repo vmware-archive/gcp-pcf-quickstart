@@ -175,9 +175,10 @@ func (c *Client) ApplyChanges(ctx context.Context) error {
 
 // DeleteInstallation deletes all tiles and their resources
 func (c *Client) DeleteInstallation(ctx context.Context) error {
+	args := []string{"--force"}
 	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewDeleteInstallation(c.api(ctx), logWriter, c.logger(ctx), pollingInterval)
-	return cmd.Execute(nil)
+	cmd := commands.NewDeleteInstallation(c.api(ctx), logWriter, c.logger(ctx), os.Stdin, pollingInterval)
+	return cmd.Execute(args)
 }
 
 // PollTillOnline wait for the OpsManager API to become available

@@ -20,3 +20,11 @@ func validateStatusOK(resp *http.Response) error {
 
 	return nil
 }
+
+func validateStatusOKOrVerificationWarning(resp *http.Response, ignoreVerifierWarnings bool) error {
+	if ignoreVerifierWarnings && resp.StatusCode == http.StatusMultiStatus {
+
+		return nil
+	}
+	return validateStatusOK(resp)
+}

@@ -21,10 +21,11 @@ type UploadStemcell struct {
 	logger    logger
 	service   uploadStemcellService
 	Options   struct {
-		Stemcell string `long:"stemcell" short:"s" required:"true" description:"path to stemcell"`
-		Force    bool   `long:"force"    short:"f"                 description:"upload stemcell even if it already exists on the target Ops Manager"`
-		Floating bool   `long:"floating" default:"true"            description:"assigns the stemcell to all compatible products "`
-		Shasum   string `long:"shasum" short:"sha" description:"shasum of the provided stemcell file to be used for validation"`
+		ConfigFile string `long:"config"   short:"c"                 description:"path to yml file for configuration (keys must match the following command line flags)"`
+		Stemcell   string `long:"stemcell" short:"s" required:"true" description:"path to stemcell"`
+		Force      bool   `long:"force"    short:"f"                 description:"upload stemcell even if it already exists on the target Ops Manager"`
+		Floating   bool   `long:"floating" default:"true"            description:"assigns the stemcell to all compatible products "`
+		Shasum     string `long:"shasum"                             description:"shasum of the provided product file to be used for validation"`
 	}
 }
 
@@ -40,6 +41,7 @@ type multipart interface {
 type uploadStemcellService interface {
 	UploadStemcell(api.StemcellUploadInput) (api.StemcellUploadOutput, error)
 	GetDiagnosticReport() (api.DiagnosticReport, error)
+	Info() (api.Info, error)
 }
 
 func NewUploadStemcell(multipart multipart, service uploadStemcellService, logger logger) UploadStemcell {
@@ -59,7 +61,8 @@ func (us UploadStemcell) Usage() jhanda.Usage {
 }
 
 func (us UploadStemcell) Execute(args []string) error {
-	if _, err := jhanda.Parse(&us.Options, args); err != nil {
+	err := loadConfigFile(args, &us.Options, nil)
+	if err != nil {
 		return fmt.Errorf("could not parse upload-stemcell flags: %s", err)
 	}
 
@@ -91,6 +94,25 @@ func (us UploadStemcell) Execute(args []string) error {
 			}
 		}
 
+		info, err := us.service.Info()
+		if err != nil {
+			return fmt.Errorf("cannot retrieve version of Ops Manager")
+		}
+
+		validVersion, err := info.VersionAtLeast(2, 6)
+		if err != nil {
+			return fmt.Errorf("could not determine version was 2.6+ compatible: %s", err)
+		}
+
+		if validVersion {
+			for _, stemcell := range report.AvailableStemcells {
+				if stemcell.Filename == filepath.Base(stemcellFilename) {
+					us.logger.Printf("stemcell has already been uploaded")
+					return nil
+				}
+			}
+		}
+
 		for _, stemcell := range report.Stemcells {
 			if stemcell == filepath.Base(stemcellFilename) {
 				us.logger.Printf("stemcell has already been uploaded")
@@ -99,7 +121,6 @@ func (us UploadStemcell) Execute(args []string) error {
 		}
 	}
 
-	var err error
 	prefixRegex := regexp.MustCompile(`^\[.*?,.*?\](.+)$`)
 	if prefixRegex.MatchString(filepath.Base(stemcellFilename)) {
 		matches := prefixRegex.FindStringSubmatch(filepath.Base(stemcellFilename))

@@ -10,8 +10,8 @@ require (
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.4.3
-	github.com/pivotal-cf/om v0.0.0-20190308185307-fa1f978a1ddb
-	github.com/starkandwayne/om-tiler v0.0.0-20190425101201-21f3f302aa7c
+	github.com/pivotal-cf/om v0.0.0-20190506223434-0d16b1addef1
+	github.com/starkandwayne/om-tiler v0.0.0-20190507133204-d30528491138
 	github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
