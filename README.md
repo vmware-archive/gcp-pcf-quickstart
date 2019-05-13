@@ -1,4 +1,4 @@
-# Pivotal Cloud Foundry on Google Cloud Platform Quickstart 
+# Pivotal Cloud Foundry on Google Cloud Platform Quickstart
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cf-platform-eng/gcp-pcf-quickstart)](https://goreportcard.com/report/github.com/cf-platform-eng/gcp-pcf-quickstart)
 
@@ -19,7 +19,7 @@ This project aims to make installing PCF on GCP straightforward and is currently
 # <a name="resources"></a>Related Resources
 1. [Pivotal Cloud Foundry on Google Cloud Platform Webseries](https://www.youtube.com/watch?v=TBsc7kiog5Q&list=PLIivdWyY5sqKJ48ycao632rEDuVbFm8yJ)
 1. [Pivotal Cloud Foundry on Google Cloud Platform Solution](https://cloud.google.com/solutions/cloud-foundry-on-gcp)
-1. [Official PCF Installation Guide](https://docs.pivotal.io/pivotalcf/1-12/customizing/gcp.html)
+1. [Official PCF Installation Guide](https://docs.pivotal.io/pivotalcf/2-4/customizing/gcp.html)
 1. [terraforming-gcp](https://github.com/pivotal-cf/terraforming-gcp)
 
 # Contributing
