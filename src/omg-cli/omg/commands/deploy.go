@@ -29,9 +29,10 @@ import (
 
 // DeployCommand deploys the quickstart.
 type DeployCommand struct {
-	logger       *log.Logger
-	envDir       string
-	applyChanges bool
+	logger           *log.Logger
+	envDir           string
+	skipApplyChanges bool
+	varsStore        string
 }
 
 const deployName = "deploy"
@@ -39,7 +40,8 @@ const deployName = "deploy"
 func (cmd *DeployCommand) register(app *kingpin.Application) {
 	c := app.Command(deployName, "Deploy tiles to a freshly deployed Ops Manager").Action(cmd.run)
 	registerEnvConfigFlag(c, &cmd.envDir)
-	c.Flag("apply-changes", "Apply Changes").Default("true").BoolVar(&cmd.applyChanges)
+	c.Flag("vars-store", "Path to a file for storing generated secrets e.g creds.yml").Default(config.VarsStore).StringVar(&cmd.varsStore)
+	c.Flag("skip-apply-changes", "Apply Changes").Default("false").BoolVar(&cmd.skipApplyChanges)
 }
 
 func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
@@ -59,10 +61,10 @@ func (cmd *DeployCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	pattern, err := templates.GetPattern(envCfg, cfg.Raw, true)
+	pattern, err := templates.GetPattern(envCfg, cfg.Raw, cmd.varsStore, true)
 	if err != nil {
 		return err
 	}
 
-	return tiler.Build(ctx, pattern, !cmd.applyChanges)
+	return tiler.Build(ctx, pattern, cmd.skipApplyChanges)
 }
