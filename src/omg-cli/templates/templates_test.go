@@ -19,11 +19,20 @@ func fixturesDir() string {
 	return filepath.Join(filepath.Dir(filename), "fixtures")
 }
 
-func readYAML(f string) map[string]interface{} {
-	in, err := ioutil.ReadFile(filepath.Join(fixturesDir(), f))
+func fixturePath(f string) string {
+	return filepath.Join(fixturesDir(), f)
+}
+
+func readFixture(f string) []byte {
+	in, err := ioutil.ReadFile(fixturePath(f))
 	Expect(err).ToNot(HaveOccurred())
+
+	return in
+}
+
+func readYAML(f string) map[string]interface{} {
 	out := make(map[string]interface{})
-	err = yaml.Unmarshal(in, out)
+	err := yaml.Unmarshal(readFixture(f), out)
 	Expect(err).ToNot(HaveOccurred())
 
 	return out
@@ -35,13 +44,14 @@ var _ = Describe("GetPattern", func() {
 		healthwatch    bool
 		smallFootPrint bool
 		varsFile       string
+		varsStore      string
 	)
 	JustBeforeEach(func() {
 		var err error
 		pattern, err = GetPattern(&config.EnvConfig{
 			SmallFootprint:     smallFootPrint,
 			IncludeHealthwatch: healthwatch,
-		}, readYAML(varsFile), true)
+		}, readYAML(varsFile), fixturePath(varsStore), true)
 		Expect(err).ToNot(HaveOccurred())
 		err = pattern.Validate(true)
 		Expect(err).ToNot(HaveOccurred())
@@ -52,6 +62,7 @@ var _ = Describe("GetPattern", func() {
 			smallFootPrint = true
 			healthwatch = false
 			varsFile = "vars-small.yml"
+			varsStore = "creds.yml"
 		})
 		It("renders tile configs", func() {
 			pattern.MatchesFixtures(ompattern.Fixtures{
@@ -67,6 +78,7 @@ var _ = Describe("GetPattern", func() {
 			smallFootPrint = true
 			healthwatch = true
 			varsFile = "vars-small.yml"
+			varsStore = "creds.yml"
 		})
 		It("renders tile configs", func() {
 			pattern.MatchesFixtures(ompattern.Fixtures{
@@ -82,6 +94,7 @@ var _ = Describe("GetPattern", func() {
 			smallFootPrint = false
 			healthwatch = false
 			varsFile = "vars.yml"
+			varsStore = "creds.yml"
 		})
 		It("renders tile configs", func() {
 			pattern.MatchesFixtures(ompattern.Fixtures{
@@ -96,6 +109,7 @@ var _ = Describe("GetPattern", func() {
 			smallFootPrint = false
 			healthwatch = true
 			varsFile = "vars.yml"
+			varsStore = "creds.yml"
 		})
 		It("renders tile configs", func() {
 			pattern.MatchesFixtures(ompattern.Fixtures{

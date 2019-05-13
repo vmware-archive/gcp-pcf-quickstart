@@ -37,6 +37,7 @@ type CredhubEncryptionKey struct {
 const (
 	TerraformOutputFile = "terraform_output.json"
 	EnvConfigFile       = "config.json"
+	VarsStore           = "creds.yml"
 )
 
 // Files are necessary files to upload.

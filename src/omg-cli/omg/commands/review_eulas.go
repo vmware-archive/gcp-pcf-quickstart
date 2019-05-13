@@ -60,7 +60,7 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 
 	cmd.pivnet = getPivnet(cmd.envConfig, cmd.logger)
 
-	cmd.pattern, err = templates.GetPattern(cmd.envConfig, map[string]interface{}{}, false)
+	cmd.pattern, err = templates.GetPattern(cmd.envConfig, map[string]interface{}{}, "", false)
 	if err != nil {
 		return err
 	}
