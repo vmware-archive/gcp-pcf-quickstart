@@ -63,6 +63,8 @@ properties-configuration:
       type: service_account
     default_deployment_tag: test-tag
     project: test-project
+  security_configuration:
+    trusted_certificates: test-ssl-root-ca
 resource-configuration:
   compilation:
     instance_type:

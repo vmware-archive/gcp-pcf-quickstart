@@ -6,6 +6,7 @@ director:
     management_subnet_reserved_ips: 10.0.0.0-10.0.0.20
     services_subnet_reserved_ips: 10.0.8.0-10.0.8.20
     ert_subnet_reserved_ips: 10.0.4.0-10.0.4.20
+    default_ca: ((ssl_root_ca))
 tiles:
 - name: cf
   version: 2.4.4
@@ -38,7 +39,7 @@ tiles:
     networking_poe_ssl_certs_0/certificate: ((ssl_cert))
     networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
     ha_proxy/skip_cert_verify: true
-    haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
+    haproxy_forward_tls/enable/backend_ca: ((ssl_root_ca))
     credhub_key_encryption_passwords_0/key: ((credhub_key))
     credhub_key_encryption_passwords_0/name: ((credhub_key_name))
     credhub_key_encryption_passwords_0/primary: true

@@ -18,6 +18,8 @@ properties-configuration:
     project: ((project))
     auth_json: ((ops_manager_service_account_key))
     default_deployment_tag: ((vm_tag))
+  security_configuration:
+    trusted_certificates: ((default_ca))  
 network-assignment:
   singleton_availability_zone:
     name: ((azs_0))

@@ -176,6 +176,10 @@ output "jumpbox_public_ip" {
   value = "${google_compute_address.jumpbox.address}"
 }
 
+output "ssl_root_ca" {
+  value = "${var.ssl_root_ca}"
+}
+
 output "ssl_cert" {
   value = "${var.ssl_cert}"
 }

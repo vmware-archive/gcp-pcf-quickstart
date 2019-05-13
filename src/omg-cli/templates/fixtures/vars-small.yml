@@ -35,6 +35,7 @@ http_lb_backend_name: test-http-lb-name
 ssh_router_pool: test-ssh-pool-name
 tcp_router_pool: test-tcp-pool-name
 wss_router_pool: test-wss-pool-name
+ssl_root_ca: test-ssl-root-ca
 ssl_cert: test-ssl-cert
 ssl_cert_private_key: test-ssl-key
 stackdriver_service_account_key:  { type: service_account, project_id: test-stackdriver-project }
