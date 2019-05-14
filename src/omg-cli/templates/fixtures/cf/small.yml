@@ -324,7 +324,7 @@ resource-config:
   control:
     instances: automatic
     instance_type:
-      id: 2xlarge.disk
+      id: 2xlarge.cpu
     elb_names:
     - tcp:test-ssh-pool-name
   database:
