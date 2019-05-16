@@ -107,12 +107,12 @@ variable "ssh_public_key" {
 
 variable "ert_sql_db_host" {
   type    = "string"
-  default = ""
+  default = "%"
 }
 
 variable "opsman_sql_db_host" {
   type    = "string"
-  default = ""
+  default = "%"
 }
 
 variable "ops_manager_username" {
