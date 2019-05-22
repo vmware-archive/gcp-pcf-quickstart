@@ -119,6 +119,5 @@ func flattenTerraform(contents []byte) (map[string]interface{}, error) {
 			return nil, fmt.Errorf("encountered unknown type in terraform config: %v", v.Value)
 		}
 	}
-	// fmt.Println(res)
 	return res, nil
 }
