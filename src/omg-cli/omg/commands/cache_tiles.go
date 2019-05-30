@@ -17,13 +17,11 @@
 package commands
 
 import (
-	"fmt"
+	"context"
 	"log"
-	"os"
-	"path/filepath"
 
 	"omg-cli/config"
-	"omg-cli/pivnet"
+	"omg-cli/templates"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -46,40 +44,38 @@ func (cmd *CacheTilesCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *CacheTilesCommand) run(c *kingpin.ParseContext) error {
-	pivnetSdk, err := pivnet.NewSdk(cmd.pivnetAPIToken, cmd.logger)
-	if err != nil {
-		return err
-	}
-
+	ctx := context.Background()
 	envCfg, err := config.FromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(cmd.tileCacheDir); os.IsNotExist(err) {
-		if err := os.Mkdir(cmd.tileCacheDir, os.ModePerm); err != nil {
-			return fmt.Errorf("creating tile cache directory %s: %v", cmd.tileCacheDir, err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("finding tile cache directory %s: %v", cmd.tileCacheDir, err)
+	envCfg.PivnetAPIToken = cmd.pivnetAPIToken
+
+	mover, err := getMover(envCfg, cmd.tileCacheDir, cmd.logger)
+	if err != nil {
+		return err
 	}
 
-	tileCache := pivnet.TileCache{Dir: cmd.tileCacheDir}
-	tiles := selectedTiles(cmd.logger, envCfg)
-	for _, tile := range tiles {
-		if tile.BuiltIn() {
-			continue
-		}
-		definition := tile.Definition(&config.EnvConfig{SmallFootprint: true})
-		cmd.logger.Printf("caching tile: %s", definition.Product.Name)
+	pattern, err := templates.GetPattern(envCfg, map[string]interface{}{}, "", false)
+	if err != nil {
+		return err
+	}
 
-		output := filepath.Join(cmd.tileCacheDir, tileCache.FileName(definition.Pivnet))
-		file, err := pivnetSdk.DownloadTileToPath(definition.Pivnet, output)
+	pattern.Validate(false)
+	if err != nil {
+		return err
+	}
+
+	for _, tile := range pattern.Tiles {
+		err = mover.Cache(ctx, tile.Product)
 		if err != nil {
-			return fmt.Errorf("downloading tile: %v", err)
+			return err
 		}
-		if err := file.Close(); err != nil {
-			return fmt.Errorf("closing tile: %v", err)
+
+		err = mover.Cache(ctx, tile.Stemcell)
+		if err != nil {
+			return err
 		}
 	}
 

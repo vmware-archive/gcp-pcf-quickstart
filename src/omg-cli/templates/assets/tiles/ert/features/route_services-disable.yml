@@ -1,0 +1,6 @@
+- type: replace
+  path: /product-properties/.properties.route_services?
+  value:
+    value: disable
+- type: remove
+  path: /product-properties/.properties.route_services.enable.ignore_ssl_cert_verification?

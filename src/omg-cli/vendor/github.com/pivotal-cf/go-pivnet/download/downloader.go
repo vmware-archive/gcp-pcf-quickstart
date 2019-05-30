@@ -48,14 +48,33 @@ type Client struct {
 	Timeout    time.Duration
 }
 
+type FileInfo struct {
+	Name string
+	Mode os.FileMode
+}
+
+func NewFileInfo(file *os.File) (*FileInfo, error) {
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	fileInfo := &FileInfo {
+		Name: file.Name(),
+		Mode: stat.Mode(),
+	}
+
+	return fileInfo, nil
+}
+
 func (c Client) Get(
-	location *os.File,
+	location *FileInfo,
 	downloadLinkFetcher downloadLinkFetcher,
 	progressWriter io.Writer,
 ) error {
 	contentURL, err := downloadLinkFetcher.NewDownloadLink()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new download link in get: %s", err)
 	}
 
 	req, err := http.NewRequest("HEAD", contentURL, nil)
@@ -74,12 +93,16 @@ func (c Client) Get(
 
 	contentURL = resp.Request.URL.String()
 
+	if resp.ContentLength == -1 {
+		return fmt.Errorf("failed to find file on remote filestore")
+	}
+
 	ranges, err := c.Ranger.BuildRange(resp.ContentLength)
 	if err != nil {
 		return fmt.Errorf("failed to construct range: %s", err)
 	}
 
-	diskStats, err := disk.Usage(path.Dir(location.Name()))
+	diskStats, err := disk.Usage(path.Dir(location.Name))
 	if err != nil {
 		return fmt.Errorf("failed to get disk free space: %s", err)
 	}
@@ -93,18 +116,14 @@ func (c Client) Get(
 	c.Bar.Kickoff()
 
 	defer c.Bar.Finish()
-	fileInfo, err := location.Stat()
-	if err != nil {
-		return fmt.Errorf("failed to read information from output file: %s", err)
-	}
 
 	var g errgroup.Group
 	for _, r := range ranges {
 		byteRange := r
 
-		fileWriter, err := os.OpenFile(location.Name(), os.O_RDWR, fileInfo.Mode())
+		fileWriter, err := os.OpenFile(location.Name, os.O_RDWR, location.Mode)
 		if err != nil {
-			return fmt.Errorf("failed to open file for writing: %s", err)
+			return fmt.Errorf("failed to open file %s for writing: %s", location.Name, err)
 		}
 
 		g.Go(func() error {
@@ -118,7 +137,7 @@ func (c Client) Get(
 	}
 
 	if err := g.Wait(); err != nil {
-		return err
+		return fmt.Errorf("problem while waiting for chunks to download: %s", err)
 	}
 
 	return nil
@@ -137,7 +156,7 @@ Retry:
 
 	req, err := http.NewRequest("GET", currentURL, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get new request: %s", err)
 	}
 
 	rangeHeader.Add("Referer", "https://go-pivnet.network.pivotal.io")
@@ -160,7 +179,7 @@ Retry:
 		c.Logger.Debug("received unsuccessful status code: %d", logger.Data{"statusCode": resp.StatusCode})
 		currentURL, err = downloadLinkFetcher.NewDownloadLink()
 		if err != nil {
-			return err
+			return fmt.Errorf("could not get new download link: %s", err)
 		}
 		c.Logger.Debug("fetched new download url: %d", logger.Data{"url": currentURL})
 

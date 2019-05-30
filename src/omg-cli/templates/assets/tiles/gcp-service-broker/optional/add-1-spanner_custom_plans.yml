@@ -1,0 +1,10 @@
+- type: replace
+  path: /product-properties/.properties.spanner_custom_plans?
+  value:
+    value:
+    - description: ((spanner_custom_plans_0/description))
+      display_name: ((spanner_custom_plans_0/display_name))
+      guid: ((spanner_custom_plans_0/guid))
+      name: ((spanner_custom_plans_0/name))
+      num_nodes: ((spanner_custom_plans_0/num_nodes))
+      service: ((spanner_custom_plans_0/service))

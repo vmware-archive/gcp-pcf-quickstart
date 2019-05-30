@@ -1,0 +1,20 @@
+- type: replace
+  path: /product-properties/.properties.blacklist?
+  value:
+    value:
+    - description: ((blacklist_0/description))
+      regexp: ((blacklist_0/regexp))
+      sink: ((blacklist_0/sink))
+      type: ((blacklist_0/type))
+    - description: ((blacklist_1/description))
+      regexp: ((blacklist_1/regexp))
+      sink: ((blacklist_1/sink))
+      type: ((blacklist_1/type))
+    - description: ((blacklist_2/description))
+      regexp: ((blacklist_2/regexp))
+      sink: ((blacklist_2/sink))
+      type: ((blacklist_2/type))
+    - description: ((blacklist_3/description))
+      regexp: ((blacklist_3/regexp))
+      sink: ((blacklist_3/sink))
+      type: ((blacklist_3/type))

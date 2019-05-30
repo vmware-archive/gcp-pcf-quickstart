@@ -17,7 +17,6 @@
 package opsman
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,9 +31,6 @@ import (
 
 	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/commands"
-	"github.com/pivotal-cf/om/extractor"
-	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
 	"github.com/pivotal-cf/om/progress"
 )
@@ -87,209 +83,6 @@ func NewSdk(target string, creds config.OpsManagerCredentials, logger *log.Logge
 		target: target,
 	}
 	return sdk, nil
-}
-
-// SetupAuth configures the initial username, password, and decryptionPhrase
-func (om *Sdk) SetupAuth() error {
-	availability, err := om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
-	if err != nil {
-		return fmt.Errorf("could not determine initial auth configuration status: %v", err)
-	}
-
-	if availability.Status == api.EnsureAvailabilityStatusUnknown {
-		return errors.New("could not determine initial auth configuration status: unexpected status")
-	}
-	if availability.Status != api.EnsureAvailabilityStatusUnstarted {
-		om.logger.Printf("configuration previously completed, skipping configuration")
-		return nil
-	}
-	om.logger.Println("configuring internal userstore...")
-	_, err = om.api.Setup(api.SetupInput{
-		IdentityProvider:                 "internal",
-		AdminUserName:                    om.creds.Username,
-		AdminPassword:                    om.creds.Password,
-		AdminPasswordConfirmation:        om.creds.Password,
-		DecryptionPassphrase:             om.creds.DecryptionPhrase,
-		DecryptionPassphraseConfirmation: om.creds.DecryptionPhrase,
-		EULAAccepted:                     "true",
-	})
-	if err != nil {
-		return fmt.Errorf("could not configure auth: %v", err)
-	}
-	for availability.Status != api.EnsureAvailabilityStatusComplete {
-		availability, err = om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
-		if err != nil {
-			return fmt.Errorf("could not determine final auth configuration status: %v", err)
-		}
-	}
-	om.logger.Println("auth configuration complete")
-	return nil
-}
-
-// Unlock decrypts Ops Manager. This is needed after a reboot before attempting to authenticate.
-// This task runs asynchronously. Query the status by invoking ReadyForAuth.
-func (om *Sdk) Unlock() error {
-	om.logger.Println("decrypting Ops Manager")
-
-	unlockReq := UnlockRequest{om.creds.DecryptionPhrase}
-	body, err := json.Marshal(&unlockReq)
-	if err != nil {
-		return err
-	}
-
-	_, err = om.api.Curl(api.RequestServiceCurlInput{
-		Path:   "/api/v0/unlock",
-		Method: "PUT",
-		Data:   bytes.NewReader(body),
-	})
-
-	return err
-}
-
-// ReadyForAuth checks if the Ops Manager authentication system is ready
-func (om *Sdk) ReadyForAuth() bool {
-	resp, err := om.api.EnsureAvailability(api.EnsureAvailabilityInput{})
-	return err == nil && resp.Status == api.EnsureAvailabilityStatusComplete
-}
-
-// SetupBosh applies the provided configuration to the BOSH director tile
-func (om *Sdk) SetupBosh(configYML []byte) error {
-	f, err := ioutil.TempFile("", "director-config")
-	if err != nil {
-		return fmt.Errorf("cannot create temp file for director configuration: %v", err)
-	}
-	defer os.Remove(f.Name())
-	_, err = f.Write(configYML)
-	if err != nil {
-		return fmt.Errorf("cannot write to director yaml file: %v", err)
-	}
-	f.Close()
-
-	cmd := commands.NewConfigureDirector(os.Environ, om.api, om.logger)
-	return cmd.Execute([]string{"--config", f.Name()})
-}
-
-// ApplyChanges deploys pending changes for a list of given tiles to the Ops Manager
-func (om *Sdk) ApplyChanges(args []string) error {
-	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
-	return cmd.Execute(args)
-}
-
-// ApplyDirector deploys the BOSH Director to the Ops Manager
-func (om *Sdk) ApplyDirector() error {
-	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewApplyChanges(om.api, om.api, logWriter, om.logger, 10)
-	return cmd.Execute([]string{"--skip-deploy-products"})
-}
-
-// UploadProduct pushes a given file located locally at path to the target
-func (om *Sdk) UploadProduct(path string) error {
-	form := formcontent.NewForm()
-	cmd := commands.NewUploadProduct(form, extractor.MetadataExtractor{}, om.api, om.logger)
-	return cmd.Execute([]string{"--product", path})
-}
-
-// UploadStemcell pushes a given stemcell located locally at path to the target
-func (om *Sdk) UploadStemcell(path string) error {
-	form := formcontent.NewForm()
-	cmd := commands.NewUploadStemcell(form, om.api, om.logger)
-	return cmd.Execute([]string{"--stemcell", path})
-}
-
-// StageProduct moves a given name, version to the list of tiles that will be deployed
-func (om *Sdk) StageProduct(tile config.OpsManagerMetadata) error {
-	cmd := commands.NewStageProduct(om.api, om.logger)
-	return cmd.Execute([]string{
-		"--product-name", tile.Name,
-		"--product-version", tile.Version,
-	})
-}
-
-// Online checks if Ops Manager is running on the target.
-func (om *Sdk) Online() bool {
-	req, _ := http.NewRequest(http.MethodGet, "/", nil)
-	resp, err := om.unauthenticatedClient.Do(req)
-	if err != nil {
-		return false
-	}
-	resp.Body.Close()
-	return resp.StatusCode < 500
-}
-
-// AvailableProducts lists products that are uploaded to Ops Manager.
-func (om *Sdk) AvailableProducts() ([]api.ProductInfo, error) {
-	products, err := om.api.ListAvailableProducts()
-	if err != nil {
-		return nil, err
-	}
-
-	return products.ProductsList, nil
-}
-
-// ConfigureProduct sets up the settings for a given tile by name
-func (om *Sdk) ConfigureProduct(name, networks, properties string, resources string) error {
-	configFileContents := fmt.Sprintf(`{
-		"product-name": "%s",
-		"product-properties": %s,
-		"network-properties": %s,
-		"resource-config": %s
-		}`, name, properties, networks, resources)
-	configFile, err := ioutil.TempFile("", "")
-	if err != nil {
-		return err
-	}
-	configFile.WriteString(configFileContents)
-	cmd := commands.NewConfigureProduct(os.Environ, om.api, om.target, om.logger)
-	return cmd.Execute([]string{
-		"--config", configFile.Name(),
-	})
-}
-
-// GetProduct fetches settings for a given tile by name
-func (om *Sdk) GetProduct(name string) (*ProductProperties, error) {
-	productGUID, err := om.productGUIDByType(name)
-	if err != nil {
-		return nil, err
-	}
-
-	props, err := om.api.GetStagedProductProperties(productGUID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ProductProperties{
-		Properties: props,
-	}, nil
-}
-
-// GetDirector fetches settings for the BOSH director
-func (om *Sdk) GetDirector() (map[string]map[string]interface{}, error) {
-	props, err := om.api.GetStagedDirectorProperties()
-	if err != nil {
-		return nil, err
-	}
-
-	return props, nil
-}
-
-// GetResource fetches resource settings for a specific job of a tile
-func (om *Sdk) GetResource(tileName, jobName string) (*api.JobProperties, error) {
-	productGUID, err := om.productGUIDByType(tileName)
-	if err != nil {
-		return nil, err
-	}
-
-	jobGUID, err := om.jobGUIDByName(productGUID, jobName)
-	if err != nil {
-		return nil, err
-	}
-
-	props, err := om.api.GetStagedProductJobResourceConfig(productGUID, jobGUID)
-	if err != nil {
-		return nil, err
-	}
-	return &props, nil
 }
 
 func (om *Sdk) getProducts() ([]api.DeployedProductOutput, error) {
@@ -409,11 +202,4 @@ func (om *Sdk) GetDirectorIP() (string, error) {
 		}
 	}
 	return "", errors.New("static_ips response had no director Job")
-}
-
-// DeleteInstallation runs the om cli DeleteInstallation command.
-func (om *Sdk) DeleteInstallation() error {
-	logWriter := commands.NewLogWriter(os.Stdout)
-	cmd := commands.NewDeleteInstallation(om.api, logWriter, om.logger, pollingIntervalSec)
-	return cmd.Execute(nil)
 }

@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/nfs_server?/additional_vm_extensions?
+  value: ((nfs_server_additional_vm_extensions))

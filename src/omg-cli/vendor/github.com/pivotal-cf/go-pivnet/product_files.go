@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
@@ -460,7 +459,7 @@ func (p ProductFilesService) RemoveFromFileGroup(
 }
 
 func (p ProductFilesService) DownloadForRelease(
-	location *os.File,
+	location *download.FileInfo,
 	productSlug string,
 	releaseID int,
 	productFileID int,
@@ -472,12 +471,12 @@ func (p ProductFilesService) DownloadForRelease(
 		productFileID,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("GetForRelease: %s", err)
 	}
 
 	downloadLink, err := pf.DownloadLink()
 	if err != nil {
-		return err
+		return fmt.Errorf("DownloadLink: %s", err)
 	}
 
 	p.client.logger.Debug("Downloading file", logger.Data{"downloadLink": downloadLink})
@@ -492,7 +491,7 @@ func (p ProductFilesService) DownloadForRelease(
 		progressWriter,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("Downloader.Get: %s", err)
 	}
 
 	return nil

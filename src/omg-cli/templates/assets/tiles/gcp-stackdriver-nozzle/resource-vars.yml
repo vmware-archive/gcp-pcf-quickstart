@@ -1,0 +1,3 @@
+stackdriver-nozzle_instance_type: automatic
+stackdriver-nozzle_instances: automatic
+stackdriver-nozzle_persistent_disk_size: automatic

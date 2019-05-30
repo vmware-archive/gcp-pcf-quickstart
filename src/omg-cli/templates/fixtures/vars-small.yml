@@ -1,0 +1,42 @@
+azs_0: testzone-1
+azs_1: testzone-2
+azs_2: testzone-3
+director_blobstore_bucket: test-director-bucket
+ert_subnet_cidrs_0: 101.0.1.0/24
+ert_subnet_gateway: 101.0.1.1
+ert_subnet_name: test-ert-subnet
+management_subnet_cidrs_0: 102.0.2.0/24
+management_subnet_gateway: 102.0.2.1
+management_subnet_name: test-mgm-subnet
+services_subnet_cidrs_0: 103.0.3.0/24
+services_subnet_gateway: 103.0.3.1
+services_subnet_name: test-services-subnet
+network_name: test-network
+ops_manager_service_account_key: { type: service_account, project_id: test-project }
+project: test-project
+region: test-region
+vm_tag: test-tag
+apps_domain: apps.example.com
+sys_domain: sys.example.com
+credhub_key: test-credhub-key
+credhub_key_name: test-credhub-key-name
+blobstore_gcp_service_account_key: { type: service_account, project_id: test-blobstore-project }
+blobstore_service_account_email: blobstore@example.com
+blobstore_service_account_project: test-blobstore-project
+buildpacks_bucket: test-buildpacks-bucket
+droplets_bucket: test-droplets-bucket
+packages_bucket: test-packges-bucket
+resources_bucket: test-resources-bucket
+service_broker_db_ip: test-broker-db-ip
+service_broker_db_password: test-broker-db-password
+service_broker_db_username: test-broker-db-username
+service_broker_service_account_key: { type: service_account, project_id: test-broker-project }
+http_lb_backend_name: test-http-lb-name
+ssh_router_pool: test-ssh-pool-name
+tcp_router_pool: test-tcp-pool-name
+wss_router_pool: test-wss-pool-name
+ssl_root_ca: test-ssl-root-ca
+ssl_cert: test-ssl-cert
+ssl_cert_private_key: test-ssl-key
+stackdriver_service_account_key:  { type: service_account, project_id: test-stackdriver-project }
+tcp_port_range: 10-20

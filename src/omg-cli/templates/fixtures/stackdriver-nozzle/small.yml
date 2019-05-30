@@ -1,0 +1,108 @@
+product-name: stackdriver-nozzle
+product-properties:
+  .properties.blacklist:
+    value:
+    - description: Blacklist all metrics from Stackdriver Monitoring.
+      regexp: ^.*$
+      sink: monitoring
+      type: name
+  .properties.debug:
+    value: false
+  .properties.firehose_events_to_stackdriver_logging:
+    value: HttpStartStop,LogMessage,Error
+  .properties.firehose_events_to_stackdriver_monitoring:
+    value: CounterEvent,ValueMetric,ContainerMetric
+  .properties.firehose_skip_ssl:
+    value: true
+  .properties.foundation_name:
+    value: cf
+  .properties.logging_batch_count:
+    value: 1000
+  .properties.logging_batch_duration:
+    value: 30
+  .properties.logging_requests_in_flight:
+    value: 16
+  .properties.metric_path_prefix:
+    value: firehose
+  .properties.metrics_batch_size:
+    value: 200
+  .properties.metrics_buffer_duration:
+    value: 30
+  .properties.project_id:
+    value: test-project
+  .properties.service_account:
+    value:
+      type: service_account
+      project_id: test-stackdriver-project
+  .properties.whitelist:
+    value:
+    - description: Whitelist auctioneer KPI metrics.
+      regexp: ^auctioneer\.LockHeld|auctioneer\.Auctioneer
+      sink: monitoring
+      type: name
+    - description: Whitelist bbs KPI metrics.
+      regexp: ^bbs\.(LockHeld|RequestLatency)|bbs\.Domain\.|bbs\..*LRP
+      sink: monitoring
+      type: name
+    - description: Whitelist rep KPI metrics.
+      regexp: ^rep\.Capacity(Remaining|Total)(Memory|Disk|Containers)|rep\.RepBulkSyncDuration|rep\.UnhealthyCell$
+      sink: monitoring
+      type: name
+    - description: Whitelist locket KPI metrics.
+      regexp: ^locket\.Active
+      sink: monitoring
+      type: name
+    - description: Whitelist route_emitter KPI metrics.
+      regexp: ^route_emitter\.MessagesEmitted|route_emitter\..*Route
+      sink: monitoring
+      type: name
+    - description: Whitelist MySQL KPI metrics.
+      regexp: ^/mysql/
+      sink: monitoring
+      type: name
+    - description: Whitelist gorouter KPI metrics.
+      regexp: ^gorouter\.(file_descriptors|backend_exhausted_conns|ms_since_last_registry_update|total_routes|registry_message\.route-emitter)
+      sink: monitoring
+      type: name
+    - description: Whitelist gorouter response metrics.
+      regexp: ^gorouter\.(total_requests|latency|responses|bad_gateways)
+      sink: monitoring
+      type: name
+    - description: Whitelist UAA KPI metrics.
+      regexp: ^uaa\.requests\.global\.completed\.count|uaa\.server\.inflight\.count$
+      sink: monitoring
+      type: name
+    - description: Whitelist loggregator KPI metrics.
+      regexp: ^loggregator\.(doppler|rlp)\.(ingress|dropped)$
+      sink: monitoring
+      type: name
+    - description: Whitelist Doppler KPI metrics.
+      regexp: ^DopplerServer\.listeners\.totalReceivedMessageCount|DopplerServer\.doppler\.shedEnvelopes$
+      sink: monitoring
+      type: name
+    - description: Whitelist syslog KPI metrics.
+      regexp: ^(scalablesyslog|cf-syslog-drain)\.(adapter\.(ingress|dropped)|scheduler\.drains)$
+      sink: monitoring
+      type: name
+    - description: Whitelist BOSH system KPI metrics.
+      regexp: ^bosh-system-metrics-forwarder\.system\.
+      sink: monitoring
+      type: name
+    - description: Whitelist metrics derived or republished by Healthwatch.
+      regexp: ^health(watch)?\.
+      sink: monitoring
+      type: name
+network-properties:
+  network:
+    name: test-services-subnet
+  other_availability_zones:
+  - name: testzone-1
+  singleton_availability_zone:
+    name: testzone-1
+resource-config:
+  stackdriver-nozzle:
+    instances: automatic
+    persistent_disk:
+      size_mb: automatic
+    instance_type:
+      id: automatic

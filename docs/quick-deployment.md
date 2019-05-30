@@ -23,9 +23,9 @@ export PIVNET_API_TOKEN=<retrieve by clicking "REQUEST NEW REFRESH TOKEN" at htt
 ```
 
 The script will output a default set of configurations that can not be
-changed after deployment. At this time you can make the 
+changed after deployment. At this time you can make the
 decision to deploy the full Elastic Runtime by editing `env/pcf/config.json`
-and setting `SmallFootprint` to `false`. 
+and setting `SmallFootprint` to `false`.
 
 ### Deployment Stages
 
@@ -36,8 +36,7 @@ The installation will perform the following steps:
 1. Deploy Pivotal Cloud Foundry (2 hours)
 
 The deployment of Pivotal Cloud Foundry is handled by Ops Manager.
-Once it's begun (evident by the streaming of BOSH output) it's safe to
-exit the command.
+Once it's begun (evident by the streaming of BOSH output)
 
 ## What's Next?
 - [Login to Pivotal Cloud Foundry](login-to-pcf.md) and deploy your first app

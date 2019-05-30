@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/redis?/nsx_security_groups?
+  value: ((redis_nsx_security_groups))

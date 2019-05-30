@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.healthwatch-forwarder.foundation_name?
+  value:
+    value: ((healthwatch-forwarder/foundation_name))

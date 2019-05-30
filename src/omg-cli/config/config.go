@@ -29,14 +29,15 @@ type OpsManagerCredentials struct {
 
 // CredhubEncryptionKey is the key for Credhub.
 type CredhubEncryptionKey struct {
-	Name string
-	Key  string
+	Name string `json:"name"`
+	Key  string `json:"key"`
 }
 
 // Filenames for configs.
 const (
 	TerraformOutputFile = "terraform_output.json"
 	EnvConfigFile       = "config.json"
+	VarsStore           = "creds.yml"
 )
 
 // Files are necessary files to upload.

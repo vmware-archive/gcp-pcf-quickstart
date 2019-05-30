@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.client_key?
+  value:
+    value: ((client_key))

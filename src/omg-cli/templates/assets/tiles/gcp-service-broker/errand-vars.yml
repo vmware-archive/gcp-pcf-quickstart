@@ -1,0 +1,4 @@
+delete-all_post_deploy_state: default
+delete-all_pre_delete_state: default
+deploy-all_post_deploy_state: default
+deploy-all_pre_delete_state: default

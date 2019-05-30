@@ -17,12 +17,11 @@
 package commands
 
 import (
-	"fmt"
+	"context"
 	"log"
+	"os"
 
 	"omg-cli/config"
-	"omg-cli/omg/setup"
-	"omg-cli/opsman"
 
 	"github.com/alecthomas/kingpin"
 )
@@ -41,6 +40,7 @@ func (cmd *DeleteInstallationCommand) register(app *kingpin.Application) {
 }
 
 func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
+	ctx := context.Background()
 	cfg, err := config.TerraformFromEnvDirectory(cmd.envDir)
 	if err != nil {
 		return err
@@ -51,18 +51,10 @@ func (cmd *DeleteInstallationCommand) run(c *kingpin.ParseContext) error {
 		return err
 	}
 
-	omSdk, err := opsman.NewSdk(fmt.Sprintf("https://%s", cfg.OpsManagerHostname), cfg.OpsManager, cmd.logger)
+	tiler, err := getTiler(cfg, envCfg, os.TempDir(), cmd.logger)
 	if err != nil {
 		return err
 	}
 
-	opsMan := setup.NewOpsManager(cfg, envCfg, omSdk, nil, cmd.logger, nil, nil)
-
-	steps := []step{
-		{function: opsMan.PoolTillOnline, name: "PoolTillOnline"},
-		{function: opsMan.Unlock, name: "Unlock"},
-		{function: opsMan.DeleteInstallation, name: "DeleteInstallation"},
-	}
-
-	return run(steps, cmd.logger)
+	return tiler.Delete(ctx)
 }

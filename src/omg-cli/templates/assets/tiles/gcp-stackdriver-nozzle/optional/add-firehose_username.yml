@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.firehose_username?
+  value:
+    value: ((firehose_username))

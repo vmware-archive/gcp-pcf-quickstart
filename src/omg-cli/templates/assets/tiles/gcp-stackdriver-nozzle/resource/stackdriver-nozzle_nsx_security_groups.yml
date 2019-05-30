@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/stackdriver-nozzle?/nsx_security_groups?
+  value: ((stackdriver-nozzle_nsx_security_groups))

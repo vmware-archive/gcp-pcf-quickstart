@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.syslog_scheduler_batch_size?
+  value:
+    value: ((syslog_scheduler_batch_size))

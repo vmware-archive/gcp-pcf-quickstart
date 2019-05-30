@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.container_networking_interface_plugin.silk.dns_servers?
+  value:
+    value: ((container_networking_interface_plugin/silk/dns_servers))

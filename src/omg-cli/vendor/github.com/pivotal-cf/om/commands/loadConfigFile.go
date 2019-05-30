@@ -26,7 +26,7 @@ func loadConfigFile(args []string, command interface{}, envFunc func() []string)
 		varsField []string
 		varsEnv   []string
 		ok        bool
-		options   map[string]string
+		options   map[string]interface{}
 		contents  []byte
 	)
 
@@ -43,11 +43,12 @@ func loadConfigFile(args []string, command interface{}, envFunc func() []string)
 	}
 
 	contents, err = interpolate(interpolateOptions{
-		templateFile: configFile,
-		varsEnvs:     varsEnv,
-		varsFiles:    varsField,
-		environFunc:  envFunc,
-		opsFiles:     nil,
+		templateFile:  configFile,
+		varsEnvs:      varsEnv,
+		varsFiles:     varsField,
+		environFunc:   envFunc,
+		opsFiles:      nil,
+		expectAllKeys: true,
 	}, "")
 	if err != nil {
 		return fmt.Errorf("could not load the config file: %s", err)
@@ -59,8 +60,16 @@ func loadConfigFile(args []string, command interface{}, envFunc func() []string)
 	}
 
 	var fileArgs []string
-	for k, v := range options {
-		fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", k, v))
+	for key, value := range options {
+		switch convertedValue := value.(type) {
+		case []interface{}:
+			for _, v := range convertedValue {
+				fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", key, v))
+			}
+		default:
+			fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", key, value))
+		}
+
 	}
 	fileArgs = append(fileArgs, args...)
 	_, err = jhanda.Parse(command, fileArgs)

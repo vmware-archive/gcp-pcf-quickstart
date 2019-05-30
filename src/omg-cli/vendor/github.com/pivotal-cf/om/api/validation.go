@@ -17,5 +17,14 @@ func validateStatusOK(resp *http.Response) error {
 
 		return fmt.Errorf("request failed: unexpected response:\n%s", out)
 	}
+
 	return nil
+}
+
+func validateStatusOKOrVerificationWarning(resp *http.Response, ignoreVerifierWarnings bool) error {
+	if ignoreVerifierWarnings && resp.StatusCode == http.StatusMultiStatus {
+
+		return nil
+	}
+	return validateStatusOK(resp)
 }
