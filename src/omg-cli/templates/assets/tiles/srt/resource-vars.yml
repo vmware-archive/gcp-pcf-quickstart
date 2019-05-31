@@ -1,5 +1,6 @@
 backup_restore_instance_type: automatic
 backup_restore_instances: automatic
+backup_restore_persistent_disk_size: automatic
 blobstore_instance_type: automatic
 blobstore_instances: automatic
 blobstore_persistent_disk_size: automatic
@@ -12,8 +13,14 @@ database_instances: automatic
 database_persistent_disk_size: automatic
 ha_proxy_instance_type: automatic
 ha_proxy_instances: automatic
+istio_control_instance_type: automatic
+istio_control_instances: automatic
+istio_router_instance_type: automatic
+istio_router_instances: automatic
 mysql_monitor_instance_type: automatic
 mysql_monitor_instances: automatic
+route_syncer_instance_type: automatic
+route_syncer_instances: automatic
 router_instance_type: automatic
 router_instances: automatic
 tcp_router_instance_type: automatic

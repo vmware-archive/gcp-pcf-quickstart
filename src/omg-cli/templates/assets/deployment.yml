@@ -9,14 +9,14 @@ director:
     default_ca: ((ssl_root_ca))
 tiles:
 - name: cf
-  version: 2.4.4
+  version: 2.5.4
   product:
     product_slug: elastic-runtime
-    release_version: 2.4.4
+    release_version: 2.5.4
     file_glob: "srt*.pivotal"
   stemcell:
     product_slug: stemcells-ubuntu-xenial
-    release_version: "170.38"
+    release_version: "250.56"
     file_glob: "*google*.tgz"
   manifest: tiles/srt/product.yml
   ops_files:

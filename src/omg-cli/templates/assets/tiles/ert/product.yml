@@ -35,8 +35,6 @@ product-properties:
     value: ((cloud_controller/system_domain))
   .diego_brain.starting_container_count_maximum:
     value: ((diego_brain/starting_container_count_maximum))
-  .doppler.message_drain_buffer_size:
-    value: ((doppler/message_drain_buffer_size))
   .ha_proxy.skip_cert_verify:
     value: ((ha_proxy/skip_cert_verify))
   .mysql.cli_history:
@@ -63,6 +61,8 @@ product-properties:
     value: ((autoscale_api_disable_connection_pooling))
   .properties.autoscale_api_instance_count:
     value: ((autoscale_api_instance_count))
+  .properties.autoscale_enable_notifications:
+    value: ((autoscale_enable_notifications))
   .properties.autoscale_enable_verbose_logging:
     value: ((autoscale_enable_verbose_logging))
   .properties.autoscale_instance_count:
@@ -83,16 +83,18 @@ product-properties:
     value: ((cf_networking_enable_space_developer_self_service))
   .properties.cf_networking_internal_domain:
     value: ((cf_networking_internal_domain))
+  .properties.cloud_controller_completed_tasks_cutoff_age_in_days:
+    value: ((cloud_controller_completed_tasks_cutoff_age_in_days))
   .properties.cloud_controller_default_health_check_timeout:
     value: ((cloud_controller_default_health_check_timeout))
-  .properties.cloud_controller_default_stack:
-    value: default
   .properties.cloud_controller_temporary_disable_deployments:
     value: ((cloud_controller_temporary_disable_deployments))
   .properties.container_networking_interface_plugin:
     value: silk
   .properties.container_networking_interface_plugin.silk.enable_log_traffic:
     value: ((container_networking_interface_plugin/silk/enable_log_traffic))
+  .properties.container_networking_interface_plugin.silk.enable_policy_enforcement:
+    value: ((container_networking_interface_plugin/silk/enable_policy_enforcement))
   .properties.container_networking_interface_plugin.silk.iptables_accepted_udp_logs_per_sec:
     value: ((container_networking_interface_plugin/silk/iptables_accepted_udp_logs_per_sec))
   .properties.container_networking_interface_plugin.silk.iptables_denied_logs_per_sec:
@@ -114,8 +116,6 @@ product-properties:
     value: ((diego_database_max_open_connections))
   .properties.diego_log_timestamp_format:
     value: rfc3339
-  .properties.enable_cf_metric_name:
-    value: ((enable_cf_metric_name))
   .properties.enable_smb_volume_driver:
     value: ((enable_smb_volume_driver))
   .properties.enable_tls_to_internal_pxc:
@@ -138,8 +138,12 @@ product-properties:
     value: ((haproxy_max_buffer_size))
   .properties.haproxy_ssl_ciphers:
     value: ((haproxy_ssl_ciphers))
+  .properties.istio:
+    value: disable
   .properties.locket_database_max_open_connections:
     value: ((locket_database_max_open_connections))
+  .properties.log_cache_max_per_source:
+    value: ((log_cache_max_per_source))
   .properties.metric_registrar_blacklisted_tags:
     value: ((metric_registrar_blacklisted_tags))
   .properties.metric_registrar_enabled:
@@ -174,7 +178,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-4/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-5/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -186,6 +190,8 @@ product-properties:
     value: enable
   .properties.route_services.enable.ignore_ssl_cert_verification:
     value: ((route_services/enable/ignore_ssl_cert_verification))
+  .properties.route_services.enable.internal_lookup:
+    value: ((route_services/enable/internal_lookup))
   .properties.router_backend_max_conn:
     value: ((router_backend_max_conn))
   .properties.router_client_cert_validation:
@@ -216,6 +222,8 @@ product-properties:
     value: ((smtp_auth_mechanism))
   .properties.smtp_enable_starttls_auto:
     value: ((smtp_enable_starttls_auto))
+  .properties.stack_migration_acknowledgement:
+    value: ((stack_migration_acknowledgement))
   .properties.syslog_drop_debug:
     value: ((syslog_drop_debug))
   .properties.syslog_metrics_to_syslog_enabled:
@@ -274,8 +282,6 @@ product-properties:
     value: ((router/request_timeout_in_seconds))
   .uaa.apps_manager_access_token_lifetime:
     value: ((uaa/apps_manager_access_token_lifetime))
-  .uaa.apps_manager_refresh_token_lifetime:
-    value: ((uaa/apps_manager_refresh_token_lifetime))
   .uaa.cf_cli_access_token_lifetime:
     value: ((uaa/cf_cli_access_token_lifetime))
   .uaa.cf_cli_refresh_token_lifetime:
@@ -295,6 +301,8 @@ resource-config:
     instance_type:
       id: ((backup_restore_instance_type))
     instances: ((backup_restore_instances))
+    persistent_disk:
+      size_mb: ((backup_restore_persistent_disk_size))
   clock_global:
     instance_type:
       id: ((clock_global_instance_type))
@@ -331,6 +339,14 @@ resource-config:
     instance_type:
       id: ((ha_proxy_instance_type))
     instances: ((ha_proxy_instances))
+  istio_control:
+    instance_type:
+      id: ((istio_control_instance_type))
+    instances: ((istio_control_instances))
+  istio_router:
+    instance_type:
+      id: ((istio_router_instance_type))
+    instances: ((istio_router_instances))
   loggregator_trafficcontroller:
     instance_type:
       id: ((loggregator_trafficcontroller_instance_type))
@@ -359,6 +375,10 @@ resource-config:
     instances: ((nfs_server_instances))
     persistent_disk:
       size_mb: ((nfs_server_persistent_disk_size))
+  route_syncer:
+    instance_type:
+      id: ((route_syncer_instance_type))
+    instances: ((route_syncer_instances))
   router:
     instance_type:
       id: ((router_instance_type))
