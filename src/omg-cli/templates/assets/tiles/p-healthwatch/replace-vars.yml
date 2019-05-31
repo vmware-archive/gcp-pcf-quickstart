@@ -1,0 +1,4 @@
+az2_name: ((azs_1))
+az3_name: ((azs_2))
+healthwatch-forwarder/health_check_az: ((azs_0))
+singleton_availability_zone: ((azs_0))

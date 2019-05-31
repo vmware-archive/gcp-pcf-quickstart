@@ -1,0 +1,8 @@
+- type: replace
+  path: /product-properties/.properties.push_apps_manager_footer_links?
+  value:
+    value:
+    - href: ((push_apps_manager_footer_links_0/href))
+      name: ((push_apps_manager_footer_links_0/name))
+    - href: ((push_apps_manager_footer_links_1/href))
+      name: ((push_apps_manager_footer_links_1/name))

@@ -19,17 +19,18 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 
 	"omg-cli/config"
-	"omg-cli/omg/tiles"
-	"omg-cli/omg/tiles/director"
-	"omg-cli/omg/tiles/ert"
-	"omg-cli/omg/tiles/healthwatch"
-	"omg-cli/omg/tiles/servicebroker"
-	"omg-cli/omg/tiles/stackdrivernozzle"
+	"omg-cli/version"
 
 	"github.com/alecthomas/kingpin"
+
+	"github.com/starkandwayne/om-tiler/mover"
+	"github.com/starkandwayne/om-tiler/opsman"
+	"github.com/starkandwayne/om-tiler/pivnet"
+	"github.com/starkandwayne/om-tiler/tiler"
 )
 
 type register interface {
@@ -39,7 +40,6 @@ type register interface {
 // Configure sets up the kingpin commands for the omg-cli.
 func Configure(logger *log.Logger, app *kingpin.Application) {
 	cmds := []register{
-		&PushTilesCommand{logger: logger},
 		&DeployCommand{logger: logger},
 		&DeleteInstallationCommand{logger: logger},
 		&GetCredentialCommand{logger: logger},
@@ -58,17 +58,44 @@ func Configure(logger *log.Logger, app *kingpin.Application) {
 	}
 }
 
-func selectedTiles(logger *log.Logger, config *config.EnvConfig) []tiles.TileInstaller {
-	result := []tiles.TileInstaller{
-		&director.Tile{},
-		&ert.Tile{},
-		&stackdrivernozzle.Tile{Logger: logger},
-		&servicebroker.Tile{},
+func getPivnet(envCfg *config.EnvConfig, l *log.Logger) *pivnet.Client {
+	return pivnet.NewClient(pivnet.Config{
+		Token: envCfg.PivnetAPIToken,
+		UserAgent:  version.UserAgent(),
+		AcceptEULA: true,
+	}, l)
+}
+
+func getMover(envCfg *config.EnvConfig, c string, l *log.Logger) (*mover.Mover, error) {
+	if _, err := os.Stat(c); os.IsNotExist(err) {
+		if err := os.Mkdir(c, os.ModePerm); err != nil {
+			return nil, fmt.Errorf("creating tile cache directory %s: %v", c, err)
+		}
+	} else if err != nil {
+		return nil, fmt.Errorf("finding tile cache directory %s: %v", c, err)
 	}
-	if config.IncludeHealthwatch {
-		result = append(result, &healthwatch.Tile{})
+
+	return mover.NewMover(getPivnet(envCfg, l), c, l)
+}
+
+func getTiler(cfg *config.Config, envCfg *config.EnvConfig, c string, l *log.Logger) (*tiler.Tiler, error) {
+	omClient, err := opsman.NewClient(opsman.Config{
+		Target:               cfg.OpsManagerHostname,
+		Username:             cfg.OpsManager.Username,
+		Password:             cfg.OpsManager.Password,
+		DecryptionPassphrase: cfg.OpsManager.DecryptionPhrase,
+		SkipSSLVerification:  cfg.OpsManager.SkipSSLVerification,
+	}, l)
+	if err != nil {
+		return nil, err
 	}
-	return result
+
+	mover, err := getMover(envCfg, c, l)
+	if err != nil {
+		return nil, err
+	}
+
+	return tiler.NewTiler(omClient, mover, l), nil
 }
 
 type step struct {

@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/clock_global?/additional_vm_extensions?
+  value: ((clock_global_additional_vm_extensions))

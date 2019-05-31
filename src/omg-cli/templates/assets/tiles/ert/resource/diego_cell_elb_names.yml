@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/diego_cell?/elb_names?
+  value: ((diego_cell_elb_names))

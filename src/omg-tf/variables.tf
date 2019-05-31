@@ -67,6 +67,11 @@ variable "dns_zone_name" {
   type = "string"
 }
 
+variable "ssl_root_ca" {
+  type        = "string"
+  description = "ssl root certificate content for *.{env_name}.{dns_suffix}"
+}
+
 variable "ssl_cert" {
   type        = "string"
   description = "ssl certificate content for *.{env_name}.{dns_suffix}"
@@ -102,12 +107,12 @@ variable "ssh_public_key" {
 
 variable "ert_sql_db_host" {
   type    = "string"
-  default = ""
+  default = "%"
 }
 
 variable "opsman_sql_db_host" {
   type    = "string"
-  default = ""
+  default = "%"
 }
 
 variable "ops_manager_username" {
@@ -176,4 +181,13 @@ variable "credhub_key" {
   description = "Credhub encryption key used by PAS"
   type        = "string"
   default     = ""
+}
+
+/*********************************
+ * Google Cloud Storage Options *
+ *********************************/
+
+variable "create_blobstore_service_account_key" {
+  description = "Create a scoped service account key for gcs storage access"
+  default     = true
 }

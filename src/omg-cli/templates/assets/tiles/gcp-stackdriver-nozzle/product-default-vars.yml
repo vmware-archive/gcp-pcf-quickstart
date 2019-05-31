@@ -1,0 +1,11 @@
+debug: false
+firehose_events_to_stackdriver_logging: HttpStartStop,LogMessage,Error
+firehose_events_to_stackdriver_monitoring: CounterEvent,ValueMetric,ContainerMetric
+firehose_skip_ssl: false
+foundation_name: cf
+logging_batch_count: 1000
+logging_batch_duration: 30
+logging_requests_in_flight: 16
+metric_path_prefix: firehose
+metrics_batch_size: 200
+metrics_buffer_duration: 30

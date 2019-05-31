@@ -18,15 +18,19 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"omg-cli/config"
-	"omg-cli/pivnet"
+	"omg-cli/templates"
 
 	"github.com/alecthomas/kingpin"
+
+	"github.com/starkandwayne/om-tiler/pattern"
+	"github.com/starkandwayne/om-tiler/pivnet"
 )
 
 // ReviewEulasCommand reviews and accepts Pivotal's EULAs.
@@ -35,12 +39,11 @@ type ReviewEulasCommand struct {
 	envDir    string
 	envConfig *config.EnvConfig
 	acceptAll bool
-	pivnetSdk *pivnet.Sdk
+	pivnet    *pivnet.Client
+	pattern   pattern.Pattern
 }
 
 const reviewEulasName = "review-eulas"
-
-var eulaSlugs = []string{"pivotal_software_eula"}
 
 func (cmd *ReviewEulasCommand) register(app *kingpin.Application) {
 	c := app.Command(reviewEulasName, "View product EULAs and interactively accept/deny").Action(cmd.run)
@@ -55,7 +58,9 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 		cmd.logger.Fatalf("loading environment config: %v", err)
 	}
 
-	cmd.pivnetSdk, err = pivnet.NewSdk(cmd.envConfig.PivnetAPIToken, cmd.logger)
+	cmd.pivnet = getPivnet(cmd.envConfig, cmd.logger)
+
+	cmd.pattern, err = templates.GetPattern(cmd.envConfig, map[string]interface{}{}, "", false)
 	if err != nil {
 		return err
 	}
@@ -64,17 +69,26 @@ func (cmd *ReviewEulasCommand) run(c *kingpin.ParseContext) error {
 		{function: cmd.fetchAndPrompt, name: "fetchAndPrompt"},
 		{function: cmd.acceptEulas, name: "acceptEulas"},
 	}, cmd.logger)
+	return nil
 }
 
 func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
-	var eulas []*pivnet.Eula
-	for _, slug := range eulaSlugs {
-		eula, err := cmd.pivnetSdk.GetEula(slug)
+	ctx := context.Background()
+	eulas := make(map[string]*pivnet.EULA)
+	for _, tile := range cmd.pattern.Tiles {
+		eula, err := cmd.pivnet.GetEULA(ctx, tile.Product)
 		if err != nil {
 			return err
 		}
 
-		eulas = append(eulas, eula)
+		eulas[eula.Slug] = eula
+
+		eula, err = cmd.pivnet.GetEULA(ctx, tile.Stemcell)
+		if err != nil {
+			return err
+		}
+
+		eulas[eula.Slug] = eula
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -97,28 +111,18 @@ func (cmd *ReviewEulasCommand) fetchAndPrompt() error {
 }
 
 func (cmd *ReviewEulasCommand) acceptEulas() error {
-	var tileData []config.PivnetMetadata
-	tiles := selectedTiles(cmd.logger, cmd.envConfig)
-	for _, installer := range tiles {
-		if installer.BuiltIn() {
-			continue
+	ctx := context.Background()
+	for _, tile := range cmd.pattern.Tiles {
+		if err := cmd.pivnet.AcceptEULA(ctx, tile.Product); err != nil {
+			return fmt.Errorf("accepting EULA for %s: %v", tile.Product.Slug, err)
 		}
 
-		tile := installer.Definition(cmd.envConfig)
-
-		tileData = append(tileData, tile.Pivnet)
-		if tile.Stemcell != nil {
-			tileData = append(tileData, tile.Stemcell.PivnetMetadata)
+		if err := cmd.pivnet.AcceptEULA(ctx, tile.Stemcell); err != nil {
+			return fmt.Errorf("accepting EULA for %s: %v", tile.Stemcell.Slug, err)
 		}
 	}
 
-	for _, tile := range tileData {
-		if err := cmd.pivnetSdk.AcceptEula(tile); err != nil {
-			return fmt.Errorf("accepting EULA for %s: %v", tile.Name, err)
-		}
-	}
-
-	cmd.logger.Printf("accepted EULAs for %d products", len(tileData))
+	cmd.logger.Printf("accepted EULAs for %d products", len(cmd.pattern.Tiles))
 
 	return nil
 }

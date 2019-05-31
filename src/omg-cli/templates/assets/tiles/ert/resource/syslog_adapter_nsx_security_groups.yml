@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/syslog_adapter?/nsx_security_groups?
+  value: ((syslog_adapter_nsx_security_groups))

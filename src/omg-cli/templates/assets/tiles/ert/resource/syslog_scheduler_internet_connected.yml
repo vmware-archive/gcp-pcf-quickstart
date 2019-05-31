@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/syslog_scheduler?/internet_connected?
+  value: ((syslog_scheduler_internet_connected))

@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.healthwatch-forwarder.health_check_vm_type?
+  value:
+    value: ((healthwatch-forwarder/health_check_vm_type))

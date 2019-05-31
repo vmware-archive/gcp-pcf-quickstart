@@ -1,0 +1,25 @@
+- type: replace
+  path: /product-properties/.properties.gsb_brokerpak_sources?
+  value:
+    value:
+    - config: ((gsb_brokerpak_sources_0/config))
+      excluded_plans: ((gsb_brokerpak_sources_0/excluded_plans))
+      guid: ((gsb_brokerpak_sources_0/guid))
+      name: ((gsb_brokerpak_sources_0/name))
+      notes: ((gsb_brokerpak_sources_0/notes))
+      service_prefix: ((gsb_brokerpak_sources_0/service_prefix))
+      uri: ((gsb_brokerpak_sources_0/uri))
+    - config: ((gsb_brokerpak_sources_1/config))
+      excluded_plans: ((gsb_brokerpak_sources_1/excluded_plans))
+      guid: ((gsb_brokerpak_sources_1/guid))
+      name: ((gsb_brokerpak_sources_1/name))
+      notes: ((gsb_brokerpak_sources_1/notes))
+      service_prefix: ((gsb_brokerpak_sources_1/service_prefix))
+      uri: ((gsb_brokerpak_sources_1/uri))
+    - config: ((gsb_brokerpak_sources_2/config))
+      excluded_plans: ((gsb_brokerpak_sources_2/excluded_plans))
+      guid: ((gsb_brokerpak_sources_2/guid))
+      name: ((gsb_brokerpak_sources_2/name))
+      notes: ((gsb_brokerpak_sources_2/notes))
+      service_prefix: ((gsb_brokerpak_sources_2/service_prefix))
+      uri: ((gsb_brokerpak_sources_2/uri))

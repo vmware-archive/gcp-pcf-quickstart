@@ -2,234 +2,89 @@ package commands
 
 import (
 	"fmt"
-	"strings"
-
+	"github.com/pivotal-cf/go-pivnet"
 	"github.com/pivotal-cf/jhanda"
-	"github.com/pivotal-cf/kiln/proofing"
-	"github.com/pivotal-cf/om/api"
-	"github.com/pivotal-cf/om/config"
-	"github.com/pivotal-cf/om/configparser"
-	"gopkg.in/yaml.v2"
+	"github.com/pivotal-cf/om/configtemplate/generator"
+	"github.com/pivotal-cf/om/configtemplate/metadata"
+	"os"
 )
 
 type ConfigTemplate struct {
-	metadataExtractor metadataExtractor
-	logger            logger
-	Options           struct {
-		Product             string `long:"product"  short:"p"  required:"true" description:"path to product to generate config template for"`
-		IncludePlaceholders bool   `long:"include-placeholders" short:"r" description:"replace obscured credentials with interpolatable placeholders"`
+	environFunc   func() []string
+	buildProvider buildProvider
+	Options       struct {
+		OutputDirectory   string `long:"output-directory" required:"true"`
+		PivnetApiToken    string `long:"pivnet-api-token" required:"true"`
+		PivnetProductSlug string `long:"pivnet-product-slug" required:"true"`
+		ProductVersion    string `long:"product-version" required:"true"`
+		ProductFileGlob   string `long:"product-file-glob" default:"*.pivotal"`
 	}
 }
 
-type propertyBluePrintPair struct {
-	proofing.NormalizedPropertyBlueprint
-	proofing.PropertyBlueprint
+//go:generate counterfeiter -o ./fakes/metadata_provider.go --fake-name MetadataProvider . MetadataProvider
+type MetadataProvider interface {
+	MetadataBytes() ([]byte, error)
 }
 
-func NewConfigTemplate(metadataExtractor metadataExtractor, logger logger) ConfigTemplate {
-	return ConfigTemplate{
-		metadataExtractor: metadataExtractor,
-		logger:            logger,
+var pivnetHost = pivnet.DefaultHost
+var DefaultProvider = func() func(c *ConfigTemplate) MetadataProvider {
+	return func(c *ConfigTemplate) MetadataProvider {
+		options := c.Options
+		return metadata.NewPivnetProvider(
+			pivnetHost,
+			options.PivnetApiToken,
+			options.PivnetProductSlug,
+			options.ProductVersion,
+			options.ProductFileGlob,
+		)
 	}
 }
 
-func (ct ConfigTemplate) Execute(args []string) error {
-	if _, err := jhanda.Parse(&ct.Options, args); err != nil {
-		return fmt.Errorf("could not parse config-template flags: %s", err)
-	}
+type buildProvider func(*ConfigTemplate) MetadataProvider
 
-	extractedMetadata, err := ct.metadataExtractor.ExtractMetadata(ct.Options.Product)
+func NewConfigTemplate(bp buildProvider) *ConfigTemplate {
+	return &ConfigTemplate{
+		environFunc:   os.Environ,
+		buildProvider: bp,
+	}
+}
+
+//Execute - generates config template and ops files
+func (c *ConfigTemplate) Execute(args []string) error {
+	_, err := jhanda.Parse(
+		&c.Options,
+		args)
 	if err != nil {
-		return fmt.Errorf("could not extract metadata: %s", err)
+		return fmt.Errorf("could not parse config-template flags: %s", err.Error())
 	}
 
-	var template proofing.ProductTemplate
-	err = yaml.Unmarshal(extractedMetadata.Raw, &template)
+	_, err = os.Stat(c.Options.OutputDirectory)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("output-directory does not exist: %s", c.Options.OutputDirectory)
+	}
+
+	metadataSource := c.newMetadataSource()
+	metadataBytes, err := metadataSource.MetadataBytes()
 	if err != nil {
-		return fmt.Errorf("could not parse metadata: %s", err)
+		return fmt.Errorf("error getting metadata for %s at version %s: %s", c.Options.PivnetProductSlug, c.Options.ProductVersion, err)
 	}
 
-	propertyPairs := makePropertyBluePrintPair(&template)
-	nameApiResponseMaps := transformAll(propertyPairs)
-
-	configTemplateProperties := map[string]interface{}{}
-
-	parser := configparser.NewConfigParser()
-
-	for name, prop := range nameApiResponseMaps {
-		propertyName := configparser.NewPropertyName(name)
-		output, err := parser.ParseProperties(propertyName, prop, ct.chooseCredentialHandler())
-		if err != nil {
-			return err
-		}
-
-		if output != nil && len(output) > 0 {
-			configTemplateProperties[name] = output
-		}
-	}
-
-	configTemplate := config.ProductConfiguration{
-		ProductProperties: configTemplateProperties,
-	}
-
-	output, err := yaml.Marshal(configTemplate)
-	if err != nil {
-		return fmt.Errorf("could not marshal config template: %s", err)
-	}
-
-	// post-processing
-	ct.logger.Println(concatenateRequiredProperties(output, propertyPairs))
-
-	return nil
+	return generator.NewExecutor(
+		metadataBytes,
+		c.Options.OutputDirectory,
+		false,
+		true,
+	).Generate()
 }
 
-func concatenateRequiredProperties(output []byte, propertyPairs []propertyBluePrintPair) string {
-	// convert list to map to avoid n^2 double for loop
-	namePropertyMaps := map[string]proofing.NormalizedPropertyBlueprint{}
-	for _, pbp := range propertyPairs {
-		namePropertyMaps[pbp.Property] = pbp.NormalizedPropertyBlueprint
-	}
-
-	lines := strings.Split(string(output), "\n")
-	for i, line := range lines {
-		propertyName := strings.TrimSpace(strings.Split(line, ":")[0])
-		if v, ok := namePropertyMaps[propertyName]; ok && v.Required {
-			lines[i+1] = lines[i+1] + " # required"
-		}
-	}
-
-	return strings.Join(lines, "\n")
+func (c *ConfigTemplate) newMetadataSource() (metadataSource MetadataProvider) {
+	return c.buildProvider(c)
 }
 
-func (ct ConfigTemplate) Usage() jhanda.Usage {
+func (c *ConfigTemplate) Usage() jhanda.Usage {
 	return jhanda.Usage{
-		Description:      "**EXPERIMENTAL** This command generates a configuration template that can be passed in to om configure-product",
-		ShortDescription: "**EXPERIMENTAL** generates a config template for the product",
-		Flags:            ct.Options,
+		Description:      "This command generates a product configuration template from a .pivotal file on Pivnet",
+		ShortDescription: "**EXPERIMENTAL** generates a config template from a Pivnet product",
+		Flags:            c.Options,
 	}
-}
-
-func (ct ConfigTemplate) chooseCredentialHandler() configparser.CredentialHandler {
-	if ct.Options.IncludePlaceholders {
-		return configparser.PlaceholderHandler()
-	}
-
-	return configparser.KeyOnlyHandler()
-}
-
-func makePropertyBluePrintPair(template *proofing.ProductTemplate) []propertyBluePrintPair {
-	var output []propertyBluePrintPair
-
-	for _, pb := range template.PropertyBlueprints {
-		normalizedPBs := pb.Normalize(".properties")
-		for _, normalizedPB := range normalizedPBs {
-			output = append(output, propertyBluePrintPair{
-				NormalizedPropertyBlueprint: normalizedPB,
-				PropertyBlueprint:           pb,
-			})
-		}
-	}
-
-	for _, jobType := range template.JobTypes {
-		for _, pb := range jobType.PropertyBlueprints {
-			prefix := fmt.Sprintf(".%s", jobType.Name)
-			normalizedPBs := pb.Normalize(prefix)
-			for _, normalizedPB := range normalizedPBs {
-				output = append(output, propertyBluePrintPair{
-					NormalizedPropertyBlueprint: normalizedPB,
-					PropertyBlueprint:           pb,
-				})
-			}
-		}
-	}
-
-	return output
-}
-
-func isCredential(t string) bool {
-	switch t {
-	case "secret", "simple_credentials", "rsa_cert_credentials", "rsa_pkey_credentials", "salted_credentials":
-		return true
-	}
-	return false
-}
-
-func transformCollection(pbp propertyBluePrintPair) (string, api.ResponseProperty) {
-	collectionPB := pbp.PropertyBlueprint.(proofing.CollectionPropertyBlueprint)
-
-	name := pbp.Property
-	prop := api.ResponseProperty{
-		Configurable: pbp.Configurable,
-		Type:         pbp.Type,
-		IsCredential: isCredential(pbp.Type),
-	}
-
-	propertyBlueprintList := collectionPB.PropertyBlueprints
-
-	values := make([]interface{}, 0)
-
-	if pbp.Default == nil {
-		value := map[interface{}]interface{}{}
-		for _, pb := range propertyBlueprintList {
-			value[pb.Name] = map[interface{}]interface{}{
-				"value":        pb.Default,
-				"configurable": true,
-				"type":         pb.Type,
-				"credential":   isCredential(pb.Type),
-			}
-		}
-		values = append(values, value)
-	} else {
-		for _, defaultValue := range pbp.Default.([]interface{}) {
-			value := map[interface{}]interface{}{}
-			innerMap := defaultValue.(map[interface{}]interface{})
-			for _, pb := range propertyBlueprintList {
-				if innerValue, ok := innerMap[pb.Name]; ok {
-					value[pb.Name] = map[interface{}]interface{}{
-						"value":        innerValue,
-						"configurable": true,
-						"type":         pb.Type,
-						"credential":   isCredential(pb.Type),
-					}
-				} else {
-					value[pb.Name] = map[interface{}]interface{}{
-						"value":        nil,
-						"configurable": true,
-						"type":         pb.Type,
-						"credential":   isCredential(pb.Type),
-					}
-				}
-			}
-			values = append(values, value)
-		}
-	}
-
-	prop.Value = values
-
-	return name, prop
-}
-
-func transform(pbp propertyBluePrintPair) (string, api.ResponseProperty) {
-	if pbp.Type == "collection" {
-		return transformCollection(pbp)
-	}
-
-	name := pbp.Property
-	prop := api.ResponseProperty{
-		Value:        pbp.Default,
-		Configurable: pbp.Configurable,
-		Type:         pbp.Type,
-		IsCredential: isCredential(pbp.Type),
-	}
-
-	return name, prop
-}
-
-func transformAll(pbps []propertyBluePrintPair) map[string]api.ResponseProperty {
-	properties := map[string]api.ResponseProperty{}
-	for _, propTuple := range pbps {
-		name, prop := transform(propTuple)
-		properties[name] = prop
-	}
-	return properties
 }

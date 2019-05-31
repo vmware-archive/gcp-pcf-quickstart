@@ -1,0 +1,16 @@
+- type: replace
+  path: /product-properties/.properties.syslog_selector?
+  value:
+    value: Yes without encryption
+- type: replace
+  path: /product-properties/.properties.syslog_selector.active.syslog_address?
+  value:
+    value: ((syslog_selector/active/syslog_address))
+- type: replace
+  path: /product-properties/.properties.syslog_selector.active.syslog_port?
+  value:
+    value: ((syslog_selector/active/syslog_port))
+- type: replace
+  path: /product-properties/.properties.syslog_selector.active.syslog_transport?
+  value:
+    value: ((syslog_selector/active/syslog_transport))

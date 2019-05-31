@@ -1,0 +1,8 @@
+- type: replace
+  path: /product-properties/.properties.tcp_routing?
+  value:
+    value: enable
+- type: replace
+  path: /product-properties/.properties.tcp_routing.enable.reservable_ports?
+  value:
+    value: ((tcp_routing/enable/reservable_ports))

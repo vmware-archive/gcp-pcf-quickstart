@@ -34,7 +34,7 @@ func (f FederationTokenService) GenerateFederationToken(productSlug string) (Fed
 	if err != nil {
 		// Untested as we cannot force an error because we are marshalling
 		// a known-good body
-		return FederationToken{}, err
+		return FederationToken{}, fmt.Errorf("could not marshall json: %v", err)
 	}
 
 	resp, err := f.client.MakeRequest(
@@ -45,14 +45,14 @@ func (f FederationTokenService) GenerateFederationToken(productSlug string) (Fed
 	)
 
 	if err != nil {
-		return FederationToken{}, err
+		return FederationToken{}, fmt.Errorf("error making federation token request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	var token FederationToken
 	err = json.NewDecoder(resp.Body).Decode(&token)
 	if err != nil {
-		return FederationToken{}, err
+		return FederationToken{}, fmt.Errorf("error decoding response body for federation token: %v", err)
 	}
 
 	return token, nil

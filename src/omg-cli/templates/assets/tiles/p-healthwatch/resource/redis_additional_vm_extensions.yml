@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/redis?/additional_vm_extensions?
+  value: ((redis_additional_vm_extensions))

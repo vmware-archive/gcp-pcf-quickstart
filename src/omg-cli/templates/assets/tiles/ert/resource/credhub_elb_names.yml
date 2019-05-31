@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/credhub?/elb_names?
+  value: ((credhub_elb_names))

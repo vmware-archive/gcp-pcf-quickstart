@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/healthwatch-forwarder?/additional_vm_extensions?
+  value: ((healthwatch-forwarder_additional_vm_extensions))

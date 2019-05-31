@@ -1,0 +1,16 @@
+- type: replace
+  path: /product-properties/.properties.haproxy_hsts_support?
+  value:
+    value: enable
+- type: replace
+  path: /product-properties/.properties.haproxy_hsts_support.enable.max_age?
+  value:
+    value: ((haproxy_hsts_support/enable/max_age))
+- type: replace
+  path: /product-properties/.properties.haproxy_hsts_support.enable.include_subdomains?
+  value:
+    value: ((haproxy_hsts_support/enable/include_subdomains))
+- type: replace
+  path: /product-properties/.properties.haproxy_hsts_support.enable.enable_preload?
+  value:
+    value: ((haproxy_hsts_support/enable/enable_preload))

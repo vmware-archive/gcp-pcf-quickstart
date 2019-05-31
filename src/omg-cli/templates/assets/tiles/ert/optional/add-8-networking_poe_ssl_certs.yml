@@ -1,0 +1,36 @@
+- type: replace
+  path: /product-properties/.properties.networking_poe_ssl_certs?
+  value:
+    value:
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_0/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_0/privatekey))
+      name: ((networking_poe_ssl_certs_0/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_1/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_1/privatekey))
+      name: ((networking_poe_ssl_certs_1/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_2/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_2/privatekey))
+      name: ((networking_poe_ssl_certs_2/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_3/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_3/privatekey))
+      name: ((networking_poe_ssl_certs_3/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_4/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_4/privatekey))
+      name: ((networking_poe_ssl_certs_4/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_5/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_5/privatekey))
+      name: ((networking_poe_ssl_certs_5/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_6/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_6/privatekey))
+      name: ((networking_poe_ssl_certs_6/name))
+    - certificate:
+        cert_pem: ((networking_poe_ssl_certs_7/certificate))
+        private_key_pem: ((networking_poe_ssl_certs_7/privatekey))
+      name: ((networking_poe_ssl_certs_7/name))

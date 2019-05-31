@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/mysql_proxy?/internet_connected?
+  value: ((mysql_proxy_internet_connected))

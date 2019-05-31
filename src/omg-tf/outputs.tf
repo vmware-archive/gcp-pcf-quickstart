@@ -176,6 +176,10 @@ output "jumpbox_public_ip" {
   value = "${google_compute_address.jumpbox.address}"
 }
 
+output "ssl_root_ca" {
+  value = "${var.ssl_root_ca}"
+}
+
 output "ssl_cert" {
   value = "${var.ssl_cert}"
 }
@@ -242,4 +246,17 @@ output "credhub_key_name" {
 output "credhub_key" {
   value     = "${var.credhub_key == "" ? random_id.credhub_key_generator.b64 : var.credhub_key}"
   sensitive = true
+}
+
+output "blobstore_gcp_service_account_key" {
+  value     = "${base64decode(element(concat(google_service_account_key.blobstore.*.private_key, list("")), 0))}"
+  sensitive = true
+}
+
+output "blobstore_service_account_email" {
+  value = "${element(concat(google_service_account.blobstore.*.email, list("")), 0)}"
+}
+
+output "blobstore_service_account_project" {
+  value = "${element(concat(google_service_account.blobstore.*.project, list("")), 0)}"
 }

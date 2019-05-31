@@ -222,7 +222,7 @@ func (c Client) handleUnexpectedResponse(resp *http.Response) error {
 	} else {
 		err = json.Unmarshal(b, &pErr)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not parse json [%q] \n%s", b, err)
 		}
 	}
 

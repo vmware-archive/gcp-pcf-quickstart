@@ -1,0 +1,29 @@
+- type: replace
+  path: /product-properties/.properties.system_blobstore?
+  value:
+    value: external_gcs
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.buildpacks_bucket?
+  value:
+    value: ((system_blobstore/external_gcs/buildpacks_bucket))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.droplets_bucket?
+  value:
+    value: ((system_blobstore/external_gcs/droplets_bucket))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.packages_bucket?
+  value:
+    value: ((system_blobstore/external_gcs/packages_bucket))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.resources_bucket?
+  value:
+    value: ((system_blobstore/external_gcs/resources_bucket))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.access_key?
+  value:
+    value: ((system_blobstore/external_gcs/access_key))
+- type: replace
+  path: /product-properties/.properties.system_blobstore.external_gcs.secret_key?
+  value:
+    value:
+      secret: ((system_blobstore/external_gcs/secret_key))

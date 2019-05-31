@@ -55,7 +55,7 @@ A Linux or Mac machine is required with the following dependencies installed:
 - dig
   - Debian/Ubuntu: `sudo apt-get install dnsutils`
   - OSX: preinstalled
-- [go](https://golang.org/doc/install) (v1.11+)
+- [go](https://golang.org/doc/install) (v1.12+)
 - [cf](https://github.com/cloudfoundry/cli#installers-and-compressed-binaries)
 - [git](https://git-scm.com/downloads)
 

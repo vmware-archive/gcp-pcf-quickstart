@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/diego_database?/internet_connected?
+  value: ((diego_database_internet_connected))

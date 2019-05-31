@@ -97,6 +97,5 @@ pushd src/omg-tf
     terraform output -json -state=${terraform_state} > ${terraform_output}
 popd
 
-# Deploy PCF
-omg-cli remote --env-dir="${ENV_DIR}" "push-tiles"
-omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"
+# # Deploy PCF
+ omg-cli remote --env-dir="${ENV_DIR}" "deploy $@"

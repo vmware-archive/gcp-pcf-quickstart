@@ -1,0 +1,9 @@
+healthwatch-forwarder_instance_type: automatic
+healthwatch-forwarder_instances: automatic
+healthwatch-forwarder_persistent_disk_size: automatic
+mysql_instance_type: automatic
+mysql_instances: automatic
+mysql_persistent_disk_size: automatic
+redis_instance_type: automatic
+redis_instances: automatic
+redis_persistent_disk_size: automatic
