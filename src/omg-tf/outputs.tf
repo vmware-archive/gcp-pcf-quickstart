@@ -62,6 +62,10 @@ output "sql_db_port" {
   value = "${module.external_database.sql_db_port}"
 }
 
+output "sql_ssl_cert" {
+  value = "${module.external_database.sql_ssl_cert}"
+}
+
 output "management_subnet_gateway" {
   value = "${google_compute_subnetwork.management-subnet.gateway_address}"
 }

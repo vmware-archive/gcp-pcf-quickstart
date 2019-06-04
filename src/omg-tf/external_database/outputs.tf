@@ -27,3 +27,7 @@ output "ert_sql_password" {
   sensitive = true
   value = "${ join(" ", random_id.ert_db_password.*.b64) }"
 }
+
+output "sql_ssl_cert" {
+  value = "${ join(" ", google_sql_ssl_cert.client_cert.*.server_ca_cert) }"
+}
