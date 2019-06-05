@@ -46,6 +46,7 @@ tiles:
     uaa/service_provider_key_credentials/certificate: ((ssl_cert))
     uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     security_acknowledgement: X
+    stack_migration_acknowledgement: x
     mysql_monitor/recipient_email: admin@example.org
     system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
     system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
@@ -60,7 +61,6 @@ tiles:
     tcp_routing/enable/reservable_ports: ((tcp_port_range))
     gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
     haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-    mysql_monitor_instances: 0
     control_instance_type: 2xlarge.cpu
 
 
