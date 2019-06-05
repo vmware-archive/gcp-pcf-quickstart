@@ -29,4 +29,6 @@ resource "google_sql_database_instance" "master" {
 resource "google_sql_ssl_cert" "client_cert" {
   common_name = "client-name"
   instance    = "${google_sql_database_instance.master.name}"
+
+  count = "${var.count}"
 }
