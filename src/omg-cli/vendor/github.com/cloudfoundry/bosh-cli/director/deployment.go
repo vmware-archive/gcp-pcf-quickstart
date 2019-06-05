@@ -221,7 +221,12 @@ func (d DeploymentImpl) IsInProgress() (bool, error) {
 }
 
 func (d DeploymentImpl) Variables() ([]VariableResult, error) {
-	path := fmt.Sprintf("/deployments/%s/variables", d.name)
+	url, err := gourl.Parse(fmt.Sprintf("/deployments/%s/variables", d.name))
+	if err != nil {
+		return nil, bosherr.WrapError(err, "Parsing variables path")
+	}
+
+	path := url.RequestURI()
 	response := []VariableResult{}
 
 	if err := d.client.clientRequest.Get(path, &response); err != nil {

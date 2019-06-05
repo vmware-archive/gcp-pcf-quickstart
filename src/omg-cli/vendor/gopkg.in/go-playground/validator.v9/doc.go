@@ -245,6 +245,68 @@ ensures the value is not nil.
 
 	Usage: required
 
+Required With
+
+The field under validation must be present and not empty only if any
+of the other specified fields are present. For strings ensures value is
+not "". For slices, maps, pointers, interfaces, channels and functions
+ensures the value is not nil.
+
+	Usage: required_with
+
+Examples:
+
+	// require the field if the Field1 is present:
+	Usage: required_with=Field1
+
+	// require the field if the Field1 or Field2 is present:
+	Usage: required_with=Field1 Field2
+
+Required With All
+
+The field under validation must be present and not empty only if all
+of the other specified fields are present. For strings ensures value is
+not "". For slices, maps, pointers, interfaces, channels and functions
+ensures the value is not nil.
+
+	Usage: required_with_all
+
+Example:
+
+	// require the field if the Field1 and Field2 is present:
+	Usage: required_with_all=Field1 Field2
+
+Required Without
+
+The field under validation must be present and not empty only when any
+of the other specified fields are not present. For strings ensures value is
+not "". For slices, maps, pointers, interfaces, channels and functions
+ensures the value is not nil.
+
+	Usage: required_without
+
+Examples:
+
+	// require the field if the Field1 is not present:
+	Usage: required_without=Field1
+
+	// require the field if the Field1 or Field2 is not present:
+	Usage: required_without=Field1 Field2
+
+Required Without All
+
+The field under validation must be present and not empty only when all
+of the other specified fields are not present. For strings ensures value is
+not "". For slices, maps, pointers, interfaces, channels and functions
+ensures the value is not nil.
+
+	Usage: required_without_all
+
+Example:
+
+	// require the field if the Field1 and Field2 is not present:
+	Usage: required_without_all=Field1 Field2
+
 Is Default
 
 This validates that the value is the default value and is almost the
@@ -714,6 +776,18 @@ This validates that a string value does not contain the supplied rune value.
 
 	Usage: excludesrune=@
 
+Starts With
+
+This validates that a string value starts with the supplied string value
+
+	Usage: startswith=hello
+
+Ends With
+
+This validates that a string value ends with the supplied string value
+
+	Usage: endswith=goodbye
+
 International Standard Book Number
 
 This validates that a string value contains a valid isbn10 or isbn13 value.
@@ -734,25 +808,25 @@ This validates that a string value contains a valid isbn13 value.
 
 Universally Unique Identifier UUID
 
-This validates that a string value contains a valid UUID.
+This validates that a string value contains a valid UUID. Uppercase UUID values will not pass - use `uuid_rfc4122` instead.
 
 	Usage: uuid
 
 Universally Unique Identifier UUID v3
 
-This validates that a string value contains a valid version 3 UUID.
+This validates that a string value contains a valid version 3 UUID.  Uppercase UUID values will not pass - use `uuid3_rfc4122` instead.
 
 	Usage: uuid3
 
 Universally Unique Identifier UUID v4
 
-This validates that a string value contains a valid version 4 UUID.
+This validates that a string value contains a valid version 4 UUID.  Uppercase UUID values will not pass - use `uuid4_rfc4122` instead.
 
 	Usage: uuid4
 
 Universally Unique Identifier UUID v5
 
-This validates that a string value contains a valid version 5 UUID.
+This validates that a string value contains a valid version 5 UUID.  Uppercase UUID values will not pass - use `uuid5_rfc4122` instead.
 
 	Usage: uuid5
 
@@ -998,5 +1072,30 @@ that should not make it to production.
 	}
 
 	validate.Struct(t) // this will panic
+
+Non standard validators
+
+A collection of validation rules that are frequently needed but are more
+complex than the ones found in the baked in validators.
+A non standard validator must be registered manually using any tag you like.
+See below examples of registration and use.
+
+	type Test struct {
+		TestField string `validate:"yourtag"`
+	}
+
+	t := &Test{
+		TestField: "Test"
+	}
+
+	validate := validator.New()
+	validate.RegisterValidation("yourtag", validations.ValidatorName)
+
+	NotBlank
+		This validates that the value is not blank or with length zero.
+		For strings ensures they do not contain only spaces. For channels, maps, slices and arrays
+		ensures they don't have zero length. For others, a non empty value is required.
+
+		Usage: notblank
 */
 package validator

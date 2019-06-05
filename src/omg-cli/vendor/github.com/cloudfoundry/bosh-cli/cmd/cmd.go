@@ -52,15 +52,11 @@ func (c Cmd) Execute() (cmdErr error) {
 	c.configureUI()
 	c.configureFS()
 
-	if c.BoshOpts.Sha2 {
-		c.deps = c.deps.WithSha2CheckSumming()
-	}
-
 	deps := c.deps
 
 	switch opts := c.Opts.(type) {
 	case *EnvironmentOpts:
-		return NewEnvironmentCmd(deps.UI, c.director()).Run()
+		return NewEnvironmentCmd(deps.UI, c.director()).Run(*opts)
 
 	case *EnvironmentsOpts:
 		return NewEnvironmentsCmd(c.config(), deps.UI).Run()
@@ -87,6 +83,9 @@ func (c Cmd) Execute() (cmdErr error) {
 		}
 
 		return NewAliasEnvCmd(sessionFactory, c.config(), deps.UI).Run(*opts)
+
+	case *UnaliasEnvOpts:
+		return NewUnaliasEnvCmd(c.config()).Run(*opts)
 
 	case *LogInOpts:
 		sessionFactory := func(config cmdconf.Config) Session {
@@ -121,6 +120,9 @@ func (c Cmd) Execute() (cmdErr error) {
 
 	case *CancelTaskOpts:
 		return NewCancelTaskCmd(c.director()).Run(*opts)
+
+	case *CancelTasksOpts:
+		return NewCancelTasksCmd(c.director()).Run(*opts)
 
 	case *DeploymentOpts:
 		sess := NewSessionFromOpts(c.BoshOpts, c.config(), deps.UI, true, false, deps.FS, deps.Logger)
@@ -285,6 +287,14 @@ func (c Cmd) Execute() (cmdErr error) {
 	case *InspectReleaseOpts:
 		return NewInspectReleaseCmd(deps.UI, c.director()).Run(*opts)
 
+	case *InspectLocalReleaseOpts:
+		relProv, _ := c.releaseProviders()
+
+		return NewInspectLocalReleaseCmd(
+			relProv.NewArchiveReader(),
+			deps.UI,
+		).Run(*opts)
+
 	case *VMsOpts:
 		return NewVMsCmd(deps.UI, c.director(), c.BoshOpts.Parallel).Run(*opts)
 
@@ -435,7 +445,7 @@ func (c Cmd) Execute() (cmdErr error) {
 		return nil
 
 	case *VariablesOpts:
-		return NewVariablesCmd(deps.UI, c.deployment()).Run()
+		return NewVariablesCmd(deps.UI, c.deployment()).Run(*opts)
 
 	default:
 		return fmt.Errorf("Unhandled command: %#v", c.Opts)

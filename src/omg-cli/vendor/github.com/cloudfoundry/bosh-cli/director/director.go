@@ -124,3 +124,22 @@ func (c Client) DownloadResourceUnchecked(blobstoreID string, out io.Writer) err
 
 	return nil
 }
+
+func (d DirectorImpl) CertificateExpiry() ([]CertificateExpiryInfo, error) {
+	var resps []CertificateExpiryInfo
+	responseBody, response, err := d.client.clientRequest.RawGet("/director/certificate_expiry", nil, nil)
+
+	if err != nil {
+		if response.StatusCode == http.StatusNotFound {
+			return nil, bosherr.WrapErrorf(err, "Certificate expiry information not supported")
+		}
+		return nil, bosherr.WrapErrorf(err, "Getting certificate expiry endpoint error")
+	}
+
+	err = json.Unmarshal(responseBody, &resps)
+	if err != nil {
+		return nil, bosherr.WrapErrorf(err, "Getting certificate expiry endpoint error")
+	}
+
+	return resps, nil
+}
