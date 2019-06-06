@@ -46,13 +46,7 @@ networks-configuration:
 properties-configuration:
   director_configuration:
     blobstore_type: gcs
-    database_type: external
-    external_database_options:
-      database: test-ops-sql-ip
-      host: test-sql-ip
-      password: test-ops-sql-password
-      port: test-sql-port
-      user: test-ops-sqlo-username
+    database_type: internal
     gcs_blobstore_options:
       bucket_name: test-director-bucket
       service_account_key:
@@ -70,7 +64,7 @@ properties-configuration:
     default_deployment_tag: test-tag
     project: test-project
   security_configuration:
-    trusted_certificates: test-ssl-root-ca    
+    trusted_certificates: test-ssl-root-ca
 resource-configuration:
   compilation:
     instance_type:
