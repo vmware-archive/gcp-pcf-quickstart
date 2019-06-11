@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #!/bin/bash -e
 
-set +x
+set -x
 
 export RECIPE=$(pwd)/repo-in/templates/assets/deployment.yml
 
