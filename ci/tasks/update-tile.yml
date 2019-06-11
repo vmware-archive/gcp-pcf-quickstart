@@ -9,7 +9,7 @@ inputs:
 outputs:
 - name: repo-out
 run:
-  path: omg-src-in/ci/scripts/update-tile.sh
+  path: omg-src-in/ci/tasks/update-tile.sh
 params:
   PIVNET_TOKEN: replace-me
   TILE_NAME: replace-me
