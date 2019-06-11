@@ -295,7 +295,7 @@ jobs:
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: cf
-        TILE_BASE_DIR: templates/assets/tiles/srt
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/srt
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
@@ -318,8 +318,8 @@ jobs:
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: cf
-        TILE_BASE_DIR: templates/assets/tiles/ert
-        OPS_FILE: templates/assets/options/full.yml
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/ert
+        OPS_FILE: src/omg-cli/templates/assets/options/full.yml
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
@@ -342,7 +342,7 @@ jobs:
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-service-broker
-        TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
@@ -365,7 +365,7 @@ jobs:
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-stackdriver-nozzle
-        TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
