@@ -6,7 +6,7 @@ set -x
 export RECIPE=$(pwd)/repo-in/src/omg-cli/templates/assets/deployment.yml
 
 if [[ ! -z ${OPS_FILE} ]]; then
-  opsfile="-o ${OPS_FILE}"
+  opsfile="--ops-file $(pwd)/repo-in/${OPS_FILE}"
 fi
 
 get_tile_var () {
