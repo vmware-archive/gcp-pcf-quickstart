@@ -1,6 +1,8 @@
 #!/bin/bash -e
 #!/bin/bash -e
 
+set +x
+
 export RECIPE=$(pwd)/repo-in/templates/assets/deployment.yml
 
 if [[ ! -z ${OPS_FILE} ]]; then
