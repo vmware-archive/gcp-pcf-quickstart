@@ -18,7 +18,8 @@ groups:
     jobs:
       - update-cf-srt-tile
       - update-cf-ert-tile
-      - update-service-broker-tile
+      - update-gcp-service-broker
+      - update-gcp-stackdriver-nozzle
 
 jobs:
   - name: run-unit
@@ -278,16 +279,14 @@ jobs:
     - task: update-tile
       image: ci-image
       file: omg-src-in/ci/tasks/update-tile.sh
-      config:
-        platform: linux
-        params:
-          PIVNET_TOKEN: ((pivnet-legacy-token))
-          TILE_NAME: cf
-          TILE_BASE_DIR: templates/assets/tiles/srt
-    - put: omg-src-in
       params:
-        repository: repo-out
-        merge: true
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: cf
+        TILE_BASE_DIR: templates/assets/tiles/srt
+    # - put: omg-src-in
+    #   params:
+    #     repository: repo-out
+    #     merge: true
 
   - name: update-cf-ert-tile
     plan:
@@ -302,13 +301,11 @@ jobs:
     - task: update-tile
       image: ci-image
       file: omg-src-in/ci/tasks/update-tile.sh
-      config:
-        platform: linux
-        params:
-          PIVNET_TOKEN: ((pivnet-legacy-token))
-          TILE_NAME: cf
-          TILE_BASE_DIR: templates/assets/tiles/ert
-          OPS_FILE: templates/assets/options/full.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: cf
+        TILE_BASE_DIR: templates/assets/tiles/ert
+        OPS_FILE: templates/assets/options/full.yml
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
@@ -327,12 +324,10 @@ jobs:
     - task: update-tile
       image: ci-image
       file: omg-src-in/ci/tasks/update-tile.sh
-      config:
-        platform: linux
-        params:
-          PIVNET_TOKEN: ((pivnet-legacy-token))
-          TILE_NAME: gcp-service-broker
-          TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: gcp-service-broker
+        TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
@@ -351,12 +346,10 @@ jobs:
     - task: update-tile
       image: ci-image
       file: omg-src-in/ci/tasks/update-tile.sh
-      config:
-        platform: linux
-        params:
-          PIVNET_TOKEN: ((pivnet-legacy-token))
-          TILE_NAME: gcp-stackdriver-nozzle
-          TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: gcp-stackdriver-nozzle
+        TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
     # - put: omg-src-in
     #   params:
     #     repository: repo-out
