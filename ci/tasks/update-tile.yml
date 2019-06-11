@@ -6,6 +6,7 @@ image_resource:
 inputs:
 - name: tile
 - name: omg-src-in
+  path: repo-in
 - name: omg-src-ci
 outputs:
 - name: repo-out
