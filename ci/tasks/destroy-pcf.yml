@@ -5,7 +5,8 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: omg-src-in
+- name: omg-src-ci
 - name: omg-env
   path: omg-env-in
 run:
-  path: omg-src-in/ci/tasks/destroy-pcf.sh
+  path: omg-src-ci/ci/tasks/destroy-pcf.sh

@@ -6,10 +6,11 @@ image_resource:
 inputs:
 - name: tile
 - name: omg-src-in
+- name: omg-src-ci
 outputs:
 - name: repo-out
 run:
-  path: omg-src-in/ci/tasks/update-tile.sh
+  path: omg-src-ci/ci/tasks/update-tile.sh
 params:
   PIVNET_TOKEN: replace-me
   TILE_NAME: replace-me

@@ -29,9 +29,10 @@ jobs:
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
       - task: unit-tests
         image: ci-image
-        file: omg-src-in/ci/tasks/run-unit.yml
+        file: omg-src-ci/ci/tasks/run-unit.yml
 
   - name: prepare-project
     plan:
@@ -40,10 +41,11 @@ jobs:
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
 
       - task: prepare-project
         image: ci-image
-        file: omg-src-in/ci/tasks/prepare-project.yml
+        file: omg-src-ci/ci/tasks/prepare-project.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
@@ -58,11 +60,12 @@ jobs:
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
 
       - aggregate:
         task: generate-env
         image: ci-image
-        file: omg-src-in/ci/tasks/generate-env.yml
+        file: omg-src-ci/ci/tasks/generate-env.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
@@ -88,10 +91,11 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - aggregate:
         task: create-infrastructure
         image: ci-image
-        file: omg-src-in/ci/tasks/create-infrastructure.yml
+        file: omg-src-ci/ci/tasks/create-infrastructure.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
@@ -111,11 +115,12 @@ jobs:
           - get: omg-env
             passed: [create-infrastructure]
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - &destroy_pcf
           task: destroy-pcf
           image: ci-image
-          file: omg-src-in/ci/tasks/destroy-pcf.yml
+          file: omg-src-ci/citasks/destroy-pcf.yml
           params:
             google_project: ((google_project))
             google_json_key_data: ((google_json_key_data))
@@ -131,13 +136,14 @@ jobs:
           - get: omg-env
             passed: [create-infrastructure]
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - try:
             *destroy_pcf
         - &destroy_infrastructure
           task: destroy-infrastructure
           image: ci-image
-          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
+          file: omg-src-ci/citasks/destroy-infrastructure.yml
           params:
             google_project: ((google_project))
             google_json_key_data: ((google_json_key_data))
@@ -158,15 +164,16 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - do:
           - task: accept-eula
             image: ci-image
-            file: omg-src-in/ci/tasks/accept-eula.yml
+            file: omg-src-ci/citasks/accept-eula.yml
             params:
               env_file_name: ((env_file_name))
           - task: deploy-pcf
             image: ci-image
-            file: omg-src-in/ci/tasks/deploy-pcf.yml
+            file: omg-src-ci/citasks/deploy-pcf.yml
             params:
               env_file_name: ((env_file_name))
 
@@ -184,10 +191,11 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - aggregate:
         task: run-certification
         image: ci-image
-        file: omg-src-in/ci/tasks/run-certification.yml
+        file: omg-src-ci/citasks/run-certification.yml
         params:
           env_file_name: ((env_file_name))
 
@@ -205,6 +213,7 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - *destroy_pcf
         - *destroy_infrastructure
@@ -222,10 +231,11 @@ jobs:
             params:
               bump: major
           - get: ci-image
+          - get: omg-src-ci
       - do: &promote_candidate
           - task: promote
             image: ci-image
-            file: omg-src-in/ci/tasks/promote-candidate.yml
+            file: omg-src-ci/citasks/promote-candidate.yml
           - put: release-version-semver
             params:
               file: release-version-semver/number
@@ -249,6 +259,7 @@ jobs:
             params:
               bump: minor
           - get: ci-image
+          - get: omg-src-ci
       - do: *promote_candidate
 
   - name: promote-candidate-patch
@@ -264,6 +275,7 @@ jobs:
             params:
               bump: patch
           - get: ci-image
+          - get: omg-src-ci
       - do: *promote_candidate
 
   - name: update-cf-srt-tile
@@ -276,9 +288,10 @@ jobs:
       - get: omg-src-in
         resource: omg-src-in
       - get: ci-image
+      - get: omg-src-ci
     - task: update-tile
       image: ci-image
-      file: omg-src-in/ci/tasks/update-tile.sh
+      file: omg-src-ci/citasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: cf
@@ -298,9 +311,10 @@ jobs:
       - get: omg-src-in
         resource: omg-src-in
       - get: ci-image
+      - get: omg-src-ci
     - task: update-tile
       image: ci-image
-      file: omg-src-in/ci/tasks/update-tile.sh
+      file: omg-src-ci/citasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: cf
@@ -321,9 +335,10 @@ jobs:
       - get: omg-src-in
         resource: omg-src-in
       - get: ci-image
+      - get: omg-src-ci
     - task: update-tile
       image: ci-image
-      file: omg-src-in/ci/tasks/update-tile.sh
+      file: omg-src-ci/citasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-service-broker
@@ -343,9 +358,10 @@ jobs:
       - get: omg-src-in
         resource: omg-src-in
       - get: ci-image
+      - get: omg-src-ci
     - task: update-tile
       image: ci-image
-      file: omg-src-in/ci/tasks/update-tile.sh
+      file: omg-src-ci/citasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-stackdriver-nozzle
@@ -361,6 +377,15 @@ resources:
     source: &git_resource
       uri: ((source_uri))
       branch: ((source_branch))
+      ignore_paths: [ci/*]
+
+  - name: omg-src-ci
+    type: git
+    source:
+      uri: ((source_uri))
+      branch: ((source_branch))
+      paths: [ci/*]
+      disable_ci_skip: true
 
   - name: omg-src-out
     type: git
