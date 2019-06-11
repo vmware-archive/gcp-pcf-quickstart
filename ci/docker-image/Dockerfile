@@ -54,5 +54,16 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     mv terraform /usr/local/bin && \
     chmod a+x /usr/local/bin/terraform
 
+# install tile-config-generator
+ENV TCG_VERSION=v0.0.16
+ENV TCG_SHA256SUM=327013f3fde4ac77cfa2e2c2ba2cd3addb736c279c3caa73091004750b134af5
+
+RUN wget https://github.com/pivotalservices/tile-config-generator/releases/download/${TCG_VERSION}/tile-config-generator-linux \
+  -O tile-config-generator && \
+  echo "${TCG_SHA256SUM}  tile-config-generator" > tcg_SHA256SUM && \
+  sha256sum -cw --status tcg_SHA256SUM && \
+  mv tile-config-generator /usr/local/bin && \
+  chmod a+x /usr/local/bin/tile-config-generator
+
 # Cleanup
 RUN rm -rf /tmp/docker-build

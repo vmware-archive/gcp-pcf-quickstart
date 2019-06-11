@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: jrjohnsongoog/omgci}
+inputs:
+- name: tile
+- name: scripts
+- name: omg-src-in
+outputs:
+- name: repo-out
+params:
+  PIVNET_TOKEN: replace-me
+  TILE_NAME: replace-me
+  TILE_BASE_DIR: replace-me
+run:
+  path: omg-src-in/ci/scripts/update-tile.sh

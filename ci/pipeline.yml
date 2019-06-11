@@ -14,6 +14,11 @@ groups:
       - promote-candidate-major
       - promote-candidate-minor
       - promote-candidate-patch
+  - name: tiles
+    jobs:
+      - update-cf-srt-tile
+      - update-cf-ert-tile
+      - update-service-broker-tile
 
 jobs:
   - name: run-unit
@@ -260,6 +265,103 @@ jobs:
           - get: ci-image
       - do: *promote_candidate
 
+  - name: update-cf-srt-tile
+    plan:
+    - aggregate:
+      - get: tile
+        resource: cf-tile
+        trigger: true
+        params: { globs: [] }
+      - get: omg-src-in
+        resource: omg-src-in
+      - get: ci-image
+    - task: update-tile
+      image: ci-image
+      file: omg-src-in/ci/tasks/update-tile.sh
+      config:
+        platform: linux
+        params:
+          PIVNET_TOKEN: ((pivnet-legacy-token))
+          TILE_NAME: cf
+          TILE_BASE_DIR: templates/assets/tiles/srt
+    - put: omg-src-in
+      params:
+        repository: repo-out
+        merge: true
+
+  - name: update-cf-ert-tile
+    plan:
+    - aggregate:
+      - get: tile
+        resource: cf-tile
+        trigger: true
+        params: { globs: [] }
+      - get: omg-src-in
+        resource: omg-src-in
+      - get: ci-image
+    - task: update-tile
+      image: ci-image
+      file: omg-src-in/ci/tasks/update-tile.sh
+      config:
+        platform: linux
+        params:
+          PIVNET_TOKEN: ((pivnet-legacy-token))
+          TILE_NAME: cf
+          TILE_BASE_DIR: templates/assets/tiles/ert
+          OPS_FILE: templates/assets/options/full.yml
+    # - put: omg-src-in
+    #   params:
+    #     repository: repo-out
+    #     merge: true
+
+  - name: update-gcp-service-broker
+    plan:
+    - aggregate:
+      - get: tile
+        resource: gcp-service-broker
+        trigger: true
+        params: { globs: [] }
+      - get: omg-src-in
+        resource: omg-src-in
+      - get: ci-image
+    - task: update-tile
+      image: ci-image
+      file: omg-src-in/ci/tasks/update-tile.sh
+      config:
+        platform: linux
+        params:
+          PIVNET_TOKEN: ((pivnet-legacy-token))
+          TILE_NAME: gcp-service-broker
+          TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+    # - put: omg-src-in
+    #   params:
+    #     repository: repo-out
+    #     merge: true
+
+  - name: update-gcp-stackdriver-nozzle
+    plan:
+    - aggregate:
+      - get: tile
+        resource: gcp-stackdriver-nozzle
+        trigger: true
+        params: { globs: [] }
+      - get: omg-src-in
+        resource: omg-src-in
+      - get: ci-image
+    - task: update-tile
+      image: ci-image
+      file: omg-src-in/ci/tasks/update-tile.sh
+      config:
+        platform: linux
+        params:
+          PIVNET_TOKEN: ((pivnet-legacy-token))
+          TILE_NAME: gcp-stackdriver-nozzle
+          TILE_BASE_DIR: templates/assets/tiles/gcp-service-broker
+    # - put: omg-src-in
+    #   params:
+    #     repository: repo-out
+    #     merge: true
+
 resources:
   - name: omg-src-in
     type: git
@@ -293,6 +395,27 @@ resources:
       password: ((docker_hub_password))
       repository: ((docker_hub_repo))
 
+  - name: cf-tile
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: elastic-runtime
+
+  - name: gcp-service-broker
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: gcp-service-broker
+
+  - name: gcp-stackdriver-nozzle
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: gcp-stackdriver-nozzle
+
 resource_types:
   - name: gcs-resource
     type: docker-image
@@ -304,3 +427,14 @@ resource_types:
     source:
       repository: concourse/semver-resource
       tag: latest
+
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
