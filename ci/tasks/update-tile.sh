@@ -40,7 +40,7 @@ bosh int ${RECIPE} -o <(echo -e "
 - type: replace
   path: /tiles/name=${TILE_NAME}/stemcell/release_version
   value: ${STMECELL_VERSION}
-") > ${OPS_FILE:-templates/assets/deployment.yml}
+") > ${OPS_FILE:-src/omg-cli/templates/assets/deployment.yml}
 
 git --no-pager diff
 
