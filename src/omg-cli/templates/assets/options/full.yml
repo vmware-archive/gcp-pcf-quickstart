@@ -77,11 +77,11 @@
 
 # GCP-STACKDRIVER-NOZZLE
 - type: replace
-  path: /tiles/name=stackdriver-nozzle/ops_files?/-
+  path: /tiles/name=gcp-stackdriver-nozzle/ops_files?/-
   value: tiles/gcp-stackdriver-nozzle/network/3-az-configuration.yml
 - type: replace
-  path: /tiles/name=stackdriver-nozzle/vars/az2_name?
+  path: /tiles/name=gcp-stackdriver-nozzle/vars/az2_name?
   value: ((azs_1))
 - type: replace
-  path: /tiles/name=stackdriver-nozzle/vars/az3_name?
+  path: /tiles/name=gcp-stackdriver-nozzle/vars/az3_name?
   value: ((azs_2))
