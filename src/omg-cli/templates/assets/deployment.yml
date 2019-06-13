@@ -90,7 +90,7 @@ tiles:
     db_username: ((service_broker_db_username))
     db_password: ((service_broker_db_password))
 
-- name: stackdriver-nozzle
+- name: gcp-stackdriver-nozzle
   version: 2.1.0
   product:
     product_slug: gcp-stackdriver-nozzle
