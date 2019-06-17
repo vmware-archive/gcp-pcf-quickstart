@@ -16,15 +16,14 @@ groups:
       - promote-candidate-patch
   - name: tiles
     jobs:
-      - update-cf-srt-tile
-      - update-cf-ert-tile
+      - update-cf-tile
       - update-gcp-service-broker
       - update-gcp-stackdriver-nozzle
 
 jobs:
   - name: run-unit
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
@@ -36,7 +35,7 @@ jobs:
 
   - name: prepare-project
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
@@ -55,14 +54,14 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
           - get: omg-src-ci
 
-      - aggregate:
+      - in_parallel:
         task: generate-env
         image: ci-image
         file: omg-src-ci/ci/tasks/generate-env.yml
@@ -72,7 +71,7 @@ jobs:
           env_file_name: ((env_file_name))
           env_config: ((env_config))
 
-      - aggregate:
+      - in_parallel:
           - put: omg-env
             params:
               file: omg-env/*.tgz
@@ -81,7 +80,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [run-unit]
             get: omg-src-in
@@ -92,7 +91,7 @@ jobs:
             resource: omg-env
           - get: ci-image
           - get: omg-src-ci
-      - aggregate:
+      - in_parallel:
         task: create-infrastructure
         image: ci-image
         file: omg-src-ci/ci/tasks/create-infrastructure.yml
@@ -109,7 +108,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - get: omg-src-in
             passed: [create-infrastructure]
           - get: omg-env
@@ -130,7 +129,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - get: omg-src-in
             passed: [create-infrastructure]
           - get: omg-env
@@ -154,7 +153,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [create-infrastructure]
             get: omg-src-in
@@ -181,7 +180,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [deploy-pcf]
             get: omg-src-in
@@ -192,7 +191,7 @@ jobs:
             resource: omg-env
           - get: ci-image
           - get: omg-src-ci
-      - aggregate:
+      - in_parallel:
         task: run-certification
         image: ci-image
         file: omg-src-ci/ci/tasks/run-certification.yml
@@ -203,7 +202,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [run-certification]
             get: omg-src-in
@@ -221,7 +220,7 @@ jobs:
   - name: promote-candidate-major
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: false
             passed: [destroy-all]
             get: omg-src-in
@@ -249,7 +248,7 @@ jobs:
   - name: promote-candidate-minor
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: false
             passed: [destroy-all]
             get: omg-src-in
@@ -265,7 +264,7 @@ jobs:
   - name: promote-candidate-patch
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: false
             passed: [destroy-all]
             get: omg-src-in
@@ -278,9 +277,9 @@ jobs:
           - get: omg-src-ci
       - do: *promote_candidate
 
-  - name: update-cf-srt-tile
+  - name: update-cf-tile
     plan:
-    - aggregate:
+    - in_parallel:
       - get: tile
         resource: cf-tile
         trigger: true
@@ -289,30 +288,14 @@ jobs:
         resource: omg-src-in
       - get: ci-image
       - get: omg-src-ci
-    - task: update-tile
+    - task: update-srt-tile
       image: ci-image
       file: omg-src-ci/ci/tasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: cf
         TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/srt
-    # - put: omg-src-in
-    #   params:
-    #     repository: repo-out
-    #     merge: true
-
-  - name: update-cf-ert-tile
-    plan:
-    - aggregate:
-      - get: tile
-        resource: cf-tile
-        trigger: true
-        params: { globs: [] }
-      - get: omg-src-in
-        resource: omg-src-in
-      - get: ci-image
-      - get: omg-src-ci
-    - task: update-tile
+    - task: update-ert-tile
       image: ci-image
       file: omg-src-ci/ci/tasks/update-tile.yml
       params:
@@ -322,12 +305,12 @@ jobs:
         OPS_FILE: src/omg-cli/templates/assets/options/full.yml
     # - put: omg-src-in
     #   params:
-    #     repository: repo-out
+    #     repository: repo
     #     merge: true
 
   - name: update-gcp-service-broker
     plan:
-    - aggregate:
+    - in_parallel:
       - get: tile
         resource: gcp-service-broker
         trigger: true
@@ -345,12 +328,12 @@ jobs:
         TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
     # - put: omg-src-in
     #   params:
-    #     repository: repo-out
+    #     repository: repo
     #     merge: true
 
   - name: update-gcp-stackdriver-nozzle
     plan:
-    - aggregate:
+    - in_parallel:
       - get: tile
         resource: gcp-stackdriver-nozzle
         trigger: true
@@ -365,10 +348,10 @@ jobs:
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-stackdriver-nozzle
-        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-stackdriver-nozzle
     # - put: omg-src-in
     #   params:
-    #     repository: repo-out
+    #     repository: repo
     #     merge: true
 
 resources:

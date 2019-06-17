@@ -4,12 +4,12 @@
 set -x
 
 if [[ ! -z ${OPS_FILE} ]]; then
-  opsfile="$(pwd)/repo-in/${OPS_FILE}"
+  opsfile="$(pwd)/repo/${OPS_FILE}"
   opsfilecommand="--ops-file ${opsfile}"
 
 fi
 
-export RECIPE="$(pwd)/repo-in/src/omg-cli/templates/assets/deployment.yml ${opsfilecommand}"
+export RECIPE="$(pwd)/repo/src/omg-cli/templates/assets/deployment.yml ${opsfilecommand}"
 
 
 
@@ -23,8 +23,7 @@ export PIVNET_PRODUCT_VERSION=$(jq -r '.Release.Version' tile/metadata.json)
 export STMECELL_VERSION=$(jq -r '.Dependencies | map(select(.Release.Product.Slug | contains("stemcell")))[0].Release.Version'  tile/metadata.json)
 
 
-git clone repo-in repo-out
-pushd repo-out
+pushd repo
 
 echo "Updating tile templates for ${TILE_NAME}/${PIVNET_PRODUCT_VERSION} in ${TILE_BASE_DIR}"
 tile-config-generator generate \
@@ -46,7 +45,8 @@ if [[ ! -z ${OPS_FILE} ]]; then
   - type: replace
     path: /path=~1tiles~1name=${TILE_NAME}/value/stemcell/release_version
     value: ${STMECELL_VERSION}
-  ") > ${OPS_FILE}
+  ") > ${OPS_FILE}.tmp
+  mv ${OPS_FILE}{.tmp,}
 else
   bosh int ${RECIPE} -o <(echo -e "
   - type: replace
@@ -58,7 +58,8 @@ else
   - type: replace
     path: /tiles/name=${TILE_NAME}/stemcell/release_version
     value: ${STMECELL_VERSION}
-  ") > src/omg-cli/templates/assets/deployment.yml
+  ") > src/omg-cli/templates/assets/deployment.yml.tmp
+  mv src/omg-cli/templates/assets/deployment.yml{.tmp,}
 fi
 
 git --no-pager diff
