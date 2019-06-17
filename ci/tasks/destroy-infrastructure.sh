@@ -3,7 +3,7 @@
 set -e
 
 pushd omg-src-in > /dev/null
-	source utils.sh
+	source ci/tasks/utils.sh
 	set_resource_dirs
   set_gcloud_config
   extract_env

@@ -2,8 +2,8 @@
 
 set -e
 
-pushd omg-src-in > /dev/null
-	source utils.sh
+pushd omg-src-ci > /dev/null
+	source ci/tasks/utils.sh
 	set_resource_dirs
 popd > /dev/null
 
