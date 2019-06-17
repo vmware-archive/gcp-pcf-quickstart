@@ -1,23 +1,11 @@
-# DIRECTOR
-- type: replace
-  path: /director/ops_files/-
+- path: /director/ops_files/-
+  type: replace
   value: director/options/full.yml
-
-# CF
-- type: replace
-  path: /tiles/name=cf
+- path: /tiles/name=cf
+  type: replace
   value:
-    name: cf
-    version: 2.5.4
-    product:
-      product_slug: elastic-runtime
-      release_version: 2.5.4
-      file_glob: "cf*.pivotal"
-    stemcell:
-      product_slug: stemcells-ubuntu-xenial
-      release_version: "250.56"
-      file_glob: "*google*.tgz"
     manifest: tiles/ert/product.yml
+    name: cf
     ops_files:
     - tiles/ert/network/3-az-configuration.yml
     - tiles/ert/features/system_blobstore-external_gcs_service_account.yml
@@ -26,62 +14,71 @@
     - tiles/ert/resource/diego_brain_elb_names.yml
     - tiles/ert/resource/router_elb_names.yml
     - tiles/ert/resource/tcp_router_elb_names.yml
+    product:
+      file_glob: cf*.pivotal
+      product_slug: elastic-runtime
+      release_version: 2.5.5
+    stemcell:
+      file_glob: '*google*.tgz'
+      product_slug: stemcells-ubuntu-xenial
+      release_version: 250.58
+    vars:
+      az2_name: ((azs_1))
+      az3_name: ((azs_2))
+      cloud_controller/apps_domain: ((apps_domain))
+      cloud_controller/system_domain: ((sys_domain))
+      credhub_key_encryption_passwords_0/key: ((credhub_key))
+      credhub_key_encryption_passwords_0/name: ((credhub_key_name))
+      credhub_key_encryption_passwords_0/primary: true
+      diego_brain_elb_names:
+      - tcp:((ssh_router_pool))
+      gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+      ha_proxy/skip_cert_verify: true
+      haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
+      haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+      mysql_monitor/recipient_email: admin@example.org
+      network_name: ((ert_subnet_name))
+      networking_poe_ssl_certs_0/certificate: ((ssl_cert))
+      networking_poe_ssl_certs_0/name: Certificate
+      networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
+      router_elb_names:
+      - tcp:((wss_router_pool))
+      - http:((http_lb_backend_name))
+      security_acknowledgement: X
+      singleton_availability_zone: ((azs_0))
+      stack_migration_acknowledgement: x
+      system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
+      system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
+      system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
+      system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
+      system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
+      system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
+      system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
+      tcp_router_elb_names:
+      - tcp:((tcp_router_pool))
+      tcp_routing/enable/reservable_ports: ((tcp_port_range))
+      uaa/service_provider_key_credentials/certificate: ((ssl_cert))
+      uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     vars_files:
     - tiles/ert/product-default-vars.yml
     - tiles/ert/resource-vars.yml
     - tiles/ert/errand-vars.yml
-    vars:
-      network_name: ((ert_subnet_name))
-      az2_name: ((azs_1))
-      az3_name: ((azs_2))
-      singleton_availability_zone: ((azs_0))
-      cloud_controller/system_domain: ((sys_domain))
-      cloud_controller/apps_domain: ((apps_domain))
-      networking_poe_ssl_certs_0/name: Certificate
-      networking_poe_ssl_certs_0/certificate: ((ssl_cert))
-      networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
-      ha_proxy/skip_cert_verify: true
-      haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
-      credhub_key_encryption_passwords_0/key: ((credhub_key))
-      credhub_key_encryption_passwords_0/name: ((credhub_key_name))
-      credhub_key_encryption_passwords_0/primary: true
-      uaa/service_provider_key_credentials/certificate: ((ssl_cert))
-      uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
-      security_acknowledgement: X
-      stack_migration_acknowledgement: x
-      mysql_monitor/recipient_email: admin@example.org
-      system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
-      system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
-      system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
-      system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
-      system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
-      system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
-      system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
-      diego_brain_elb_names: [tcp:((ssh_router_pool))]
-      router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
-      tcp_router_elb_names: [tcp:((tcp_router_pool))]
-      tcp_routing/enable/reservable_ports: ((tcp_port_range))
-      gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-      haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-
-# GCP-SERVICE-BROKER
-- type: replace
-  path: /tiles/name=gcp-service-broker/ops_files/-
+    version: 2.5.5
+- path: /tiles/name=gcp-service-broker/ops_files/-
+  type: replace
   value: tiles/gcp-service-broker/network/3-az-configuration.yml
-- type: replace
-  path: /tiles/name=gcp-service-broker/vars/az2_name?
+- path: /tiles/name=gcp-service-broker/vars/az2_name?
+  type: replace
   value: ((azs_1))
-- type: replace
-  path: /tiles/name=gcp-service-broker/vars/az3_name?
+- path: /tiles/name=gcp-service-broker/vars/az3_name?
+  type: replace
   value: ((azs_2))
-
-# GCP-STACKDRIVER-NOZZLE
-- type: replace
-  path: /tiles/name=gcp-stackdriver-nozzle/ops_files?/-
+- path: /tiles/name=gcp-stackdriver-nozzle/ops_files?/-
+  type: replace
   value: tiles/gcp-stackdriver-nozzle/network/3-az-configuration.yml
-- type: replace
-  path: /tiles/name=gcp-stackdriver-nozzle/vars/az2_name?
+- path: /tiles/name=gcp-stackdriver-nozzle/vars/az2_name?
+  type: replace
   value: ((azs_1))
-- type: replace
-  path: /tiles/name=gcp-stackdriver-nozzle/vars/az3_name?
+- path: /tiles/name=gcp-stackdriver-nozzle/vars/az3_name?
+  type: replace
   value: ((azs_2))

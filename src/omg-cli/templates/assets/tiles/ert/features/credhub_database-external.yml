@@ -23,7 +23,7 @@
   path: /product-properties/.properties.credhub_database.external.tls_ca?
   value:
     value: ((credhub_database/external/tls_ca))
-# - type: replace
-#   path: /product-properties/.properties.credhub_database.external.require_tls?
-#   value:
-#     value: ((credhub_database/external/require_tls))
+- type: replace
+  path: /product-properties/.properties.credhub_database.external.require_tls?
+  value:
+    value: ((credhub_database/external/require_tls))
