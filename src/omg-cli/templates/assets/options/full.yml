@@ -73,12 +73,12 @@
 - path: /tiles/name=gcp-service-broker/vars/az3_name?
   type: replace
   value: ((azs_2))
-- path: /tiles/name=gcp-stackdriver-nozzle/ops_files?/-
+- path: /tiles/name=stackdriver-nozzle/ops_files?/-
   type: replace
-  value: tiles/gcp-stackdriver-nozzle/network/3-az-configuration.yml
-- path: /tiles/name=gcp-stackdriver-nozzle/vars/az2_name?
+  value: tiles/stackdriver-nozzle/network/3-az-configuration.yml
+- path: /tiles/name=stackdriver-nozzle/vars/az2_name?
   type: replace
   value: ((azs_1))
-- path: /tiles/name=gcp-stackdriver-nozzle/vars/az3_name?
+- path: /tiles/name=stackdriver-nozzle/vars/az3_name?
   type: replace
   value: ((azs_2))

@@ -90,7 +90,7 @@ tiles:
     db_username: ((service_broker_db_username))
     db_password: ((service_broker_db_password))
 
-- name: gcp-stackdriver-nozzle
+- name: stackdriver-nozzle
   version: 2.1.0
   product:
     product_slug: gcp-stackdriver-nozzle
@@ -100,11 +100,11 @@ tiles:
     product_slug: stemcells-ubuntu-xenial
     release_version: "170.38"
     file_glob: "*google*.tgz"
-  manifest: tiles/gcp-stackdriver-nozzle/product.yml
+  manifest: tiles/stackdriver-nozzle/product.yml
   vars_files:
-  - tiles/gcp-stackdriver-nozzle/product-default-vars.yml
-  - tiles/gcp-stackdriver-nozzle/resource-vars.yml
-  - tiles/gcp-stackdriver-nozzle/errand-vars.yml
+  - tiles/stackdriver-nozzle/product-default-vars.yml
+  - tiles/stackdriver-nozzle/resource-vars.yml
+  - tiles/stackdriver-nozzle/errand-vars.yml
   vars:
     network_name: ((services_subnet_name))
     singleton_availability_zone: ((azs_0))
