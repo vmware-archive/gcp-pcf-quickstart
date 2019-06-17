@@ -303,10 +303,10 @@ jobs:
         TILE_NAME: cf
         TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/ert
         OPS_FILE: src/omg-cli/templates/assets/options/full.yml
-    # - put: omg-src-in
-    #   params:
-    #     repository: repo
-    #     merge: true
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
 
   - name: update-gcp-service-broker
     plan:
@@ -326,10 +326,10 @@ jobs:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-service-broker
         TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
-    # - put: omg-src-in
-    #   params:
-    #     repository: repo
-    #     merge: true
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
 
   - name: update-gcp-stackdriver-nozzle
     plan:
@@ -349,10 +349,10 @@ jobs:
         PIVNET_TOKEN: ((pivnet-legacy-token))
         TILE_NAME: gcp-stackdriver-nozzle
         TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-stackdriver-nozzle
-    # - put: omg-src-in
-    #   params:
-    #     repository: repo
-    #     merge: true
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
 
 resources:
   - name: omg-src-in
@@ -360,6 +360,8 @@ resources:
     source: &git_resource
       uri: ((source_uri))
       branch: ((source_branch))
+      username: ((github_user_name))
+      password: ((github_access_token))
       ignore_paths: [ci/*]
 
   - name: omg-src-ci
