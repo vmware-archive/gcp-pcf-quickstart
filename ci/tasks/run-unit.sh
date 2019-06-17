@@ -2,11 +2,11 @@
 
 set -e
 
-pushd omg-src-ci > /dev/null
-	source ci/tasks/utils.sh
+pushd omg-src-in/ci/tasks > /dev/null
+	source utils.sh
 	set_resource_dirs
 popd > /dev/null
 
-pushd omg-src-in
+pushd ${omg_dir}
 	ginkgo -skipPackage=certification -r .
 popd
