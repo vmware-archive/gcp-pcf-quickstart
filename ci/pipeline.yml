@@ -11,9 +11,7 @@ groups:
       - destroy-pcf
       - run-certification
       - destroy-all
-      - promote-candidate-major
-      - promote-candidate-minor
-      - promote-candidate-patch
+      - create-pull-request
   - name: tiles
     jobs:
       - update-cf-tile
@@ -217,65 +215,17 @@ jobs:
         - *destroy_pcf
         - *destroy_infrastructure
 
-  - name: promote-candidate-major
-    serial: true
+  - name: create-pull-request
     plan:
-      - in_parallel:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: major
-          - get: ci-image
-          - get: omg-src-ci
-      - do: &promote_candidate
-          - task: promote
-            image: ci-image
-            file: omg-src-ci/ci/tasks/promote-candidate.yml
-          - put: release-version-semver
-            params:
-              file: release-version-semver/number
-          - put: omg-src-out
-            params:
-              repository: promoted/repo
-              rebase: true
-              tag_prefix: "v"
-              tag: promoted/semver_version
-
-  - name: promote-candidate-minor
-    serial: true
-    plan:
-      - in_parallel:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: minor
-          - get: ci-image
-          - get: omg-src-ci
-      - do: *promote_candidate
-
-  - name: promote-candidate-patch
-    serial: true
-    plan:
-      - in_parallel:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: patch
-          - get: ci-image
-          - get: omg-src-ci
-      - do: *promote_candidate
+    - in_parallel:
+        - get: omg-src-in
+          resource: omg-src-in
+          passed: [run-certification]
+        - get: ci-image
+        - get: omg-src-ci
+    - task: create-pull-request
+      image: ci-image
+      file: omg-src-ci/ci/tasks/create-pull-request.yml
 
   - name: update-cf-tile
     plan:
@@ -347,8 +297,8 @@ jobs:
       file: omg-src-ci/ci/tasks/update-tile.yml
       params:
         PIVNET_TOKEN: ((pivnet-legacy-token))
-        TILE_NAME: gcp-stackdriver-nozzle
-        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-stackdriver-nozzle
+        TILE_NAME: stackdriver-nozzle
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/stackdriver-nozzle
     - put: omg-src-out
       params:
         repository: repo
@@ -382,14 +332,6 @@ resources:
       bucket: ((ci_bucket_name))
       json_key: ((ci_json_key_date))
       versioned_file: ((env_file_name))
-
-  - name: release-version-semver
-    type: semver
-    source:
-      driver: gcs
-      key: release-current-version
-      bucket: ((ci_bucket_name))
-      json_key: ((ci_json_key_date))
 
   - name: ci-image
     type: docker-image
