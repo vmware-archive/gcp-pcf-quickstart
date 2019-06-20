@@ -5,8 +5,7 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: tile
-- name: omg-src-in
-  path: repo
+- name: repo
 - name: omg-src-ci
 outputs:
 - name: repo
