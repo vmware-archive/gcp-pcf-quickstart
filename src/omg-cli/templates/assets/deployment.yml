@@ -2,23 +2,13 @@ director:
   manifest: director/config.yml
   ops_files: []
   vars:
-    # TODO: investigate move to terraform static vars
+    default_ca: ((ssl_root_ca))
+    ert_subnet_reserved_ips: 10.0.4.0-10.0.4.20
     management_subnet_reserved_ips: 10.0.0.0-10.0.0.20
     services_subnet_reserved_ips: 10.0.8.0-10.0.8.20
-    ert_subnet_reserved_ips: 10.0.4.0-10.0.4.20
-    default_ca: ((ssl_root_ca))
 tiles:
-- name: cf
-  version: 2.5.4
-  product:
-    product_slug: elastic-runtime
-    release_version: 2.5.4
-    file_glob: "srt*.pivotal"
-  stemcell:
-    product_slug: stemcells-ubuntu-xenial
-    release_version: "250.56"
-    file_glob: "*google*.tgz"
-  manifest: tiles/srt/product.yml
+- manifest: tiles/srt/product.yml
+  name: cf
   ops_files:
   - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
@@ -26,88 +16,98 @@ tiles:
   - tiles/srt/resource/control_elb_names.yml
   - tiles/srt/resource/router_elb_names.yml
   - tiles/srt/resource/tcp_router_elb_names.yml
+  product:
+    file_glob: srt*.pivotal
+    product_slug: elastic-runtime
+    release_version: 2.6.0
+  stemcell:
+    file_glob: '*google*.tgz'
+    product_slug: stemcells-ubuntu-xenial
+    release_version: 315.41
+  vars:
+    cloud_controller/apps_domain: ((apps_domain))
+    cloud_controller/system_domain: ((sys_domain))
+    control_elb_names:
+    - tcp:((ssh_router_pool))
+    control_instance_type: 2xlarge.cpu
+    credhub_key_encryption_passwords_0/key: ((credhub_key))
+    credhub_key_encryption_passwords_0/name: ((credhub_key_name))
+    credhub_key_encryption_passwords_0/primary: true
+    gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+    ha_proxy/skip_cert_verify: true
+    haproxy_forward_tls/enable/backend_ca: ((ssl_root_ca))
+    haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+    mysql_monitor/recipient_email: admin@example.org
+    network_name: ((ert_subnet_name))
+    networking_poe_ssl_certs_0/certificate: ((ssl_cert))
+    networking_poe_ssl_certs_0/name: Certificate
+    networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
+    router_elb_names:
+    - tcp:((wss_router_pool))
+    - http:((http_lb_backend_name))
+    security_acknowledgement: X
+    singleton_availability_zone: ((azs_0))
+    stack_migration_acknowledgement: x
+    system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
+    system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
+    system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
+    system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
+    system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
+    system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
+    system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
+    tcp_router_elb_names:
+    - tcp:((tcp_router_pool))
+    tcp_routing/enable/reservable_ports: ((tcp_port_range))
+    uaa/service_provider_key_credentials/certificate: ((ssl_cert))
+    uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
   vars_files:
   - tiles/srt/product-default-vars.yml
   - tiles/srt/resource-vars.yml
   - tiles/srt/errand-vars.yml
-  vars:
-    network_name: ((ert_subnet_name))
-    singleton_availability_zone: ((azs_0))
-    cloud_controller/system_domain: ((sys_domain))
-    cloud_controller/apps_domain: ((apps_domain))
-    networking_poe_ssl_certs_0/name: Certificate
-    networking_poe_ssl_certs_0/certificate: ((ssl_cert))
-    networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
-    ha_proxy/skip_cert_verify: true
-    haproxy_forward_tls/enable/backend_ca: ((ssl_root_ca))
-    credhub_key_encryption_passwords_0/key: ((credhub_key))
-    credhub_key_encryption_passwords_0/name: ((credhub_key_name))
-    credhub_key_encryption_passwords_0/primary: true
-    uaa/service_provider_key_credentials/certificate: ((ssl_cert))
-    uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
-    security_acknowledgement: X
-    stack_migration_acknowledgement: x
-    mysql_monitor/recipient_email: admin@example.org
-    system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
-    system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
-    system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
-    system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
-    system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
-    system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
-    system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
-    control_elb_names: [tcp:((ssh_router_pool))]
-    router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
-    tcp_router_elb_names: [tcp:((tcp_router_pool))]
-    tcp_routing/enable/reservable_ports: ((tcp_port_range))
-    gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-    haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-    control_instance_type: 2xlarge.cpu
-
-
-- name: gcp-service-broker
-  version: 4.2.2
-  product:
-    product_slug: gcp-service-broker
-    release_version: 4.2.2
-    file_glob: "*.pivotal"
-  stemcell:
-    product_slug: stemcells-ubuntu-xenial
-    release_version: "170.38"
-    file_glob: "*google*.tgz"
-  manifest: tiles/gcp-service-broker/product.yml
+  version: 2.6.0
+- manifest: tiles/gcp-service-broker/product.yml
+  name: gcp-service-broker
   ops_files:
   - tiles/gcp-service-broker/optional/add-db_username.yml
   - tiles/gcp-service-broker/optional/add-db_password.yml
+  product:
+    file_glob: '*.pivotal'
+    product_slug: gcp-service-broker
+    release_version: 4.2.2
+  stemcell:
+    file_glob: '*google*.tgz'
+    product_slug: stemcells-ubuntu-xenial
+    release_version: "170.38"
+  vars:
+    db_host: ((service_broker_db_ip))
+    db_password: ((service_broker_db_password))
+    db_username: ((service_broker_db_username))
+    network_name: ((services_subnet_name))
+    root_service_account_json: ((service_broker_service_account_key))
+    singleton_availability_zone: ((azs_0))
   vars_files:
   - tiles/gcp-service-broker/product-default-vars.yml
   - tiles/gcp-service-broker/resource-vars.yml
   - tiles/gcp-service-broker/errand-vars.yml
-  vars:
-    network_name: ((services_subnet_name))
-    singleton_availability_zone: ((azs_0))
-    root_service_account_json: ((service_broker_service_account_key))
-    db_host: ((service_broker_db_ip))
-    db_username: ((service_broker_db_username))
-    db_password: ((service_broker_db_password))
-
-- name: stackdriver-nozzle
-  version: 2.1.0
+  version: 4.2.2
+- manifest: tiles/stackdriver-nozzle/product.yml
+  name: stackdriver-nozzle
   product:
+    file_glob: '*.pivotal'
     product_slug: gcp-stackdriver-nozzle
     release_version: 2.1.0
-    file_glob: "*.pivotal"
   stemcell:
+    file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
     release_version: "170.38"
-    file_glob: "*google*.tgz"
-  manifest: tiles/stackdriver-nozzle/product.yml
+  vars:
+    firehose_skip_ssl: true
+    network_name: ((services_subnet_name))
+    project_id: ((project))
+    service_account: ((stackdriver_service_account_key))
+    singleton_availability_zone: ((azs_0))
   vars_files:
   - tiles/stackdriver-nozzle/product-default-vars.yml
   - tiles/stackdriver-nozzle/resource-vars.yml
   - tiles/stackdriver-nozzle/errand-vars.yml
-  vars:
-    network_name: ((services_subnet_name))
-    singleton_availability_zone: ((azs_0))
-    service_account: ((stackdriver_service_account_key))
-    project_id: ((project))
-    firehose_skip_ssl: true
+  version: 2.1.0
