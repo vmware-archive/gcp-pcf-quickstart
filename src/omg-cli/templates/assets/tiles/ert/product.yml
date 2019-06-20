@@ -116,6 +116,8 @@ product-properties:
     value: ((diego_database_max_open_connections))
   .properties.diego_log_timestamp_format:
     value: rfc3339
+  .properties.enable_garden_containerd_mode:
+    value: ((enable_garden_containerd_mode))
   .properties.enable_smb_volume_driver:
     value: ((enable_smb_volume_driver))
   .properties.enable_tls_to_internal_pxc:
@@ -124,6 +126,8 @@ product-properties:
     value: ((experimental_dynamic_egress_enforcement))
   .properties.garden_disk_cleanup:
     value: reserved
+  .properties.garden_disk_cleanup.reserved.reserved_space_for_other_jobs_in_mb:
+    value: ((garden_disk_cleanup/reserved/reserved_space_for_other_jobs_in_mb))
   .properties.gorouter_ssl_ciphers:
     value: ((gorouter_ssl_ciphers))
   .properties.haproxy_client_cert_validation:
@@ -178,7 +182,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-5/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-6/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -222,8 +226,8 @@ product-properties:
     value: ((smtp_auth_mechanism))
   .properties.smtp_enable_starttls_auto:
     value: ((smtp_enable_starttls_auto))
-  .properties.stack_migration_acknowledgement:
-    value: ((stack_migration_acknowledgement))
+  .properties.syslog_agent_enabled:
+    value: ((syslog_agent_enabled))
   .properties.syslog_drop_debug:
     value: ((syslog_drop_debug))
   .properties.syslog_metrics_to_syslog_enabled:
@@ -240,6 +244,8 @@ product-properties:
     value: ((system_blobstore_ccpackage_max_valid_packages_stored))
   .properties.system_database:
     value: internal_pxc
+  .properties.system_metrics_enabled:
+    value: ((system_metrics_enabled))
   .properties.tcp_routing:
     value: disable
   .properties.uaa:

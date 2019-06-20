@@ -34,6 +34,7 @@ credhub_key_encryption_passwords_0/primary: false
 credhub_key_encryption_passwords_0/provider: internal
 diego_brain/starting_container_count_maximum: 200
 diego_database_max_open_connections: 100
+enable_garden_containerd_mode: true
 enable_smb_volume_driver: false
 enable_tls_to_internal_pxc: false
 experimental_dynamic_egress_enforcement: false
@@ -45,7 +46,7 @@ haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-R
 locket_database_max_open_connections: 200
 log_cache_max_per_source: 100000
 metric_registrar_blacklisted_tags: deployment,job,index,id
-metric_registrar_enabled: false
+metric_registrar_enabled: true
 metric_registrar_scrape_interval_in_seconds: 35
 mysql/cli_history: true
 mysql/max_connections: 3500
@@ -83,11 +84,13 @@ secure_service_instance_credentials: false
 silk_database_max_open_connections: 200
 smtp_auth_mechanism: plain
 smtp_enable_starttls_auto: false
+syslog_agent_enabled: false
 syslog_drop_debug: true
 syslog_metrics_to_syslog_enabled: true
 syslog_use_tcp_for_file_forwarding_local_transport: false
 system_blobstore_ccdroplet_max_staged_droplets_stored: 2
 system_blobstore_ccpackage_max_valid_packages_stored: 2
+system_metrics_enabled: true
 uaa/apps_manager_access_token_lifetime: 3600
 uaa/cf_cli_access_token_lifetime: 7200
 uaa/cf_cli_refresh_token_lifetime: 1209600
