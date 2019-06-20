@@ -154,6 +154,10 @@ output "resources_bucket" {
   value = "${google_storage_bucket.resources.name}"
 }
 
+output "backup_bucket" {
+  value = "${google_storage_bucket.backup.name}"
+}
+
 output "director_blobstore_bucket" {
   value = "${google_storage_bucket.director.name}"
 }

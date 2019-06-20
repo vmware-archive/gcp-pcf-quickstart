@@ -147,6 +147,8 @@ product-properties:
     value: 100
   .properties.diego_log_timestamp_format:
     value: rfc3339
+  .properties.enable_garden_containerd_mode:
+    value: true
   .properties.enable_smb_volume_driver:
     value: false
   .properties.enable_tls_to_internal_pxc:
@@ -155,6 +157,8 @@ product-properties:
     value: false
   .properties.garden_disk_cleanup:
     value: reserved
+  .properties.garden_disk_cleanup.reserved.reserved_space_for_other_jobs_in_mb:
+    value: 15360
   .properties.gorouter_ssl_ciphers:
     value: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
   .properties.haproxy_client_cert_validation:
@@ -176,7 +180,7 @@ product-properties:
   .properties.metric_registrar_blacklisted_tags:
     value: deployment,job,index,id
   .properties.metric_registrar_enabled:
-    value: false
+    value: true
   .properties.metric_registrar_scrape_interval_in_seconds:
     value: 35
   .properties.mysql_activity_logging:
@@ -207,7 +211,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-5/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-6/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -251,8 +255,8 @@ product-properties:
     value: plain
   .properties.smtp_enable_starttls_auto:
     value: false
-  .properties.stack_migration_acknowledgement:
-    value: x
+  .properties.syslog_agent_enabled:
+    value: false
   .properties.syslog_drop_debug:
     value: true
   .properties.syslog_metrics_to_syslog_enabled:
@@ -263,6 +267,8 @@ product-properties:
     value: false
   .properties.system_blobstore:
     value: external_gcs_service_account
+  .properties.system_blobstore.external_gcs_service_account.backup_bucket:
+    value: test-backup-bucket
   .properties.system_blobstore.external_gcs_service_account.buildpacks_bucket:
     value: test-buildpacks-bucket
   .properties.system_blobstore.external_gcs_service_account.droplets_bucket:
@@ -285,6 +291,8 @@ product-properties:
     value: 2
   .properties.system_database:
     value: internal_pxc
+  .properties.system_metrics_enabled:
+    value: true
   .properties.tcp_routing:
     value: enable
   .properties.tcp_routing.enable.reservable_ports:

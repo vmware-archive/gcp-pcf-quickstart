@@ -27,6 +27,7 @@ buildpacks_bucket: test-buildpacks-bucket
 droplets_bucket: test-droplets-bucket
 packages_bucket: test-packges-bucket
 resources_bucket: test-resources-bucket
+backup_bucket: test-backup-bucket
 service_broker_db_ip: test-broker-db-ip
 service_broker_db_password: test-broker-db-password
 service_broker_db_username: test-broker-db-username

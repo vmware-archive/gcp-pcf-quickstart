@@ -47,12 +47,12 @@ tiles:
     - http:((http_lb_backend_name))
     security_acknowledgement: X
     singleton_availability_zone: ((azs_0))
-    stack_migration_acknowledgement: x
     system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
     system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
     system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
     system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
     system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
+    system_blobstore/external_gcs_service_account/backup_bucket: ((backup_bucket))
     system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
     system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
     tcp_router_elb_names:
