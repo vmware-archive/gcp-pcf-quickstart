@@ -226,6 +226,9 @@ jobs:
     - task: create-pull-request
       image: ci-image
       file: omg-src-ci/ci/tasks/create-pull-request.yml
+      params:
+        GITHUB_USER: ((github_user_name))
+        GITHUB_PASSWORD: ((github_access_token))
 
   - name: update-cf-tile
     plan:
@@ -265,7 +268,7 @@ jobs:
         resource: gcp-service-broker
         trigger: true
         params: { globs: [] }
-      - get: omg-src-in
+      - get: repo
         resource: omg-src-in
       - get: ci-image
       - get: omg-src-ci
@@ -288,7 +291,7 @@ jobs:
         resource: gcp-stackdriver-nozzle
         trigger: true
         params: { globs: [] }
-      - get: omg-src-in
+      - get: repo
         resource: omg-src-in
       - get: ci-image
       - get: omg-src-ci
