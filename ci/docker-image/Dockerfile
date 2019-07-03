@@ -19,6 +19,11 @@ RUN wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/mas
     apt-get -y -qq update && \
     apt-get -y -qq install bosh-cli hub
 
+# add yq for updating opsman image
+RUN add-apt-repository ppa:rmescandon/yq \
+    apt update \
+    apt install yq -y
+
 WORKDIR /tmp/docker-build
 
 # Golang
