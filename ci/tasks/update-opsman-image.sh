@@ -7,7 +7,7 @@ url=$(yq r opsman-tile/*.yml us)
 fullurl=https://storage.cloud.google.com/${url}
 
 pushd repo
-file=src/omg-cli/templates/opsman-image
+file=src/omg-cli/templates/assets/opsman-image
 
 echo ${fullurl} > ${file}
 
