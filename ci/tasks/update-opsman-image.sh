@@ -2,15 +2,19 @@
 
 set -x
 
-# pushd repo
+version=$(cat opsman-tile/version | cut -d# -f1)
 url=$(yq r opsman-tile/*.yml us)
 fullurl=https://storage.cloud.google.com/${url}
 
-file=repo/src/omg-cli/templates/opsman-image
+pushd repo
+file=src/omg-cli/templates/opsman-image
 
 echo ${fullurl} > ${file}
 
-go generate repo/src/omg-cli/templates/templates.go
+go generate src/omg-cli/templates/templates.go
 
-cd repo
-git status
+git config --global user.email "ci@starkandwayne.com"
+git config --global user.name "CI Bot"
+
+git add -A
+git commit -m "Bump opsman-image: ${version}"

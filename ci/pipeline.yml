@@ -246,6 +246,10 @@ jobs:
     - task: update-opsman-url
       image: ci-image
       file: omg-src-ci/ci/tasks/update-opsman-image.yml
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true      
 
   - name: update-cf-tile
     plan:
