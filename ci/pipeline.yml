@@ -14,6 +14,7 @@ groups:
       - create-pull-request
   - name: tiles
     jobs:
+      - update-opsman-image
       - update-cf-tile
       - update-gcp-service-broker
       - update-gcp-stackdriver-nozzle
@@ -230,6 +231,22 @@ jobs:
         GITHUB_USER: ((github_user_name))
         GITHUB_PASSWORD: ((github_access_token))
 
+  - name: update-opsman-image
+    plan:
+    - in_parallel:
+      - get: opsman-tile
+        trigger: true
+        params:
+          globs:
+            - '*gcp*.yml'
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-opsman-url
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-opsman-image.yml
+
   - name: update-cf-tile
     plan:
     - in_parallel:
@@ -342,6 +359,13 @@ resources:
       username: ((docker_hub_username))
       password: ((docker_hub_password))
       repository: ((docker_hub_repo))
+
+  - name: opsman-tile
+    type: pivnet
+    source:
+      api_token: ((pivnet_token))
+      copy_metadata: true
+      product_slug: ops-manager
 
   - name: cf-tile
     type: pivnet
