@@ -27,6 +27,8 @@ product-properties:
     value: ((cloud_controller/max_disk_quota_app))
   .cloud_controller.max_file_size:
     value: ((cloud_controller/max_file_size))
+  .cloud_controller.max_package_size:
+    value: ((cloud_controller/max_package_size))
   .cloud_controller.security_event_logging_enabled:
     value: ((cloud_controller/security_event_logging_enabled))
   .cloud_controller.staging_timeout_in_seconds:
@@ -204,6 +206,8 @@ product-properties:
     value: ((router_enable_proxy))
   .properties.router_keepalive_connections:
     value: enable
+  .properties.router_prune_all_stale_routes:
+    value: ((router_prune_all_stale_routes))
   .properties.routing_disable_http:
     value: ((routing_disable_http))
   .properties.routing_log_client_ips:

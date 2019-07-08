@@ -19,6 +19,7 @@ cloud_controller/default_quota_memory_limit_mb: 10240
 cloud_controller/enable_custom_buildpacks: true
 cloud_controller/max_disk_quota_app: 2048
 cloud_controller/max_file_size: 1024
+cloud_controller/max_package_size: 2147483648
 cloud_controller/security_event_logging_enabled: true
 cloud_controller/staging_timeout_in_seconds: 900
 cloud_controller_completed_tasks_cutoff_age_in_days: 31
@@ -78,6 +79,7 @@ router/lb_healthy_threshold: 20
 router/request_timeout_in_seconds: 900
 router_backend_max_conn: 500
 router_enable_proxy: false
+router_prune_all_stale_routes: false
 routing_disable_http: false
 saml_signature_algorithm: SHA256
 secure_service_instance_credentials: false
