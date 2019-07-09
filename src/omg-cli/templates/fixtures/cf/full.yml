@@ -60,6 +60,8 @@ product-properties:
     value: 2048
   .cloud_controller.max_file_size:
     value: 1024
+  .cloud_controller.max_package_size:
+    value: 2147483648
   .cloud_controller.security_event_logging_enabled:
     value: true
   .cloud_controller.staging_timeout_in_seconds:
@@ -235,6 +237,8 @@ product-properties:
     value: false
   .properties.router_keepalive_connections:
     value: enable
+  .properties.router_prune_all_stale_routes:
+    value: false
   .properties.routing_disable_http:
     value: false
   .properties.routing_log_client_ips:
