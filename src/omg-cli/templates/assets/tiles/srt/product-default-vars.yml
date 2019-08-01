@@ -56,6 +56,7 @@ mysql/remote_admin_access: false
 mysql_activity_logging/enable/audit_logging_events: connect,query
 mysql_monitor/poll_frequency: 30
 mysql_monitor/write_read_delay: 20
+mysql_proxy/enable_inactive_mysql_port: false
 mysql_proxy/shutdown_delay: 30
 mysql_proxy/startup_delay: 0
 networkpolicyserver_database_max_open_connections: 200

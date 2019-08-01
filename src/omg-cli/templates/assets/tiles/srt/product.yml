@@ -53,6 +53,8 @@ product-properties:
     value: ((mysql_monitor/recipient_email))
   .mysql_monitor.write_read_delay:
     value: ((mysql_monitor/write_read_delay))
+  .mysql_proxy.enable_inactive_mysql_port:
+    value: ((mysql_proxy/enable_inactive_mysql_port))
   .mysql_proxy.shutdown_delay:
     value: ((mysql_proxy/shutdown_delay))
   .mysql_proxy.startup_delay:
