@@ -27,6 +27,11 @@ resource "google_storage_bucket" "resources" {
   force_destroy = true
 }
 
+resource "google_storage_bucket" "backup" {
+  name          = "${var.env_name}-backup-${random_id.suffix.hex}"
+  force_destroy = true
+}
+
 resource "google_service_account" "blobstore" {
   count = "${var.create_blobstore_service_account_key}"
 

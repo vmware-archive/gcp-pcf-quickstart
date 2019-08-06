@@ -61,6 +61,7 @@ type DownloadProductOptions struct {
 	StemcellIaas        string   `long:"stemcell-iaas"                    description:"download the latest available stemcell for the product for the specified iaas. for example 'vsphere' or 'vcloud' or 'openstack' or 'google' or 'azure' or 'aws'"`
 	VarsEnv             []string `long:"vars-env"                         description:"load variables from environment variables matching the provided prefix (e.g.: 'MY' to load MY_var=value)"`
 	VarsFile            []string `long:"vars-file"             short:"l"  description:"load variables from a YAML file"`
+	Vars                []string `long:"var"                              description:"Load variable from the command line. Format: VAR=VAL"`
 }
 
 type DownloadProduct struct {
@@ -126,7 +127,7 @@ func (c *DownloadProduct) Execute(args []string) error {
 	}
 
 	if c.Options.StemcellIaas == "" {
-		return c.writeDownloadProductOutput(productFileName, "", "")
+		return c.writeDownloadProductOutput(productFileName, productVersion, "", "")
 	}
 
 	c.stderr.Printf("Downloading stemcell")
@@ -152,12 +153,12 @@ func (c *DownloadProduct) Execute(args []string) error {
 		return fmt.Errorf("could not download stemcell: %s", err)
 	}
 
-	err = c.writeDownloadProductOutput(productFileName, stemcellFileName, stemcell.Version())
+	err = c.writeDownloadProductOutput(productFileName, productVersion, stemcellFileName, stemcell.Version())
 	if err != nil {
 		return err
 	}
 
-	return c.writeAssignStemcellInput(stemcell.Version())
+	return c.writeAssignStemcellInput(productFileName, stemcell.Version())
 }
 
 func (c *DownloadProduct) determineProductVersion() (string, error) {
@@ -227,18 +228,20 @@ func (c *DownloadProduct) validate() error {
 	return nil
 }
 
-func (c DownloadProduct) writeDownloadProductOutput(productFileName string, stemcellFileName string, stemcellVersion string) error {
+func (c DownloadProduct) writeDownloadProductOutput(productFileName string, productVersion string, stemcellFileName string, stemcellVersion string) error {
 	downloadProductFilename := "download-file.json"
 	c.stderr.Printf("Writing a list of downloaded artifact to %s", downloadProductFilename)
 	downloadProductPayload := struct {
 		ProductPath     string `json:"product_path,omitempty"`
 		ProductSlug     string `json:"product_slug,omitempty"`
+		ProductVersion  string `json:"product_version,omitempty"`
 		StemcellPath    string `json:"stemcell_path,omitempty"`
 		StemcellVersion string `json:"stemcell_version,omitempty"`
 	}{
 		ProductPath:     productFileName,
 		StemcellPath:    stemcellFileName,
 		ProductSlug:     c.Options.PivnetProductSlug,
+		ProductVersion:  productVersion,
 		StemcellVersion: stemcellVersion,
 	}
 
@@ -256,14 +259,19 @@ func (c DownloadProduct) writeDownloadProductOutput(productFileName string, stem
 	return nil
 }
 
-func (c DownloadProduct) writeAssignStemcellInput(stemcellVersion string) error {
+func (c DownloadProduct) writeAssignStemcellInput(productFileName string, stemcellVersion string) error {
 	assignStemcellFileName := "assign-stemcell.yml"
 	c.stderr.Printf("Writing a assign stemcll artifact to %s", assignStemcellFileName)
+	metadata, err := getTileMetadata(productFileName)
+	if err != nil {
+		return fmt.Errorf("cannot parse product metadata: %s", err)
+	}
+
 	assignStemcellPayload := struct {
 		Product  string `json:"product"`
 		Stemcell string `json:"stemcell"`
 	}{
-		Product:  c.Options.PivnetProductSlug,
+		Product:  metadata.ProductName,
 		Stemcell: stemcellVersion,
 	}
 

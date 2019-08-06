@@ -3,7 +3,7 @@
   value:
     value:
     - config: ((gsb_brokerpak_sources_0/config))
-      excluded_plans: ((gsb_brokerpak_sources_0/excluded_plans))
+      excluded_services: ((gsb_brokerpak_sources_0/excluded_services))
       guid: ((gsb_brokerpak_sources_0/guid))
       name: ((gsb_brokerpak_sources_0/name))
       notes: ((gsb_brokerpak_sources_0/notes))

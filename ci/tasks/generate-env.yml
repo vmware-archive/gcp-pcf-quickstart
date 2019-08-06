@@ -5,8 +5,9 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: omg-src-in
+- name: omg-src-ci
 outputs:
 - name: omg-env
   path: omg-env-out
 run:
-  path: omg-src-in/ci/tasks/generate-env.sh
+  path: omg-src-ci/ci/tasks/generate-env.sh

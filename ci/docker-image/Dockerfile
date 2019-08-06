@@ -13,6 +13,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y -qq update && apt-get -y -qq insta
   unzip \
   jq
 
+# Set starkandwayne repo and install bosh
+RUN wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | apt-key add - && \
+    echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.d/starkandwayne.list && \
+    apt-get -y -qq update && \
+    apt-get -y -qq install bosh-cli hub
+
+# add yq for updating opsman image
+RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:rmescandon/yq && \
+    apt-get -y -qq update && \
+    apt-get -y -qq install yq
+
 WORKDIR /tmp/docker-build
 
 # Golang
@@ -53,6 +64,17 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     unzip terraform.zip && \
     mv terraform /usr/local/bin && \
     chmod a+x /usr/local/bin/terraform
+
+# install tile-config-generator
+ENV TCG_VERSION=v0.0.16
+ENV TCG_SHA256SUM=327013f3fde4ac77cfa2e2c2ba2cd3addb736c279c3caa73091004750b134af5
+
+RUN wget https://github.com/pivotalservices/tile-config-generator/releases/download/${TCG_VERSION}/tile-config-generator-linux \
+  -O tile-config-generator && \
+  echo "${TCG_SHA256SUM}  tile-config-generator" > tcg_SHA256SUM && \
+  sha256sum -cw --status tcg_SHA256SUM && \
+  mv tile-config-generator /usr/local/bin && \
+  chmod a+x /usr/local/bin/tile-config-generator
 
 # Cleanup
 RUN rm -rf /tmp/docker-build

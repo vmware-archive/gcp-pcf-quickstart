@@ -85,7 +85,7 @@ nat_instance_count=3
 nat_machine_type="n1-standard-1"
 opsman_machine_type="n1-standard-2"
 jumpbox_machine_type="n1-standard-1"
-external_database="true"
+external_database="false"
 if [ "${SMALL_FOOTPRINT}" == "true" ]; then
   nat_instance_count=1
   nat_machine_type="g1-small"

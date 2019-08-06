@@ -6,6 +6,7 @@ import (
 	"net/http"
 	gourl "net/url"
 
+	urlhelper "github.com/cloudfoundry/bosh-cli/common/util"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	semver "github.com/cppforlife/go-semi-semantic/version"
 )
@@ -30,6 +31,10 @@ type ReleaseImpl struct {
 
 func (r ReleaseImpl) Name() string            { return r.name }
 func (r ReleaseImpl) Version() semver.Version { return r.version }
+
+func (r ReleaseImpl) Exists() (bool, error) {
+	return r.client.HasRelease(r.name, r.version.String())
+}
 
 func (r ReleaseImpl) VersionMark(suffix string) string {
 	if r.currentlyDeployed {
@@ -302,7 +307,7 @@ func (c Client) UploadReleaseURL(url, sha1 string, rebase, fix bool) error {
 
 	_, err = c.taskClientRequest.PostResult(path, reqBody, setHeaders)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Uploading remote release '%s'", url)
+		return bosherr.WrapErrorf(err, "Uploading remote release '%s'", urlhelper.RedactBasicAuth(url))
 	}
 
 	return nil

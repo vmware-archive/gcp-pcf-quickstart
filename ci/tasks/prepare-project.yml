@@ -5,8 +5,9 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: omg-src-in
+- name: omg-src-ci
 run:
-  path: omg-src-in/ci/tasks/prepare-project.sh
+  path: omg-src-ci/ci/tasks/prepare-project.sh
 params:
   google_project: replace-me
   google_json_key_data: replace-me

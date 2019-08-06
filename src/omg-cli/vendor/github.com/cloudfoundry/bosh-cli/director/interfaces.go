@@ -23,6 +23,7 @@ type Director interface {
 	RecentTasks(int, TasksFilter) ([]Task, error)
 	FindTask(int) (Task, error)
 	FindTasksByContextId(string) ([]Task, error)
+	CancelTasks(TasksFilter) error
 
 	Events(EventsFilter) ([]Event, error)
 	Event(string) (Event, error)
@@ -80,6 +81,8 @@ type Director interface {
 	DownloadResourceUnchecked(blobstoreID string, out io.Writer) error
 
 	OrphanedVMs() ([]OrphanedVM, error)
+
+	CertificateExpiry() ([]CertificateExpiryInfo, error)
 }
 
 var _ Director = &DirectorImpl{}
@@ -222,6 +225,7 @@ type UpdateOpts struct {
 type ReleaseSeries interface {
 	Name() string
 	Delete(force bool) error
+	Exists() (bool, error)
 }
 
 //go:generate counterfeiter . Release
@@ -229,6 +233,7 @@ type ReleaseSeries interface {
 type Release interface {
 	Name() string
 	Version() semver.Version
+	Exists() (bool, error)
 	VersionMark(mark string) string
 	CommitHashWithMark(mark string) string
 
@@ -256,6 +261,8 @@ type Stemcell interface {
 type TasksFilter struct {
 	All        bool
 	Deployment string
+	Types      []string
+	States     []string
 }
 
 type Task interface {
@@ -350,4 +357,10 @@ type Event interface {
 	Instance() string
 	Context() map[string]interface{}
 	Error() string
+}
+
+type CertificateExpiryInfo struct {
+	Path     string `json:"certificate_path"`
+	Expiry   string `json:"expiry"`
+	DaysLeft int    `json:"days_left"`
 }

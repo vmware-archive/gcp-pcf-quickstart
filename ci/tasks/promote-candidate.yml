@@ -5,8 +5,9 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
   - name: omg-src-in
+  - name: omg-src-ci
   - name: release-version-semver
 outputs:
   - name: promoted
 run:
-  path: omg-src-in/ci/tasks/promote-candidate.sh
+  path: omg-src-ci/ci/tasks/promote-candidate.sh

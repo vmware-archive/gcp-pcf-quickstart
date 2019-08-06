@@ -12,13 +12,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/gosuri/uilive"
 	"github.com/pivotal-cf/om/api"
 	"github.com/pivotal-cf/om/commands"
 	"github.com/pivotal-cf/om/extractor"
 	"github.com/pivotal-cf/om/formcontent"
 	"github.com/pivotal-cf/om/network"
-	"github.com/pivotal-cf/om/progress"
 	"github.com/starkandwayne/om-tiler/pattern"
 	"github.com/starkandwayne/om-tiler/steps"
 )
@@ -200,16 +198,15 @@ func (c *Client) PollTillOnline(ctx context.Context) error {
 }
 
 func (c *Client) api(ctx context.Context) api.Api {
-	live := uilive.New()
-	live.Out = ioutil.Discard
+	live := liveDiscarder{}
 
 	return api.New(api.ApiInput{
 		Client:         c.oauthClient,
 		UnauthedClient: c.unauthenticatedClient,
 		ProgressClient: network.NewProgressClient(
-			c.oauthClient, progress.NewBar(), live),
+			c.oauthClient, progressBarDiscarder{}, live),
 		UnauthedProgressClient: network.NewProgressClient(
-			c.unauthenticatedClient, progress.NewBar(), live),
+			c.unauthenticatedClient, progressBarDiscarder{}, live),
 		Logger: c.logger(ctx),
 	})
 }

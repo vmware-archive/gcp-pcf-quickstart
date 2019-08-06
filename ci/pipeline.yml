@@ -11,33 +11,39 @@ groups:
       - destroy-pcf
       - run-certification
       - destroy-all
-      - promote-candidate-major
-      - promote-candidate-minor
-      - promote-candidate-patch
+      - create-pull-request
+  - name: tiles
+    jobs:
+      - update-opsman-image
+      - update-cf-tile
+      - update-gcp-service-broker
+      - update-gcp-stackdriver-nozzle
 
 jobs:
   - name: run-unit
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
       - task: unit-tests
         image: ci-image
-        file: omg-src-in/ci/tasks/run-unit.yml
+        file: omg-src-ci/ci/tasks/run-unit.yml
 
   - name: prepare-project
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
 
       - task: prepare-project
         image: ci-image
-        file: omg-src-in/ci/tasks/prepare-project.yml
+        file: omg-src-ci/ci/tasks/prepare-project.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
@@ -47,23 +53,24 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             get: omg-src-in
             resource: omg-src-in
           - get: ci-image
+          - get: omg-src-ci
 
-      - aggregate:
+      - in_parallel:
         task: generate-env
         image: ci-image
-        file: omg-src-in/ci/tasks/generate-env.yml
+        file: omg-src-ci/ci/tasks/generate-env.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
           env_file_name: ((env_file_name))
           env_config: ((env_config))
 
-      - aggregate:
+      - in_parallel:
           - put: omg-env
             params:
               file: omg-env/*.tgz
@@ -72,7 +79,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [run-unit]
             get: omg-src-in
@@ -82,10 +89,11 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
-      - aggregate:
+          - get: omg-src-ci
+      - in_parallel:
         task: create-infrastructure
         image: ci-image
-        file: omg-src-in/ci/tasks/create-infrastructure.yml
+        file: omg-src-ci/ci/tasks/create-infrastructure.yml
         params:
           google_project: ((google_project))
           google_json_key_data: ((google_json_key_data))
@@ -99,17 +107,18 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - get: omg-src-in
             passed: [create-infrastructure]
           - get: omg-env
             passed: [create-infrastructure]
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - &destroy_pcf
           task: destroy-pcf
           image: ci-image
-          file: omg-src-in/ci/tasks/destroy-pcf.yml
+          file: omg-src-ci/ci/tasks/destroy-pcf.yml
           params:
             google_project: ((google_project))
             google_json_key_data: ((google_json_key_data))
@@ -119,19 +128,20 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - get: omg-src-in
             passed: [create-infrastructure]
           - get: omg-env
             passed: [create-infrastructure]
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - try:
             *destroy_pcf
         - &destroy_infrastructure
           task: destroy-infrastructure
           image: ci-image
-          file: omg-src-in/ci/tasks/destroy-infrastructure.yml
+          file: omg-src-ci/ci/tasks/destroy-infrastructure.yml
           params:
             google_project: ((google_project))
             google_json_key_data: ((google_json_key_data))
@@ -142,7 +152,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [create-infrastructure]
             get: omg-src-in
@@ -152,15 +162,16 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - do:
           - task: accept-eula
             image: ci-image
-            file: omg-src-in/ci/tasks/accept-eula.yml
+            file: omg-src-ci/ci/tasks/accept-eula.yml
             params:
               env_file_name: ((env_file_name))
           - task: deploy-pcf
             image: ci-image
-            file: omg-src-in/ci/tasks/deploy-pcf.yml
+            file: omg-src-ci/ci/tasks/deploy-pcf.yml
             params:
               env_file_name: ((env_file_name))
 
@@ -168,7 +179,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [deploy-pcf]
             get: omg-src-in
@@ -178,10 +189,11 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
-      - aggregate:
+          - get: omg-src-ci
+      - in_parallel:
         task: run-certification
         image: ci-image
-        file: omg-src-in/ci/tasks/run-certification.yml
+        file: omg-src-ci/ci/tasks/run-certification.yml
         params:
           env_file_name: ((env_file_name))
 
@@ -189,7 +201,7 @@ jobs:
     serial: true
     serial_groups: [gcp-project]
     plan:
-      - aggregate:
+      - in_parallel:
           - trigger: true
             passed: [run-certification]
             get: omg-src-in
@@ -199,66 +211,122 @@ jobs:
             get: omg-env
             resource: omg-env
           - get: ci-image
+          - get: omg-src-ci
       - do:
         - *destroy_pcf
         - *destroy_infrastructure
 
-  - name: promote-candidate-major
-    serial: true
+  - name: create-pull-request
     plan:
-      - aggregate:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: major
-          - get: ci-image
-      - do: &promote_candidate
-          - task: promote
-            image: ci-image
-            file: omg-src-in/ci/tasks/promote-candidate.yml
-          - put: release-version-semver
-            params:
-              file: release-version-semver/number
-          - put: omg-src-out
-            params:
-              repository: promoted/repo
-              rebase: true
-              tag_prefix: "v"
-              tag: promoted/semver_version
+    - in_parallel:
+        - get: omg-src-in
+          resource: omg-src-in
+          passed: [run-certification]
+        - get: ci-image
+        - get: omg-src-ci
+    - task: create-pull-request
+      image: ci-image
+      file: omg-src-ci/ci/tasks/create-pull-request.yml
+      params:
+        GITHUB_USER: ((github_user_name))
+        GITHUB_PASSWORD: ((github_access_token))
 
-  - name: promote-candidate-minor
-    serial: true
+  - name: update-opsman-image
     plan:
-      - aggregate:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: minor
-          - get: ci-image
-      - do: *promote_candidate
+    - in_parallel:
+      - get: opsman-tile
+        trigger: true
+        params:
+          globs:
+            - '*gcp*.yml'
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-opsman-url
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-opsman-image.yml
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true      
 
-  - name: promote-candidate-patch
-    serial: true
+  - name: update-cf-tile
     plan:
-      - aggregate:
-          - trigger: false
-            passed: [destroy-all]
-            get: omg-src-in
-            resource: omg-src-in
-          - trigger: false
-            get: release-version-semver
-            params:
-              bump: patch
-          - get: ci-image
-      - do: *promote_candidate
+    - in_parallel:
+      - get: tile
+        resource: cf-tile
+        trigger: true
+        params: { globs: [] }
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-srt-tile
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-tile.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: cf
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/srt
+    - task: update-ert-tile
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-tile.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: cf
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/ert
+        OPS_FILE: src/omg-cli/templates/assets/options/full.yml
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
+
+  - name: update-gcp-service-broker
+    plan:
+    - in_parallel:
+      - get: tile
+        resource: gcp-service-broker
+        trigger: true
+        params: { globs: [] }
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-tile
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-tile.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: gcp-service-broker
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/gcp-service-broker
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
+
+  - name: update-gcp-stackdriver-nozzle
+    plan:
+    - in_parallel:
+      - get: tile
+        resource: gcp-stackdriver-nozzle
+        trigger: true
+        params: { globs: [] }
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-tile
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-tile.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: stackdriver-nozzle
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/stackdriver-nozzle
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
 
 resources:
   - name: omg-src-in
@@ -266,6 +334,17 @@ resources:
     source: &git_resource
       uri: ((source_uri))
       branch: ((source_branch))
+      username: ((github_user_name))
+      password: ((github_access_token))
+      ignore_paths: [ci/*]
+
+  - name: omg-src-ci
+    type: git
+    source:
+      uri: ((source_uri))
+      branch: ((source_branch))
+      paths: [ci/*]
+      disable_ci_skip: true
 
   - name: omg-src-out
     type: git
@@ -278,20 +357,40 @@ resources:
       json_key: ((ci_json_key_date))
       versioned_file: ((env_file_name))
 
-  - name: release-version-semver
-    type: semver
-    source:
-      driver: gcs
-      key: release-current-version
-      bucket: ((ci_bucket_name))
-      json_key: ((ci_json_key_date))
-
   - name: ci-image
     type: docker-image
     source:
       username: ((docker_hub_username))
       password: ((docker_hub_password))
       repository: ((docker_hub_repo))
+
+  - name: opsman-tile
+    type: pivnet
+    source:
+      api_token: ((pivnet_token))
+      copy_metadata: true
+      product_slug: ops-manager
+
+  - name: cf-tile
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: elastic-runtime
+
+  - name: gcp-service-broker
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: gcp-service-broker
+
+  - name: gcp-stackdriver-nozzle
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: gcp-stackdriver-nozzle
 
 resource_types:
   - name: gcs-resource
@@ -304,3 +403,14 @@ resource_types:
     source:
       repository: concourse/semver-resource
       tag: latest
+
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final

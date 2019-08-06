@@ -28,6 +28,7 @@ buildpacks_bucket: test-buildpacks-bucket
 droplets_bucket: test-droplets-bucket
 packages_bucket: test-packges-bucket
 resources_bucket: test-resources-bucket
+backup_bucket: test-backup-bucket
 service_broker_db_ip: test-broker-db-ip
 service_broker_db_password: test-broker-db-password
 service_broker_db_username: test-broker-db-username
@@ -41,10 +42,3 @@ ssl_cert: test-ssl-cert
 ssl_cert_private_key: test-ssl-key
 stackdriver_service_account_key:  { type: service_account, project_id: test-stackdriver-project }
 tcp_port_range: 10-20
-ert_sql_password: test-ert-sql-password
-ert_sql_username: test-ert-sql-username
-sql_db_ip: test-sql-ip
-sql_db_port: test-sql-port
-opsman_sql_db_name: test-ops-sql-ip
-opsman_sql_password: test-ops-sql-password
-opsman_sql_username: test-ops-sqlo-username

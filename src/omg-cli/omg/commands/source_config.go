@@ -18,12 +18,16 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	"omg-cli/config"
+	"omg-cli/templates"
 
 	"github.com/alecthomas/kingpin"
-  "github.com/iancoleman/strcase"
+	"github.com/iancoleman/strcase"
 )
 
 // SourceConfigCommand outputs the quickstart's config.
@@ -48,6 +52,17 @@ func (cmd *SourceConfigCommand) run(c *kingpin.ParseContext) error {
 	if err != nil {
 		return err
 	}
+
+	opsmanImage, err := templates.Templates.Open("opsman-image")
+	if err != nil {
+		return fmt.Errorf("opening opsman image url: %v", err)
+	}
+	url, err := ioutil.ReadAll(opsmanImage)
+	if err != nil {
+		return fmt.Errorf("reading opsman image url: %v", err)
+	}
+
+	cfg.BaseImageURL = strings.TrimSpace(string(url))
 
 	cfgBytes, err := json.Marshal(cfg)
 	if err != nil {

@@ -1,5 +1,6 @@
 backup_restore_instance_type: automatic
 backup_restore_instances: automatic
+backup_restore_persistent_disk_size: automatic
 clock_global_instance_type: automatic
 clock_global_instances: automatic
 cloud_controller_instance_type: automatic
@@ -18,6 +19,10 @@ doppler_instance_type: automatic
 doppler_instances: automatic
 ha_proxy_instance_type: automatic
 ha_proxy_instances: automatic
+istio_control_instance_type: automatic
+istio_control_instances: automatic
+istio_router_instance_type: automatic
+istio_router_instances: automatic
 loggregator_trafficcontroller_instance_type: automatic
 loggregator_trafficcontroller_instances: automatic
 mysql_instance_type: automatic
@@ -32,6 +37,8 @@ nats_instances: automatic
 nfs_server_instance_type: automatic
 nfs_server_instances: automatic
 nfs_server_persistent_disk_size: automatic
+route_syncer_instance_type: automatic
+route_syncer_instances: automatic
 router_instance_type: automatic
 router_instances: automatic
 syslog_adapter_instance_type: automatic

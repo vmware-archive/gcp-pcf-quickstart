@@ -1,124 +1,84 @@
-# DIRECTOR
-- type: replace
-  path: /director/ops_files/-
+- path: /director/ops_files/-
+  type: replace
   value: director/options/full.yml
-
-# CF
-- type: replace
-  path: /tiles/name=cf
+- path: /tiles/name=cf
+  type: replace
   value:
-    name: cf
-    version: 2.4.4
-    product:
-      product_slug: elastic-runtime
-      release_version: 2.4.4
-      file_glob: "cf*.pivotal"
-    stemcell:
-      product_slug: stemcells-ubuntu-xenial
-      release_version: "170.38"
-      file_glob: "*google*.tgz"
     manifest: tiles/ert/product.yml
+    name: cf
     ops_files:
     - tiles/ert/network/3-az-configuration.yml
     - tiles/ert/features/system_blobstore-external_gcs_service_account.yml
-    # TODO: credhub external database does not work in 2.4
-    # - tiles/ert/features/system_database-external.yml
-    # - tiles/ert/features/uaa_database-external.yml
-    # - tiles/ert/features/credhub_database-external.yml
     - tiles/ert/features/haproxy_forward_tls-disable.yml
     - tiles/ert/features/tcp_routing-enable.yml
     - tiles/ert/resource/diego_brain_elb_names.yml
     - tiles/ert/resource/router_elb_names.yml
     - tiles/ert/resource/tcp_router_elb_names.yml
+    product:
+      file_glob: cf*.pivotal
+      product_slug: elastic-runtime
+      release_version: 2.6.3
+    stemcell:
+      file_glob: '*google*.tgz'
+      product_slug: stemcells-ubuntu-xenial
+      release_version: 315.72
+    vars:
+      az2_name: ((azs_1))
+      az3_name: ((azs_2))
+      cloud_controller/apps_domain: ((apps_domain))
+      cloud_controller/system_domain: ((sys_domain))
+      credhub_key_encryption_passwords_0/key: ((credhub_key))
+      credhub_key_encryption_passwords_0/name: ((credhub_key_name))
+      credhub_key_encryption_passwords_0/primary: true
+      diego_brain_elb_names:
+      - tcp:((ssh_router_pool))
+      gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+      ha_proxy/skip_cert_verify: true
+      haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
+      haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+      mysql_monitor/recipient_email: admin@example.org
+      network_name: ((ert_subnet_name))
+      networking_poe_ssl_certs_0/certificate: ((ssl_cert))
+      networking_poe_ssl_certs_0/name: Certificate
+      networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
+      router_elb_names:
+      - tcp:((wss_router_pool))
+      - http:((http_lb_backend_name))
+      security_acknowledgement: X
+      singleton_availability_zone: ((azs_0))
+      system_blobstore/external_gcs_service_account/backup_bucket: ((backup_bucket))
+      system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
+      system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
+      system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
+      system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
+      system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
+      system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
+      system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
+      tcp_router_elb_names:
+      - tcp:((tcp_router_pool))
+      tcp_routing/enable/reservable_ports: ((tcp_port_range))
+      uaa/service_provider_key_credentials/certificate: ((ssl_cert))
+      uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     vars_files:
     - tiles/ert/product-default-vars.yml
     - tiles/ert/resource-vars.yml
     - tiles/ert/errand-vars.yml
-    vars:
-      network_name: ((ert_subnet_name))
-      az2_name: ((azs_1))
-      az3_name: ((azs_2))
-      singleton_availability_zone: ((azs_0))
-      cloud_controller/system_domain: ((sys_domain))
-      cloud_controller/apps_domain: ((apps_domain))
-      networking_poe_ssl_certs_0/name: Certificate
-      networking_poe_ssl_certs_0/certificate: ((ssl_cert))
-      networking_poe_ssl_certs_0/privatekey: ((ssl_cert_private_key))
-      ha_proxy/skip_cert_verify: true
-      haproxy_forward_tls/enable/backend_ca: ((ssl_cert))
-      credhub_key_encryption_passwords_0/key: ((credhub_key))
-      credhub_key_encryption_passwords_0/name: ((credhub_key_name))
-      credhub_key_encryption_passwords_0/primary: true
-      uaa/service_provider_key_credentials/certificate: ((ssl_cert))
-      uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
-      security_acknowledgement: X
-      mysql_monitor/recipient_email: admin@example.org
-      system_blobstore/external_gcs_service_account/project_id: ((blobstore_service_account_project))
-      system_blobstore/external_gcs_service_account/service_account_email: ((blobstore_service_account_email))
-      system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
-      system_blobstore/external_gcs_service_account/buildpacks_bucket: ((buildpacks_bucket))
-      system_blobstore/external_gcs_service_account/droplets_bucket: ((droplets_bucket))
-      system_blobstore/external_gcs_service_account/packages_bucket: ((packages_bucket))
-      system_blobstore/external_gcs_service_account/resources_bucket: ((resources_bucket))
-      diego_brain_elb_names: [tcp:((ssh_router_pool))]
-      router_elb_names: [tcp:((wss_router_pool)), http:((http_lb_backend_name))]
-      tcp_router_elb_names: [tcp:((tcp_router_pool))]
-      tcp_routing/enable/reservable_ports: ((tcp_port_range))
-      gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-      haproxy_ssl_ciphers: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-      # TODO: credhub external database does not work in 2.4
-      # system_database/external/host: ((sql_db_ip))
-      # system_database/external/port: ((sql_db_port))
-      # system_database/external/account_password: ((ert_sql_password))
-      # system_database/external/account_username: ((ert_sql_username))
-      # system_database/external/app_usage_service_password: ((ert_sql_password))
-      # system_database/external/app_usage_service_username: ((ert_sql_username))
-      # system_database/external/autoscale_password: ((ert_sql_password))
-      # system_database/external/autoscale_username: ((ert_sql_username))
-      # system_database/external/ccdb_password: ((ert_sql_password))
-      # system_database/external/ccdb_username: ((ert_sql_username))
-      # system_database/external/diego_password: ((ert_sql_password))
-      # system_database/external/diego_username: ((ert_sql_username))
-      # system_database/external/locket_password: ((ert_sql_password))
-      # system_database/external/locket_username: ((ert_sql_username))
-      # system_database/external/networkpolicyserver_password: ((ert_sql_password))
-      # system_database/external/networkpolicyserver_username: ((ert_sql_username))
-      # system_database/external/nfsvolume_password: ((ert_sql_password))
-      # system_database/external/nfsvolume_username: ((ert_sql_username))
-      # system_database/external/notifications_password: ((ert_sql_password))
-      # system_database/external/notifications_username: ((ert_sql_username))
-      # system_database/external/routing_password: ((ert_sql_password))
-      # system_database/external/routing_username: ((ert_sql_username))
-      # system_database/external/silk_password: ((ert_sql_password))
-      # system_database/external/silk_username: ((ert_sql_username))
-      # uaa_database/external/host: ((sql_db_ip))
-      # uaa_database/external/port: ((sql_db_port))
-      # uaa_database/external/uaa_password: ((ert_sql_password))
-      # uaa_database/external/uaa_username: ((ert_sql_username))
-      # credhub_database/external/host: ((sql_db_ip))
-      # credhub_database/external/port: ((sql_db_port))
-      # credhub_database/external/username: ert_sql_username
-      # credhub_database/external/password: ert_sql_password
-      # credhub_database/external/tls_ca: nil
-
-# GCP-SERVICE-BROKER
-- type: replace
-  path: /tiles/name=gcp-service-broker/ops_files/-
+    version: 2.6.3
+- path: /tiles/name=gcp-service-broker/ops_files/-
+  type: replace
   value: tiles/gcp-service-broker/network/3-az-configuration.yml
-- type: replace
-  path: /tiles/name=gcp-service-broker/vars/az2_name?
+- path: /tiles/name=gcp-service-broker/vars/az2_name?
+  type: replace
   value: ((azs_1))
-- type: replace
-  path: /tiles/name=gcp-service-broker/vars/az3_name?
+- path: /tiles/name=gcp-service-broker/vars/az3_name?
+  type: replace
   value: ((azs_2))
-
-# GCP-STACKDRIVER-NOZZLE
-- type: replace
-  path: /tiles/name=stackdriver-nozzle/ops_files?/-
-  value: tiles/gcp-stackdriver-nozzle/network/3-az-configuration.yml
-- type: replace
-  path: /tiles/name=stackdriver-nozzle/vars/az2_name?
+- path: /tiles/name=stackdriver-nozzle/ops_files?/-
+  type: replace
+  value: tiles/stackdriver-nozzle/network/3-az-configuration.yml
+- path: /tiles/name=stackdriver-nozzle/vars/az2_name?
+  type: replace
   value: ((azs_1))
-- type: replace
-  path: /tiles/name=stackdriver-nozzle/vars/az3_name?
+- path: /tiles/name=stackdriver-nozzle/vars/az3_name?
+  type: replace
   value: ((azs_2))

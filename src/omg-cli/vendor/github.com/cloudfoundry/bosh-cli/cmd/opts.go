@@ -46,19 +46,21 @@ type BoshOpts struct {
 	CreateEnv    CreateEnvOpts    `command:"create-env"                description:"Create or update BOSH environment"`
 	DeleteEnv    DeleteEnvOpts    `command:"delete-env"                description:"Delete BOSH environment"`
 	AliasEnv     AliasEnvOpts     `command:"alias-env"                 description:"Alias environment to save URL and CA certificate"`
+	UnaliasEnv   UnaliasEnvOpts   `command:"unalias-env"              description:"Remove an aliased environment"`
 
 	// Authentication
 	LogIn  LogInOpts  `command:"log-in"  alias:"l" alias:"login"  description:"Log in"`
 	LogOut LogOutOpts `command:"log-out"           alias:"logout" description:"Log out"`
 
 	// Tasks
-	Task       TaskOpts       `command:"task"        alias:"t"  description:"Show task status and start tracking its output"`
-	Tasks      TasksOpts      `command:"tasks"       alias:"ts" description:"List running or recent tasks"`
-	CancelTask CancelTaskOpts `command:"cancel-task" alias:"ct" description:"Cancel task at its next checkpoint"`
+	Task        TaskOpts        `command:"task"         alias:"t"   description:"Show task status and start tracking its output"`
+	Tasks       TasksOpts       `command:"tasks"        alias:"ts"  description:"List running or recent tasks"`
+	CancelTask  CancelTaskOpts  `command:"cancel-task"  alias:"ct"  description:"Cancel task at its next checkpoint"`
+	CancelTasks CancelTasksOpts `command:"cancel-tasks" alias:"cts" description:"Cancel tasks at their next checkpoints"`
 
 	// Misc
 	Locks   LocksOpts   `command:"locks"    description:"List current locks"`
-	CleanUp CleanUpOpts `command:"clean-up" description:"Clean up releases, stemcells, disks, etc."`
+	CleanUp CleanUpOpts `command:"clean-up" description:"Clean up old unused resources except orphaned disks"`
 	Curl    CurlOpts    `command:"curl"     description:"Make an HTTP request to the Director" hidden:"true"`
 
 	// Config
@@ -102,11 +104,12 @@ type BoshOpts struct {
 	RepackStemcell       RepackStemcellOpts         `command:"repack-stemcell"              description:"Repack stemcell"`
 
 	// Releases
-	Releases       ReleasesOpts       `command:"releases"        alias:"rs"   description:"List releases"`
-	UploadRelease  UploadReleaseOpts  `command:"upload-release"  alias:"ur"   description:"Upload release"`
-	ExportRelease  ExportReleaseOpts  `command:"export-release"               description:"Export the compiled release to a tarball"`
-	InspectRelease InspectReleaseOpts `command:"inspect-release"              description:"List release contents such as jobs"`
-	DeleteRelease  DeleteReleaseOpts  `command:"delete-release"  alias:"delr" description:"Delete release"`
+	Releases            ReleasesOpts            `command:"releases"        alias:"rs"   description:"List releases"`
+	UploadRelease       UploadReleaseOpts       `command:"upload-release"  alias:"ur"   description:"Upload release"`
+	ExportRelease       ExportReleaseOpts       `command:"export-release"               description:"Export the compiled release to a tarball"`
+	InspectRelease      InspectReleaseOpts      `command:"inspect-release"              description:"List release contents such as jobs"`
+	InspectLocalRelease InspectLocalReleaseOpts `command:"inspect-local-release"     description:"Display information from release metadata"`
+	DeleteRelease       DeleteReleaseOpts       `command:"delete-release"  alias:"delr" description:"Delete release"`
 
 	// Errands
 	Errands   ErrandsOpts   `command:"errands"    alias:"es" description:"List errands"`
@@ -160,8 +163,9 @@ type BoshOpts struct {
 	VendorPackage   VendorPackageOpts   `command:"vendor-package"              description:"Vendor package"`
 
 	// Hidden
-	Sha1ifyRelease  Sha1ifyReleaseOpts  `command:"sha1ify-release"  hidden:"true" description:"Convert release tarball to use SHA1"`
-	Sha2ifyRelease  Sha2ifyReleaseOpts  `command:"sha2ify-release"  hidden:"true" description:"Convert release tarball to use SHA256"`
+	Sha1ifyRelease Sha1ifyReleaseOpts `command:"sha1ify-release"  hidden:"true" description:"Convert release tarball to use SHA1"`
+	Sha2ifyRelease Sha2ifyReleaseOpts `command:"sha2ify-release"  hidden:"true" description:"Convert release tarball to use SHA256"`
+
 	FinalizeRelease FinalizeReleaseOpts `command:"finalize-release"               description:"Create final release from dev release tarball"`
 
 	// Blob management
@@ -184,7 +188,7 @@ type CreateEnvOpts struct {
 	Args CreateEnvArgs `positional-args:"true" required:"true"`
 	VarFlags
 	OpsFlags
-	SkipDrain               bool   `long:"skip-drain" description:"Skip running drain scripts"`
+	SkipDrain               bool   `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
 	StatePath               string `long:"state" value-name:"PATH" description:"State file path"`
 	Recreate                bool   `long:"recreate" description:"Recreate VM in deployment"`
 	RecreatePersistentDisks bool   `long:"recreate-persistent-disks" description:"Recreate persistent disks in the deployment"`
@@ -199,7 +203,7 @@ type DeleteEnvOpts struct {
 	Args DeleteEnvArgs `positional-args:"true" required:"true"`
 	VarFlags
 	OpsFlags
-	SkipDrain bool   `long:"skip-drain" description:"Skip running drain scripts"`
+	SkipDrain bool   `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
 	StatePath string `long:"state" value-name:"PATH" description:"State file path"`
 	cmd
 }
@@ -211,6 +215,7 @@ type DeleteEnvArgs struct {
 // Environment
 
 type EnvironmentOpts struct {
+	Details bool `long:"details" description:"Show director's certificates details"`
 	cmd
 }
 
@@ -228,6 +233,16 @@ type AliasEnvOpts struct {
 }
 
 type AliasEnvArgs struct {
+	Alias string `positional-arg-name:"ALIAS" description:"Environment alias"`
+}
+
+type UnaliasEnvOpts struct {
+	Args UnaliasEnvArgs `positional-args:"true" required:"true"`
+
+	cmd
+}
+
+type UnaliasEnvArgs struct {
 	Alias string `positional-arg-name:"ALIAS" description:"Environment alias"`
 }
 
@@ -260,7 +275,7 @@ type TaskArgs struct {
 }
 
 type TasksOpts struct {
-	Recent     *int `long:"recent" short:"r" description:"Number of tasks to show" optional:"true" optional-value:"30"`
+	Recent     *int `long:"recent" short:"r" description:"Show 30 recent tasks. Use '=' to specify the number of tasks to show" optional:"true" optional-value:"30"`
 	All        bool `long:"all" short:"a" description:"Include all task types (ssh, logs, vms, etc)"`
 	Deployment string
 
@@ -272,6 +287,14 @@ type CancelTaskOpts struct {
 	cmd
 }
 
+type CancelTasksOpts struct {
+	Types      []string `long:"type"  short:"t" description:"task types to cancel (cck_scan_and_fix, cck_apply, update_release, update_deployment, vms, etc) (default is all types)" optional:"true"`
+	States     []string `long:"state" short:"s" description:"task states to cancel (queued, processing) (default: queued)" optional:"true"`
+	Deployment string
+
+	cmd
+}
+
 // Misc
 
 type LocksOpts struct {
@@ -279,7 +302,7 @@ type LocksOpts struct {
 }
 
 type CleanUpOpts struct {
-	All bool `long:"all" description:"Remove all unused releases, stemcells, etc.; otherwise most recent resources will be kept"`
+	All bool `long:"all" description:"Clean up all unused resources including orphaned disks"`
 
 	cmd
 }
@@ -448,7 +471,7 @@ type DeployOpts struct {
 	Recreate                bool                `long:"recreate"                                description:"Recreate all VMs in deployment"`
 	RecreatePersistentDisks bool                `long:"recreate-persistent-disks"               description:"Recreate all persistent disks in deployment"`
 	Fix                     bool                `long:"fix"                                     description:"Recreate an instance with an unresponsive agent instead of erroring"`
-	SkipDrain               []boshdir.SkipDrain `long:"skip-drain" value-name:"INSTANCE-GROUP"  description:"Skip running drain scripts for specific instance groups" optional:"true" optional-value:"*"`
+	SkipDrain               []boshdir.SkipDrain `long:"skip-drain" value-name:"INSTANCE-GROUP"  description:"Skip running drain and pre-stop scripts for specific instance groups" optional:"true" optional-value:"*"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
 	MaxInFlight string `long:"max-in-flight" description:"Override manifest values for max_in_flight"`
@@ -622,6 +645,15 @@ type InspectReleaseOpts struct {
 
 type InspectReleaseArgs struct {
 	Slug boshdir.ReleaseSlug `positional-arg-name:"NAME/VERSION"`
+}
+
+type InspectLocalReleaseOpts struct {
+	Args InspectLocalReleaseArgs `positional-args:"true" required:"true"`
+	cmd
+}
+
+type InspectLocalReleaseArgs struct {
+	PathToRelease string `positional-arg-name:"PATH-TO-RELEASE" description:"Path to release"`
 }
 
 // Errands
@@ -817,7 +849,7 @@ type StopOpts struct {
 	Soft bool `long:"soft" description:"Stop process only (default)"`
 	Hard bool `long:"hard" description:"Delete VM (but keep persistent disk)"`
 
-	SkipDrain bool `long:"skip-drain" description:"Skip running drain scripts"`
+	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
 	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
@@ -829,7 +861,7 @@ type StopOpts struct {
 type RestartOpts struct {
 	Args AllOrInstanceGroupOrInstanceSlugArgs `positional-args:"true"`
 
-	SkipDrain bool `long:"skip-drain" description:"Skip running drain scripts"`
+	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
 	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
@@ -841,7 +873,7 @@ type RestartOpts struct {
 type RecreateOpts struct {
 	Args AllOrInstanceGroupOrInstanceSlugArgs `positional-args:"true"`
 
-	SkipDrain bool `long:"skip-drain" description:"Skip running drain scripts"`
+	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
 	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 	Fix       bool `long:"fix"        description:"Recreate an instance with an unresponsive agent instead of erroring"`
 
