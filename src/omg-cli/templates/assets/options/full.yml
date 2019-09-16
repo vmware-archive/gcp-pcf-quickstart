@@ -21,7 +21,7 @@
     stemcell:
       file_glob: '*google*.tgz'
       product_slug: stemcells-ubuntu-xenial
-      release_version: 315.72
+      release_version: 315.93
     vars:
       az2_name: ((azs_1))
       az3_name: ((azs_2))
