@@ -1,3 +1,12 @@
+network-properties:
+  network:
+    name: test-services-subnet
+  other_availability_zones:
+  - name: testzone-1
+  - name: testzone-2
+  - name: testzone-3
+  singleton_availability_zone:
+    name: testzone-1
 product-name: stackdriver-nozzle
 product-properties:
   .properties.blacklist:
@@ -32,8 +41,8 @@ product-properties:
     value: test-project
   .properties.service_account:
     value:
-      type: service_account
       project_id: test-stackdriver-project
+      type: service_account
   .properties.whitelist:
     value:
     - description: Whitelist auctioneer KPI metrics.
@@ -92,19 +101,10 @@ product-properties:
       regexp: ^health(watch)?\.
       sink: monitoring
       type: name
-network-properties:
-  network:
-    name: test-services-subnet
-  other_availability_zones:
-  - name: testzone-1
-  - name: testzone-2
-  - name: testzone-3
-  singleton_availability_zone:
-    name: testzone-1
 resource-config:
   stackdriver-nozzle:
+    instance_type:
+      id: automatic
     instances: automatic
     persistent_disk:
       size_mb: automatic
-    instance_type:
-      id: automatic

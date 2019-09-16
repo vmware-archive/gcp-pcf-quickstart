@@ -23,7 +23,7 @@ tiles:
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 315.72
+    release_version: 315.93
   vars:
     cloud_controller/apps_domain: ((apps_domain))
     cloud_controller/system_domain: ((sys_domain))

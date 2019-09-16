@@ -86,6 +86,8 @@ product-properties:
     value: admin@example.org
   .mysql_monitor.write_read_delay:
     value: 20
+  .mysql_proxy.enable_inactive_mysql_port:
+    value: false
   .mysql_proxy.shutdown_delay:
     value: 30
   .mysql_proxy.startup_delay:
