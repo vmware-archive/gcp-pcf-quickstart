@@ -21,4 +21,8 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/jessevdk/go-flags => github.com/cppforlife/go-flags v0.0.0-20170707010757-351f5f310b26
+replace (
+	github.com/cheggaaa/pb => github.com/cheggaaa/pb v1.0.28 // from bosh-cli Gopkg.lock
+	github.com/golang/lint => golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // https://github.com/golang/lint/issues/446#issuecomment-483638233
+	github.com/jessevdk/go-flags => github.com/cppforlife/go-flags v0.0.0-20170707010757-351f5f310b26 // from bosh-cli Gopkg.lock
+)
