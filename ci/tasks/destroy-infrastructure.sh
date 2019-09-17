@@ -22,3 +22,7 @@ pushd "${release_dir}/src/omg-tf"
 	sleep ${seconds}
 	terraform destroy --auto-approve --parallelism=100 -var-file=${terraform_config}
 popd
+
+#quick and dirty cleanup fix
+gcloud compute disks list --format="value(NAME)" | xargs -L 1 gcloud compute disks delete --zone europe-west4-c -q
+gcloud compute images list --format="value(NAME)" --filter=stemcell | xargs -L 1 gcloud compute images delete -q
