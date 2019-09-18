@@ -65,7 +65,9 @@ git --no-pager diff
 
 echo "Embed updated template files"
 go generate src/omg-cli/templates/templates.go
-UPDATE_FIXTURES=true ginkgo src/omg-cli/templates
+pushd src/omg-cli
+UPDATE_FIXTURES=true ginkgo -skipPackage=certification -r ./...
+popd
 
 git config --global user.email "ci@starkandwayne.com"
 git config --global user.name "CI Bot"
