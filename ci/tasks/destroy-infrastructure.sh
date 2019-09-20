@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 pushd omg-src-in/ci/tasks > /dev/null
 	source utils.sh
