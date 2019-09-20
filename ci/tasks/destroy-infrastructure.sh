@@ -24,5 +24,7 @@ pushd "${release_dir}/src/omg-tf"
 popd
 
 #quick and dirty cleanup fix
+echo "removing leftover disks"
 gcloud compute disks list --format="value(NAME)" | xargs -L 1 gcloud compute disks delete --zone europe-west4-c -q
+echo "removing leftover stemcells"
 gcloud compute images list --format="value(NAME)" --filter=stemcell | xargs -L 1 gcloud compute images delete -q
