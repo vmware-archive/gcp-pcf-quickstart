@@ -202,6 +202,8 @@ product-properties:
     value: ((route_services/enable/internal_lookup))
   .properties.router_backend_max_conn:
     value: ((router_backend_max_conn))
+  .properties.router_balancing_algorithm:
+    value: round-robin
   .properties.router_client_cert_validation:
     value: request
   .properties.router_enable_proxy:
@@ -327,6 +329,12 @@ resource-config:
     instance_type:
       id: ((cloud_controller_worker_instance_type))
     instances: ((cloud_controller_worker_instances))
+  consul_server:
+    instance_type:
+      id: ((consul_server_instance_type))
+    instances: ((consul_server_instances))
+    persistent_disk:
+      size_mb: ((consul_server_persistent_disk_size))
   credhub:
     instance_type:
       id: ((credhub_instance_type))

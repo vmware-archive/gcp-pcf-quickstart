@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/consul_server?/nsx_security_groups?
+  value: ((consul_server_nsx_security_groups))

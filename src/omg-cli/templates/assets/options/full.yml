@@ -17,11 +17,11 @@
     product:
       file_glob: cf*.pivotal
       product_slug: elastic-runtime
-      release_version: 2.6.4
+      release_version: 2.6.6
     stemcell:
       file_glob: '*google*.tgz'
       product_slug: stemcells-ubuntu-xenial
-      release_version: 315.93
+      release_version: 315.97
     vars:
       az2_name: ((azs_1))
       az3_name: ((azs_2))
@@ -63,7 +63,7 @@
     - tiles/ert/product-default-vars.yml
     - tiles/ert/resource-vars.yml
     - tiles/ert/errand-vars.yml
-    version: 2.6.4
+    version: 2.6.6
 - path: /tiles/name=gcp-service-broker/ops_files/-
   type: replace
   value: tiles/gcp-service-broker/network/3-az-configuration.yml
