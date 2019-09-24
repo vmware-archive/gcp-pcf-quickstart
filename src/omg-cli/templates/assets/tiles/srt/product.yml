@@ -202,6 +202,8 @@ product-properties:
     value: ((route_services/enable/internal_lookup))
   .properties.router_backend_max_conn:
     value: ((router_backend_max_conn))
+  .properties.router_balancing_algorithm:
+    value: round-robin
   .properties.router_client_cert_validation:
     value: request
   .properties.router_enable_proxy:

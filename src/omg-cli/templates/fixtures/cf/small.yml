@@ -231,6 +231,8 @@ product-properties:
     value: false
   .properties.router_backend_max_conn:
     value: 500
+  .properties.router_balancing_algorithm:
+    value: round-robin
   .properties.router_client_cert_validation:
     value: request
   .properties.router_enable_proxy:
