@@ -85,8 +85,9 @@ product-properties:
     value: ((cf_networking_database_connection_timeout))
   .properties.cf_networking_enable_space_developer_self_service:
     value: ((cf_networking_enable_space_developer_self_service))
-  .properties.cf_networking_internal_domain:
-    value: ((cf_networking_internal_domain))
+  .properties.cf_networking_internal_domains:
+    value:
+    - name: apps.internal
   .properties.cloud_controller_completed_tasks_cutoff_age_in_days:
     value: ((cloud_controller_completed_tasks_cutoff_age_in_days))
   .properties.cloud_controller_default_health_check_timeout:
@@ -109,13 +110,12 @@ product-properties:
     value: ((container_networking_interface_plugin/silk/vtep_port))
   .properties.credhub_database:
     value: internal_mysql
-  .properties.credhub_key_encryption_passwords:
+  .properties.credhub_internal_provider_keys:
     value:
     - key:
-        secret: ((credhub_key_encryption_passwords_0/key))
-      name: ((credhub_key_encryption_passwords_0/name))
-      primary: ((credhub_key_encryption_passwords_0/primary))
-      provider: ((credhub_key_encryption_passwords_0/provider))
+        secret: ((credhub_internal_provider_keys_0/key))
+      name: ((credhub_internal_provider_keys_0/name))
+      primary: ((credhub_internal_provider_keys_0/primary))
   .properties.diego_database_max_open_connections:
     value: ((diego_database_max_open_connections))
   .properties.diego_log_timestamp_format:
@@ -126,6 +126,8 @@ product-properties:
     value: ((enable_smb_volume_driver))
   .properties.enable_tls_to_internal_pxc:
     value: ((enable_tls_to_internal_pxc))
+  .properties.enable_v1_firehose:
+    value: ((enable_v1_firehose))
   .properties.experimental_dynamic_egress_enforcement:
     value: ((experimental_dynamic_egress_enforcement))
   .properties.garden_disk_cleanup:
@@ -186,7 +188,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-6/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-7/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -210,8 +212,6 @@ product-properties:
     value: ((router_enable_proxy))
   .properties.router_keepalive_connections:
     value: enable
-  .properties.router_prune_all_stale_routes:
-    value: ((router_prune_all_stale_routes))
   .properties.routing_disable_http:
     value: ((routing_disable_http))
   .properties.routing_log_client_ips:
@@ -234,18 +234,16 @@ product-properties:
     value: ((smtp_auth_mechanism))
   .properties.smtp_enable_starttls_auto:
     value: ((smtp_enable_starttls_auto))
-  .properties.syslog_agent_enabled:
-    value: ((syslog_agent_enabled))
   .properties.syslog_drop_debug:
     value: ((syslog_drop_debug))
-  .properties.syslog_metrics_to_syslog_enabled:
-    value: ((syslog_metrics_to_syslog_enabled))
   .properties.syslog_tls:
     value: disabled
   .properties.syslog_use_tcp_for_file_forwarding_local_transport:
     value: ((syslog_use_tcp_for_file_forwarding_local_transport))
   .properties.system_blobstore:
     value: internal
+  .properties.system_blobstore_backup_level:
+    value: all
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
     value: ((system_blobstore_ccdroplet_max_staged_droplets_stored))
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:
@@ -329,12 +327,6 @@ resource-config:
     instance_type:
       id: ((cloud_controller_worker_instance_type))
     instances: ((cloud_controller_worker_instances))
-  consul_server:
-    instance_type:
-      id: ((consul_server_instance_type))
-    instances: ((consul_server_instances))
-    persistent_disk:
-      size_mb: ((consul_server_persistent_disk_size))
   credhub:
     instance_type:
       id: ((credhub_instance_type))
@@ -403,14 +395,6 @@ resource-config:
     instance_type:
       id: ((router_instance_type))
     instances: ((router_instances))
-  syslog_adapter:
-    instance_type:
-      id: ((syslog_adapter_instance_type))
-    instances: ((syslog_adapter_instances))
-  syslog_scheduler:
-    instance_type:
-      id: ((syslog_scheduler_instance_type))
-    instances: ((syslog_scheduler_instances))
   tcp_router:
     instance_type:
       id: ((tcp_router_instance_type))
@@ -441,6 +425,9 @@ errand-config:
   push-usage-service:
     post-deploy-state: ((push-usage-service_post_deploy_state))
     pre-delete-state: ((push-usage-service_pre_delete_state))
+  rotate_cc_database_key:
+    post-deploy-state: ((rotate_cc_database_key_post_deploy_state))
+    pre-delete-state: ((rotate_cc_database_key_pre_delete_state))
   smbbrokerpush:
     post-deploy-state: ((smbbrokerpush_post_deploy_state))
     pre-delete-state: ((smbbrokerpush_pre_delete_state))

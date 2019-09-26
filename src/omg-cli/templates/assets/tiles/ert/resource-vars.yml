@@ -7,9 +7,6 @@ cloud_controller_instance_type: automatic
 cloud_controller_instances: automatic
 cloud_controller_worker_instance_type: automatic
 cloud_controller_worker_instances: automatic
-consul_server_instance_type: automatic
-consul_server_instances: automatic
-consul_server_persistent_disk_size: automatic
 credhub_instance_type: automatic
 credhub_instances: automatic
 diego_brain_instance_type: automatic
@@ -44,10 +41,6 @@ route_syncer_instance_type: automatic
 route_syncer_instances: automatic
 router_instance_type: automatic
 router_instances: automatic
-syslog_adapter_instance_type: automatic
-syslog_adapter_instances: automatic
-syslog_scheduler_instance_type: automatic
-syslog_scheduler_instances: automatic
 tcp_router_instance_type: automatic
 tcp_router_instances: automatic
 uaa_instance_type: automatic

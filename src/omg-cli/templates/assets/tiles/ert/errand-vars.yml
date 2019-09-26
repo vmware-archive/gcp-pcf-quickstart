@@ -12,6 +12,8 @@ push-apps-manager_post_deploy_state: default
 push-apps-manager_pre_delete_state: default
 push-usage-service_post_deploy_state: default
 push-usage-service_pre_delete_state: default
+rotate_cc_database_key_post_deploy_state: default
+rotate_cc_database_key_pre_delete_state: default
 smbbrokerpush_post_deploy_state: default
 smbbrokerpush_pre_delete_state: default
 smoke_tests_post_deploy_state: default
