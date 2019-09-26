@@ -1,0 +1,12 @@
+- type: replace
+  path: /product-properties/.properties.credhub_internal_provider_keys?
+  value:
+    value:
+    - key:
+        secret: ((credhub_internal_provider_keys_0/key))
+      name: ((credhub_internal_provider_keys_0/name))
+      primary: ((credhub_internal_provider_keys_0/primary))
+    - key:
+        secret: ((credhub_internal_provider_keys_1/key))
+      name: ((credhub_internal_provider_keys_1/name))
+      primary: ((credhub_internal_provider_keys_1/primary))

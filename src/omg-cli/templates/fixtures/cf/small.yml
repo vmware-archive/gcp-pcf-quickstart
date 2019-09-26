@@ -20,6 +20,9 @@ errand-config:
   push-usage-service:
     post-deploy-state: default
     pre-delete-state: default
+  rotate_cc_database_key:
+    post-deploy-state: default
+    pre-delete-state: default
   smbbrokerpush:
     post-deploy-state: default
     pre-delete-state: default
@@ -116,8 +119,9 @@ product-properties:
     value: 120
   .properties.cf_networking_enable_space_developer_self_service:
     value: false
-  .properties.cf_networking_internal_domain:
-    value: apps.internal
+  .properties.cf_networking_internal_domains:
+    value:
+    - name: apps.internal
   .properties.cloud_controller_completed_tasks_cutoff_age_in_days:
     value: 31
   .properties.cloud_controller_default_health_check_timeout:
@@ -140,13 +144,12 @@ product-properties:
     value: 4789
   .properties.credhub_database:
     value: internal_mysql
-  .properties.credhub_key_encryption_passwords:
+  .properties.credhub_internal_provider_keys:
     value:
     - key:
-        secret: test-credhub-key
-      name: test-credhub-key-name
+        secret: rtef13s9jinlc69wgfuy
+      name: default_key
       primary: true
-      provider: internal
   .properties.diego_database_max_open_connections:
     value: 100
   .properties.diego_log_timestamp_format:
@@ -157,6 +160,8 @@ product-properties:
     value: false
   .properties.enable_tls_to_internal_pxc:
     value: false
+  .properties.enable_v1_firehose:
+    value: true
   .properties.experimental_dynamic_egress_enforcement:
     value: false
   .properties.garden_disk_cleanup:
@@ -215,7 +220,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-6/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-7/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -239,8 +244,6 @@ product-properties:
     value: false
   .properties.router_keepalive_connections:
     value: enable
-  .properties.router_prune_all_stale_routes:
-    value: false
   .properties.routing_disable_http:
     value: false
   .properties.routing_log_client_ips:
@@ -263,11 +266,7 @@ product-properties:
     value: plain
   .properties.smtp_enable_starttls_auto:
     value: false
-  .properties.syslog_agent_enabled:
-    value: false
   .properties.syslog_drop_debug:
-    value: true
-  .properties.syslog_metrics_to_syslog_enabled:
     value: true
   .properties.syslog_tls:
     value: disabled
@@ -293,6 +292,8 @@ product-properties:
     value:
       project_id: test-blobstore-project
       type: service_account
+  .properties.system_blobstore_backup_level:
+    value: all
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
     value: 2
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:
