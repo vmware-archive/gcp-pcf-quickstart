@@ -147,8 +147,8 @@ product-properties:
   .properties.credhub_internal_provider_keys:
     value:
     - key:
-        secret: rtef13s9jinlc69wgfuy
-      name: default_key
+        secret: test-credhub-key
+      name: test-credhub-key-name
       primary: true
   .properties.diego_database_max_open_connections:
     value: 100
