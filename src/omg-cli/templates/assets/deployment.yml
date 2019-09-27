@@ -77,7 +77,7 @@ tiles:
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 170.129
+    release_version: 170.133
   vars:
     db_host: ((service_broker_db_ip))
     db_password: ((service_broker_db_password))
@@ -99,7 +99,7 @@ tiles:
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: "170.38"
+    release_version: 170.133
   vars:
     firehose_skip_ssl: true
     network_name: ((services_subnet_name))
