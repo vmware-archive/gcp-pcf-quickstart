@@ -30,6 +30,9 @@
       credhub_internal_provider_keys_0/key: ((credhub_encryption_key))
       credhub_internal_provider_keys_0/name: default_key
       credhub_internal_provider_keys_0/primary: true
+      credhub_key_encryption_passwords_0/key: ((credhub_key))
+      credhub_key_encryption_passwords_0/name: ((credhub_key_name))
+      credhub_key_encryption_passwords_0/primary: true
       diego_brain_elb_names:
       - tcp:((ssh_router_pool))
       gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
