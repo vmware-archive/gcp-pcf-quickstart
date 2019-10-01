@@ -293,7 +293,7 @@ product-properties:
       project_id: test-blobstore-project
       type: service_account
   .properties.system_blobstore_backup_level:
-    value: skip_droplets
+    value: skip_droplets_packages
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
     value: 2
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:
