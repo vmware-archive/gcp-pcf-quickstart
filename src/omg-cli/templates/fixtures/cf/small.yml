@@ -273,25 +273,7 @@ product-properties:
   .properties.syslog_use_tcp_for_file_forwarding_local_transport:
     value: false
   .properties.system_blobstore:
-    value: external_gcs_service_account
-  .properties.system_blobstore.external_gcs_service_account.backup_bucket:
-    value: test-backup-bucket
-  .properties.system_blobstore.external_gcs_service_account.buildpacks_bucket:
-    value: test-buildpacks-bucket
-  .properties.system_blobstore.external_gcs_service_account.droplets_bucket:
-    value: test-droplets-bucket
-  .properties.system_blobstore.external_gcs_service_account.packages_bucket:
-    value: test-packges-bucket
-  .properties.system_blobstore.external_gcs_service_account.project_id:
-    value: test-blobstore-project
-  .properties.system_blobstore.external_gcs_service_account.resources_bucket:
-    value: test-resources-bucket
-  .properties.system_blobstore.external_gcs_service_account.service_account_email:
-    value: blobstore@example.com
-  .properties.system_blobstore.external_gcs_service_account.service_account_json_key:
-    value:
-      project_id: test-blobstore-project
-      type: service_account
+    value: internal
   .properties.system_blobstore_backup_level:
     value: all
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
