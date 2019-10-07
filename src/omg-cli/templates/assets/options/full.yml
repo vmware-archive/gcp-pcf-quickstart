@@ -8,7 +8,7 @@
     name: cf
     ops_files:
     - tiles/ert/network/3-az-configuration.yml
-    - tiles/ert/features/system_blobstore-external_gcs_service_account.yml
+    # - tiles/ert/features/system_blobstore-external_gcs_service_account.yml
     - tiles/ert/features/haproxy_forward_tls-disable.yml
     - tiles/ert/features/tcp_routing-enable.yml
     - tiles/ert/resource/diego_brain_elb_names.yml
