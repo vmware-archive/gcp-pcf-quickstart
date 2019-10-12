@@ -72,11 +72,11 @@ tiles:
   product:
     file_glob: '*.pivotal'
     product_slug: gcp-service-broker
-    release_version: 4.3.0
+    release_version: 4.4.0
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 170.133
+    release_version: 170.14
   vars:
     db_host: ((service_broker_db_ip))
     db_password: ((service_broker_db_password))
@@ -88,7 +88,7 @@ tiles:
   - tiles/gcp-service-broker/product-default-vars.yml
   - tiles/gcp-service-broker/resource-vars.yml
   - tiles/gcp-service-broker/errand-vars.yml
-  version: 4.3.0
+  version: 4.4.0
 - manifest: tiles/stackdriver-nozzle/product.yml
   name: stackdriver-nozzle
   product:
