@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.router_balancing_algorithm?
+  value:
+    value: least-connection

@@ -20,6 +20,9 @@ errand-config:
   push-usage-service:
     post-deploy-state: default
     pre-delete-state: default
+  rotate_cc_database_key:
+    post-deploy-state: default
+    pre-delete-state: default
   smbbrokerpush:
     post-deploy-state: default
     pre-delete-state: default
@@ -84,6 +87,8 @@ product-properties:
     value: admin@example.org
   .mysql_monitor.write_read_delay:
     value: 20
+  .mysql_proxy.enable_inactive_mysql_port:
+    value: false
   .mysql_proxy.shutdown_delay:
     value: 30
   .mysql_proxy.startup_delay:
@@ -114,8 +119,9 @@ product-properties:
     value: 120
   .properties.cf_networking_enable_space_developer_self_service:
     value: false
-  .properties.cf_networking_internal_domain:
-    value: apps.internal
+  .properties.cf_networking_internal_domains:
+    value:
+    - name: apps.internal
   .properties.cloud_controller_completed_tasks_cutoff_age_in_days:
     value: 31
   .properties.cloud_controller_default_health_check_timeout:
@@ -138,13 +144,12 @@ product-properties:
     value: 4789
   .properties.credhub_database:
     value: internal_mysql
-  .properties.credhub_key_encryption_passwords:
+  .properties.credhub_internal_provider_keys:
     value:
     - key:
         secret: test-credhub-key
       name: test-credhub-key-name
       primary: true
-      provider: internal
   .properties.diego_database_max_open_connections:
     value: 100
   .properties.diego_log_timestamp_format:
@@ -155,6 +160,8 @@ product-properties:
     value: false
   .properties.enable_tls_to_internal_pxc:
     value: false
+  .properties.enable_v1_firehose:
+    value: true
   .properties.experimental_dynamic_egress_enforcement:
     value: false
   .properties.garden_disk_cleanup:
@@ -213,7 +220,7 @@ product-properties:
     value:
     - href: /marketplace
       name: Marketplace
-    - href: https://docs.pivotal.io/pivotalcf/2-6/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-7/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
@@ -229,14 +236,14 @@ product-properties:
     value: false
   .properties.router_backend_max_conn:
     value: 500
+  .properties.router_balancing_algorithm:
+    value: round-robin
   .properties.router_client_cert_validation:
     value: request
   .properties.router_enable_proxy:
     value: false
   .properties.router_keepalive_connections:
     value: enable
-  .properties.router_prune_all_stale_routes:
-    value: false
   .properties.routing_disable_http:
     value: false
   .properties.routing_log_client_ips:
@@ -259,36 +266,16 @@ product-properties:
     value: plain
   .properties.smtp_enable_starttls_auto:
     value: false
-  .properties.syslog_agent_enabled:
-    value: false
   .properties.syslog_drop_debug:
-    value: true
-  .properties.syslog_metrics_to_syslog_enabled:
     value: true
   .properties.syslog_tls:
     value: disabled
   .properties.syslog_use_tcp_for_file_forwarding_local_transport:
     value: false
   .properties.system_blobstore:
-    value: external_gcs_service_account
-  .properties.system_blobstore.external_gcs_service_account.backup_bucket:
-    value: test-backup-bucket
-  .properties.system_blobstore.external_gcs_service_account.buildpacks_bucket:
-    value: test-buildpacks-bucket
-  .properties.system_blobstore.external_gcs_service_account.droplets_bucket:
-    value: test-droplets-bucket
-  .properties.system_blobstore.external_gcs_service_account.packages_bucket:
-    value: test-packges-bucket
-  .properties.system_blobstore.external_gcs_service_account.project_id:
-    value: test-blobstore-project
-  .properties.system_blobstore.external_gcs_service_account.resources_bucket:
-    value: test-resources-bucket
-  .properties.system_blobstore.external_gcs_service_account.service_account_email:
-    value: blobstore@example.com
-  .properties.system_blobstore.external_gcs_service_account.service_account_json_key:
-    value:
-      project_id: test-blobstore-project
-      type: service_account
+    value: internal
+  .properties.system_blobstore_backup_level:
+    value: all
   .properties.system_blobstore_ccdroplet_max_staged_droplets_stored:
     value: 2
   .properties.system_blobstore_ccpackage_max_valid_packages_stored:

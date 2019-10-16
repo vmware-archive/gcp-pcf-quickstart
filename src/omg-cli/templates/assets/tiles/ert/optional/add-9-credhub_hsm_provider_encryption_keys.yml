@@ -1,0 +1,22 @@
+- type: replace
+  path: /product-properties/.properties.credhub_hsm_provider_encryption_keys?
+  value:
+    value:
+    - name: ((credhub_hsm_provider_encryption_keys_0/name))
+      primary: ((credhub_hsm_provider_encryption_keys_0/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_1/name))
+      primary: ((credhub_hsm_provider_encryption_keys_1/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_2/name))
+      primary: ((credhub_hsm_provider_encryption_keys_2/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_3/name))
+      primary: ((credhub_hsm_provider_encryption_keys_3/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_4/name))
+      primary: ((credhub_hsm_provider_encryption_keys_4/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_5/name))
+      primary: ((credhub_hsm_provider_encryption_keys_5/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_6/name))
+      primary: ((credhub_hsm_provider_encryption_keys_6/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_7/name))
+      primary: ((credhub_hsm_provider_encryption_keys_7/primary))
+    - name: ((credhub_hsm_provider_encryption_keys_8/name))
+      primary: ((credhub_hsm_provider_encryption_keys_8/primary))

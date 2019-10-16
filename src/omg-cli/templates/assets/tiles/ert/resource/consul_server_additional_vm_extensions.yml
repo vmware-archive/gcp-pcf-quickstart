@@ -1,0 +1,3 @@
+- type: replace
+  path: /resource-config?/consul_server?/additional_vm_extensions?
+  value: ((consul_server_additional_vm_extensions))

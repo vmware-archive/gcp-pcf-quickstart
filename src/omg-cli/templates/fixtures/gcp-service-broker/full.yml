@@ -31,6 +31,8 @@ product-properties:
     value: true
   .properties.gsb_brokerpak_config:
     value: '{}'
+  .properties.gsb_compatibility_enable_builtin_brokerpaks:
+    value: "true"
   .properties.gsb_compatibility_enable_builtin_services:
     value: "true"
   .properties.gsb_compatibility_enable_catalog_schemas:

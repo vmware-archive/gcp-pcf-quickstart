@@ -2,6 +2,7 @@ db_name: servicebroker
 db_port: "3306"
 gcp_service_broker_enable_global_access_to_plans: true
 gsb_brokerpak_config: '{}'
+gsb_compatibility_enable_builtin_brokerpaks: "true"
 gsb_compatibility_enable_builtin_services: "true"
 gsb_compatibility_enable_catalog_schemas: "false"
 gsb_compatibility_enable_cf_sharing: "false"

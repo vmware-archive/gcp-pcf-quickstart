@@ -1,0 +1,32 @@
+- type: replace
+  path: /product-properties/.properties.cloud_controller_encryption_keys?
+  value:
+    value:
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_0/encryption_key))
+      label: ((cloud_controller_encryption_keys_0/label))
+      primary: ((cloud_controller_encryption_keys_0/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_1/encryption_key))
+      label: ((cloud_controller_encryption_keys_1/label))
+      primary: ((cloud_controller_encryption_keys_1/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_2/encryption_key))
+      label: ((cloud_controller_encryption_keys_2/label))
+      primary: ((cloud_controller_encryption_keys_2/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_3/encryption_key))
+      label: ((cloud_controller_encryption_keys_3/label))
+      primary: ((cloud_controller_encryption_keys_3/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_4/encryption_key))
+      label: ((cloud_controller_encryption_keys_4/label))
+      primary: ((cloud_controller_encryption_keys_4/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_5/encryption_key))
+      label: ((cloud_controller_encryption_keys_5/label))
+      primary: ((cloud_controller_encryption_keys_5/primary))
+    - encryption_key:
+        secret: ((cloud_controller_encryption_keys_6/encryption_key))
+      label: ((cloud_controller_encryption_keys_6/label))
+      primary: ((cloud_controller_encryption_keys_6/primary))

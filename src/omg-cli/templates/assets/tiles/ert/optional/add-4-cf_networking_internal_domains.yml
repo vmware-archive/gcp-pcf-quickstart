@@ -1,0 +1,8 @@
+- type: replace
+  path: /product-properties/.properties.cf_networking_internal_domains?
+  value:
+    value:
+    - name: ((cf_networking_internal_domains_0/name))
+    - name: ((cf_networking_internal_domains_1/name))
+    - name: ((cf_networking_internal_domains_2/name))
+    - name: ((cf_networking_internal_domains_3/name))
