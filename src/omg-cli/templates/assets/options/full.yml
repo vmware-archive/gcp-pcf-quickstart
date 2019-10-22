@@ -56,6 +56,7 @@
       tcp_router_elb_names:
       - tcp:((tcp_router_pool))
       tcp_routing/enable/reservable_ports: ((tcp_port_range))
+      tcp_routing/enable/request_timeout_in_seconds: 900
       uaa/service_provider_key_credentials/certificate: ((ssl_cert))
       uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
     vars_files:
