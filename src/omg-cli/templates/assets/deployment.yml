@@ -18,11 +18,11 @@ tiles:
   product:
     file_glob: srt*.pivotal
     product_slug: elastic-runtime
-    release_version: 2.7.0
+    release_version: 2.7.2
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 456.27
+    release_version: 456.3
   vars:
     cloud_controller/apps_domain: ((apps_domain))
     cloud_controller/system_domain: ((sys_domain))
@@ -56,15 +56,15 @@ tiles:
     system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
     tcp_router_elb_names:
     - tcp:((tcp_router_pool))
-    tcp_routing/enable/reservable_ports: ((tcp_port_range))
     tcp_routing/enable/request_timeout_in_seconds: 900
+    tcp_routing/enable/reservable_ports: ((tcp_port_range))
     uaa/service_provider_key_credentials/certificate: ((ssl_cert))
     uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
   vars_files:
   - tiles/srt/product-default-vars.yml
   - tiles/srt/resource-vars.yml
   - tiles/srt/errand-vars.yml
-  version: 2.7.0
+  version: 2.7.2
 - manifest: tiles/gcp-service-broker/product.yml
   name: gcp-service-broker
   ops_files:

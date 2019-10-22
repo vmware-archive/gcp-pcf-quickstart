@@ -286,6 +286,8 @@ product-properties:
     value: true
   .properties.tcp_routing:
     value: enable
+  .properties.tcp_routing.enable.request_timeout_in_seconds:
+    value: 900
   .properties.tcp_routing.enable.reservable_ports:
     value: 10-20
   .properties.uaa:
