@@ -20,7 +20,7 @@
     stemcell:
       file_glob: '*google*.tgz'
       product_slug: stemcells-ubuntu-xenial
-      release_version: 456.30
+      release_version: "456.30"
     vars:
       az2_name: ((azs_1))
       az3_name: ((azs_2))
