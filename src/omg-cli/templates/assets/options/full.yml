@@ -8,6 +8,7 @@
     name: cf
     ops_files:
     - tiles/ert/network/3-az-configuration.yml
+    - tiles/ert/features/system_blobstore-external_gcs_service_account.yml 
     - tiles/ert/features/haproxy_forward_tls-disable.yml
     - tiles/ert/features/tcp_routing-enable.yml
     - tiles/ert/resource/diego_brain_elb_names.yml
@@ -16,11 +17,11 @@
     product:
       file_glob: cf*.pivotal
       product_slug: elastic-runtime
-      release_version: 2.7.0
+      release_version: 2.7.2
     stemcell:
       file_glob: '*google*.tgz'
       product_slug: stemcells-ubuntu-xenial
-      release_version: 456.27
+      release_version: "456.30"
     vars:
       az2_name: ((azs_1))
       az3_name: ((azs_2))
@@ -55,6 +56,7 @@
       system_blobstore/external_gcs_service_account/service_account_json_key: ((blobstore_gcp_service_account_key))
       tcp_router_elb_names:
       - tcp:((tcp_router_pool))
+      tcp_routing/enable/request_timeout_in_seconds: 900
       tcp_routing/enable/reservable_ports: ((tcp_port_range))
       uaa/service_provider_key_credentials/certificate: ((ssl_cert))
       uaa/service_provider_key_credentials/privatekey: ((ssl_cert_private_key))
@@ -62,7 +64,7 @@
     - tiles/ert/product-default-vars.yml
     - tiles/ert/resource-vars.yml
     - tiles/ert/errand-vars.yml
-    version: 2.7.0
+    version: 2.7.2
 - path: /tiles/name=gcp-service-broker/ops_files/-
   type: replace
   value: tiles/gcp-service-broker/network/3-az-configuration.yml
