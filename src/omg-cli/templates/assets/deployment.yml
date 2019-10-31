@@ -10,7 +10,7 @@ tiles:
 - manifest: tiles/srt/product.yml
   name: cf
   ops_files:
-  - tiles/srt/features/system_blobstore-external_gcs_service_account.yml 
+  - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
   - tiles/srt/features/tcp_routing-enable.yml
   - tiles/srt/resource/control_elb_names.yml
@@ -19,11 +19,11 @@ tiles:
   product:
     file_glob: srt*.pivotal
     product_slug: elastic-runtime
-    release_version: 2.7.2
+    release_version: 2.7.3
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: "456.30"
+    release_version: 456.51
   vars:
     cloud_controller/apps_domain: ((apps_domain))
     cloud_controller/system_domain: ((sys_domain))
@@ -65,7 +65,7 @@ tiles:
   - tiles/srt/product-default-vars.yml
   - tiles/srt/resource-vars.yml
   - tiles/srt/errand-vars.yml
-  version: 2.7.2
+  version: 2.7.3
 - manifest: tiles/gcp-service-broker/product.yml
   name: gcp-service-broker
   ops_files:
