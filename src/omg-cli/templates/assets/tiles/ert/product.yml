@@ -186,8 +186,6 @@ product-properties:
     value: ((push_apps_manager_enable_invitations))
   .properties.push_apps_manager_nav_links:
     value:
-    - href: /marketplace
-      name: Marketplace
     - href: https://docs.pivotal.io/pivotalcf/2-7/pas/intro.html
       name: Docs
     - href: /tools
