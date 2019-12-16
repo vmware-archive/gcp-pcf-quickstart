@@ -7,6 +7,5 @@
       guid: ((cloudsql_mysql_custom_plans_0/guid))
       max_disk_size: ((cloudsql_mysql_custom_plans_0/max_disk_size))
       name: ((cloudsql_mysql_custom_plans_0/name))
-      pricing_plan: ((cloudsql_mysql_custom_plans_0/pricing_plan))
       service: ((cloudsql_mysql_custom_plans_0/service))
       tier: ((cloudsql_mysql_custom_plans_0/tier))
