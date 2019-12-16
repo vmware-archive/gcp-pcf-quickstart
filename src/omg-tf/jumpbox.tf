@@ -11,7 +11,7 @@ resource "google_compute_instance" "jumpbox" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-1404-lts"
+      image = "ubuntu-os-cloud/ubuntu-1804-lts"
       size  = 250
       type  = "pd-ssd"
     }
