@@ -43,7 +43,7 @@ if [[ ! -z ${OPS_FILE} ]]; then
     value: ${PIVNET_PRODUCT_VERSION}
   - type: replace
     path: /path=~1tiles~1name=${TILE_NAME}/value/stemcell/release_version
-    value: '${STEMCELL_VERSION}''
+    value: '${STEMCELL_VERSION}'
   ") > ${OPS_FILE}.tmp
   mv ${OPS_FILE}{.tmp,}
 else
@@ -56,7 +56,7 @@ else
     value: ${PIVNET_PRODUCT_VERSION}
   - type: replace
     path: /tiles/name=${TILE_NAME}/stemcell/release_version
-    value: '${STEMCELL_VERSION}''
+    value: '${STEMCELL_VERSION}'
   ") > src/omg-cli/templates/assets/deployment.yml.tmp
   mv src/omg-cli/templates/assets/deployment.yml{.tmp,}
 fi
