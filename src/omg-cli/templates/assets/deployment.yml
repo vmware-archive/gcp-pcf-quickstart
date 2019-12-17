@@ -78,7 +78,7 @@ tiles:
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 170.18
+    release_version: "170.180"
   vars:
     db_host: ((service_broker_db_ip))
     db_password: ((service_broker_db_password))
