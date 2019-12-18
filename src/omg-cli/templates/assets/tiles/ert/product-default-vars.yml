@@ -34,9 +34,11 @@ credhub_internal_provider_keys_0/primary: false
 diego_brain/starting_container_count_maximum: 200
 diego_database_max_open_connections: 100
 enable_garden_containerd_mode: true
-enable_smb_volume_driver: false
+enable_log_cache_syslog_ingestion: false
+enable_smb_volume_driver: true
 enable_tls_to_internal_pxc: false
 enable_v1_firehose: true
+enable_v2_firehose: true
 experimental_dynamic_egress_enforcement: false
 garden_disk_cleanup/reserved/reserved_space_for_other_jobs_in_mb: 15360
 gorouter_ssl_ciphers: ECDHE-RSA-AES128-GCM-SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
@@ -67,6 +69,7 @@ push_apps_manager_currency_lookup: '{ "usd": "$", "eur": "€" }'
 push_apps_manager_display_plan_prices: false
 push_apps_manager_enable_invitations: true
 push_apps_manager_poll_interval: 30
+push_usage_service_cutoff_age_in_days: 365
 route_services/enable/ignore_ssl_cert_verification: false
 route_services/enable/internal_lookup: false
 router/disable_insecure_cookies: false
@@ -89,12 +92,12 @@ syslog_drop_debug: true
 syslog_use_tcp_for_file_forwarding_local_transport: false
 system_blobstore_ccdroplet_max_staged_droplets_stored: 2
 system_blobstore_ccpackage_max_valid_packages_stored: 2
-system_metrics_enabled: true
 uaa/apps_manager_access_token_lifetime: 3600
 uaa/cf_cli_access_token_lifetime: 7200
 uaa/cf_cli_refresh_token_lifetime: 1209600
 uaa/customize_password_label: Password
 uaa/customize_username_label: Email
+uaa/enable_uri_encoding_compatibility_mode: true
 uaa/internal/password_expires_after_months: 0
 uaa/internal/password_max_retry: 5
 uaa/internal/password_min_length: 0

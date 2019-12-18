@@ -122,12 +122,16 @@ product-properties:
     value: rfc3339
   .properties.enable_garden_containerd_mode:
     value: ((enable_garden_containerd_mode))
+  .properties.enable_log_cache_syslog_ingestion:
+    value: ((enable_log_cache_syslog_ingestion))
   .properties.enable_smb_volume_driver:
     value: ((enable_smb_volume_driver))
   .properties.enable_tls_to_internal_pxc:
     value: ((enable_tls_to_internal_pxc))
   .properties.enable_v1_firehose:
     value: ((enable_v1_firehose))
+  .properties.enable_v2_firehose:
+    value: ((enable_v2_firehose))
   .properties.experimental_dynamic_egress_enforcement:
     value: ((experimental_dynamic_egress_enforcement))
   .properties.garden_disk_cleanup:
@@ -186,12 +190,14 @@ product-properties:
     value: ((push_apps_manager_enable_invitations))
   .properties.push_apps_manager_nav_links:
     value:
-    - href: https://docs.pivotal.io/pivotalcf/2-7/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-8/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
   .properties.push_apps_manager_poll_interval:
     value: ((push_apps_manager_poll_interval))
+  .properties.push_usage_service_cutoff_age_in_days:
+    value: ((push_usage_service_cutoff_age_in_days))
   .properties.route_integrity:
     value: tls_verify
   .properties.route_services:
@@ -248,8 +254,6 @@ product-properties:
     value: ((system_blobstore_ccpackage_max_valid_packages_stored))
   .properties.system_database:
     value: internal_pxc
-  .properties.system_metrics_enabled:
-    value: ((system_metrics_enabled))
   .properties.tcp_routing:
     value: disable
   .properties.uaa:
@@ -300,6 +304,8 @@ product-properties:
     value: ((uaa/customize_password_label))
   .uaa.customize_username_label:
     value: ((uaa/customize_username_label))
+  .uaa.enable_uri_encoding_compatibility_mode:
+    value: ((uaa/enable_uri_encoding_compatibility_mode))
   .uaa.proxy_ips_regex:
     value: ((uaa/proxy_ips_regex))
   .uaa.service_provider_key_credentials:
