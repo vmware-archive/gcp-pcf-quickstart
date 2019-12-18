@@ -10,7 +10,7 @@ tiles:
 - manifest: tiles/srt/product.yml
   name: cf
   ops_files:
-  - tiles/srt/features/system_blobstore-external_gcs_service_account.yml 
+  - tiles/srt/features/system_blobstore-external_gcs_service_account.yml
   - tiles/srt/features/haproxy_forward_tls-disable.yml
   - tiles/srt/features/tcp_routing-enable.yml
   - tiles/srt/resource/control_elb_names.yml
@@ -19,11 +19,11 @@ tiles:
   product:
     file_glob: srt*.pivotal
     product_slug: elastic-runtime
-    release_version: 2.7.2
+    release_version: 2.7.6
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: "456.30"
+    release_version: 456.74
   vars:
     cloud_controller/apps_domain: ((apps_domain))
     cloud_controller/system_domain: ((sys_domain))
@@ -65,7 +65,7 @@ tiles:
   - tiles/srt/product-default-vars.yml
   - tiles/srt/resource-vars.yml
   - tiles/srt/errand-vars.yml
-  version: 2.7.2
+  version: 2.7.6
 - manifest: tiles/gcp-service-broker/product.yml
   name: gcp-service-broker
   ops_files:
@@ -74,11 +74,11 @@ tiles:
   product:
     file_glob: '*.pivotal'
     product_slug: gcp-service-broker
-    release_version: 4.4.0
+    release_version: 5.0.0
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: 170.14
+    release_version: "170.180"
   vars:
     db_host: ((service_broker_db_ip))
     db_password: ((service_broker_db_password))
@@ -90,7 +90,7 @@ tiles:
   - tiles/gcp-service-broker/product-default-vars.yml
   - tiles/gcp-service-broker/resource-vars.yml
   - tiles/gcp-service-broker/errand-vars.yml
-  version: 4.4.0
+  version: 5.0.0
 - manifest: tiles/stackdriver-nozzle/product.yml
   name: stackdriver-nozzle
   product:
