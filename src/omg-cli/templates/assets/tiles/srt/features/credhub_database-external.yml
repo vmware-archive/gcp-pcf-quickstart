@@ -27,3 +27,7 @@
   path: /product-properties/.properties.credhub_database.external.require_tls?
   value:
     value: ((credhub_database/external/require_tls))
+- type: replace
+  path: /product-properties/.properties.credhub_database.external.disable_hostname_verification?
+  value:
+    value: ((credhub_database/external/disable_hostname_verification))
