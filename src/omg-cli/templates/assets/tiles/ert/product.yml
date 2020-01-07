@@ -280,6 +280,8 @@ product-properties:
     value: ((uaa_session_idle_timeout))
   .router.disable_insecure_cookies:
     value: ((router/disable_insecure_cookies))
+  .router.drain_timeout:
+    value: ((router/drain_timeout))
   .router.drain_wait:
     value: ((router/drain_wait))
   .router.enable_isolated_routing:
