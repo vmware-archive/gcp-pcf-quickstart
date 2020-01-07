@@ -334,6 +334,8 @@ product-properties:
     value: 1800
   .router.disable_insecure_cookies:
     value: false
+  .router.drain_timeout:
+    value: 900
   .router.drain_wait:
     value: 20
   .router.enable_isolated_routing:

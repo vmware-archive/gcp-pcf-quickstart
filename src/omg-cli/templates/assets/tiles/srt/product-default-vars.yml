@@ -73,6 +73,7 @@ push_usage_service_cutoff_age_in_days: 365
 route_services/enable/ignore_ssl_cert_verification: false
 route_services/enable/internal_lookup: false
 router/disable_insecure_cookies: false
+router/drain_timeout: 900
 router/drain_wait: 20
 router/enable_isolated_routing: false
 router/enable_write_access_logs: true
