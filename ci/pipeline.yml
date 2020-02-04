@@ -255,7 +255,7 @@ jobs:
         merge: true
     - put: gcp-github-release
       params:
-        name: release/version
+        name: release/name
         tag: release/tag
         body: release/notes.md
 
