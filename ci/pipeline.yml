@@ -436,16 +436,16 @@ resources:
     repository: gcp-pcf-quickstart
     access_token: ((github_access_token))
 
-  - name: version
-    type: semver
-    source :
-      driver: git
-      uri: ((source_uri))
-      username: ((github_user_name))
-      password: ((github_access_token))
-      branch: version
-      file: version
-      initial_version:   (( grab meta.initial_version || "3.0.0" ))
+- name: version
+  type: semver
+  source :
+    driver: git
+    uri: ((source_uri))
+    username: ((github_user_name))
+    password: ((github_access_token))
+    branch: version
+    file: version
+    initial_version:   (( grab meta.initial_version || "3.0.0" ))
 
 resource_types:
   - name: gcs-resource
