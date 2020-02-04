@@ -233,31 +233,31 @@ jobs:
 #         GITHUB_USER: ((github_user_name))
 #         GITHUB_PASSWORD: ((github_access_token))
 
-- name: shipit
-  plan:
-  - in_parallel:
-      - get: omg-src-in
-        resource: omg-src-in
-        passed: [run-certification]
-      - get: ci-image
-      - get: omg-src-ci
-      - get: omg-src-in-master
-      - get: version
-  - task: create-pull-request
-    image: ci-image
-    file: omg-src-ci/ci/tasks/create-pull-request.yml
-  - put: version
-    params: { bump: minor }
-  - put: omg-src-master
-    params:
-      repository: omg-src-develop
-      tag: release/tag
-      merge: true
-  - put: gcp-github-release
-    params:
-      name: release/version
-      tag: release/tag
-      body: release/notes.md
+  - name: shipit
+    plan:
+    - in_parallel:
+        - get: omg-src-in
+          resource: omg-src-in
+          passed: [run-certification]
+        - get: ci-image
+        - get: omg-src-ci
+        - get: omg-src-master
+        - get: version
+    - task: shipit
+      image: ci-image
+      file: omg-src-ci/ci/tasks/shipit.yml
+    - put: version
+      params: { bump: minor }
+    - put: omg-src-master
+      params:
+        repository: omg-src-develop
+        tag: release/tag
+        merge: true
+    - put: gcp-github-release
+      params:
+        name: release/version
+        tag: release/tag
+        body: release/notes.md
 
   - name: update-opsman-image
     plan:
@@ -429,23 +429,23 @@ resources:
       copy_metadata: true
       product_slug: gcp-stackdriver-nozzle
 
-- name: gcp-github-release
-  type: github-release
-  source:
-    owner: cf-platform-eng
-    repository: gcp-pcf-quickstart
-    access_token: ((github_access_token))
+  - name: gcp-github-release
+    type: github-release
+    source:
+      owner: cf-platform-eng
+      repository: gcp-pcf-quickstart
+      access_token: ((github_access_token))
 
-- name: version
-  type: semver
-  source :
-    driver: git
-    uri: ((source_uri))
-    username: ((github_user_name))
-    password: ((github_access_token))
-    branch: version
-    file: version
-    initial_version:   (( grab meta.initial_version || "3.0.0" ))
+  - name: version
+    type: semver
+    source :
+      driver: git
+      uri: ((source_uri))
+      username: ((github_user_name))
+      password: ((github_access_token))
+      branch: version
+      file: version
+      initial_version: 3.0.0
 
 resource_types:
   - name: gcs-resource

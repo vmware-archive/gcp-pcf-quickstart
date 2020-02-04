@@ -8,8 +8,6 @@ inputs:
   path: omg-src-develop
 - name: omg-src-master
 - name: omg-src-ci
-- name: omg-env
-  path: omg-env-in
 - name: version
 outputs:
 - name: release
