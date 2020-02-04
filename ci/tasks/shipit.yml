@@ -13,4 +13,4 @@ outputs:
 - name: release
 - name: omg-src-develop
 run:
-  path: omg-src-ci/ci/tasks/finalize-release.sh
+  path: omg-src-ci/ci/tasks/shipit.sh
