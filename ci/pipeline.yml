@@ -11,7 +11,8 @@ groups:
       - destroy-pcf
       - run-certification
       - destroy-all
-      - create-pull-request
+      # - create-pull-request
+      - shipit
   - name: tiles
     jobs:
       - update-opsman-image
@@ -216,20 +217,47 @@ jobs:
         - *destroy_pcf
         - *destroy_infrastructure
 
-  - name: create-pull-request
-    plan:
-    - in_parallel:
-        - get: omg-src-in
-          resource: omg-src-in
-          passed: [run-certification]
-        - get: ci-image
-        - get: omg-src-ci
-    - task: create-pull-request
-      image: ci-image
-      file: omg-src-ci/ci/tasks/create-pull-request.yml
-      params:
-        GITHUB_USER: ((github_user_name))
-        GITHUB_PASSWORD: ((github_access_token))
+# # TODO: should be a merge develop in to master
+#   - name: create-pull-request
+#     plan:
+#     - in_parallel:
+#         - get: omg-src-in
+#           resource: omg-src-in
+#           passed: [run-certification]
+#         - get: ci-image
+#         - get: omg-src-ci
+#     - task: create-pull-request
+#       image: ci-image
+#       file: omg-src-ci/ci/tasks/create-pull-request.yml
+#       params:
+#         GITHUB_USER: ((github_user_name))
+#         GITHUB_PASSWORD: ((github_access_token))
+
+- name: shipit
+  plan:
+  - in_parallel:
+      - get: omg-src-in
+        resource: omg-src-in
+        passed: [run-certification]
+      - get: ci-image
+      - get: omg-src-ci
+      - get: omg-src-in-master
+      - get: version
+  - task: create-pull-request
+    image: ci-image
+    file: omg-src-ci/ci/tasks/create-pull-request.yml
+  - put: version
+    params: { bump: minor }
+  - put: omg-src-master
+    params:
+      repository: omg-src-develop
+      tag: release/tag
+      merge: true
+  - put: gcp-github-release
+    params:
+      name: release/version
+      tag: release/tag
+      body: release/notes.md
 
   - name: update-opsman-image
     plan:
@@ -249,7 +277,7 @@ jobs:
     - put: omg-src-out
       params:
         repository: repo
-        merge: true      
+        merge: true
 
   - name: update-cf-tile
     plan:
@@ -338,6 +366,15 @@ resources:
       password: ((github_access_token))
       ignore_paths: [ci/*]
 
+  - name: omg-src-master
+    type: git
+    source: &git_resource
+      uri: ((source_uri))
+      branch: master
+      username: ((github_user_name))
+      password: ((github_access_token))
+      ignore_paths: [ci/*]
+
   - name: omg-src-ci
     type: git
     source:
@@ -391,6 +428,24 @@ resources:
       api_token: ((pivnet-token))
       copy_metadata: true
       product_slug: gcp-stackdriver-nozzle
+
+- name: gcp-github-release
+  type: github-release
+  source:
+    owner: cf-platform-eng
+    repository: gcp-pcf-quickstart
+    access_token: ((github_access_token))
+
+  - name: version
+    type: semver
+    source :
+      driver: git
+      uri: ((source_uri))
+      username: ((github_user_name))
+      password: ((github_access_token))
+      branch: version
+      file: version
+      initial_version:   (( grab meta.initial_version || "3.0.0" ))
 
 resource_types:
   - name: gcs-resource
