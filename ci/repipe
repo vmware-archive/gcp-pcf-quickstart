@@ -1,0 +1,5 @@
+#!/bin/bash
+
+fly -t pipes@oneclick set-pipeline -c ci/pipeline.yml -p gcp
+
+fly -t pipes@oneclick set-pipeline -c ci/docker-image/pipeline.yml -p gcp-ci-image
