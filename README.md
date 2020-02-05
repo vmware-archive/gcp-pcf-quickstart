@@ -8,6 +8,10 @@ and the [Stackdriver Nozzle](https://docs.pivotal.io/partners/gcp-sdn/index.html
 
 This project aims to make installing PCF on GCP straightforward and is currently in **beta**. It is **not** an official Google product.
 
+# Change log
+please check the [release page](https://github.com/cf-platform-eng/gcp-pcf-quickstart/releases)
+for the latest changes 
+
 # Getting Started
 1. Verify and setup [prerequisites](./docs/prerequisites.md)
 1. Setup [DNS](./docs/dns.md) records for your deployment
