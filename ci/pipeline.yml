@@ -241,7 +241,6 @@ jobs:
           passed: [run-certification]
         - get: ci-image
         - get: omg-src-ci
-        - get: omg-src-master
         - get: version
     - task: shipit
       image: ci-image

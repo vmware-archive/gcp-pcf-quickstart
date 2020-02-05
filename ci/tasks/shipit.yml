@@ -5,7 +5,6 @@ image_resource:
   source: {repository: jrjohnsongoog/omgci}
 inputs:
 - name: omg-src-develop
-- name: omg-src-master
 - name: omg-src-ci
 - name: version
 outputs:
