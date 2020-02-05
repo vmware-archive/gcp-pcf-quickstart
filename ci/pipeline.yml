@@ -236,7 +236,7 @@ jobs:
   - name: shipit
     plan:
     - in_parallel:
-        - get: omg-src-in
+        - get: omg-src-develop
           resource: omg-src-in
           passed: [run-certification]
         - get: ci-image
@@ -368,12 +368,11 @@ resources:
 
   - name: omg-src-master
     type: git
-    source: &git_resource
+    source:
       uri: ((source_uri))
       branch: master
       username: ((github_user_name))
       password: ((github_access_token))
-      ignore_paths: [ci/*]
 
   - name: omg-src-ci
     type: git
