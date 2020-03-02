@@ -19,11 +19,11 @@ tiles:
   product:
     file_glob: srt*.pivotal
     product_slug: elastic-runtime
-    release_version: 2.8.3
+    release_version: 2.8.4
   stemcell:
     file_glob: '*google*.tgz'
     product_slug: stemcells-ubuntu-xenial
-    release_version: "621.55"
+    release_version: "621.57"
   vars:
     cloud_controller/apps_domain: ((apps_domain))
     cloud_controller/system_domain: ((sys_domain))
@@ -65,7 +65,7 @@ tiles:
   - tiles/srt/product-default-vars.yml
   - tiles/srt/resource-vars.yml
   - tiles/srt/errand-vars.yml
-  version: 2.8.3
+  version: 2.8.4
 - manifest: tiles/gcp-service-broker/product.yml
   name: gcp-service-broker
   ops_files:
