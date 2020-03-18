@@ -19,6 +19,7 @@ groups:
       - update-cf-tile
       - update-gcp-service-broker
       - update-gcp-stackdriver-nozzle
+      - update-healthwatch-tile
 
 jobs:
   - name: run-unit
@@ -355,6 +356,30 @@ jobs:
         repository: repo
         merge: true
 
+  - name: update-healthwatch-tile
+    plan:
+    - in_parallel:
+      - get: tile
+        resource: healthwatch-tile
+        trigger: true
+        params: { globs: [] }
+      - get: repo
+        resource: omg-src-in
+      - get: ci-image
+      - get: omg-src-ci
+    - task: update-tile
+      image: ci-image
+      file: omg-src-ci/ci/tasks/update-tile.yml
+      params:
+        PIVNET_TOKEN: ((pivnet-legacy-token))
+        TILE_NAME: p-healthwatch
+        TILE_BASE_DIR: src/omg-cli/templates/assets/tiles/p-healthwatch
+        OPS_FILE: src/omg-cli/templates/assets/options/healthwatch.yml
+    - put: omg-src-out
+      params:
+        repository: repo
+        merge: true
+
 resources:
   - name: omg-src-in
     type: git
@@ -426,6 +451,13 @@ resources:
       api_token: ((pivnet-token))
       copy_metadata: true
       product_slug: gcp-stackdriver-nozzle
+
+  - name: healthwatch-tile
+    type: pivnet
+    source:
+      api_token: ((pivnet-token))
+      copy_metadata: true
+      product_slug: p-healthwatch
 
   - name: gcp-github-release
     type: github-release
