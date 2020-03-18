@@ -367,7 +367,7 @@ jobs:
         resource: omg-src-in
       - get: ci-image
       - get: omg-src-ci
-    - task: update-ert-tile
+    - task: update-tile
       image: ci-image
       file: omg-src-ci/ci/tasks/update-tile.yml
       params:

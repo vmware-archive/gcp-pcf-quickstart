@@ -48,7 +48,7 @@ if [[ ! -z ${OPS_FILE} ]]; then
     value: ${PIVNET_PRODUCT_VERSION}
   - type: replace
     path: ${basepath}/value/stemcell/release_version
-    value: '${STMECELL_VERSION}'
+    value: '${STEMCELL_VERSION}'
   ") > ${OPS_FILE}.tmp
   mv ${OPS_FILE}{.tmp,}
 else
