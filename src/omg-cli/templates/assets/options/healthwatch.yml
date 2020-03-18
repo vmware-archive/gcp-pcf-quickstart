@@ -1,34 +1,33 @@
-- type: replace
-  path: /director/ops_files/-
+- path: /director/ops_files/-
+  type: replace
   value: director/options/healthwatch.yml
-
-- type: replace
-  path: /tiles/-
+- path: /tiles/-
+  type: replace
   value:
-    name: p-healthwatch
-    version: 1.5.2-build.4
-    product:
-      product_slug: p-healthwatch
-      release_version: 1.5.2
-      file_glob: "*.pivotal"
-    stemcell:
-      product_slug: stemcells-ubuntu-xenial
-      release_version: "170.38"
-      file_glob: "*google*.tgz"
     manifest: tiles/p-healthwatch/product.yml
+    name: p-healthwatch
     ops_files:
     - tiles/p-healthwatch/features/opsman-disable.yml
     - tiles/p-healthwatch/optional/add-healthwatch-forwarder-foundation_name.yml
-    vars_files:
-    - tiles/p-healthwatch/product-default-vars.yml
-    - tiles/p-healthwatch/resource-vars.yml
-    - tiles/p-healthwatch/errand-vars.yml
+    product:
+      file_glob: '*.pivotal'
+      product_slug: p-healthwatch
+      release_version: 1.8.1
+    stemcell:
+      file_glob: '*google*.tgz'
+      product_slug: stemcells-ubuntu-xenial
+      release_version: "456.100"
     vars:
       boshtasks/enable/bosh_taskcheck_password: password
       boshtasks/enable/bosh_taskcheck_username: username
       healthwatch-forwarder/foundation_name: example
+      healthwatch-forwarder/health_check_az: ((azs_0))
+      healthwatch-forwarder_instances: 1
       network_name: ((ert_subnet_name))
       service_network_name: ((services_subnet_name))
-      healthwatch-forwarder_instances: 1
-      healthwatch-forwarder/health_check_az: ((azs_0))
       singleton_availability_zone: ((azs_0))
+    vars_files:
+    - tiles/p-healthwatch/product-default-vars.yml
+    - tiles/p-healthwatch/resource-vars.yml
+    - tiles/p-healthwatch/errand-vars.yml
+    version: 1.8.1

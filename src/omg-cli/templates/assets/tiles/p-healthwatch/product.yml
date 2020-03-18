@@ -34,6 +34,8 @@ product-properties:
       secret: ((boshtasks/enable/bosh_taskcheck_password))
   .properties.boshtasks.enable.bosh_taskcheck_username:
     value: ((boshtasks/enable/bosh_taskcheck_username))
+  .properties.indicators_selector:
+    value: "No"
   .properties.opsman:
     value: enable
   .properties.opsman.enable.url:
@@ -59,3 +61,16 @@ resource-config:
     instances: ((redis_instances))
     persistent_disk:
       size_mb: ((redis_persistent_disk_size))
+errand-config:
+  cleanup:
+    post-deploy-state: ((cleanup_post_deploy_state))
+    pre-delete-state: ((cleanup_pre_delete_state))
+  push-apps:
+    post-deploy-state: ((push-apps_post_deploy_state))
+    pre-delete-state: ((push-apps_pre_delete_state))
+  smoke-tests:
+    post-deploy-state: ((smoke-tests_post_deploy_state))
+    pre-delete-state: ((smoke-tests_pre_delete_state))
+  validate-expected-metrics:
+    post-deploy-state: ((validate-expected-metrics_post_deploy_state))
+    pre-delete-state: ((validate-expected-metrics_pre_delete_state))

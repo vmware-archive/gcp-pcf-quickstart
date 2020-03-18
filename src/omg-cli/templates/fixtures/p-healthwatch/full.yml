@@ -1,3 +1,16 @@
+errand-config:
+  cleanup:
+    post-deploy-state: default
+    pre-delete-state: default
+  push-apps:
+    post-deploy-state: default
+    pre-delete-state: default
+  smoke-tests:
+    post-deploy-state: default
+    pre-delete-state: default
+  validate-expected-metrics:
+    post-deploy-state: default
+    pre-delete-state: default
 network-properties:
   network:
     name: test-ert-subnet
@@ -30,7 +43,7 @@ product-properties:
   .healthwatch-forwarder.publish_to_eva:
     value: true
   .healthwatch-forwarder.worker_instance_count:
-    value: 4
+    value: 1
   .properties.boshtasks:
     value: enable
   .properties.boshtasks.enable.bosh_taskcheck_password:
@@ -38,6 +51,8 @@ product-properties:
       secret: password
   .properties.boshtasks.enable.bosh_taskcheck_username:
     value: username
+  .properties.indicators_selector:
+    value: "No"
   .properties.opsman:
     value: disable
   .properties.syslog_selector:

@@ -1,0 +1,8 @@
+cleanup_post_deploy_state: default
+cleanup_pre_delete_state: default
+push-apps_post_deploy_state: default
+push-apps_pre_delete_state: default
+smoke-tests_post_deploy_state: default
+smoke-tests_pre_delete_state: default
+validate-expected-metrics_post_deploy_state: default
+validate-expected-metrics_pre_delete_state: default
