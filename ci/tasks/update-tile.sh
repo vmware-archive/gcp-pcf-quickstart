@@ -33,17 +33,22 @@ tile-config-generator generate \
 
 echo "Update stemcell to: ${STEMCELL_VERSION} for: ${TILE_NAME}/${PIVNET_PRODUCT_VERSION}"
 if [[ ! -z ${OPS_FILE} ]]; then
+  if grep "path: /tiles/-" ${opsfile}; then
+    basepath="/path=~1tiles~1-"
+  else
+    basepath="/path=~1tiles~1name=${TILE_NAME}"
+  fi
   # ~1 is a special charater for / https://bosh.io/docs/cli-ops-files/#escaping
   bosh int ${opsfile} -o <(echo -e "
   - type: replace
-    path: /path=~1tiles~1name=${TILE_NAME}/value/version
+    path: ${basepath}/value/version
     value: ${PIVNET_PRODUCT_VERSION}
   - type: replace
-    path: /path=~1tiles~1name=${TILE_NAME}/value/product/release_version
+    path: ${basepath}/value/product/release_version
     value: ${PIVNET_PRODUCT_VERSION}
   - type: replace
-    path: /path=~1tiles~1name=${TILE_NAME}/value/stemcell/release_version
-    value: '${STEMCELL_VERSION}'
+    path: ${basepath}/value/stemcell/release_version
+    value: '${STMECELL_VERSION}'
   ") > ${OPS_FILE}.tmp
   mv ${OPS_FILE}{.tmp,}
 else
