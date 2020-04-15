@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.app_log_rate_limiting?
+  value:
+    value: enable

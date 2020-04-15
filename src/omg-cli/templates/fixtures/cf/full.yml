@@ -97,6 +97,10 @@ product-properties:
     value: 0
   .nfs_server.blobstore_internal_access_rules:
     value: allow 10.0.0.0/8;,allow 172.16.0.0/12;,allow 192.168.0.0/16;
+  .properties.app_graceful_shutdown_period_in_seconds:
+    value: 10
+  .properties.app_log_rate_limiting:
+    value: disable
   .properties.autoscale_api_disable_connection_pooling:
     value: false
   .properties.autoscale_api_instance_count:
@@ -186,8 +190,6 @@ product-properties:
     value: 16384
   .properties.haproxy_ssl_ciphers:
     value: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
-  .properties.istio:
-    value: disable
   .properties.locket_database_max_open_connections:
     value: 200
   .properties.log_cache_max_per_source:
@@ -216,20 +218,26 @@ product-properties:
     value: enable
   .properties.push_apps_manager_app_poll_interval:
     value: 10
+  .properties.push_apps_manager_buildpack:
+    value: staticfile_buildpack
   .properties.push_apps_manager_currency_lookup:
     value: '{ "usd": "$", "eur": "€" }'
   .properties.push_apps_manager_display_plan_prices:
     value: false
   .properties.push_apps_manager_enable_invitations:
     value: true
+  .properties.push_apps_manager_invitations_buildpack:
+    value: nodejs_buildpack
   .properties.push_apps_manager_nav_links:
     value:
-    - href: https://docs.pivotal.io/pivotalcf/2-8/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-9/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
   .properties.push_apps_manager_poll_interval:
     value: 30
+  .properties.push_apps_manager_search_server_buildpack:
+    value: nodejs_buildpack
   .properties.push_usage_service_cutoff_age_in_days:
     value: 365
   .properties.route_integrity:

@@ -1,3 +1,4 @@
+app_graceful_shutdown_period_in_seconds: 10
 autoscale_api_disable_connection_pooling: false
 autoscale_api_instance_count: 1
 autoscale_enable_notifications: true
@@ -65,10 +66,13 @@ networkpolicyserverinternal_database_max_open_connections: 200
 nfs_server/blobstore_internal_access_rules: allow 10.0.0.0/8;,allow 172.16.0.0/12;,allow
   192.168.0.0/16;
 push_apps_manager_app_poll_interval: 10
+push_apps_manager_buildpack: staticfile_buildpack
 push_apps_manager_currency_lookup: '{ "usd": "$", "eur": "€" }'
 push_apps_manager_display_plan_prices: false
 push_apps_manager_enable_invitations: true
+push_apps_manager_invitations_buildpack: nodejs_buildpack
 push_apps_manager_poll_interval: 30
+push_apps_manager_search_server_buildpack: nodejs_buildpack
 push_usage_service_cutoff_age_in_days: 365
 route_services/enable/ignore_ssl_cert_verification: false
 route_services/enable/internal_lookup: false
