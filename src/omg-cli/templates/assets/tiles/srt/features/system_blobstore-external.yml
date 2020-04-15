@@ -7,6 +7,10 @@
   value:
     value: ((system_blobstore/external/endpoint))
 - type: replace
+  path: /product-properties/.properties.system_blobstore.external.path_style_s3_urls?
+  value:
+    value: ((system_blobstore/external/path_style_s3_urls))
+- type: replace
   path: /product-properties/.properties.system_blobstore.external.buildpacks_bucket?
   value:
     value: ((system_blobstore/external/buildpacks_bucket))

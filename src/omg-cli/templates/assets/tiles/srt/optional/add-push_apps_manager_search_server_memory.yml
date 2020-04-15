@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.push_apps_manager_search_server_memory?
+  value:
+    value: ((push_apps_manager_search_server_memory))

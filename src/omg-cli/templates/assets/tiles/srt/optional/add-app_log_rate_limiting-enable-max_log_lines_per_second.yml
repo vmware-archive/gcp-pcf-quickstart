@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.app_log_rate_limiting.enable.max_log_lines_per_second?
+  value:
+    value: ((app_log_rate_limiting/enable/max_log_lines_per_second))

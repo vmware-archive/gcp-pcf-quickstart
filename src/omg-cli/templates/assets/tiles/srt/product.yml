@@ -61,6 +61,10 @@ product-properties:
     value: ((mysql_proxy/startup_delay))
   .nfs_server.blobstore_internal_access_rules:
     value: ((nfs_server/blobstore_internal_access_rules))
+  .properties.app_graceful_shutdown_period_in_seconds:
+    value: ((app_graceful_shutdown_period_in_seconds))
+  .properties.app_log_rate_limiting:
+    value: disable
   .properties.autoscale_api_disable_connection_pooling:
     value: ((autoscale_api_disable_connection_pooling))
   .properties.autoscale_api_instance_count:
@@ -152,8 +156,6 @@ product-properties:
     value: ((haproxy_max_buffer_size))
   .properties.haproxy_ssl_ciphers:
     value: ((haproxy_ssl_ciphers))
-  .properties.istio:
-    value: disable
   .properties.locket_database_max_open_connections:
     value: ((locket_database_max_open_connections))
   .properties.log_cache_max_per_source:
@@ -182,20 +184,26 @@ product-properties:
     value: enable
   .properties.push_apps_manager_app_poll_interval:
     value: ((push_apps_manager_app_poll_interval))
+  .properties.push_apps_manager_buildpack:
+    value: ((push_apps_manager_buildpack))
   .properties.push_apps_manager_currency_lookup:
     value: ((push_apps_manager_currency_lookup))
   .properties.push_apps_manager_display_plan_prices:
     value: ((push_apps_manager_display_plan_prices))
   .properties.push_apps_manager_enable_invitations:
     value: ((push_apps_manager_enable_invitations))
+  .properties.push_apps_manager_invitations_buildpack:
+    value: ((push_apps_manager_invitations_buildpack))
   .properties.push_apps_manager_nav_links:
     value:
-    - href: https://docs.pivotal.io/pivotalcf/2-8/pas/intro.html
+    - href: https://docs.pivotal.io/pivotalcf/2-9/pas/intro.html
       name: Docs
     - href: /tools
       name: Tools
   .properties.push_apps_manager_poll_interval:
     value: ((push_apps_manager_poll_interval))
+  .properties.push_apps_manager_search_server_buildpack:
+    value: ((push_apps_manager_search_server_buildpack))
   .properties.push_usage_service_cutoff_age_in_days:
     value: ((push_usage_service_cutoff_age_in_days))
   .properties.route_integrity:

@@ -10,7 +10,3 @@
   path: /product-properties/.properties.smoke_tests.specified.space_name?
   value:
     value: ((smoke_tests/specified/space_name))
-- type: replace
-  path: /product-properties/.properties.smoke_tests.specified.apps_domain?
-  value:
-    value: ((smoke_tests/specified/apps_domain))
