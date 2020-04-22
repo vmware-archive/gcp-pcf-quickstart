@@ -312,6 +312,8 @@ product-properties:
     value: 2
   .properties.system_database:
     value: internal_pxc
+  .properties.system_metrics_scraper_scrape_interval:
+    value: 1m
   .properties.tcp_routing:
     value: enable
   .properties.tcp_routing.enable.request_timeout_in_seconds:

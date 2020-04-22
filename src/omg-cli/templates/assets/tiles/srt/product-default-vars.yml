@@ -97,6 +97,7 @@ syslog_drop_debug: true
 syslog_use_tcp_for_file_forwarding_local_transport: false
 system_blobstore_ccdroplet_max_staged_droplets_stored: 2
 system_blobstore_ccpackage_max_valid_packages_stored: 2
+system_metrics_scraper_scrape_interval: 1m
 uaa/apps_manager_access_token_lifetime: 3600
 uaa/cf_cli_access_token_lifetime: 7200
 uaa/cf_cli_refresh_token_lifetime: 1209600
