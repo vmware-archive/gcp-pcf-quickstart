@@ -1,0 +1,4 @@
+- type: replace
+  path: /product-properties/.properties.haproxy_custom_ca_certificates?
+  value:
+    value: ((haproxy_custom_ca_certificates))
