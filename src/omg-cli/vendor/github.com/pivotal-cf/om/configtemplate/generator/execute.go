@@ -38,9 +38,9 @@ func (e *Executor) Generate() error {
 
 	productName := metadata.ProductName()
 
-	targetDirectory := e.baseDirectory
-	if !e.doNotIncludeProductVersion { //always happens
-		targetDirectory = path.Join(e.baseDirectory, productName, productVersion)
+	targetDirectory := path.Join(e.baseDirectory, productName)
+	if !e.doNotIncludeProductVersion {
+		targetDirectory = path.Join(targetDirectory, productVersion)
 	}
 	if err = e.createDirectory(targetDirectory); err != nil {
 		return err
@@ -132,17 +132,31 @@ func (e *Executor) Generate() error {
 		}
 	}
 
-	productPropertyVars, err := CreateProductPropertiesVars(metadata)
+	productPropertyVars, err := GetDefaultPropertyVars(metadata)
 	if err != nil {
 		return err
 	}
 
 	if len(productPropertyVars) > 0 {
-		if err = e.writeYamlFile(path.Join(targetDirectory, "product-default-vars.yml"), productPropertyVars); err != nil {
+		if err = e.writeYamlFile(path.Join(targetDirectory, "default-vars.yml"), productPropertyVars); err != nil {
 			return err
 		}
 	} else {
-		if err = e.writeYamlFile(path.Join(targetDirectory, "product-default-vars.yml"), nil); err != nil {
+		if err = e.writeYamlFile(path.Join(targetDirectory, "default-vars.yml"), nil); err != nil {
+			return err
+		}
+	}
+
+	requiredVars, err := GetRequiredPropertyVars(metadata)
+	if err != nil {
+		return err
+	}
+	if len(requiredVars) > 0 {
+		if err = e.writeYamlFile(path.Join(targetDirectory, "required-vars.yml"), requiredVars); err != nil {
+			return err
+		}
+	} else {
+		if err = e.writeYamlFile(path.Join(targetDirectory, "required-vars.yml"), nil); err != nil {
 			return err
 		}
 	}
@@ -182,7 +196,7 @@ func (e *Executor) CreateTemplate(metadata *Metadata) (*Template, error) {
 		template.NetworkProperties = CreateNetworkProperties(metadata)
 		template.ResourceConfig = CreateResourceConfig(metadata)
 	}
-	productProperties, err := CreateProductProperties(metadata)
+	productProperties, err := GetAllProductProperties(metadata)
 	if err != nil {
 		return nil, err
 	}

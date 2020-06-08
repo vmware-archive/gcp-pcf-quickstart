@@ -49,7 +49,7 @@ func toCamelInitCase(s string, initCase bool) string {
 				n += string(v)
 			}
 		}
-		if v == '_' || v == ' ' || v == '-' {
+		if v == '_' || v == ' ' || v == '-' || v == '.' {
 			capNext = true
 		} else {
 			capNext = false
@@ -58,15 +58,21 @@ func toCamelInitCase(s string, initCase bool) string {
 	return n
 }
 
-// Converts a string to CamelCase
+// ToCamel converts a string to CamelCase
 func ToCamel(s string) string {
+	if uppercaseAcronym[s] {
+		s = strings.ToLower(s)
+	}
 	return toCamelInitCase(s, true)
 }
 
-// Converts a string to lowerCamelCase
+// ToLowerCamel converts a string to lowerCamelCase
 func ToLowerCamel(s string) string {
 	if s == "" {
 		return s
+	}
+	if uppercaseAcronym[s] {
+		s = strings.ToLower(s)
 	}
 	if r := rune(s[0]); r >= 'A' && r <= 'Z' {
 		s = strings.ToLower(string(r)) + s[1:]

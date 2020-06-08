@@ -1,6 +1,6 @@
 package templates
 
-//go:generate go run -tags=dev generate.go
+//go:generate go run -mod=vendor -tags=dev generate.go
 
 import (
 	"omg-cli/config"

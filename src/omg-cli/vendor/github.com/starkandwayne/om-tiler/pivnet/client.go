@@ -62,11 +62,10 @@ func NewClient(c Config, logger *log.Logger) *Client {
 		return steps.ContextLogger(ctx, logger, "[Pivnet]")
 	}
 	client := func(ctx context.Context) gopivnet.Client {
-		return gopivnet.NewClient(gopivnet.ClientConfig{
-			Host:      host,
-			Token:     c.Token,
-			UserAgent: c.UserAgent,
-		}, logshim.NewLogShim(log(ctx), log(ctx), false))
+		return gopivnet.NewClient(
+			gopivnet.NewAccessTokenOrLegacyToken(c.Token, host, c.UserAgent),
+			gopivnet.ClientConfig{Host: host, UserAgent: c.UserAgent},
+			logshim.NewLogShim(log(ctx), log(ctx), false))
 	}
 	filter := func(ctx context.Context) *filter.Filter {
 		return filter.NewFilter(logshim.NewLogShim(log(ctx), log(ctx), false))

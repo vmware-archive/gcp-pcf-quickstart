@@ -28,10 +28,12 @@ type stagedConfigService interface {
 	GetStagedProductByName(product string) (api.StagedProductsFindOutput, error)
 	GetStagedProductJobResourceConfig(productGUID, jobGUID string) (api.JobProperties, error)
 	GetStagedProductNetworksAndAZs(product string) (map[string]interface{}, error)
+	GetStagedProductSyslogConfiguration(product string) (map[string]interface{}, error)
 	GetStagedProductProperties(product string) (map[string]api.ResponseProperty, error)
 	ListDeployedProducts() ([]api.DeployedProductOutput, error)
 	ListStagedProductJobs(productGUID string) (map[string]string, error)
 	ListStagedProductErrands(productID string) (api.ErrandsListOutput, error)
+	GetStagedProductJobMaxInFlight(productGUID string) (map[string]interface{}, error)
 }
 
 func NewStagedConfig(service stagedConfigService, logger logger) StagedConfig {
@@ -131,14 +133,30 @@ func (ec StagedConfig) Execute(args []string) error {
 		return err
 	}
 
-	resourceConfig := map[string]interface{}{}
+	jobsToMaxInFlight, err := ec.service.GetStagedProductJobMaxInFlight(productGUID)
+	if err != nil {
+		return err
+	}
+
+	syslogProperties, err := ec.service.GetStagedProductSyslogConfiguration(productGUID)
+	if err != nil {
+		return err
+	}
+
+	resourceConfig := map[string]config.ResourceConfig{}
 
 	for name, jobGUID := range jobs {
 		jobProperties, err := ec.service.GetStagedProductJobResourceConfig(productGUID, jobGUID)
 		if err != nil {
 			return err
 		}
-		resourceConfig[name] = jobProperties
+		rc := config.ResourceConfig{
+			JobProperties: jobProperties,
+		}
+		if maxInFlight, ok := jobsToMaxInFlight[jobGUID]; ok {
+			rc.MaxInFlight = maxInFlight
+		}
+		resourceConfig[name] = rc
 	}
 
 	errandsListOutput, err := ec.service.ListStagedProductErrands(productGUID)
@@ -162,6 +180,7 @@ func (ec StagedConfig) Execute(args []string) error {
 		NetworkProperties:        networks,
 		ResourceConfigProperties: resourceConfig,
 		ErrandConfigs:            errandConfigs,
+		SyslogProperties:         syslogProperties,
 	}
 
 	output, err := yaml.Marshal(config)
@@ -175,12 +194,12 @@ func (ec StagedConfig) Execute(args []string) error {
 
 func (ec StagedConfig) chooseCredentialHandler(productGUID string) configparser.CredentialHandler {
 	if ec.Options.IncludePlaceholders {
-		return configparser.PlaceholderHandler()
+		return configparser.NewPlaceholderHandler()
 	}
 
 	if ec.Options.IncludeCredentials {
-		return configparser.GetCredentialHandler(productGUID, ec.service)
+		return configparser.NewGetCredentialHandler(productGUID, ec.service)
 	}
 
-	return configparser.NilHandler()
+	return configparser.NewNilHandler()
 }

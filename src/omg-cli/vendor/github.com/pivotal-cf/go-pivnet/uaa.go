@@ -14,10 +14,11 @@ type AuthResp struct {
 type TokenFetcher struct {
 	Endpoint     string
 	RefreshToken string
+	UserAgent    string
 }
 
-func NewTokenFetcher(endpoint, refresh_token string) *TokenFetcher {
-	return &TokenFetcher{endpoint, refresh_token}
+func NewTokenFetcher(endpoint, refreshToken string, userAgent string) *TokenFetcher {
+	return &TokenFetcher{endpoint, refreshToken, userAgent}
 }
 
 func (t TokenFetcher) GetToken() (string, error) {
@@ -29,6 +30,11 @@ func (t TokenFetcher) GetToken() (string, error) {
 	}
 	req, err := http.NewRequest("POST", t.Endpoint+"/authentication/access_tokens", bytes.NewReader(b))
 	req.Header.Add("Content-Type", "application/json")
+
+	if t.UserAgent != "" {
+		req.Header.Add("User-Agent", t.UserAgent)
+	}
+
 	if err != nil {
 		return "", fmt.Errorf("failed to construct API token request: %s", err.Error())
 	}

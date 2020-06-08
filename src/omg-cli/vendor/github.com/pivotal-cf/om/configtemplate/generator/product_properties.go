@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func CreateProductProperties(metadata *Metadata) (map[string]PropertyValue, error) {
+func GetAllProductProperties(metadata *Metadata) (map[string]PropertyValue, error) {
 	productProperties := make(map[string]PropertyValue)
-	for _, property := range metadata.Properties() {
-		propertyMetadata, err := metadata.GetPropertyMetadata(property.Reference)
+	for _, property := range metadata.PropertyInputs() {
+		propertyMetadata, err := metadata.GetPropertyBlueprint(property.Reference)
 		if err != nil {
 			return nil, err
 		}
@@ -18,7 +18,7 @@ func CreateProductProperties(metadata *Metadata) (map[string]PropertyValue, erro
 			}
 			if propertyMetadata.IsCollection() {
 				if propertyMetadata.IsRequiredCollection() {
-					propertyType, err := CollectionPropertyType(strings.Replace(property.Reference, ".", "", 1), propertyMetadata.Default, propertyMetadata.PropertyMetadata)
+					propertyType, err := collectionPropertyType(strings.Replace(property.Reference, ".", "", 1), propertyMetadata.Default, propertyMetadata.PropertyBlueprints)
 					if err != nil {
 						return nil, err
 					}
@@ -36,11 +36,11 @@ func CreateProductProperties(metadata *Metadata) (map[string]PropertyValue, erro
 
 		if propertyMetadata.IsSelector() {
 			defaultSelector := propertyMetadata.DefaultSelectorPath(property.Reference)
-			for _, selector := range property.Selectors {
+			for _, selector := range property.SelectorPropertyInputs {
 				if strings.EqualFold(defaultSelector, selector.Reference) {
-					selectorMetadata := SelectorMetadataBySelectValue(propertyMetadata.OptionTemplates, fmt.Sprintf("%s", propertyMetadata.Default))
+					selectorMetadata := SelectorBlueprintsBySelectValue(propertyMetadata.OptionTemplates, fmt.Sprintf("%s", propertyMetadata.Default))
 					for _, metadata := range selectorMetadata {
-						if metadata.IsExplicityConfigurable() && metadata.IsRequired() && !metadata.IsDropdown() {
+						if metadata.IsConfigurable() && metadata.IsRequired() && !metadata.IsDropdown() {
 							selectorProperty := fmt.Sprintf("%s.%s", selector.Reference, metadata.Name)
 							propertyType := metadata.PropertyType(strings.Replace(selectorProperty, ".", "", 1))
 							if propertyType != nil {
@@ -55,10 +55,10 @@ func CreateProductProperties(metadata *Metadata) (map[string]PropertyValue, erro
 	return productProperties, nil
 }
 
-func CreateProductPropertiesVars(metadata *Metadata) (map[string]interface{}, error) {
+func GetDefaultPropertyVars(metadata *Metadata) (map[string]interface{}, error) {
 	vars := make(map[string]interface{})
-	for _, property := range metadata.Properties() {
-		propertyMetadata, err := metadata.GetPropertyMetadata(property.Reference)
+	for _, property := range metadata.PropertyInputs() {
+		propertyMetadata, err := metadata.GetPropertyBlueprint(property.Reference)
 		if err != nil {
 			return nil, err
 		}
@@ -67,25 +67,23 @@ func CreateProductPropertiesVars(metadata *Metadata) (map[string]interface{}, er
 		}
 		if propertyMetadata.IsConfigurable() && propertyMetadata.IsRequired() {
 			if propertyMetadata.IsCollection() {
-				if propertyMetadata.IsRequiredCollection() {
-					CollectionPropertyVars(strings.Replace(property.Reference, ".", "", 1), propertyMetadata.PropertyMetadata, vars)
-				}
+				collectionPropertyVars(strings.Replace(property.Reference, ".", "", 1), propertyMetadata.PropertyBlueprints, true, vars)
 			} else {
 				if !propertyMetadata.IsSelector() {
-					addPropertyToVars(property.Reference, propertyMetadata, vars)
+					addPropertyToVars(property.Reference, propertyMetadata, true, vars)
 				}
 			}
 		}
 
 		if propertyMetadata.IsSelector() {
 			defaultSelector := propertyMetadata.DefaultSelectorPath(property.Reference)
-			for _, selector := range property.Selectors {
+			for _, selector := range property.SelectorPropertyInputs {
 				if strings.EqualFold(defaultSelector, selector.Reference) {
-					selectorMetadata := SelectorMetadata(propertyMetadata.OptionTemplates, fmt.Sprintf("%s", propertyMetadata.DefaultSelector()))
+					selectorMetadata := SelectorOptionsBlueprints(propertyMetadata.OptionTemplates, fmt.Sprintf("%s", propertyMetadata.DefaultSelector()))
 					for _, metadata := range selectorMetadata {
 						if metadata.IsConfigurable() {
 							selectorProperty := fmt.Sprintf("%s.%s", selector.Reference, metadata.Name)
-							addPropertyToVars(selectorProperty, &metadata, vars)
+							addPropertyToVars(selectorProperty, &metadata, true, vars)
 						}
 					}
 				}
@@ -95,22 +93,86 @@ func CreateProductPropertiesVars(metadata *Metadata) (map[string]interface{}, er
 	return vars, nil
 }
 
-func addPropertyToVars(propertyName string, propertyMetadata *PropertyMetadata, vars map[string]interface{}) {
-	if !propertyMetadata.IsSecret() {
-		newPropertyName := strings.Replace(propertyName, ".", "", 1)
-		newPropertyName = strings.Replace(newPropertyName, "properties.", "", 1)
-		newPropertyName = strings.Replace(newPropertyName, ".", "/", -1)
-		if propertyMetadata.Default != nil {
-			if propertyMetadata.IsMultiSelect() {
-				if _, ok := propertyMetadata.Default.([]interface{}); ok {
-					vars[newPropertyName] = propertyMetadata.Default
-				}
-			} else {
-				vars[newPropertyName] = propertyMetadata.Default
-			}
-		} else if propertyMetadata.IsBool() {
-			vars[newPropertyName] = false
+func GetRequiredPropertyVars(metadata *Metadata) (map[string]interface{}, error) {
+	vars := make(map[string]interface{})
+	for _, property := range metadata.PropertyInputs() {
+		propertyBlueprint, err := metadata.GetPropertyBlueprint(property.Reference)
+		if err != nil {
+			return nil, fmt.Errorf("could not create required-vars file: %s", err.Error())
 		}
+
+		if propertyBlueprint.IsMultiSelect() || !propertyBlueprint.IsConfigurable() || !propertyBlueprint.IsRequired() || propertyBlueprint.IsDropdown() {
+			continue
+		}
+
+		if propertyBlueprint.IsCollection() {
+			collectionPropertyVars(strings.Replace(property.Reference, ".", "", 1), propertyBlueprint.PropertyBlueprints, false, vars)
+			continue
+		}
+
+		if propertyBlueprint.IsSelector() && propertyBlueprint.HasDefault() {
+			defaultSelector := propertyBlueprint.DefaultSelectorPath(property.Reference)
+			for _, selector := range property.SelectorPropertyInputs {
+				if !strings.EqualFold(defaultSelector, selector.Reference) {
+					continue
+				}
+
+				selectorOptionBlueprints := SelectorOptionsBlueprints(propertyBlueprint.OptionTemplates, fmt.Sprintf("%s", propertyBlueprint.DefaultSelector()))
+				for _, selectorOptionBlueprint := range selectorOptionBlueprints {
+					if selectorOptionBlueprint.IsConfigurable() && selectorOptionBlueprint.IsRequired() && !selectorOptionBlueprint.IsMultiSelect() {
+						selectorProperty := fmt.Sprintf("%s.%s", selector.Reference, selectorOptionBlueprint.Name)
+						addPropertyToVars(selectorProperty, &selectorOptionBlueprint, false, vars)
+					}
+				}
+			}
+			continue
+		}
+
+		addPropertyToVars(property.Reference, propertyBlueprint, false, vars)
+	}
+	return vars, nil
+}
+
+func addPropertyToVars(propertyName string, propertyBlueprint *PropertyBlueprint, includePropertiesWithDefaults bool, vars map[string]interface{}) {
+	newPropertyName := strings.Replace(propertyName, ".", "", 1)
+	newPropertyName = strings.Replace(newPropertyName, "properties.", "", 1)
+	newPropertyName = strings.Replace(newPropertyName, ".", "_", -1)
+	if !propertyBlueprint.IsSecret() && !propertyBlueprint.IsSimpleCredentials() && !propertyBlueprint.IsCertificate() {
+		if includePropertiesWithDefaults {
+			if propertyBlueprint.HasDefault() {
+				if propertyBlueprint.IsMultiSelect() {
+					if _, ok := propertyBlueprint.Default.([]interface{}); ok {
+						vars[newPropertyName] = propertyBlueprint.Default
+						return
+					}
+				}
+
+				vars[newPropertyName] = propertyBlueprint.Default
+				return
+			} else if propertyBlueprint.IsBool() {
+				vars[newPropertyName] = false
+				return
+			}
+
+			return
+		}
+
+		if !propertyBlueprint.HasDefault() && !propertyBlueprint.IsBool() {
+			vars[newPropertyName] = ""
+		}
+
+		return
+	}
+
+	if !includePropertiesWithDefaults && !propertyBlueprint.HasDefault() {
+		if propertyBlueprint.IsCertificate() {
+			vars[fmt.Sprintf("%s_%s", newPropertyName, "certificate")] = ""
+			vars[fmt.Sprintf("%s_%s", newPropertyName, "privatekey")] = ""
+
+			return
+		}
+
+		vars[newPropertyName] = ""
 	}
 }
 
@@ -122,17 +184,17 @@ func CreateOpsFileName(propertyKey string) string {
 
 func CreateProductPropertiesOptionalOpsFiles(metadata *Metadata) (map[string][]Ops, error) {
 	opsFiles := make(map[string][]Ops)
-	for _, property := range metadata.Properties() {
+	for _, property := range metadata.PropertyInputs() {
 		propertyKey := strings.Replace(property.Reference, ".", "", 1)
 		opsFileName := CreateOpsFileName(propertyKey)
-		propertyMetadata, err := metadata.GetPropertyMetadata(property.Reference)
+		propertyMetadata, err := metadata.GetPropertyBlueprint(property.Reference)
 		if err != nil {
 			return nil, err
 		}
 		if propertyMetadata.IsConfigurable() {
 			if propertyMetadata.IsSelector() {
-				for _, selector := range property.Selectors {
-					selectorMetadata := SelectorMetadata(propertyMetadata.OptionTemplates, strings.Replace(selector.Reference, property.Reference+".", "", 1))
+				for _, selector := range property.SelectorPropertyInputs {
+					selectorMetadata := SelectorOptionsBlueprints(propertyMetadata.OptionTemplates, strings.Replace(selector.Reference, property.Reference+".", "", 1))
 					for _, metadata := range selectorMetadata {
 						if metadata.IsConfigurable() {
 							if !metadata.IsRequired() || metadata.IsDropdown() {
@@ -167,7 +229,7 @@ func CreateProductPropertiesOptionalOpsFiles(metadata *Metadata) (map[string][]O
 							{
 								Type:  "replace",
 								Path:  fmt.Sprintf("/product-properties/%s?", property.Reference),
-								Value: CollectionOpsFile(i, propertyKey, propertyMetadata.PropertyMetadata),
+								Value: collectionOpsFile(i, propertyKey, propertyMetadata.PropertyBlueprints),
 							},
 						}
 					}
@@ -187,33 +249,33 @@ func CreateProductPropertiesOptionalOpsFiles(metadata *Metadata) (map[string][]O
 	return opsFiles, nil
 }
 
-func CreateProductPropertiesFeaturesOpsFiles(metadata *Metadata) (map[string][]Ops, error) {
+func CreateProductPropertiesFeaturesOpsFiles(tileMetadata *Metadata) (map[string][]Ops, error) {
 	opsFiles := make(map[string][]Ops)
-	for _, property := range metadata.Properties() {
-		propertyMetadata, err := metadata.GetPropertyMetadata(property.Reference)
+	for _, propertyReference := range tileMetadata.PropertyInputs() {
+		propertyBlueprint, err := tileMetadata.GetPropertyBlueprint(propertyReference.Reference)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not create feature ops files: %s", err.Error())
 		}
 
-		if propertyMetadata.IsMultiSelect() && len(propertyMetadata.Options) > 1 {
-			multiselectOpsFiles(property.Reference, propertyMetadata, opsFiles)
+		if propertyBlueprint.IsMultiSelect() && len(propertyBlueprint.Options) > 1 {
+			multiselectOpsFiles(propertyReference.Reference, propertyBlueprint, opsFiles)
 		}
 
-		if propertyMetadata.IsSelector() {
-			defaultSelector := propertyMetadata.DefaultSelectorPath(property.Reference)
-			for _, selector := range property.Selectors {
-				if !strings.EqualFold(defaultSelector, selector.Reference) {
+		if propertyBlueprint.IsSelector() {
+			defaultSelector := propertyBlueprint.DefaultSelectorPath(propertyReference.Reference)
+			for _, selectorPropertyInput := range propertyReference.SelectorPropertyInputs {
+				if !strings.EqualFold(defaultSelector, selectorPropertyInput.Reference) {
 					var ops []Ops
-					opsFileName := strings.Replace(selector.Reference, ".", "", 1)
-					opsFileName = strings.Replace(opsFileName, "properties.", "", 1)
-					opsFileName = strings.Replace(opsFileName, ".", "-", -1)
+					featureOpsFileName := strings.Replace(selectorPropertyInput.Reference, ".", "", 1)
+					featureOpsFileName = strings.Replace(featureOpsFileName, "properties.", "", 1)
+					featureOpsFileName = strings.Replace(featureOpsFileName, ".", "-", -1)
 
-					optionTemplate := propertyMetadata.OptionTemplate(strings.Replace(selector.Reference, property.Reference+".", "", 1))
+					optionTemplate := propertyBlueprint.OptionTemplate(strings.Replace(selectorPropertyInput.Reference, propertyReference.Reference+".", "", 1))
 					if optionTemplate != nil {
 						ops = append(ops,
 							Ops{
 								Type: "replace",
-								Path: fmt.Sprintf("/product-properties/%s?", property.Reference),
+								Path: fmt.Sprintf("/product-properties/%s?", propertyReference.Reference),
 								Value: &OpsValue{
 									Value:          optionTemplate.SelectValue,
 									SelectedOption: optionTemplate.Name,
@@ -222,10 +284,10 @@ func CreateProductPropertiesFeaturesOpsFiles(metadata *Metadata) (map[string][]O
 						)
 					}
 
-					if propertyMetadata.Default != nil {
-						defaultSelectorMetadata := SelectorMetadataBySelectValue(propertyMetadata.OptionTemplates, fmt.Sprintf("%s", propertyMetadata.Default))
-						for _, metadata := range defaultSelectorMetadata {
-							selectorProperty := fmt.Sprintf("%s.%s", defaultSelector, metadata.Name)
+					if propertyBlueprint.HasDefault() {
+						defaultSelectorBlueprints := SelectorBlueprintsBySelectValue(propertyBlueprint.OptionTemplates, fmt.Sprintf("%s", propertyBlueprint.Default))
+						for _, selectorBlueprint := range defaultSelectorBlueprints {
+							selectorProperty := fmt.Sprintf("%s.%s", defaultSelector, selectorBlueprint.Name)
 							ops = append(ops,
 								Ops{
 									Type: "remove",
@@ -234,37 +296,38 @@ func CreateProductPropertiesFeaturesOpsFiles(metadata *Metadata) (map[string][]O
 							)
 						}
 					}
-					selectorParts := strings.Split(selector.Reference, ".")
-					selectorMetadata := SelectorMetadata(propertyMetadata.OptionTemplates, selectorParts[len(selectorParts)-1])
-					for _, metadata := range selectorMetadata {
-						if metadata.IsMultiSelect() && len(metadata.Options) > 1 {
-							multiselectOpsFiles(selector.Reference+"."+metadata.Name, &metadata, opsFiles)
+					selectorReferenceParts := strings.Split(selectorPropertyInput.Reference, ".")
+					selectorBlueprints := SelectorOptionsBlueprints(propertyBlueprint.OptionTemplates, selectorReferenceParts[len(selectorReferenceParts)-1])
+					for _, selectorBlueprint := range selectorBlueprints {
+						if selectorBlueprint.IsMultiSelect() && len(selectorBlueprint.Options) > 1 {
+							multiselectOpsFiles(selectorPropertyInput.Reference+"."+selectorBlueprint.Name, &selectorBlueprint, opsFiles)
 						}
-						if metadata.IsConfigurable() && metadata.IsRequired() && !metadata.IsDropdown() {
-							selectorProperty := fmt.Sprintf("%s.%s", selector.Reference, metadata.Name)
+						if selectorBlueprint.IsConfigurable() && selectorBlueprint.IsRequired() && !selectorBlueprint.IsDropdown() {
+							selectorProperty := fmt.Sprintf("%s.%s", selectorPropertyInput.Reference, selectorBlueprint.Name)
 							ops = append(ops,
 								Ops{
 									Type:  "replace",
 									Path:  fmt.Sprintf("/product-properties/%s?", selectorProperty),
-									Value: metadata.PropertyType(strings.Replace(selectorProperty, ".", "", 1)),
+									Value: selectorBlueprint.PropertyType(strings.Replace(selectorProperty, ".", "", 1)),
 								},
 							)
 						}
 					}
-					opsFiles[opsFileName] = ops
+					opsFiles[featureOpsFileName] = ops
 				}
 			}
 		}
 	}
+
 	return opsFiles, nil
 }
 
-func multiselectOpsFiles(propertyName string, propertyMetadata *PropertyMetadata, opsFiles map[string][]Ops) {
-	for _, option := range propertyMetadata.Options {
-		opsFileName := CreateOpsFileName(strings.Replace(propertyName, ".", "", 1))
-		opsFileName = fmt.Sprintf("%s_%v", opsFileName, option.Name)
+func multiselectOpsFiles(propertyName string, propertyBlueprint *PropertyBlueprint, opsFiles map[string][]Ops) {
+	for _, option := range propertyBlueprint.Options {
+		multiSelectOpsFileName := CreateOpsFileName(strings.Replace(propertyName, ".", "", 1))
+		multiSelectOpsFileName = fmt.Sprintf("%s_%v", multiSelectOpsFileName, option.Name)
 
-		opsFiles[opsFileName] = []Ops{
+		opsFiles[multiSelectOpsFileName] = []Ops{
 			{
 				Type:  "replace",
 				Path:  fmt.Sprintf("/product-properties/%s?/value/-", propertyName),

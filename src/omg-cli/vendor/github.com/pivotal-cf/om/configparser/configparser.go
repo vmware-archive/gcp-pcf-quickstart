@@ -108,58 +108,13 @@ func (p *configParser) handleCollection(name PropertyName, property api.Response
 	return nil, nil
 }
 
-func NilHandler() CredentialHandler {
+func NewNilHandler() CredentialHandler {
 	return func(name PropertyName, property api.ResponseProperty) (map[string]interface{}, error) {
 		return nil, nil
 	}
 }
 
-func KeyOnlyHandler() CredentialHandler {
-	var output map[string]interface{}
-
-	return func(name PropertyName, property api.ResponseProperty) (map[string]interface{}, error) {
-		switch property.Type {
-		case "secret":
-			output = map[string]interface{}{
-				"value": map[string]string{
-					"secret": "",
-				},
-			}
-		case "simple_credentials":
-			output = map[string]interface{}{
-				"value": map[string]string{
-					"identity": "",
-					"password": "",
-				},
-			}
-		case "rsa_cert_credentials":
-			output = map[string]interface{}{
-				"value": map[string]string{
-					"cert_pem":        "",
-					"private_key_pem": "",
-				},
-			}
-		case "rsa_pkey_credentials":
-			output = map[string]interface{}{
-				"value": map[string]string{
-					"public_key_pem":  "",
-					"private_key_pem": "",
-				},
-			}
-		case "salted_credentials":
-			output = map[string]interface{}{
-				"value": map[string]string{
-					"identity": "",
-					"password": "",
-					"salt":     "",
-				},
-			}
-		}
-		return output, nil
-	}
-}
-
-func PlaceholderHandler() CredentialHandler {
+func NewPlaceholderHandler() CredentialHandler {
 	var output map[string]interface{}
 
 	return func(name PropertyName, property api.ResponseProperty) (map[string]interface{}, error) {
@@ -205,7 +160,7 @@ func PlaceholderHandler() CredentialHandler {
 	}
 }
 
-func GetCredentialHandler(productGUID string, apiService getCredential) CredentialHandler {
+func NewGetCredentialHandler(productGUID string, apiService getCredential) CredentialHandler {
 	var output map[string]interface{}
 
 	return func(name PropertyName, property api.ResponseProperty) (map[string]interface{}, error) {

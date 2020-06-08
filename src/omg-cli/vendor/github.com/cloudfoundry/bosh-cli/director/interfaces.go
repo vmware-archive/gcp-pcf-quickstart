@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cloudfoundry/bosh-cli/ui"
+	bio "github.com/cloudfoundry/bosh-cli/io"
 	biproperty "github.com/cloudfoundry/bosh-utils/property"
 	semver "github.com/cppforlife/go-semi-semantic/version"
 )
@@ -123,7 +123,7 @@ type StemcellArchive interface {
 //go:generate counterfeiter . FileReporter
 
 type FileReporter interface {
-	TrackUpload(int64, io.ReadCloser) ui.ReadSeekCloser
+	TrackUpload(int64, io.ReadCloser) bio.ReadSeekCloser
 	TrackDownload(int64, io.Writer) io.Writer
 }
 
@@ -183,6 +183,7 @@ type Deployment interface {
 type StartOpts struct {
 	Canaries    string
 	MaxInFlight string
+	Converge    bool
 }
 
 type StopOpts struct {
@@ -191,6 +192,7 @@ type StopOpts struct {
 	Force       bool
 	SkipDrain   bool
 	Hard        bool
+	Converge    bool
 }
 
 type RestartOpts struct {
@@ -198,6 +200,7 @@ type RestartOpts struct {
 	MaxInFlight string
 	Force       bool
 	SkipDrain   bool
+	Converge    bool
 }
 
 type RecreateOpts struct {
@@ -207,6 +210,7 @@ type RecreateOpts struct {
 	Fix         bool
 	SkipDrain   bool
 	DryRun      bool
+	Converge    bool
 }
 
 type UpdateOpts struct {
@@ -268,7 +272,7 @@ type TasksFilter struct {
 type Task interface {
 	ID() int
 	StartedAt() time.Time
-	LastActivityAt() time.Time
+	FinishedAt() time.Time
 
 	State() string
 	IsError() bool

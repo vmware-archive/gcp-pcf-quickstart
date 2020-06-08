@@ -3,6 +3,8 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pivotal-cf/om/interpolate"
+	"os"
 	"sort"
 	"strings"
 
@@ -25,6 +27,11 @@ type ConfigureDirector struct {
 	}
 }
 
+type VMTypesConfiguration struct {
+	CustomTypesOnly bool               `yaml:"custom_only,omitempty" json:"custom_only,omitempty"`
+	VMTypes         []api.CreateVMType `yaml:"vm_types,omitempty" json:"vm_types,omitempty"`
+}
+
 type directorConfig struct {
 	NetworkAssignment       interface{}            `yaml:"network-assignment"`
 	AZConfiguration         interface{}            `yaml:"az-configuration"`
@@ -33,12 +40,15 @@ type directorConfig struct {
 	IAASConfigurations      interface{}            `yaml:"iaas-configurations"`
 	ResourceConfiguration   map[string]interface{} `yaml:"resource-configuration"`
 	VMExtensions            interface{}            `yaml:"vmextensions-configuration"`
+	VMTypes                 VMTypesConfiguration   `yaml:"vmtypes-configuration"`
 	Field                   map[string]interface{} `yaml:",inline"`
 }
 
 //go:generate counterfeiter -o ./fakes/configure_director_service.go --fake-name ConfigureDirectorService . configureDirectorService
 type configureDirectorService interface {
+	CreateCustomVMTypes(api.CreateVMTypes) error
 	CreateStagedVMExtension(api.CreateVMExtension) error
+	DeleteCustomVMTypes() error
 	DeleteVMExtension(name string) error
 	GetStagedProductByName(name string) (api.StagedProductsFindOutput, error)
 	GetStagedProductJobResourceConfig(string, string) (api.JobProperties, error)
@@ -47,6 +57,7 @@ type configureDirectorService interface {
 	ListInstallations() ([]api.InstallationsServiceOutput, error)
 	ListStagedProductJobs(string) (map[string]string, error)
 	ListStagedVMExtensions() ([]api.VMExtension, error)
+	ListVMTypes() ([]api.VMType, error)
 	UpdateStagedDirectorIAASConfigurations(api.IAASConfigurationsInput) error
 	UpdateStagedDirectorAvailabilityZones(api.AvailabilityZoneInput, bool) error
 	UpdateStagedDirectorNetworkAndAZ(api.NetworkAndAZConfiguration) error
@@ -116,6 +127,11 @@ func (c ConfigureDirector) Execute(args []string) error {
 		return err
 	}
 
+	err = c.configureVMTypes(config)
+	if err != nil {
+		return err
+	}
+
 	err = c.configureResourceConfigurations(config)
 	if err != nil {
 		return err
@@ -130,15 +146,21 @@ func (c ConfigureDirector) Execute(args []string) error {
 }
 
 func (c ConfigureDirector) interpolateConfig() (*directorConfig, error) {
-	configContents, err := interpolate(interpolateOptions{
-		templateFile:  c.Options.ConfigFile,
-		varsFiles:     c.Options.VarsFile,
-		environFunc:   c.environFunc,
-		vars:          c.Options.Vars,
-		varsEnvs:      c.Options.VarsEnv,
-		opsFiles:      c.Options.OpsFile,
-		expectAllKeys: true,
-	}, "")
+	varsEnvs := c.Options.VarsEnv
+	if value, ok := os.LookupEnv("OM_VARS_ENV"); ok {
+		// EXPERIMENTAL: don't put this directly in VarsEnv
+		varsEnvs = append(varsEnvs, value)
+	}
+
+	configContents, err := interpolate.Execute(interpolate.Options{
+		TemplateFile:  c.Options.ConfigFile,
+		VarsFiles:     c.Options.VarsFile,
+		EnvironFunc:   c.environFunc,
+		Vars:          c.Options.Vars,
+		VarsEnvs:      varsEnvs,
+		OpsFiles:      c.Options.OpsFile,
+		ExpectAllKeys: true,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -460,6 +482,57 @@ func (c ConfigureDirector) configureVMExtensions(config *directorConfig) error {
 		c.logger.Printf("finished configuring vm extensions")
 	}
 	return nil
+}
+
+func (c ConfigureDirector) configureVMTypes(config *directorConfig) error {
+	if len(config.VMTypes.VMTypes) == 0 {
+		if config.VMTypes.CustomTypesOnly {
+			return fmt.Errorf("if custom_types = true, vm_types must not be empty")
+		}
+
+		return nil
+	}
+
+	c.logger.Printf("creating custom vm types")
+
+	vmTypesToCreate := make([]api.CreateVMType, 0)
+	existingVMTypes := make([]api.VMType, 0)
+
+	var err error
+	if !config.VMTypes.CustomTypesOnly {
+		// delete all custom VM types
+		if err = c.service.DeleteCustomVMTypes(); err != nil {
+			return err
+		}
+
+		existingVMTypes, err = c.service.ListVMTypes()
+		if err != nil {
+			return err
+		}
+	}
+
+	for i := range existingVMTypes {
+		vmTypesToCreate = append(vmTypesToCreate, existingVMTypes[i].CreateVMType)
+	}
+
+	for i := range config.VMTypes.VMTypes {
+		overwriting := false
+		for j := range vmTypesToCreate {
+			if config.VMTypes.VMTypes[i].Name == vmTypesToCreate[j].Name {
+				vmTypesToCreate[j] = config.VMTypes.VMTypes[i]
+				overwriting = true
+				break
+			}
+		}
+
+		if !overwriting {
+			vmTypesToCreate = append(vmTypesToCreate, config.VMTypes.VMTypes[i])
+		}
+	}
+
+	return c.service.CreateCustomVMTypes(api.CreateVMTypes{
+		VMTypes: vmTypesToCreate,
+	})
 }
 
 func (c ConfigureDirector) getProductGUID() (string, error) {

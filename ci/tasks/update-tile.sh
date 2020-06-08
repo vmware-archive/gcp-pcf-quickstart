@@ -69,7 +69,7 @@ fi
 git --no-pager diff
 
 echo "Embed updated template files"
-go generate src/omg-cli/templates/templates.go
+go generate -mod=vendor src/omg-cli/templates/templates.go
 pushd src/omg-cli
 UPDATE_FIXTURES=true ginkgo -skipPackage=certification -r ./...
 popd

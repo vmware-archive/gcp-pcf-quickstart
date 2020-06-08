@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -38,8 +39,24 @@ func Run(ctx context.Context, steps []Step, logger *log.Logger) error {
 				namedCtx := context.WithValue(ctx, stepNameKey, step.Name)
 				l := ContextLogger(namedCtx, logger, "[Steps]")
 				attempt := 1
+				safelyDo := func() (err error) {
+					defer func() {
+						if r := recover(); r != nil {
+							switch x := r.(type) {
+							case string:
+								err = errors.New(x)
+							case error:
+								err = x
+							default:
+								err = errors.New("Unknown panic")
+							}
+						}
+					}()
+					err = step.Do(namedCtx)
+					return
+				}
 				for {
-					err := step.Do(namedCtx)
+					err := safelyDo()
 					if err != nil {
 						if attempt <= step.Retry {
 							l.Printf("Attempt %d retrying error: %s", attempt, err.Error())

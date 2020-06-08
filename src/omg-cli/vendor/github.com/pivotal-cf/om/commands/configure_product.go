@@ -3,6 +3,8 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pivotal-cf/om/interpolate"
+	"os"
 	"sort"
 	"strings"
 
@@ -23,7 +25,7 @@ type ConfigureProduct struct {
 		ConfigFile string   `long:"config"    short:"c" description:"path to yml file containing all config fields (see docs/configure-product/README.md for format)" required:"true"`
 		VarsFile   []string `long:"vars-file" short:"l" description:"Load variables from a YAML file"`
 		Vars       []string `long:"var" short:"v"       description:"Load variable from the command line. Format: VAR=VAL"`
-		VarsEnv    []string `long:"vars-env"            description:"Load variables from environment variables (e.g.: 'MY' to load MY_var=value)"`
+		VarsEnv    []string `long:"vars-env" description:"Load variables from environment variables (e.g.: 'MY' to load MY_var=value)"`
 		OpsFile    []string `long:"ops-file"  short:"o" description:"YAML operations file"`
 	}
 }
@@ -39,6 +41,8 @@ type configureProductService interface {
 	UpdateStagedProductJobResourceConfig(productGUID, jobGUID string, jobProperties api.JobProperties) error
 	UpdateStagedProductNetworksAndAZs(api.UpdateStagedProductNetworksAndAZsInput) error
 	UpdateStagedProductProperties(api.UpdateStagedProductPropertiesInput) error
+	UpdateStagedProductJobMaxInFlight(string, map[string]interface{}) error
+	UpdateSyslogConfiguration(api.UpdateSyslogConfigurationInput) error
 }
 
 type configureProduct struct {
@@ -96,6 +100,16 @@ func (cp ConfigureProduct) Execute(args []string) error {
 	}
 
 	err = cp.configureResources(cfg, productGUID)
+	if err != nil {
+		return err
+	}
+
+	err = cp.configureMaxInFlight(cfg, productGUID)
+	if err != nil {
+		return err
+	}
+
+	err = cp.configureSyslog(cfg, productGUID)
 	if err != nil {
 		return err
 	}
@@ -188,6 +202,31 @@ func (cp *ConfigureProduct) configureResources(cfg configureProduct, productGUID
 	return nil
 }
 
+func (cp *ConfigureProduct) configureMaxInFlight(cfg configureProduct, productGUID string) error {
+	if cfg.ResourceConfigProperties == nil {
+		cp.logger.Println("max in flight properties are not provided, nothing to do here")
+		return nil
+	}
+
+	cp.logger.Printf("applying max in flight for the following jobs:")
+
+	jobsToGUIDs, err := cp.service.ListStagedProductJobs(productGUID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch jobs: %s", err)
+	}
+
+	jobsToMaxInFlight := map[string]interface{}{}
+
+	for name, guid := range jobsToGUIDs {
+		if value, ok := cfg.ResourceConfigProperties[name]; ok && value.MaxInFlight != nil {
+			cp.logger.Printf("\t%s", name)
+			jobsToMaxInFlight[guid] = value.MaxInFlight
+		}
+	}
+
+	return cp.service.UpdateStagedProductJobMaxInFlight(productGUID, jobsToMaxInFlight)
+}
+
 func (cp *ConfigureProduct) configureProperties(cfg configureProduct, productGUID string) error {
 	if cfg.ProductProperties == nil {
 		cp.logger.Println("product properties are not provided, nothing to do here")
@@ -256,6 +295,31 @@ func (cp *ConfigureProduct) configureNetwork(cfg configureProduct, productGUID s
 	return nil
 }
 
+func (cp *ConfigureProduct) configureSyslog(cfg configureProduct, productGUID string) error {
+	if cfg.SyslogProperties == nil {
+		cp.logger.Println("syslog configuration is not provided, nothing to do here")
+		return nil
+	}
+
+	syslogProperties, err := getJSONProperties(cfg.SyslogProperties)
+	if err != nil {
+		return err
+	}
+
+	cp.logger.Printf("setting up syslog")
+	err = cp.service.UpdateSyslogConfiguration(api.UpdateSyslogConfigurationInput{
+		GUID:                productGUID,
+		SyslogConfiguration: syslogProperties,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to configure product: %s", err)
+	}
+	cp.logger.Printf("finished setting up syslog")
+
+	return nil
+}
+
 func (cp *ConfigureProduct) configureErrands(cfg configureProduct, productGUID string) error {
 	if cfg.ErrandConfigs == nil || len(cfg.ErrandConfigs) == 0 {
 		cp.logger.Println("errands are not provided, nothing to do here")
@@ -284,15 +348,21 @@ func (cp *ConfigureProduct) configureErrands(cfg configureProduct, productGUID s
 }
 
 func (cp *ConfigureProduct) interpolateConfig(cfg configureProduct) (configureProduct, error) {
-	configContents, err := interpolate(interpolateOptions{
-		templateFile:  cp.Options.ConfigFile,
-		varsFiles:     cp.Options.VarsFile,
-		vars:          cp.Options.Vars,
-		environFunc:   cp.environFunc,
-		varsEnvs:      cp.Options.VarsEnv,
-		opsFiles:      cp.Options.OpsFile,
-		expectAllKeys: true,
-	}, "")
+	varsEnvs := cp.Options.VarsEnv
+	if value, ok := os.LookupEnv("OM_VARS_ENV"); ok {
+		// EXPERIMENTAL: don't put this directly in VarsEnv
+		varsEnvs = append(varsEnvs, value)
+	}
+
+	configContents, err := interpolate.Execute(interpolate.Options{
+		TemplateFile:  cp.Options.ConfigFile,
+		VarsFiles:     cp.Options.VarsFile,
+		Vars:          cp.Options.Vars,
+		EnvironFunc:   cp.environFunc,
+		VarsEnvs:      varsEnvs,
+		OpsFiles:      cp.Options.OpsFile,
+		ExpectAllKeys: true,
+	})
 	if err != nil {
 		return configureProduct{}, err
 	}

@@ -114,7 +114,7 @@ func (c *Client) UploadProduct(ctx context.Context, p *os.File) error {
 func (c *Client) UploadStemcell(ctx context.Context, s *os.File) error {
 	args := []string{
 		fmt.Sprintf("--stemcell=%s", s.Name()),
-		"--floating",
+		"--floating=true",
 	}
 	form := formcontent.NewForm()
 	cmd := commands.NewUploadStemcell(form, c.api(ctx), c.logger(ctx))
@@ -164,7 +164,7 @@ func (c *Client) ConfigureDirector(ctx context.Context, config []byte) error {
 
 // ApplyChanges applies all pending changes (will skip unchanged products)
 func (c *Client) ApplyChanges(ctx context.Context) error {
-	args := []string{"--skip-unchanged-products"}
+	args := []string{}
 	logWriter := commands.NewLogWriter(os.Stdout)
 	api := c.api(ctx)
 	cmd := commands.NewApplyChanges(api, api, logWriter, c.logger(ctx), applySleepDuration)

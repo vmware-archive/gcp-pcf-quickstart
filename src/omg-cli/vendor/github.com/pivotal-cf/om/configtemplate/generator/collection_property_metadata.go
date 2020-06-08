@@ -14,7 +14,7 @@ func IsDefaultAnArray(defaultValue interface{}) bool {
 	return ok
 }
 
-func DefaultsArrayToCollectionArray(propertyName string, defaultValue interface{}, subProperties []PropertyMetadata) ([]map[string]SimpleType, error) {
+func DefaultsArrayToCollectionArray(propertyName string, defaultValue interface{}, subProperties []PropertyBlueprint) ([]map[string]SimpleType, error) {
 	var collectionProperties []map[string]SimpleType
 	for _, defaultValues := range defaultValue.([]interface{}) {
 		arrayProperties := make(map[string]SimpleType)
@@ -37,7 +37,7 @@ func DefaultsArrayToCollectionArray(propertyName string, defaultValue interface{
 		}
 		for _, subProperty := range subProperties {
 			if _, ok := arrayProperties[subProperty.Name]; !ok {
-				arrayProperties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s/%s))", propertyName, subProperty.Name))
+				arrayProperties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s_%s))", propertyName, subProperty.Name))
 			}
 		}
 		collectionProperties = append(collectionProperties, arrayProperties)
@@ -45,27 +45,27 @@ func DefaultsArrayToCollectionArray(propertyName string, defaultValue interface{
 	return collectionProperties, nil
 }
 
-func DefaultsToArray(propertyName string, subProperties []PropertyMetadata) map[string]SimpleType {
+func DefaultsToArray(propertyName string, subProperties []PropertyBlueprint) map[string]SimpleType {
 	properties := make(map[string]SimpleType)
 	for _, subProperty := range subProperties {
 		if subProperty.IsConfigurable() {
 			if subProperty.IsSecret() {
 				properties[subProperty.Name] = &SecretValue{
-					Value: fmt.Sprintf("((%s/%s))", propertyName, subProperty.Name),
+					Value: fmt.Sprintf("((%s_%s))", propertyName, subProperty.Name),
 				}
 			} else if subProperty.IsCertificate() {
 				properties[subProperty.Name] = NewCertificateValue(propertyName)
 			} else {
-				properties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s/%s))", propertyName, subProperty.Name))
+				properties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s_%s))", propertyName, subProperty.Name))
 			}
 		}
 	}
 	return properties
 }
 
-func CollectionPropertyType(propertyName string, defaultValue interface{}, subProperties []PropertyMetadata) (PropertyValue, error) {
+func collectionPropertyType(propertyName string, defaultValue interface{}, subProperties []PropertyBlueprint) (PropertyValue, error) {
 	propertyName = strings.Replace(propertyName, "properties.", "", 1)
-	propertyName = fmt.Sprintf("%s_0", strings.Replace(propertyName, ".", "/", -1))
+	propertyName = fmt.Sprintf("%s_0", strings.Replace(propertyName, ".", "_", -1))
 	var collectionProperties []map[string]SimpleType
 	if IsDefaultAnArray(defaultValue) {
 		defaultArrayProperties, err := DefaultsArrayToCollectionArray(propertyName, defaultValue, subProperties)
@@ -82,36 +82,55 @@ func CollectionPropertyType(propertyName string, defaultValue interface{}, subPr
 	}, nil
 }
 
-func CollectionPropertyVars(propertyName string, subProperties []PropertyMetadata, vars map[string]interface{}) {
+func collectionPropertyVars(propertyName string, subProperties []PropertyBlueprint, includePropertiesWithDefaults bool, vars map[string]interface{}) {
 	propertyName = strings.Replace(propertyName, "properties.", "", 1)
-	propertyName = fmt.Sprintf("%s_0", strings.Replace(propertyName, ".", "/", -1))
+	propertyName = fmt.Sprintf("%s_0", strings.Replace(propertyName, ".", "_", -1))
 	for _, subProperty := range subProperties {
 		if subProperty.IsConfigurable() {
+			subPropertyName := fmt.Sprintf("%s_%s", propertyName, subProperty.Name)
 			if !subProperty.IsSecret() && !subProperty.IsSimpleCredentials() && !subProperty.IsCertificate() {
-				subPropertyName := fmt.Sprintf("%s/%s", propertyName, subProperty.Name)
-				if subProperty.Default != nil {
-					vars[subPropertyName] = subProperty.Default
+				if includePropertiesWithDefaults {
+					if subProperty.Default != nil {
+						vars[subPropertyName] = subProperty.Default
+					}
+
+					continue // need test to validate multiple subproperties get included
 				}
+
+				if subProperty.Default == nil {
+					vars[subPropertyName] = ""
+				}
+				continue
+			}
+
+			if !includePropertiesWithDefaults && !subProperty.HasDefault() {
+				if subProperty.IsCertificate() {
+					vars[fmt.Sprintf("%s_%s", propertyName, "certificate")] = ""
+					vars[fmt.Sprintf("%s_%s", propertyName, "privatekey")] = ""
+
+					continue
+				}
+				vars[subPropertyName] = ""
 			}
 		}
 	}
 }
 
-func CollectionOpsFile(numOfElements int, propertyName string, subProperties []PropertyMetadata) OpsValueType {
+func collectionOpsFile(numOfElements int, propertyName string, subProperties []PropertyBlueprint) OpsValueType {
 	var collectionProperties []map[string]SimpleType
 	for i := 1; i <= numOfElements; i++ {
 		newPropertyName := strings.Replace(propertyName, "properties.", "", 1)
-		newPropertyName = fmt.Sprintf("%s_%d", strings.Replace(newPropertyName, ".", "/", -1), i-1)
+		newPropertyName = fmt.Sprintf("%s_%d", strings.Replace(newPropertyName, ".", "_", -1), i-1)
 		properties := make(map[string]SimpleType)
 		for _, subProperty := range subProperties {
 			if subProperty.IsSecret() {
 				properties[subProperty.Name] = &SecretValue{
-					Value: fmt.Sprintf("((%s/%s))", newPropertyName, subProperty.Name),
+					Value: fmt.Sprintf("((%s_%s))", newPropertyName, subProperty.Name),
 				}
 			} else if subProperty.IsCertificate() {
 				properties[subProperty.Name] = NewCertificateValue(newPropertyName)
 			} else {
-				properties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s/%s))", newPropertyName, subProperty.Name))
+				properties[subProperty.Name] = SimpleString(fmt.Sprintf("((%s_%s))", newPropertyName, subProperty.Name))
 			}
 		}
 		collectionProperties = append(collectionProperties, properties)

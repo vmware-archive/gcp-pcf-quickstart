@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -36,6 +39,15 @@ type UpdateStagedProductPropertiesInput struct {
 type UpdateStagedProductNetworksAndAZsInput struct {
 	GUID           string
 	NetworksAndAZs string
+}
+
+type SyslogConfiguration struct {
+	SyslogConfiguration map[string]interface{} `json:"syslog_configuration"`
+}
+
+type UpdateSyslogConfigurationInput struct {
+	GUID                string
+	SyslogConfiguration string
 }
 
 type ResponseProperty struct {
@@ -162,6 +174,31 @@ func (a Api) ListStagedProducts() (StagedProductsOutput, error) {
 	return StagedProductsOutput{
 		Products: stagedProducts,
 	}, nil
+}
+
+func (a Api) GetStagedProductSyslogConfiguration(product string) (map[string]interface{}, error) {
+	req := fmt.Sprintf("/api/v0/staged/products/%s/syslog_configuration", product)
+	resp, err := a.sendAPIRequest("GET", req, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not make api request to staged product syslog_configuration endpoint")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		return nil, nil
+	}
+
+	if err = validateStatusOK(resp); err != nil {
+		return nil, err
+	}
+
+	var syslogConfig SyslogConfiguration
+	err = json.NewDecoder(resp.Body).Decode(&syslogConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal staged product syslog_configuration response")
+	}
+
+	return syslogConfig.SyslogConfiguration, nil
 }
 
 var errNotFound = fmt.Errorf("element not found")
@@ -313,6 +350,22 @@ func (a Api) UpdateStagedProductNetworksAndAZs(input UpdateStagedProductNetworks
 	return nil
 }
 
+func (a Api) UpdateSyslogConfiguration(input UpdateSyslogConfigurationInput) error {
+	resp, err := a.sendAPIRequest("PUT",
+		fmt.Sprintf("/api/v0/staged/products/%s/syslog_configuration", input.GUID),
+		[]byte(fmt.Sprintf(`{"syslog_configuration": %s}`, input.SyslogConfiguration)),
+	)
+	if err != nil {
+		return errors.Wrap(err, "could not make api request to staged product syslog_configuration endpoint")
+	}
+
+	if err = validateStatusOK(resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //TODO consider refactoring to use fetchProductResource
 func (a Api) GetStagedProductManifest(guid string) (string, error) {
 	resp, err := a.sendAPIRequest("GET", fmt.Sprintf("/api/v0/staged/products/%s/manifest", guid), nil)
@@ -412,4 +465,67 @@ func (a Api) checkStagedProducts(productName string) (string, error) {
 	}
 
 	return "", nil
+}
+
+func (a Api) GetStagedProductJobMaxInFlight(productGUID string) (ProductJobMaxInFlights map[string]interface{}, err error) {
+	resp, err := a.sendAPIRequest(
+		"GET",
+		fmt.Sprintf("/api/v0/staged/products/%s/max_in_flight", productGUID),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if err = validateStatusOK(resp); err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
+
+	var payload map[string]interface{}
+	err = json.Unmarshal(contents, &payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON response from server: %v", err)
+	}
+
+	ProductJobMaxInFlights, _ = payload["max_in_flight"].(map[string]interface{})
+	return ProductJobMaxInFlights, nil
+}
+
+func (a Api) UpdateStagedProductJobMaxInFlight(productGUID string, jobsToMaxInFlight map[string]interface{}) error {
+	if len(jobsToMaxInFlight) == 0 {
+		return nil
+	}
+
+	for job, maxInFlight := range jobsToMaxInFlight {
+		if v, ok := maxInFlight.(string); ok {
+			if !(strings.Contains(v, "%") || v == "default") {
+				value, err := strconv.Atoi(v)
+				if err != nil {
+					return fmt.Errorf("invalid max_in_flight value provided for job '%s': '%s'\nvalid options configurations include percentages ('50%%'), counts ('2'), and 'default'", job, v)
+				}
+				jobsToMaxInFlight[job] = value
+			}
+		}
+	}
+
+	payload, err := json.Marshal(jobsToMaxInFlight)
+	if err != nil {
+		return err
+	}
+
+	resp, err := a.sendAPIRequest("PUT",
+		fmt.Sprintf("/api/v0/staged/products/%s/max_in_flight", productGUID),
+		[]byte(fmt.Sprintf(`{"max_in_flight": %s}`, payload)),
+	)
+	if err != nil {
+		return errors.Wrap(err, "could not make api request to staged product networks_and_azs endpoint")
+	}
+
+	if err = validateStatusOK(resp); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -3,8 +3,10 @@ package commands
 import (
 	"fmt"
 	"github.com/pivotal-cf/jhanda"
+	"github.com/pivotal-cf/om/interpolate"
 	"gopkg.in/yaml.v2"
 	"reflect"
+	"strconv"
 )
 
 // Load the config file, (optionally) load the vars file, vars env as well
@@ -50,15 +52,15 @@ func loadConfigFile(args []string, command interface{}, envFunc func() []string)
 		}
 	}
 
-	contents, err = interpolate(interpolateOptions{
-		templateFile:  configFile,
-		varsEnvs:      varsEnv,
-		varsFiles:     varsField,
-		vars:          cmdVars,
-		environFunc:   envFunc,
-		opsFiles:      nil,
-		expectAllKeys: true,
-	}, "")
+	contents, err = interpolate.Execute(interpolate.Options{
+		TemplateFile:  configFile,
+		VarsEnvs:      varsEnv,
+		VarsFiles:     varsField,
+		Vars:          cmdVars,
+		EnvironFunc:   envFunc,
+		OpsFiles:      nil,
+		ExpectAllKeys: true,
+	})
 	if err != nil {
 		return fmt.Errorf("could not load the config file: %s", err)
 	}
@@ -75,6 +77,8 @@ func loadConfigFile(args []string, command interface{}, envFunc func() []string)
 			for _, v := range convertedValue {
 				fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", key, v))
 			}
+		case bool:
+			fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", key, strconv.FormatBool(convertedValue)))
 		default:
 			fileArgs = append(fileArgs, fmt.Sprintf("--%s=%s", key, value))
 		}

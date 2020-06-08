@@ -835,10 +835,10 @@ type LogsOpts struct {
 type StartOpts struct {
 	Args AllOrInstanceGroupOrInstanceSlugArgs `positional-args:"true"`
 
-	Force bool `long:"force" description:"No-op for backwards compatibility"`
-
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
 	MaxInFlight string `long:"max-in-flight" description:"Override manifest values for max_in_flight"`
+	Converge    bool   `long:"converge" description:"Converge the deployment state before running action (default)"`
+	NoConverge  bool   `long:"no-converge" description:"Act only on specified instance"`
 
 	cmd
 }
@@ -850,10 +850,12 @@ type StopOpts struct {
 	Hard bool `long:"hard" description:"Delete VM (but keep persistent disk)"`
 
 	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
-	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
 	MaxInFlight string `long:"max-in-flight" description:"Override manifest values for max_in_flight"`
+
+	Converge   bool `long:"converge" description:"Converge the deployment state before running action (default)"`
+	NoConverge bool `long:"no-converge" description:"Act only on specified instance"`
 
 	cmd
 }
@@ -862,10 +864,12 @@ type RestartOpts struct {
 	Args AllOrInstanceGroupOrInstanceSlugArgs `positional-args:"true"`
 
 	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
-	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
 	MaxInFlight string `long:"max-in-flight" description:"Override manifest values for max_in_flight"`
+
+	Converge   bool `long:"converge" description:"Converge the deployment state before running action (default)"`
+	NoConverge bool `long:"no-converge" description:"Act only on specified instance"`
 
 	cmd
 }
@@ -874,13 +878,15 @@ type RecreateOpts struct {
 	Args AllOrInstanceGroupOrInstanceSlugArgs `positional-args:"true"`
 
 	SkipDrain bool `long:"skip-drain" description:"Skip running drain and pre-stop scripts"`
-	Force     bool `long:"force"      description:"No-op for backwards compatibility"`
 	Fix       bool `long:"fix"        description:"Recreate an instance with an unresponsive agent instead of erroring"`
 
 	Canaries    string `long:"canaries" description:"Override manifest values for canaries"`
 	MaxInFlight string `long:"max-in-flight" description:"Override manifest values for max_in_flight"`
 
 	DryRun bool `long:"dry-run" description:"Renders job templates without altering deployment"`
+
+	Converge   bool `long:"converge" description:"Converge the deployment state before running action (default)"`
+	NoConverge bool `long:"no-converge" description:"Act only on specified instance"`
 
 	cmd
 }
