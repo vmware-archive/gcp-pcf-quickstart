@@ -1,0 +1,6 @@
+- type: replace
+  path: /product-properties/.properties.host_tcp_services?
+  value:
+    value:
+    - ip_and_port: ((host_tcp_services_0/ip_and_port))
+      name: ((host_tcp_services_0/name))
