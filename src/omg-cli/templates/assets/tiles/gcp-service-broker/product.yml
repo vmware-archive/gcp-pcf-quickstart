@@ -49,10 +49,18 @@ product-properties:
     value: ((gsb_service_google_cloudsql_mysql_bind_defaults))
   .properties.gsb_service_google_cloudsql_mysql_provision_defaults:
     value: ((gsb_service_google_cloudsql_mysql_provision_defaults))
+  .properties.gsb_service_google_cloudsql_mysql_vpc_bind_defaults:
+    value: ((gsb_service_google_cloudsql_mysql_vpc_bind_defaults))
+  .properties.gsb_service_google_cloudsql_mysql_vpc_provision_defaults:
+    value: ((gsb_service_google_cloudsql_mysql_vpc_provision_defaults))
   .properties.gsb_service_google_cloudsql_postgres_bind_defaults:
     value: ((gsb_service_google_cloudsql_postgres_bind_defaults))
   .properties.gsb_service_google_cloudsql_postgres_provision_defaults:
     value: ((gsb_service_google_cloudsql_postgres_provision_defaults))
+  .properties.gsb_service_google_cloudsql_postgres_vpc_bind_defaults:
+    value: ((gsb_service_google_cloudsql_postgres_vpc_bind_defaults))
+  .properties.gsb_service_google_cloudsql_postgres_vpc_provision_defaults:
+    value: ((gsb_service_google_cloudsql_postgres_vpc_provision_defaults))
   .properties.gsb_service_google_ml_apis_bind_defaults:
     value: ((gsb_service_google_ml_apis_bind_defaults))
   .properties.gsb_service_google_ml_apis_provision_defaults:

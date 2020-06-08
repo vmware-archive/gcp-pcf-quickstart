@@ -61,9 +61,17 @@ product-properties:
     value: '{}'
   .properties.gsb_service_google_cloudsql_mysql_provision_defaults:
     value: '{}'
+  .properties.gsb_service_google_cloudsql_mysql_vpc_bind_defaults:
+    value: '{}'
+  .properties.gsb_service_google_cloudsql_mysql_vpc_provision_defaults:
+    value: '{}'
   .properties.gsb_service_google_cloudsql_postgres_bind_defaults:
     value: '{}'
   .properties.gsb_service_google_cloudsql_postgres_provision_defaults:
+    value: '{}'
+  .properties.gsb_service_google_cloudsql_postgres_vpc_bind_defaults:
+    value: '{}'
+  .properties.gsb_service_google_cloudsql_postgres_vpc_provision_defaults:
     value: '{}'
   .properties.gsb_service_google_ml_apis_bind_defaults:
     value: '{}'
