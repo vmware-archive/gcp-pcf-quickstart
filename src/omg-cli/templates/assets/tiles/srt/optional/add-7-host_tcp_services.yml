@@ -1,0 +1,18 @@
+- type: replace
+  path: /product-properties/.properties.host_tcp_services?
+  value:
+    value:
+    - ip_and_port: ((host_tcp_services_0/ip_and_port))
+      name: ((host_tcp_services_0/name))
+    - ip_and_port: ((host_tcp_services_1/ip_and_port))
+      name: ((host_tcp_services_1/name))
+    - ip_and_port: ((host_tcp_services_2/ip_and_port))
+      name: ((host_tcp_services_2/name))
+    - ip_and_port: ((host_tcp_services_3/ip_and_port))
+      name: ((host_tcp_services_3/name))
+    - ip_and_port: ((host_tcp_services_4/ip_and_port))
+      name: ((host_tcp_services_4/name))
+    - ip_and_port: ((host_tcp_services_5/ip_and_port))
+      name: ((host_tcp_services_5/name))
+    - ip_and_port: ((host_tcp_services_6/ip_and_port))
+      name: ((host_tcp_services_6/name))
